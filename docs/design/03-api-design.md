@@ -1,6 +1,7 @@
 # 货袋子平台 — API 接口设计
 
-> 版本：v1.0 | 日期：2026-02-23
+> 版本：v2.0 | 日期：2026-02-23  
+> 更新说明：新增招商登记、广告需求登记、跟进记录、企微通知配置、用户分站记忆等接口；广告接口增加赠送/收费、位置调整、跳转链接类型字段
 
 ---
 
@@ -26,14 +27,9 @@
 | 404 | 资源不存在 |
 | 500 | 服务器内部错误 |
 
-### 1.2 分页请求参数
+### 1.2 分页请求/响应
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| pageNum | int | 否 | 页码，默认 1 |
-| pageSize | int | 否 | 每页条数，默认 10 |
-
-### 1.3 分页响应格式
+请求参数：pageNum（默认 1）、pageSize（默认 10）
 
 ```json
 {
@@ -48,11 +44,11 @@
 }
 ```
 
-### 1.4 接口前缀
+### 1.3 接口前缀
 
 | 类别 | 前缀 | 说明 |
 |------|------|------|
-| C 端（用户侧） | `/api/v1/` | 分站首页、广告展示 |
+| C 端（用户侧） | `/api/v1/` | 分站首页、广告展示、登记表单提交 |
 | B 端（管理侧） | `/api/admin/v1/` | 后台管理接口 |
 
 ---
@@ -63,9 +59,7 @@
 
 **GET** `/api/v1/location/detect`
 
-根据用户 IP 自动定位城市并返回对应分站信息。
-
-**请求参数：** 无（通过 Request Header 获取 IP）
+根据用户 IP 自动定位城市并返回对应分站信息。若用户已登录，同时返回上次访问的分站。
 
 **响应示例：**
 ```json
@@ -78,12 +72,13 @@
     "provinceName": "广东省",
     "stationCode": "shenzhen",
     "stationName": "深圳站",
-    "hasStation": true
+    "hasStation": true,
+    "lastStationCode": "guangzhou"
   }
 }
 ```
 
-若用户所在城市没有对应分站，`hasStation` 为 `false`，前端引导用户选择其他城市或跳转默认分站。
+`lastStationCode`：用户上次访问的分站编码，仅已登录用户有值。前端优先使用此值跳转。
 
 ---
 
@@ -93,31 +88,6 @@
 
 获取所有已启用的分站列表（用于城市选择页）。
 
-**响应示例：**
-```json
-{
-  "code": 200,
-  "data": [
-    {
-      "stationCode": "beijing",
-      "stationName": "北京站",
-      "stationLogo": "https://cdn.huodaizi.com/logo/bj.png",
-      "cities": [
-        { "cityCode": "110100", "cityName": "北京市" }
-      ]
-    },
-    {
-      "stationCode": "shanghai",
-      "stationName": "上海站",
-      "stationLogo": "https://cdn.huodaizi.com/logo/sh.png",
-      "cities": [
-        { "cityCode": "310100", "cityName": "上海市" }
-      ]
-    }
-  ]
-}
-```
-
 ---
 
 ### 2.3 分站详情接口
@@ -126,39 +96,15 @@
 
 获取指定分站的详细信息。
 
-**响应示例：**
-```json
-{
-  "code": 200,
-  "data": {
-    "stationCode": "shenzhen",
-    "stationName": "深圳站",
-    "stationLogo": "https://cdn.huodaizi.com/logo/sz.png",
-    "stationBanner": "https://cdn.huodaizi.com/banner/sz.jpg",
-    "description": "货袋子深圳站，服务深圳及周边企业",
-    "contactPhone": "0755-88888888",
-    "seoTitle": "货袋子深圳站 - 本地企业服务平台",
-    "seoKeywords": "深圳,企业服务,货袋子",
-    "seoDescription": "货袋子深圳站为深圳地区企业提供一站式服务"
-  }
-}
-```
-
 ---
 
 ### 2.4 分站广告数据接口
 
 **GET** `/api/v1/station/{stationCode}/ads`
 
-获取指定分站首页的所有广告版块及广告内容，用于渲染分站首页。
+获取指定分站首页的所有广告版块及广告内容。
 
-**请求参数：**
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| zoneType | string | 否 | 按版块类型筛选：BANNER/RECOMMEND/LIST/SIDEBAR |
-
-**响应示例：**
+**响应示例（v2 新增 linkType、linkUrlMobile 字段）：**
 ```json
 {
   "code": 200,
@@ -176,49 +122,11 @@
             "id": 1001,
             "title": "XX 企业品牌推广",
             "imageUrl": "https://cdn.huodaizi.com/ad/1001.jpg",
+            "linkType": "OFFICIAL_SITE",
             "linkUrl": "https://www.example.com",
+            "linkUrlMobile": "https://m.example.com",
             "linkTarget": "_blank",
             "advertiserName": "XX科技有限公司"
-          },
-          {
-            "id": 1002,
-            "title": "YY 物流优惠活动",
-            "imageUrl": "https://cdn.huodaizi.com/ad/1002.jpg",
-            "linkUrl": "https://www.example2.com",
-            "linkTarget": "_blank",
-            "advertiserName": "YY物流有限公司"
-          }
-        ]
-      },
-      {
-        "zoneCode": "recommend_grid",
-        "zoneName": "推荐企业",
-        "zoneType": "RECOMMEND",
-        "width": 280,
-        "height": 200,
-        "ads": [
-          {
-            "id": 2001,
-            "title": "ZZ 建材",
-            "subtitle": "深圳领先的建材供应商",
-            "imageUrl": "https://cdn.huodaizi.com/ad/2001.jpg",
-            "linkUrl": "https://www.example3.com",
-            "advertiserName": "ZZ建材有限公司"
-          }
-        ]
-      },
-      {
-        "zoneCode": "list_ads",
-        "zoneName": "企业列表广告",
-        "zoneType": "LIST",
-        "ads": [
-          {
-            "id": 3001,
-            "title": "AA 餐饮连锁",
-            "subtitle": "全城100+门店，品质保证",
-            "imageUrl": "https://cdn.huodaizi.com/ad/3001.jpg",
-            "linkUrl": "https://www.example4.com",
-            "advertiserName": "AA餐饮管理有限公司"
           }
         ]
       }
@@ -229,39 +137,91 @@
 
 ---
 
-### 2.5 广告点击上报接口
+### 2.5 用户分站记忆接口 🆕
+
+**POST** `/api/v1/user/station`
+
+记录当前登录用户访问的分站（每次进入分站首页时调用）。
+
+**请求体：**
+```json
+{
+  "stationCode": "shenzhen"
+}
+```
+
+**GET** `/api/v1/user/station`
+
+获取当前登录用户上次访问的分站编码。
+
+**响应示例：**
+```json
+{
+  "code": 200,
+  "data": {
+    "stationCode": "shenzhen",
+    "stationName": "深圳站",
+    "lastVisitTime": "2026-03-15 14:30:00"
+  }
+}
+```
+
+---
+
+### 2.6 广告点击上报接口
 
 **POST** `/api/v1/ad/{adId}/click`
 
-上报广告点击事件，用于数据统计。
+上报广告点击事件。返回跳转地址（根据设备类型自动选择 PC/移动端链接）。
 
 **请求参数：**
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | stationCode | string | 是 | 分站编码 |
+| deviceType | string | 否 | 设备类型：PC/MOBILE，用于返回对应链接 |
 
 **响应示例：**
 ```json
 {
   "code": 200,
-  "message": "success"
+  "data": {
+    "redirectUrl": "https://www.example.com",
+    "linkTarget": "_blank"
+  }
 }
 ```
 
 ---
 
-### 2.6 广告展示上报接口
+### 2.7 广告展示上报接口
 
 **POST** `/api/v1/ad/impression`
 
 批量上报广告展示事件。
 
+---
+
+### 2.8 招商登记提交接口 🆕
+
+**POST** `/api/v1/business-inquiry/submit`
+
+用户在首页或分站首页提交招商入驻登记。提交后即时推送企业微信通知。
+
 **请求体：**
 ```json
 {
   "stationCode": "shenzhen",
-  "adIds": [1001, 1002, 2001, 3001]
+  "companyName": "XX科技有限公司",
+  "contactName": "张先生",
+  "contactPhone": "13800138000",
+  "contactEmail": "zhang@example.com",
+  "industry": "互联网/科技",
+  "cityName": "深圳",
+  "cooperationType": "JOIN",
+  "description": "希望入驻深圳站，主营智能硬件",
+  "captchaCode": "a8d3",
+  "captchaKey": "uuid-xxxx"
 }
 ```
 
@@ -269,7 +229,65 @@
 ```json
 {
   "code": 200,
-  "message": "success"
+  "message": "登记成功，我们将尽快与您联系",
+  "data": {
+    "inquiryNo": "ZS20260315143022001"
+  }
+}
+```
+
+---
+
+### 2.9 广告需求登记提交接口 🆕
+
+**POST** `/api/v1/ad-demand/submit`
+
+用户在首页或分站首页提交广告投放需求登记。提交后即时推送企业微信通知。
+
+**请求体：**
+```json
+{
+  "stationCode": "shenzhen",
+  "companyName": "YY物流有限公司",
+  "contactName": "李女士",
+  "contactPhone": "13900139000",
+  "contactEmail": "li@example.com",
+  "targetZoneType": "BANNER",
+  "budgetRange": "3000-5000",
+  "duration": "MONTH",
+  "description": "希望在深圳站首页Banner位投放一个月广告",
+  "captchaCode": "b7e2",
+  "captchaKey": "uuid-yyyy"
+}
+```
+
+**响应示例：**
+```json
+{
+  "code": 200,
+  "message": "需求登记成功，我们将尽快与您联系",
+  "data": {
+    "demandNo": "GG20260315150000001"
+  }
+}
+```
+
+---
+
+### 2.10 图形验证码接口 🆕
+
+**GET** `/api/v1/captcha`
+
+获取图形验证码（用于招商登记和广告需求登记表单的防刷保护）。
+
+**响应示例：**
+```json
+{
+  "code": 200,
+  "data": {
+    "captchaKey": "uuid-xxxx",
+    "captchaImage": "data:image/png;base64,iVBORw0KGgo..."
+  }
 }
 ```
 
@@ -289,190 +307,58 @@
 |------|------|------|------|
 | pageNum | int | 否 | 页码 |
 | pageSize | int | 否 | 每页条数 |
-| stationName | string | 否 | 分站名称模糊搜索 |
+| stationName | string | 否 | 模糊搜索 |
 | status | int | 否 | 状态筛选 |
-
----
 
 #### 3.1.2 创建分站
 
 **POST** `/api/admin/v1/station`
 
-**请求体：**
-```json
-{
-  "stationCode": "shenzhen",
-  "stationName": "深圳站",
-  "stationLogo": "https://cdn.huodaizi.com/logo/sz.png",
-  "stationBanner": "https://cdn.huodaizi.com/banner/sz.jpg",
-  "description": "货袋子深圳站",
-  "contactPhone": "0755-88888888",
-  "contactEmail": "sz@huodaizi.com",
-  "sortOrder": 10,
-  "status": 1,
-  "isDefault": 0,
-  "seoTitle": "货袋子深圳站",
-  "seoKeywords": "深圳,货袋子",
-  "seoDescription": "服务深圳地区",
-  "cityCodeList": ["440300", "440400"]
-}
-```
-
----
-
 #### 3.1.3 更新分站
 
 **PUT** `/api/admin/v1/station/{id}`
-
-请求体同创建接口。
-
----
 
 #### 3.1.4 删除分站
 
 **DELETE** `/api/admin/v1/station/{id}`
 
-逻辑删除。该分站下有生效中的广告时禁止删除。
-
----
-
 #### 3.1.5 分站详情
 
 **GET** `/api/admin/v1/station/{id}`
-
----
 
 #### 3.1.6 分站城市管理
 
 **PUT** `/api/admin/v1/station/{id}/cities`
 
-更新分站绑定的城市列表。
-
-```json
-{
-  "cityCodeList": ["440300", "440400", "441300"]
-}
-```
-
----
-
 #### 3.1.7 分站状态变更
 
 **PUT** `/api/admin/v1/station/{id}/status`
 
-```json
-{
-  "status": 1
-}
-```
-
----
-
 #### 3.1.8 分站配置管理
 
-**GET** `/api/admin/v1/station/{id}/config`
-
-**PUT** `/api/admin/v1/station/{id}/config`
-
-```json
-{
-  "configs": [
-    { "configKey": "theme_color", "configValue": "#1890ff", "configDesc": "主题色" },
-    { "configKey": "footer_text", "configValue": "版权所有 货袋子", "configDesc": "页脚文字" }
-  ]
-}
-```
+**GET/PUT** `/api/admin/v1/station/{id}/config`
 
 ---
 
 ### 3.2 广告版块管理接口
 
-#### 3.2.1 版块列表
-
-**GET** `/api/admin/v1/ad-zone/list`
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| zoneType | string | 否 | 版块类型筛选 |
-| status | int | 否 | 状态筛选 |
-
----
-
-#### 3.2.2 创建版块
-
-**POST** `/api/admin/v1/ad-zone`
-
-```json
-{
-  "zoneCode": "top_banner",
-  "zoneName": "顶部轮播Banner",
-  "zoneType": "BANNER",
-  "description": "首页顶部大图轮播区域",
-  "maxSlots": 5,
-  "width": 1200,
-  "height": 400,
-  "sortOrder": 1,
-  "status": 1
-}
-```
-
----
-
-#### 3.2.3 更新版块
-
-**PUT** `/api/admin/v1/ad-zone/{id}`
-
----
-
-#### 3.2.4 删除版块
-
-**DELETE** `/api/admin/v1/ad-zone/{id}`
+**GET** `/api/admin/v1/ad-zone/list` — 列表
+**POST** `/api/admin/v1/ad-zone` — 创建
+**PUT** `/api/admin/v1/ad-zone/{id}` — 更新
+**DELETE** `/api/admin/v1/ad-zone/{id}` — 删除
 
 ---
 
 ### 3.3 广告位管理接口
 
-#### 3.3.1 广告位列表
-
-**GET** `/api/admin/v1/ad-slot/list`
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| stationId | long | 否 | 分站 ID |
-| zoneId | long | 否 | 版块 ID |
-| status | int | 否 | 状态筛选 |
+**GET** `/api/admin/v1/ad-slot/list` — 列表
+**POST** `/api/admin/v1/ad-slot` — 创建
+**PUT** `/api/admin/v1/ad-slot/{id}` — 更新
+**DELETE** `/api/admin/v1/ad-slot/{id}` — 删除
 
 ---
 
-#### 3.3.2 创建广告位
-
-**POST** `/api/admin/v1/ad-slot`
-
-```json
-{
-  "stationId": 1,
-  "zoneId": 1,
-  "slotName": "深圳站-顶部Banner位1",
-  "slotIndex": 1,
-  "status": 1
-}
-```
-
----
-
-#### 3.3.3 更新广告位
-
-**PUT** `/api/admin/v1/ad-slot/{id}`
-
----
-
-#### 3.3.4 删除广告位
-
-**DELETE** `/api/admin/v1/ad-slot/{id}`
-
----
-
-### 3.4 广告内容管理接口
+### 3.4 广告内容管理接口（v2 更新）
 
 #### 3.4.1 广告列表（分页）
 
@@ -485,12 +371,11 @@
 | stationId | long | 否 | 分站 ID |
 | zoneId | long | 否 | 版块 ID |
 | auditStatus | int | 否 | 审核状态 |
-| status | int | 否 | 上线状态 |
+| status | int | 否 | 上线状态（含 3=待调整） |
+| chargeType | string | 否 | 🆕 收费模式：FREE/PAID |
 | title | string | 否 | 标题模糊搜索 |
 
----
-
-#### 3.4.2 创建广告
+#### 3.4.2 创建广告（v2 更新）
 
 **POST** `/api/admin/v1/ad-content`
 
@@ -502,43 +387,33 @@
   "title": "XX企业品牌推广",
   "subtitle": "深圳领先的科技企业",
   "imageUrl": "https://cdn.huodaizi.com/ad/upload/xxx.jpg",
+  "linkType": "OFFICIAL_SITE",
   "linkUrl": "https://www.example.com",
+  "linkUrlMobile": "https://m.example.com",
   "linkTarget": "_blank",
   "advertiserName": "XX科技有限公司",
   "advertiserPhone": "13800138000",
   "contentType": "IMAGE",
+  "chargeType": "FREE",
+  "chargeRemark": "首批合作企业免费赠送3个月Banner广告位",
+  "positionAdjustable": 1,
   "sortWeight": 100,
   "startTime": "2026-03-01 00:00:00",
-  "endTime": "2026-03-31 23:59:59"
+  "endTime": "2026-05-31 23:59:59"
 }
 ```
-
----
 
 #### 3.4.3 更新广告
 
 **PUT** `/api/admin/v1/ad-content/{id}`
 
----
-
 #### 3.4.4 删除广告
 
 **DELETE** `/api/admin/v1/ad-content/{id}`
 
----
-
 #### 3.4.5 广告审核
 
 **PUT** `/api/admin/v1/ad-content/{id}/audit`
-
-```json
-{
-  "auditStatus": 1,
-  "auditRemark": "审核通过"
-}
-```
-
----
 
 #### 3.4.6 广告上下线
 
@@ -550,209 +425,274 @@
 }
 ```
 
----
+status 取值：0=下线, 1=上线, 3=待调整
 
 #### 3.4.7 广告详情
 
 **GET** `/api/admin/v1/ad-content/{id}`
 
+#### 3.4.8 广告位置调整（到期后） 🆕
+
+**PUT** `/api/admin/v1/ad-content/{id}/reposition`
+
+将到期且 position_adjustable=1 的广告重新分配到新的广告位。
+
+```json
+{
+  "newSlotId": 5,
+  "newStartTime": "2026-06-01 00:00:00",
+  "newEndTime": "2026-08-31 23:59:59",
+  "chargeType": "PAID",
+  "chargeRemark": "续期转为收费"
+}
+```
+
 ---
 
 ### 3.5 广告定价管理接口
 
-#### 3.5.1 定价列表
-
-**GET** `/api/admin/v1/ad-pricing/list`
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| zoneId | long | 否 | 版块 ID |
-| stationId | long | 否 | 分站 ID |
-
----
-
-#### 3.5.2 创建/更新定价
-
-**POST** `/api/admin/v1/ad-pricing`
-
-```json
-{
-  "zoneId": 1,
-  "stationId": 1,
-  "pricingName": "顶部Banner月度投放",
-  "priceType": "MONTH",
-  "price": 5000.00,
-  "originalPrice": 6000.00,
-  "description": "首页顶部Banner位，月度投放",
-  "sortOrder": 1,
-  "status": 1
-}
-```
-
-**PUT** `/api/admin/v1/ad-pricing/{id}`
-
----
-
-#### 3.5.3 删除定价
-
-**DELETE** `/api/admin/v1/ad-pricing/{id}`
+**GET** `/api/admin/v1/ad-pricing/list` — 列表
+**POST** `/api/admin/v1/ad-pricing` — 创建
+**PUT** `/api/admin/v1/ad-pricing/{id}` — 更新
+**DELETE** `/api/admin/v1/ad-pricing/{id}` — 删除
 
 ---
 
 ### 3.6 广告订单管理接口
 
-#### 3.6.1 订单列表（分页）
-
-**GET** `/api/admin/v1/ad-order/page`
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| pageNum | int | 否 | 页码 |
-| pageSize | int | 否 | 每页条数 |
-| stationId | long | 否 | 分站 ID |
-| payStatus | int | 否 | 支付状态 |
-| orderNo | string | 否 | 订单号 |
-| advertiserName | string | 否 | 广告主名称 |
-
----
-
-#### 3.6.2 创建订单
-
-**POST** `/api/admin/v1/ad-order`
-
-```json
-{
-  "adContentId": 1,
-  "stationId": 1,
-  "zoneId": 1,
-  "pricingId": 1,
-  "advertiserName": "XX科技有限公司",
-  "advertiserPhone": "13800138000",
-  "amount": 5000.00,
-  "payStatus": 1,
-  "startTime": "2026-03-01 00:00:00",
-  "endTime": "2026-03-31 23:59:59",
-  "remark": "月度Banner广告"
-}
-```
-
----
-
-#### 3.6.3 订单详情
-
-**GET** `/api/admin/v1/ad-order/{id}`
+**GET** `/api/admin/v1/ad-order/page` — 列表（分页）
+**POST** `/api/admin/v1/ad-order` — 创建
+**GET** `/api/admin/v1/ad-order/{id}` — 详情
 
 ---
 
 ### 3.7 广告数据统计接口
 
-#### 3.7.1 广告效果概览
+**GET** `/api/admin/v1/ad-stats/overview` — 效果概览
+**GET** `/api/admin/v1/ad-stats/trend` — 效果趋势
+**GET** `/api/admin/v1/ad-stats/ranking` — 广告排名
 
-**GET** `/api/admin/v1/ad-stats/overview`
+---
+
+### 3.8 招商登记管理接口 🆕
+
+> 招商登记数据不可删除、不可修改原始信息，仅可更新处理状态和添加跟进记录。
+
+#### 3.8.1 招商登记列表（分页）
+
+**GET** `/api/admin/v1/business-inquiry/page`
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| stationId | long | 否 | 分站 ID |
-| startDate | string | 是 | 开始日期 yyyy-MM-dd |
-| endDate | string | 是 | 结束日期 yyyy-MM-dd |
+| pageNum | int | 否 | 页码 |
+| pageSize | int | 否 | 每页条数 |
+| stationId | long | 否 | 来源分站 |
+| processStatus | int | 否 | 处理状态：0=待处理, 1=跟进中, 2=已成交, 3=已关闭 |
+| companyName | string | 否 | 企业名称模糊搜索 |
+| contactPhone | string | 否 | 联系电话搜索 |
+| startTime | string | 否 | 登记开始时间 |
+| endTime | string | 否 | 登记结束时间 |
 
 **响应示例：**
 ```json
 {
   "code": 200,
   "data": {
-    "totalView": 125000,
-    "totalClick": 3200,
-    "avgCtr": 2.56,
-    "totalAds": 45,
-    "activeAds": 38
+    "records": [
+      {
+        "id": 1,
+        "inquiryNo": "ZS20260315143022001",
+        "stationName": "深圳站",
+        "companyName": "XX科技有限公司",
+        "contactName": "张先生",
+        "contactPhone": "13800138000",
+        "industry": "互联网/科技",
+        "cooperationType": "JOIN",
+        "processStatus": 1,
+        "processStatusText": "跟进中",
+        "followUpCount": 3,
+        "lastFollowTime": "2026-03-16 10:00:00",
+        "notifySent": true,
+        "createTime": "2026-03-15 14:30:22"
+      }
+    ],
+    "total": 50
   }
 }
 ```
 
----
+#### 3.8.2 招商登记详情
 
-#### 3.7.2 广告效果趋势
+**GET** `/api/admin/v1/business-inquiry/{id}`
 
-**GET** `/api/admin/v1/ad-stats/trend`
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| stationId | long | 否 | 分站 ID |
-| adContentId | long | 否 | 广告 ID |
-| startDate | string | 是 | 开始日期 |
-| endDate | string | 是 | 结束日期 |
-
-**响应示例：**
-```json
-{
-  "code": 200,
-  "data": [
-    { "date": "2026-03-01", "viewCount": 5200, "clickCount": 130 },
-    { "date": "2026-03-02", "viewCount": 4800, "clickCount": 112 }
-  ]
-}
-```
-
----
-
-#### 3.7.3 广告排名
-
-**GET** `/api/admin/v1/ad-stats/ranking`
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| stationId | long | 否 | 分站 ID |
-| rankBy | string | 否 | 排名维度：view/click/ctr，默认 view |
-| top | int | 否 | 前 N 名，默认 10 |
-| startDate | string | 是 | 开始日期 |
-| endDate | string | 是 | 结束日期 |
-
----
-
-### 3.8 城市数据接口
-
-#### 3.8.1 城市列表
-
-**GET** `/api/admin/v1/city/list`
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| provinceCode | string | 否 | 按省份筛选 |
-| keyword | string | 否 | 关键词搜索 |
-
----
-
-#### 3.8.2 未绑定分站的城市列表
-
-**GET** `/api/admin/v1/city/unbindList`
-
-返回尚未绑定任何分站的城市列表，方便创建分站时选择。
-
----
-
-### 3.9 文件上传接口
-
-#### 3.9.1 上传广告素材
-
-**POST** `/api/admin/v1/upload/ad-material`
-
-Content-Type: multipart/form-data
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| file | File | 是 | 图片/视频文件 |
-| type | string | 否 | 类型：image/video |
+返回完整登记信息 + 所有跟进记录列表。
 
 **响应示例：**
 ```json
 {
   "code": 200,
   "data": {
-    "url": "https://cdn.huodaizi.com/ad/upload/2026/03/xxx.jpg",
-    "fileName": "xxx.jpg",
-    "fileSize": 102400,
-    "fileType": "image/jpeg"
+    "id": 1,
+    "inquiryNo": "ZS20260315143022001",
+    "stationName": "深圳站",
+    "companyName": "XX科技有限公司",
+    "contactName": "张先生",
+    "contactPhone": "13800138000",
+    "contactEmail": "zhang@example.com",
+    "industry": "互联网/科技",
+    "cityName": "深圳",
+    "cooperationType": "JOIN",
+    "description": "希望入驻深圳站，主营智能硬件",
+    "source": "WEB",
+    "processStatus": 1,
+    "ipAddress": "116.25.100.1",
+    "notifySent": true,
+    "createTime": "2026-03-15 14:30:22",
+    "followUpRecords": [
+      {
+        "id": 1,
+        "followContent": "已电话联系张先生，确认入驻意向，约下周面谈",
+        "followResult": "CONTACTED",
+        "followBy": "admin",
+        "followByName": "王运营",
+        "followTime": "2026-03-15 16:00:00",
+        "createTime": "2026-03-15 16:00:00"
+      },
+      {
+        "id": 2,
+        "followContent": "面谈完成，对方同意入驻，需准备入驻材料",
+        "followResult": "NEGOTIATING",
+        "followBy": "admin",
+        "followByName": "王运营",
+        "followTime": "2026-03-18 14:00:00",
+        "createTime": "2026-03-18 14:00:00"
+      }
+    ]
   }
 }
 ```
+
+#### 3.8.3 更新处理状态
+
+**PUT** `/api/admin/v1/business-inquiry/{id}/status`
+
+仅允许更新处理状态，不允许修改原始登记信息。
+
+```json
+{
+  "processStatus": 2
+}
+```
+
+#### 3.8.4 添加跟进记录
+
+**POST** `/api/admin/v1/business-inquiry/{id}/follow-up`
+
+跟进记录一旦提交不可修改、不可删除。
+
+```json
+{
+  "followContent": "已电话联系张先生，确认入驻意向，约下周面谈",
+  "followResult": "CONTACTED",
+  "followTime": "2026-03-15 16:00:00"
+}
+```
+
+---
+
+### 3.9 广告需求登记管理接口 🆕
+
+> 广告需求登记数据不可删除、不可修改原始信息，仅可更新处理状态和添加跟进记录。
+
+#### 3.9.1 广告需求列表（分页）
+
+**GET** `/api/admin/v1/ad-demand/page`
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| pageNum | int | 否 | 页码 |
+| pageSize | int | 否 | 每页条数 |
+| stationId | long | 否 | 来源分站 |
+| processStatus | int | 否 | 处理状态 |
+| targetZoneType | string | 否 | 意向版块类型 |
+| companyName | string | 否 | 企业名称模糊搜索 |
+| startTime | string | 否 | 登记开始时间 |
+| endTime | string | 否 | 登记结束时间 |
+
+#### 3.9.2 广告需求详情
+
+**GET** `/api/admin/v1/ad-demand/{id}`
+
+返回完整登记信息 + 所有跟进记录列表（结构同招商登记详情）。
+
+#### 3.9.3 更新处理状态
+
+**PUT** `/api/admin/v1/ad-demand/{id}/status`
+
+```json
+{
+  "processStatus": 1
+}
+```
+
+#### 3.9.4 添加跟进记录
+
+**POST** `/api/admin/v1/ad-demand/{id}/follow-up`
+
+```json
+{
+  "followContent": "已与李女士确认Banner广告需求，报价5000元/月",
+  "followResult": "NEGOTIATING",
+  "followTime": "2026-03-16 09:30:00"
+}
+```
+
+---
+
+### 3.10 企业微信通知配置接口 🆕
+
+#### 3.10.1 通知配置列表
+
+**GET** `/api/admin/v1/wechat-notify/list`
+
+#### 3.10.2 创建/更新通知配置
+
+**POST** `/api/admin/v1/wechat-notify`
+
+```json
+{
+  "configName": "招商登记通知",
+  "notifyType": "INQUIRY",
+  "channelType": "WEBHOOK",
+  "webhookUrl": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx",
+  "receiverUserIds": "user1,user2",
+  "enabled": 1,
+  "silentStart": "23:00",
+  "silentEnd": "08:00"
+}
+```
+
+**PUT** `/api/admin/v1/wechat-notify/{id}`
+
+#### 3.10.3 删除通知配置
+
+**DELETE** `/api/admin/v1/wechat-notify/{id}`
+
+#### 3.10.4 测试通知发送
+
+**POST** `/api/admin/v1/wechat-notify/{id}/test`
+
+发送一条测试消息到企微，验证配置是否正确。
+
+---
+
+### 3.11 城市数据接口
+
+**GET** `/api/admin/v1/city/list` — 城市列表
+**GET** `/api/admin/v1/city/unbindList` — 未绑定分站的城市列表
+
+---
+
+### 3.12 文件上传接口
+
+**POST** `/api/admin/v1/upload/ad-material` — 上传广告素材
