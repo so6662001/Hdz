@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.hdz</groupId>
+        <artifactId>hdz-modules</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>hdz-advertisement</artifactId>
+    <name>hdz-advertisement</name>
+    <description>广告管理模块 - 广告版块/位/内容管理、赠送收费、位置调整、定价、订单、统计</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.hdz</groupId>
+            <artifactId>hdz-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hdz</groupId>
+            <artifactId>hdz-sub-station</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+</project>

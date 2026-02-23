@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.hdz</groupId>
+        <artifactId>hdz-modules</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>hdz-sub-station</artifactId>
+    <name>hdz-sub-station</name>
+    <description>分站管理模块 - 分站CRUD、城市绑定、分站配置、用户分站记忆</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.hdz</groupId>
+            <artifactId>hdz-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+</project>
