@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>企业自定义海报落地页设计器 · 货袋子</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  :root { --brand: #1f5eff; --ui-bg: #f4f5f7; --ui-panel: #fff; --ui-line: #e6e8ec; --ui-txt: #1c1f26; --ui-mute: #7c8492; }
+  body { background: var(--ui-bg); color: var(--ui-txt); font-size: 13px; }
+  .app { display: grid; grid-template-columns: 320px 1fr 300px; height: 100vh; }
+  .topbar { grid-column: 1 / -1; height: 52px; background: #111; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+  .topbar .l { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .topbar .l i { width: 26px; height: 26px; border-radius: 6px; background: var(--brand); display: flex; align-items: center; justify-content: center; font-style: normal; font-weight: 900; }
+  .topbar .l small { color: #9aa3b2; font-weight: 400; margin-left: 4px; }
+  .topbar .r { display: flex; gap: 8px; }
+  .topbar .r button { padding: 7px 14px; border-radius: 6px; background: #2a2e37; color: #fff; font-size: 12px; }
+  .topbar .r button.pri { background: var(--brand); }
+  .topbar .r a { padding: 7px 12px; color: #9aa3b2; font-size: 12px; }
+  .app { grid-template-rows: 52px 1fr; }
+  .left, .right { background: var(--ui-panel); overflow-y: auto; border-right: 1px solid var(--ui-line); }
+  .right { border-right: 0; border-left: 1px solid var(--ui-line); }
+  .center { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 18px; overflow: auto; background: radial-gradient(circle at 50% 0, #e9ebf0, #dfe2e8 70%); }
+  .seg { display: inline-flex; background: #fff; border: 1px solid var(--ui-line); border-radius: 8px; padding: 3px; margin-bottom: 14px; }
+  .seg button { padding: 6px 14px; border-radius: 6px; font-size: 12px; color: var(--ui-mute); }
+  .seg button.on { background: #111; color: #fff; }
+  .phone { width: 375px; height: 780px; background: #000; border-radius: 40px; padding: 12px; box-shadow: 0 30px 70px rgba(0,0,0,.35); position: relative; flex: none; }
+  .phone::before { content: ""; position: absolute; left: 50%; top: 12px; transform: translateX(-50%); width: 120px; height: 26px; background: #000; border-radius: 0 0 16px 16px; z-index: 3; }
+  .screen { width: 100%; height: 100%; border-radius: 30px; overflow: hidden; background: #fff; position: relative; }
+  .screen iframe { width: 100%; height: 100%; border: 0; }
+  .posterview { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #222; }
+  .sec { padding: 14px 16px; border-bottom: 1px solid var(--ui-line); }
+  .sec h4 { font-size: 12px; color: var(--ui-mute); letter-spacing: 1px; margin-bottom: 10px; display: flex; justify-content: space-between; }
+  .sec h4 span { color: var(--brand); cursor: pointer; letter-spacing: 0; font-weight: 400; }
+  .tpl { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .tpl button { aspect-ratio: 1; border-radius: 8px; border: 2px solid transparent; position: relative; overflow: hidden; }
+  .tpl button.on { border-color: var(--brand); }
+  .tpl button span { position: absolute; left: 0; right: 0; bottom: 0; font-size: 9px; background: rgba(0,0,0,.5); color: #fff; padding: 1px 0; }
+  .field { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  .field label { color: var(--ui-txt); flex: none; width: 74px; }
+  .field input[type=text], .field select { flex: 1; height: 32px; border: 1px solid var(--ui-line); border-radius: 6px; padding: 0 8px; font-size: 12px; background: #fafbfc; }
+  .field input[type=color] { width: 32px; height: 32px; border: 1px solid var(--ui-line); border-radius: 6px; padding: 2px; background: #fff; }
+  .field input[type=range] { flex: 1; }
+  .swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+  .swatches button { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--ui-line); }
+  .swatches button.on { box-shadow: 0 0 0 2px var(--brand); }
+  .blocks .b { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--ui-line); border-radius: 8px; margin-bottom: 6px; background: #fff; }
+  .blocks .b .h { color: #c0c5cf; cursor: grab; }
+  .blocks .b .n { flex: 1; }
+  .blocks .b .mv button { color: var(--ui-mute); padding: 0 3px; }
+  .toggle { width: 34px; height: 20px; border-radius: 10px; background: #dfe2e8; position: relative; transition: .2s; }
+  .toggle::after { content: ""; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .toggle.on { background: var(--brand); } .toggle.on::after { left: 16px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips button { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--ui-line); font-size: 12px; background: #fff; }
+  .chips button.on { background: #111; color: #fff; border-color: #111; }
+  .upload { border: 1px dashed #c8cdd6; border-radius: 8px; padding: 12px; text-align: center; color: var(--ui-mute); font-size: 12px; cursor: pointer; }
+  .upload b { display: block; color: var(--ui-txt); }
+  .right .big { width: 100%; height: 40px; border-radius: 8px; background: var(--brand); color: #fff; font-weight: 700; margin-bottom: 8px; }
+  .right .big.sec2 { background: #111; }
+  .right .big.ghost { background: #f1f3f6; color: #111; }
+  .right .qrbox { display: flex; gap: 12px; align-items: center; background: #fafbfc; border: 1px solid var(--ui-line); border-radius: 8px; padding: 10px; }
+  .right .qrbox small { color: var(--ui-mute); line-height: 1.6; display: block; }
+  .right .qrbox code { background: #eef1f6; padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+  .right .kv { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--ui-line); }
+  .right .kv b { font-variant-numeric: tabular-nums; }
+  .members .m { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+  .members .m i { width: 26px; height: 26px; border-radius: 50%; background: #e9ecf2; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 12px; }
+  .members .m span { flex: 1; } .members .m small { color: var(--ui-mute); }
+  textarea.json { width: 100%; height: 120px; font: 11px/1.5 Menlo, monospace; border: 1px solid var(--ui-line); border-radius: 8px; padding: 8px; background: #fafbfc; resize: vertical; }
+  .toast { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); background: #111; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; display: none; z-index: 999; }
+  .toast.show { display: block; animation: slideUp .25s; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="l"><i>货</i>货袋子 · 海报落地页设计器<small>企业自定义 · 我的模板</small></div>
+    <div class="r">
+      <a href="index.html">← 返回风格库</a>
+      <button onclick="saveTpl()">保存为企业模板</button>
+      <button onclick="toast('原型：生成预览链接，微信扫码可在手机查看')">手机预览</button>
+      <button class="pri" onclick="publish()">发布 · 生成海报/落地页</button>
+    </div>
+  </div>
+
+  <!-- 左：配置 -->
+  <aside class="left">
+    <div class="sec">
+      <h4>1 · 基础风格 <span onclick="randomize()">随机灵感</span></h4>
+      <div class="tpl" id="tpl"></div>
+    </div>
+    <div class="sec">
+      <h4>2 · 品牌</h4>
+      <div class="field"><label>企业简称</label><input type="text" id="f-short"></div>
+      <div class="field"><label>标题</label><input type="text" id="f-title"></div>
+      <div class="field"><label>口号</label><input type="text" id="f-slogan"></div>
+      <div class="field"><label>Logo</label><div class="upload" style="flex:1" onclick="toast('原型：上传企业 Logo / 从资质库选择')"><b>上传 Logo</b>PNG / SVG · 建议 200×200</div></div>
+      <div class="field"><label>主色</label><input type="color" id="f-brand"><div class="swatches" id="sw"></div></div>
+      <div class="field"><label>强调色</label><input type="color" id="f-accent"></div>
+      <div class="field"><label>背景</label><select id="f-bg"><option value="light">浅色</option><option value="dark">深色</option><option value="paper">纸质</option><option value="brand">品牌色</option></select></div>
+      <div class="field"><label>字体</label><select id="f-font"><option value="sans">现代黑体</option><option value="serif">典雅宋体</option><option value="kai">国风楷体</option><option value="din">数字 DIN</option></select></div>
+      <div class="field"><label>圆角</label><input type="range" id="f-radius" min="0" max="20" value="12"></div>
+      <div class="field"><label>信息密度</label><select id="f-density"><option value="loose">宽松</option><option value="normal" selected>标准</option><option value="dense">紧凑</option></select></div>
+    </div>
+    <div class="sec">
+      <h4>3 · 内容板块 <span>拖拽/箭头排序</span></h4>
+      <div class="blocks" id="blocks"></div>
+    </div>
+    <div class="sec">
+      <h4>4 · 行情品种（来自货袋子行情）</h4>
+      <div class="chips" id="chips-q"></div>
+      <div class="field" style="margin-top:8px"><label>主推品种</label><select id="f-hero"></select></div>
+      <div class="field"><label>显示走势</label><i class="toggle on" id="f-trend" onclick="this.classList.toggle('on');S.trend=this.classList.contains('on');render()"></i></div>
+    </div>
+    <div class="sec">
+      <h4>5 · 现货资源（来自我的资源库）</h4>
+      <div class="chips" id="chips-r"></div>
+      <div class="field" style="margin-top:8px"><label>价格显示</label><select id="f-priceMode"><option value="show">明码标价</option><option value="range">区间价</option><option value="hide">电议（隐藏）</option></select></div>
+    </div>
+    <div class="sec">
+      <h4>6 · 点评与转化</h4>
+      <div class="field"><label>今日点评</label><input type="text" id="f-comment"></div>
+      <div class="field"><label>主按钮</label><input type="text" id="f-cta"></div>
+      <div class="field"><label>次按钮</label><select id="f-cta2"><option>电话 + 微信</option><option>仅电话</option><option>仅微信</option><option>不显示</option></select></div>
+      <div class="field"><label>留资表单</label><select id="f-form"><option>品名/规格/数量/手机</option><option>仅手机号（极简）</option><option>完整（含交期付款）</option></select></div>
+      <div class="field"><label>紧迫感</label><select id="f-urgency"><option value="">无</option><option value="timer">倒计时</option><option value="stock">库存进度</option></select></div>
+    </div>
+    <div class="sec">
+      <h4>7 · 二维码与追踪</h4>
+      <div class="field"><label>码类型</label><select id="f-qr"><option>小程序码（带追踪）</option><option>企微活码</option><option>H5 二维码</option></select></div>
+      <div class="field"><label>销售员</label><select id="f-sales"><option>王建国 · 销售总监</option><option>李敏 · 销售经理</option><option>每人一码（团队批量）</option></select></div>
+      <div class="field"><label>底部标识</label><i class="toggle on" onclick="this.classList.toggle('on');S.footer=this.classList.contains('on');render()"></i></div>
+    </div>
+  </aside>
+
+  <!-- 中：预览 -->
+  <main class="center">
+    <div class="seg">
+      <button class="on" onclick="mode('page',this)">落地页</button>
+      <button onclick="mode('poster',this)">海报图 9:16</button>
+      <button onclick="mode('square',this)">方图 1:1</button>
+      <button onclick="mode('video',this)">视频 15s</button>
+    </div>
+    <div class="phone"><div class="screen" id="screen"></div></div>
+  </main>
+
+  <!-- 右：生成与数据 -->
+  <aside class="right">
+    <div class="sec">
+      <h4>生成</h4>
+      <button class="big" onclick="publish()">生成落地页 + 海报图</button>
+      <button class="big sec2" onclick="location.href='video.html'">生成 15s 视频海报</button>
+      <button class="big ghost" onclick="toast('原型：为团队每个销售员批量生成专属码海报（每人一码）')">团队批量生成（每人一码）</button>
+    </div>
+    <div class="sec">
+      <h4>追踪二维码</h4>
+      <div class="qrbox"><div id="qr"></div><div><small>追踪码 <code id="code"></code></small><small>扫码→落地页→留资，线索归因到销售员与企业</small><small>有效期：长期 · 可随时更新内容</small></div></div>
+    </div>
+    <div class="sec">
+      <h4>我的模板</h4>
+      <div class="members" id="mytpl">
+        <div class="m"><i>早</i><span>鑫钢 · 每日早报版</span><small>默认</small></div>
+        <div class="m"><i>特</i><span>周末特价专用</span><small>3 天前</small></div>
+      </div>
+    </div>
+    <div class="sec">
+      <h4>近 7 日效果（本模板）</h4>
+      <div class="kv"><span>海报转发</span><b>214</b></div>
+      <div class="kv"><span>扫码访问</span><b>1,286</b></div>
+      <div class="kv"><span>留资线索</span><b>37</b></div>
+      <div class="kv"><span>转化率</span><b>2.9%</b></div>
+      <div class="kv"><span>最佳转发时段</span><b>07:30–08:30</b></div>
+    </div>
+    <div class="sec">
+      <h4>配置 JSON <span onclick="copyJson()">复制</span></h4>
+      <textarea class="json" id="json" readonly></textarea>
+    </div>
+  </aside>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="shared/data.js"></script>
+<script src="shared/common.js"></script>
+<script>
+  const D = HDZ.data;
+  const TPL = [
+    { id: "brief", n: "早报", brand: "#1a3a6b", accent: "#c8102e", bg: "paper", font: "serif" },
+    { id: "screen", n: "数据屏", brand: "#00d4ff", accent: "#00d4ff", bg: "dark", font: "din" },
+    { id: "red", n: "喜报", brand: "#c8102e", accent: "#f5c451", bg: "brand", font: "sans" },
+    { id: "min", n: "极简", brand: "#111111", accent: "#1f5eff", bg: "light", font: "sans" },
+    { id: "ink", n: "国潮", brand: "#1f3d2b", accent: "#b8323a", bg: "paper", font: "kai" },
+    { id: "ind", n: "工业", brand: "#ff7a00", accent: "#ffb400", bg: "dark", font: "din" },
+    { id: "mag", n: "杂志", brand: "#0b0b0b", accent: "#ffcc00", bg: "light", font: "sans" },
+    { id: "chat", n: "对话", brand: "#07c160", accent: "#fa5151", bg: "light", font: "sans" },
+    { id: "sale", n: "特价", brand: "#111111", accent: "#ff3b30", bg: "brand", font: "sans" },
+    { id: "fin", n: "金融", brand: "#1f5eff", accent: "#ff5c57", bg: "dark", font: "sans" }
+  ];
+  const FONT = { sans: '-apple-system,"PingFang SC","Microsoft YaHei",sans-serif', serif: '"Songti SC","STSong","Noto Serif SC",serif', kai: '"STKaiti","KaiTi","Noto Serif SC",serif', din: '"DIN Alternate","Helvetica Neue",sans-serif' };
+  const BLOCKS = [["hero", "主推行情大字"], ["quotes", "行情列表"], ["trend", "走势图"], ["comment", "今日点评"], ["resources", "现货资源"], ["card", "销售员名片 + 二维码"], ["urgency", "紧迫感（倒计时/库存）"]];
+
+  const S = {
+    tpl: "min", short: D.company.short, title: "今日钢市行情", slogan: D.company.slogan, brand: "#111111", accent: "#1f5eff", bg: "light", font: "sans", radius: 12, density: "normal",
+    blocks: ["hero", "quotes", "trend", "resources", "comment", "card"], hidden: ["urgency"],
+    quotes: D.quotes.map(q => q.name), hero: D.quotes[0].name, trend: true,
+    resources: D.resources.slice(0, 4).map((_, i) => i), priceMode: "show",
+    comment: D.comment, cta: "立即询价", cta2: "电话 + 微信", form: 0, urgency: "", footer: true, viewMode: "page"
+  };
+
+  /* ---------- 左侧控件绑定 ---------- */
+  const $ = (id) => document.getElementById(id);
+  function bind(id, key, ev) { const el = $(id); el.value = S[key]; el.addEventListener(ev || "input", () => { S[key] = el.type === "range" ? +el.value : el.value; render(); }); }
+  function initControls() {
+    $("tpl").innerHTML = TPL.map(t => `<button data-id="${t.id}" style="background:linear-gradient(135deg,${t.brand},${t.accent})"><span>${t.n}</span></button>`).join("");
+    $("tpl").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; applyTpl(b.dataset.id); });
+    bind("f-short", "short"); bind("f-title", "title"); bind("f-slogan", "slogan"); bind("f-brand", "brand"); bind("f-accent", "accent"); bind("f-bg", "bg", "change"); bind("f-font", "font", "change"); bind("f-radius", "radius"); bind("f-density", "density", "change"); bind("f-comment", "comment"); bind("f-cta", "cta"); bind("f-cta2", "cta2", "change"); bind("f-priceMode", "priceMode", "change"); bind("f-urgency", "urgency", "change");
+    $("f-urgency").addEventListener("change", () => { if (S.urgency && S.hidden.includes("urgency")) { S.hidden = S.hidden.filter(x => x !== "urgency"); S.blocks.splice(1, 0, "urgency"); } if (!S.urgency && !S.hidden.includes("urgency")) { S.blocks = S.blocks.filter(x => x !== "urgency"); S.hidden.push("urgency"); } renderBlocks(); render(); });
+    const sw = ["#111111", "#1f5eff", "#c8102e", "#ff7a00", "#07c160", "#1a3a6b", "#1f3d2b", "#7b2cbf"];
+    $("sw").innerHTML = sw.map(c => `<button style="background:${c}" data-c="${c}"></button>`).join("");
+    $("sw").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S.brand = b.dataset.c; $("f-brand").value = S.brand; render(); });
+    $("chips-q").innerHTML = D.quotes.map(q => `<button data-n="${q.name}" class="${S.quotes.includes(q.name) ? "on" : ""}">${q.name}</button>`).join("");
+    $("chips-q").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const n = b.dataset.n; S.quotes = S.quotes.includes(n) ? S.quotes.filter(x => x !== n) : [...S.quotes, n]; b.classList.toggle("on"); render(); });
+    $("f-hero").innerHTML = D.quotes.map(q => `<option>${q.name}</option>`).join(""); bind("f-hero", "hero", "change");
+    $("chips-r").innerHTML = D.resources.map((r, i) => `<button data-i="${i}" class="${S.resources.includes(i) ? "on" : ""}">${r.name} ${r.spec}</button>`).join("");
+    $("chips-r").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const i = +b.dataset.i; S.resources = S.resources.includes(i) ? S.resources.filter(x => x !== i) : [...S.resources, i]; b.classList.toggle("on"); render(); });
+    renderBlocks();
+  }
+  function renderBlocks() {
+    const all = [...S.blocks, ...S.hidden];
+    $("blocks").innerHTML = all.map((k, i) => { const on = S.blocks.includes(k); const name = BLOCKS.find(b => b[0] === k)[1]; return `<div class="b"><span class="h">⋮⋮</span><span class="n" style="${on ? "" : "color:#aab"}">${name}</span><span class="mv"><button onclick="mv('${k}',-1)">↑</button><button onclick="mv('${k}',1)">↓</button></span><i class="toggle ${on ? "on" : ""}" onclick="tg('${k}')"></i></div>`; }).join("");
+  }
+  window.mv = (k, d) => { const i = S.blocks.indexOf(k); if (i < 0) return; const j = i + d; if (j < 0 || j >= S.blocks.length) return; [S.blocks[i], S.blocks[j]] = [S.blocks[j], S.blocks[i]]; renderBlocks(); render(); };
+  window.tg = (k) => { if (S.blocks.includes(k)) { S.blocks = S.blocks.filter(x => x !== k); S.hidden.push(k); } else { S.hidden = S.hidden.filter(x => x !== k); S.blocks.push(k); } renderBlocks(); render(); };
+  function applyTpl(id) { const t = TPL.find(x => x.id === id); Object.assign(S, { tpl: id, brand: t.brand, accent: t.accent, bg: t.bg, font: t.font }); $("f-brand").value = t.brand; $("f-accent").value = t.accent; $("f-bg").value = t.bg; $("f-font").value = t.font; document.querySelectorAll("#tpl button").forEach(b => b.classList.toggle("on", b.dataset.id === id)); render(); }
+  window.randomize = () => { applyTpl(TPL[Math.floor(Math.random() * TPL.length)].id); S.radius = Math.floor(Math.random() * 20); $("f-radius").value = S.radius; S.blocks = S.blocks.sort(() => Math.random() - .5); if (S.blocks.indexOf("card") !== S.blocks.length - 1) { S.blocks = S.blocks.filter(x => x !== "card").concat("card"); } renderBlocks(); render(); };
+
+  /* ---------- 渲染引擎：由配置生成落地页 HTML ---------- */
+  function theme() {
+    const bg = { light: ["#ffffff", "#111111", "rgba(0,0,0,.05)"], dark: ["#0f1218", "#e6e9ef", "rgba(255,255,255,.06)"], paper: ["#f6f1e6", "#1f1f1f", "rgba(0,0,0,.05)"], brand: [S.brand, "#ffffff", "rgba(255,255,255,.14)"] }[S.bg];
+    return { bg: bg[0], fg: bg[1], panel: bg[2], onBrand: "#fff" };
+  }
+  function pageHTML() {
+    const t = theme(); const pad = { loose: 20, normal: 16, dense: 12 }[S.density]; const gap = { loose: 18, normal: 14, dense: 10 }[S.density];
+    const heroQ = D.quotes.find(q => q.name === S.hero) || D.quotes[0];
+    const qs = D.quotes.filter(q => S.quotes.includes(q.name));
+    const rs = S.resources.map(i => D.resources[i]);
+    const price = (p) => S.priceMode === "hide" ? "电议" : S.priceMode === "range" ? `¥${p - 20}~${p + 20}` : `¥${p}`;
+    const chg = (c) => c > 0 ? `<span style="color:#ff5c57">▲${c}</span>` : c < 0 ? `<span style="color:#2bd671">▼${-c}</span>` : `<span style="opacity:.5">—</span>`;
+    const R = S.radius + "px";
+    const isBrandBg = S.bg === "brand";
+    const accent = isBrandBg ? "#fff" : S.accent;
+    const blocks = {
+      hero: `<div style="padding:${gap}px ${pad}px 0;text-align:center"><div style="font-size:12px;opacity:.7">上海 · ${heroQ.name} ${heroQ.spec}</div><div style="font-size:58px;font-weight:900;line-height:1.05;color:${accent};letter-spacing:-1px;font-variant-numeric:tabular-nums">${heroQ.price}<span style="font-size:14px;opacity:.6;margin-left:4px;font-weight:500;color:${t.fg}">元/吨</span></div><div style="font-size:14px;font-weight:700;margin-top:4px">${chg(heroQ.change)} 较昨日</div></div>`,
+      quotes: `<div style="margin:${gap}px ${pad}px 0;background:${t.panel};border-radius:${R};padding:6px 12px">${qs.map(q => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed rgba(127,127,127,.25)"><div><b style="font-size:14px">${q.name}</b><span style="font-size:10px;opacity:.6;margin-left:6px">${q.spec}</span></div><div><b style="font-size:16px;font-variant-numeric:tabular-nums">${q.price}</b> <span style="font-size:11px;font-weight:700">${chg(q.change)}</span></div></div>`).join("") || '<div style="padding:10px;opacity:.5;text-align:center">请选择行情品种</div>'}</div>`,
+      trend: S.trend ? `<div style="margin:${gap}px ${pad}px 0;background:${t.panel};border-radius:${R};padding:10px 12px"><div style="font-size:11px;opacity:.7;display:flex;justify-content:space-between"><span>${heroQ.name} · 近 8 日走势</span><span>元/吨</span></div><div id="pv-spark" style="color:${t.fg}"></div></div>` : "",
+      comment: `<div style="margin:${gap}px ${pad}px 0;padding:12px 14px;border-left:3px solid ${accent};background:${t.panel};border-radius:0 ${R} ${R} 0;font-size:13px;line-height:1.8"><b style="display:block;margin-bottom:2px">今日点评</b>${S.comment}</div>`,
+      resources: `<div style="margin:${gap}px ${pad}px 0"><div style="font-size:14px;font-weight:800;margin-bottom:8px;display:flex;justify-content:space-between"><span>本店现货</span><span style="font-size:11px;font-weight:500;opacity:.6">当日提货</span></div>${rs.map(r => `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:${t.panel};border-radius:${R};margin-bottom:8px"><div><b style="font-size:14px">${r.name} ${r.spec}</b><span style="font-size:10px;border:1px solid ${accent};color:${accent};padding:0 4px;border-radius:3px;margin-left:6px">${r.tag}</span><div style="font-size:11px;opacity:.65;margin-top:2px">${r.mill} · ${r.warehouse} · ${r.qty} 吨</div></div><div style="text-align:right"><b style="font-size:16px;color:${accent}">${price(r.price)}</b><div style="font-size:11px;margin-top:2px;padding:2px 8px;border-radius:999px;background:${isBrandBg ? "rgba(255,255,255,.2)" : S.brand};color:#fff;display:inline-block">询价</div></div></div>`).join("") || '<div style="padding:10px;opacity:.5;text-align:center">请选择现货资源</div>'}</div>`,
+      card: `<div style="margin:${gap}px ${pad}px 0;padding:14px;border-radius:${R};background:${isBrandBg ? "rgba(0,0,0,.25)" : S.brand};color:#fff;display:flex;align-items:center;gap:12px"><div style="width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800">${D.sales.avatar}</div><div style="flex:1"><b style="font-size:15px">${D.sales.name} · ${D.sales.title}</b><div style="font-size:11px;opacity:.9">${S.short} · ${D.sales.phone}</div><div style="font-size:10px;opacity:.8;margin-top:4px">长按识别二维码 · 询价看货</div></div><div id="pv-qr" style="background:#fff;padding:4px;border-radius:6px"></div></div>`,
+      urgency: S.urgency === "timer" ? `<div style="margin:${gap}px ${pad}px 0;padding:10px 14px;border-radius:${R};background:${accent};color:#fff;display:flex;justify-content:space-between;align-items:center;font-weight:800"><span style="font-size:12px">⏰ 特价倒计时</span><span style="font-size:18px;font-variant-numeric:tabular-nums">05:59:59</span></div>` : S.urgency === "stock" ? `<div style="margin:${gap}px ${pad}px 0;padding:10px 14px;border-radius:${R};background:${t.panel}"><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700"><span>Φ20 特价库存</span><span style="color:${accent}">已抢 78%</span></div><div style="height:8px;background:rgba(127,127,127,.2);border-radius:4px;margin-top:6px;overflow:hidden"><i style="display:block;width:78%;height:100%;background:${accent}"></i></div></div>` : ""
+    };
+    const cta2 = S.cta2 === "不显示" ? "" : S.cta2 === "仅电话" ? `<button style="flex:1;height:44px;border-radius:10px;background:rgba(127,127,127,.15);font-weight:600">📞 电话</button>` : S.cta2 === "仅微信" ? `<button style="flex:1;height:44px;border-radius:10px;background:rgba(127,127,127,.15);font-weight:600">💬 微信</button>` : `<button style="flex:1;height:44px;border-radius:10px;background:rgba(127,127,127,.15);font-weight:600">📞</button><button style="flex:1;height:44px;border-radius:10px;background:rgba(127,127,127,.15);font-weight:600">💬</button>`;
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box;margin:0;padding:0}body{background:${t.bg};color:${t.fg};font-family:${FONT[S.font]};padding-bottom:90px}button{font:inherit;border:0;color:inherit;cursor:pointer}</style></head><body>
+      <div style="padding:16px ${pad}px 0;display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:${Math.min(S.radius, 8)}px;background:${isBrandBg ? "rgba(255,255,255,.25)" : S.brand};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900">${D.company.logoText}</div><b style="font-size:14px">${S.short}</b></div><span style="font-size:11px;opacity:.6">${D.date} ${D.weekday}</span></div>
+      <div style="padding:${gap}px ${pad}px 0"><div style="font-size:28px;font-weight:900;line-height:1.15">${S.title}</div><div style="font-size:12px;opacity:.7;margin-top:4px">${S.slogan}</div></div>
+      ${S.blocks.map(k => blocks[k] || "").join("")}
+      ${S.footer ? `<div style="text-align:center;font-size:10px;opacity:.5;padding:16px 0 6px">行情数据由货袋子提供 · 追踪码 ${D.spreadCode}</div>` : ""}
+      <div style="position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;padding:10px 12px 14px;background:${t.bg};border-top:1px solid rgba(127,127,127,.2)">${cta2}<button style="flex:2;height:44px;border-radius:10px;background:${isBrandBg ? "#fff" : S.brand};color:${isBrandBg ? S.brand : "#fff"};font-weight:700;font-size:15px">${S.cta}</button></div>
+      <script src="shared/data.js"><\/script><script src="shared/common.js"><\/script><script>HDZ.qr(document.getElementById('pv-qr'),56);const sp=document.getElementById('pv-spark');if(sp)HDZ.spark(sp,HDZ.data.trend,{color:'${accent}',labels:HDZ.data.trendLabels,h:84});<\/script>
+    </body></html>`;
+  }
+  function posterHTML(square) {
+    const t = theme(); const isBrandBg = S.bg === "brand"; const accent = isBrandBg ? "#fff" : S.accent;
+    const heroQ = D.quotes.find(q => q.name === S.hero) || D.quotes[0];
+    const qs = D.quotes.filter(q => S.quotes.includes(q.name)).slice(0, square ? 3 : 4);
+    const rs = S.resources.map(i => D.resources[i]).slice(0, square ? 2 : 3);
+    const w = 300, h = square ? 300 : 533;
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#222;display:flex;align-items:center;justify-content:center;height:100vh;font-family:${FONT[S.font]}}</style></head><body>
+      <div style="width:${w}px;height:${h}px;background:${t.bg};color:${t.fg};border-radius:${Math.min(S.radius, 14)}px;overflow:hidden;position:relative;font-size:12px;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+        <div style="padding:14px 16px 0;display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:6px"><div style="width:24px;height:24px;border-radius:6px;background:${isBrandBg ? "rgba(255,255,255,.25)" : S.brand};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px">${D.company.logoText}</div><b>${S.short}</b></div><span style="font-size:10px;opacity:.6">${D.date}</span></div>
+        <div style="padding:10px 16px 0"><div style="font-size:${square ? 20 : 24}px;font-weight:900;line-height:1.1">${S.title}</div><div style="font-size:10px;opacity:.7;margin-top:3px">${S.slogan}</div></div>
+        <div style="padding:8px 16px 0;display:flex;align-items:baseline;gap:6px"><span style="font-size:11px;opacity:.7">${heroQ.name}</span><b style="font-size:${square ? 30 : 38}px;color:${accent};line-height:1">${heroQ.price}</b><span style="font-size:11px;font-weight:700;color:#ff5c57">▲${heroQ.change}</span></div>
+        ${square ? "" : `<div style="margin:10px 16px 0;background:${t.panel};border-radius:8px;padding:6px 10px">${qs.map(q => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(127,127,127,.25)"><span>${q.name}</span><b>${q.price}</b></div>`).join("")}</div>`}
+        <div style="margin:10px 16px 0;font-size:11px;font-weight:700;opacity:.85">本店现货 · 当日提</div>
+        ${rs.map(r => `<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 16px"><span>${r.name} ${r.spec} · ${r.mill}</span><b style="color:${accent}">${S.priceMode === "hide" ? "电议" : "¥" + r.price}</b></div>`).join("")}
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px;background:${isBrandBg ? "rgba(0,0,0,.25)" : S.brand};color:#fff;display:flex;align-items:center;gap:10px"><div id="pq" style="background:#fff;padding:3px;border-radius:5px"></div><div style="flex:1"><div style="font-size:12px;font-weight:800">${D.sales.name} · ${D.sales.title}</div><div style="font-size:10px;opacity:.9">${D.sales.phone}</div><div style="font-size:9px;opacity:.8;margin-top:2px">长按识别 · 查看更多现货并询价</div></div></div>
+      </div><script src="shared/data.js"><\/script><script src="shared/common.js"><\/script><script>HDZ.qr(document.getElementById('pq'),${square ? 44 : 54});<\/script></body></html>`;
+  }
+  function videoHTML() {
+    const t = theme(); const isBrandBg = S.bg === "brand"; const accent = isBrandBg ? "#fff" : S.accent;
+    const heroQ = D.quotes.find(q => q.name === S.hero) || D.quotes[0];
+    const rs = S.resources.map(i => D.resources[i]).slice(0, 3);
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box;margin:0;padding:0}body{background:${t.bg};color:${t.fg};font-family:${FONT[S.font]};height:100vh;overflow:hidden;position:relative}
+      .s{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;opacity:0;animation:sc 15s linear infinite}
+      .s1{animation-delay:0s}.s2{animation-delay:3s}.s3{animation-delay:6s}.s4{animation-delay:9s}.s5{animation-delay:12s}
+      @keyframes sc{0%{opacity:0;transform:translateY(20px)}4%{opacity:1;transform:none}18%{opacity:1}20%{opacity:0;transform:translateY(-20px)}100%{opacity:0}}
+      .bar{position:absolute;left:0;bottom:0;height:4px;background:${accent};animation:pb 15s linear infinite}@keyframes pb{from{width:0}to{width:100%}}
+      .lbl{position:absolute;top:14px;left:14px;font-size:11px;opacity:.6}.play{position:absolute;top:12px;right:14px;font-size:10px;background:rgba(127,127,127,.2);padding:3px 8px;border-radius:999px}</style></head><body>
+      <div class="lbl">${S.short} · 视频海报预览</div><div class="play">▶ 15s 循环</div>
+      <div class="s s1"><div style="width:64px;height:64px;border-radius:16px;background:${isBrandBg ? "rgba(255,255,255,.25)" : S.brand};color:#fff;font-size:30px;font-weight:900;display:flex;align-items:center;justify-content:center">${D.company.logoText}</div><h1 style="font-size:26px;margin-top:14px">${S.short}</h1><p style="opacity:.7;font-size:13px;margin-top:6px">${S.slogan}</p></div>
+      <div class="s s2"><p style="font-size:13px;opacity:.7">${D.date} · 上海 · ${heroQ.name}</p><b style="font-size:72px;color:${accent};line-height:1.1;letter-spacing:-2px">${heroQ.price}</b><p style="font-size:18px;font-weight:800;color:#ff5c57;margin-top:6px">▲ ${heroQ.change} 元/吨</p></div>
+      <div class="s s3"><h2 style="font-size:20px;margin-bottom:12px">今日点评</h2><p style="font-size:15px;line-height:1.9;max-width:300px">${S.comment}</p></div>
+      <div class="s s4"><h2 style="font-size:20px;margin-bottom:12px">本店现货 · 当日提</h2>${rs.map(r => `<div style="width:100%;display:flex;justify-content:space-between;padding:10px 14px;background:${t.panel};border-radius:10px;margin-bottom:8px;font-size:14px"><span>${r.name} ${r.spec}</span><b style="color:${accent}">${S.priceMode === "hide" ? "电议" : "¥" + r.price}</b></div>`).join("")}</div>
+      <div class="s s5"><div id="vq" style="background:#fff;padding:6px;border-radius:10px"></div><h2 style="font-size:20px;margin-top:14px">${D.sales.name} · ${D.sales.title}</h2><p style="opacity:.8;margin-top:4px">${D.sales.phone}</p><p style="font-size:12px;opacity:.6;margin-top:10px">长按识别 · 询价看货</p></div>
+      <div class="bar"></div><script src="shared/data.js"><\/script><script src="shared/common.js"><\/script><script>HDZ.qr(document.getElementById('vq'),120);<\/script></body></html>`;
+  }
+
+  function render() {
+    const html = S.viewMode === "page" ? pageHTML() : S.viewMode === "poster" ? posterHTML(false) : S.viewMode === "square" ? posterHTML(true) : videoHTML();
+    const scr = $("screen");
+    let f = scr.querySelector("iframe");
+    if (!f) { f = document.createElement("iframe"); scr.appendChild(f); }
+    f.srcdoc = html;
+    $("json").value = JSON.stringify({ template: S.tpl, brand: { short: S.short, title: S.title, slogan: S.slogan, color: S.brand, accent: S.accent, bg: S.bg, font: S.font, radius: S.radius, density: S.density }, blocks: S.blocks, quotes: S.quotes, hero: S.hero, trend: S.trend, resources: S.resources, priceMode: S.priceMode, cta: [S.cta, S.cta2], urgency: S.urgency, footer: S.footer, tracking: { spreadCode: D.spreadCode, sales: D.sales.name } }, null, 2);
+  }
+  window.mode = (m, btn) => { S.viewMode = m; document.querySelectorAll(".seg button").forEach(b => b.classList.remove("on")); btn.classList.add("on"); render(); };
+  window.toast = (m) => { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2200); };
+  window.saveTpl = () => { const el = document.createElement("div"); el.className = "m"; el.innerHTML = `<i>${S.title[0]}</i><span>${S.short} · ${S.title}</span><small>刚刚</small>`; $("mytpl").prepend(el); toast("已保存为企业模板，团队成员可直接套用"); };
+  window.publish = () => toast("原型：服务端渲染落地页 + 海报图（9:16 / 1:1），生成带追踪码的小程序码，推送到销售员微信");
+  window.copyJson = () => { navigator.clipboard && navigator.clipboard.writeText($("json").value); toast("配置 JSON 已复制（可用于 API 批量生成）"); };
+
+  initControls(); applyTpl("min");
+  HDZ.qr($("qr"), 72); $("code").textContent = D.spreadCode;
+</script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>05 · 国潮新中式 · 货袋子行情海报落地页</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  :root { --brand: #1f3d2b; --accent: #b8323a; --gold: #c9a24a; --paper: #f4efe4; }
+  body { background: #cfc7b4; }
+  .page { background: var(--paper); color: #2b2b2b; font-family: "Songti SC", "STSong", "Noto Serif SC", serif; }
+  .page::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .6; background: radial-gradient(ellipse 80% 40% at 50% 0%, rgba(31,61,43,.18), transparent 60%); }
+  .frame { margin: 14px; border: 1px solid var(--brand); position: relative; padding-bottom: 8px; }
+  .frame::before { content: ""; position: absolute; inset: 4px; border: 1px solid rgba(31,61,43,.35); pointer-events: none; }
+  .hdr { display: flex; justify-content: space-between; align-items: flex-start; padding: 18px 16px 0; }
+  .seal { width: 44px; height: 44px; border: 2px solid var(--accent); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; border-radius: 4px; transform: rotate(-6deg); background: rgba(184,50,58,.04); font-family: "STKaiti", "KaiTi", serif; }
+  .vert { writing-mode: vertical-rl; font-size: 12px; letter-spacing: 4px; color: #555; }
+  .title { text-align: center; padding: 10px 16px 0; }
+  .title h1 { font-size: 46px; font-weight: 900; letter-spacing: 10px; color: var(--brand); font-family: "STKaiti", "KaiTi", "Noto Serif SC", serif; line-height: 1.1; }
+  .title .en { font-size: 10px; letter-spacing: 4px; color: #888; margin-top: 4px; font-family: -apple-system, sans-serif; }
+  .title .date { display: inline-block; margin-top: 10px; border-top: 1px solid var(--gold); border-bottom: 1px solid var(--gold); padding: 3px 14px; font-size: 12px; color: #555; letter-spacing: 2px; }
+  .ink { margin: 10px 16px 0; height: 90px; position: relative; overflow: hidden; }
+  .ink svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .mainq { margin: -8px 16px 0; text-align: center; }
+  .mainq .n { font-size: 13px; color: #555; letter-spacing: 2px; }
+  .mainq .p { font-size: 54px; font-weight: 900; color: var(--accent); line-height: 1.05; font-variant-numeric: tabular-nums; font-family: "STKaiti", "KaiTi", serif; }
+  .mainq .p small { font-size: 13px; color: #777; margin-left: 4px; font-weight: 400; }
+  .mainq .c { font-size: 13px; margin-top: 2px; letter-spacing: 1px; }
+  .sec { display: flex; align-items: center; gap: 10px; margin: 20px 16px 8px; color: var(--brand); font-size: 14px; letter-spacing: 3px; font-weight: 700; }
+  .sec::before, .sec::after { content: ""; flex: 1; height: 1px; background: var(--gold); }
+  .sec i { font-style: normal; width: 6px; height: 6px; background: var(--accent); transform: rotate(45deg); }
+  .q { margin: 0 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .q .c { background: rgba(255,255,255,.55); border: 1px solid rgba(31,61,43,.2); padding: 10px 12px; }
+  .q .c .n { font-size: 13px; letter-spacing: 1px; }
+  .q .c .s { font-size: 10px; color: #888; font-family: -apple-system, sans-serif; }
+  .q .c .p { font-size: 20px; font-weight: 900; margin-top: 4px; font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; align-items: baseline; }
+  .q .c .p span { font-size: 11px; font-weight: 700; }
+  .res { margin: 0 16px; }
+  .res .r { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed rgba(31,61,43,.3); }
+  .res .r .n { font-size: 14px; } .res .r .n small { display: block; color: #777; font-size: 10px; font-family: -apple-system, sans-serif; }
+  .res .r .n .tag { font-size: 10px; color: var(--gold); border: 1px solid var(--gold); padding: 0 4px; margin-left: 6px; }
+  .res .r .p { text-align: right; }
+  .res .r .p b { display: block; color: var(--accent); font-size: 17px; }
+  .res .r .p button { font-size: 11px; color: var(--brand); border-bottom: 1px solid var(--brand); }
+  .comment { margin: 16px 16px 0; padding: 12px 14px; background: rgba(31,61,43,.06); border-left: 3px solid var(--brand); font-size: 13px; line-height: 1.9; color: #444; }
+  .comment b { color: var(--brand); letter-spacing: 2px; }
+  .card { margin: 18px 16px 0; padding: 14px; background: var(--brand); color: #f4efe4; display: flex; align-items: center; gap: 12px; }
+  .card .av { width: 50px; height: 50px; border-radius: 50%; background: var(--gold); color: var(--brand); font-size: 22px; font-weight: 900; display: flex; align-items: center; justify-content: center; font-family: "STKaiti", "KaiTi", serif; }
+  .card .info { flex: 1; } .card .info b { font-size: 15px; letter-spacing: 1px; } .card .info small { display: block; opacity: .85; font-size: 11px; font-family: -apple-system, sans-serif; }
+  .card .qr { background: #fff; padding: 4px; }
+  .foot { text-align: center; font-size: 10px; color: #888; padding: 12px 0 4px; font-family: -apple-system, sans-serif; letter-spacing: 1px; }
+  .cta-bar { background: rgba(244,239,228,.96); }
+  .cta-bar .primary { background: var(--accent); }
+  .fab { background: var(--accent); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="frame">
+    <div class="hdr">
+      <div class="seal" id="logo"></div>
+      <div class="vert" id="company"></div>
+    </div>
+    <div class="title">
+      <h1>钢市观澜</h1>
+      <div class="en">STEEL MARKET · DAILY VIEW</div>
+      <div class="date" id="date"></div>
+    </div>
+    <div class="ink" id="ink"></div>
+    <div class="mainq">
+      <div class="n">上海 · 螺纹钢 HRB400E</div>
+      <div class="p"><span id="big">0</span><small>元/吨</small></div>
+      <div class="c" id="mainc"></div>
+    </div>
+
+    <div class="sec"><i></i>今日行情<i></i></div>
+    <div class="q" id="quotes"></div>
+
+    <div class="comment"><b>观 · 点</b><br><span id="comment"></span></div>
+
+    <div class="sec"><i></i>本店现货<i></i></div>
+    <div class="res" id="res"></div>
+
+    <div class="card">
+      <div class="av" id="av"></div>
+      <div class="info"><b id="sname"></b><small id="stitle"></small><small id="sphone"></small><small style="margin-top:4px;color:var(--gold)">长按识别 · 询价看货</small></div>
+      <div class="qr" id="qr"></div>
+    </div>
+    <div class="foot">货袋子 · 钢铁现货资源平台 · <span id="code"></span></div>
+  </div>
+</div>
+
+<div class="cta-bar">
+  <button class="ghost" onclick="HDZ.call()">电 话</button>
+  <button class="ghost" onclick="HDZ.wechat()">微 信</button>
+  <button class="primary" onclick="HDZ.inquiry()">询 价</button>
+</div>
+<button class="fab" onclick="HDZ.poster({bg:'#f4efe4',fg:'#2b2b2b',brand:'#1f3d2b',accent:'#b8323a',title:'钢市观澜',sub:'STEEL MARKET · DAILY VIEW',font:'serif'})">生成<br>海报</button>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+  const d = HDZ.data;
+  HDZ.mountCommon({ name: "05 国潮新中式" });
+  logo.textContent = d.company.logoText; company.textContent = d.company.name; date.textContent = `${d.date} · ${d.lunar}`; comment.textContent = d.comment; code.textContent = d.spreadCode;
+  HDZ.countUp(document.getElementById("big"), d.quotes[0].price, 1200);
+  mainc.innerHTML = `${HDZ.chg(d.quotes[0].change)} 元 · 较昨稍涨`;
+  // 山水墨迹（走势化山形）
+  const t = d.trend, min = Math.min(...t), max = Math.max(...t);
+  const pts = t.map((v, i) => [i / (t.length - 1) * 380, 80 - (v - min) / (max - min) * 55]);
+  const path = "M0 90 " + pts.map(p => `L${p[0]} ${p[1]}`).join(" ") + " L380 90 Z";
+  ink.innerHTML = `<svg viewBox="0 0 380 90" preserveAspectRatio="none"><defs><linearGradient id="m" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#1f3d2b" stop-opacity=".55"/><stop offset="1" stop-color="#1f3d2b" stop-opacity=".05"/></linearGradient></defs><path d="${path}" fill="url(#m)"/><path d="${"M" + pts.map(p => p.join(" ")).join(" L")}" fill="none" stroke="#1f3d2b" stroke-width="1.5" stroke-opacity=".8"/><text x="4" y="14" font-size="10" fill="#888" font-family="serif">近八日走势</text></svg>`;
+  quotes.innerHTML = d.quotes.map(q => `<div class="c"><div class="n">${q.name}</div><div class="s">${q.spec}</div><div class="p ${HDZ.cls(q.change)}">${q.price}<span>${HDZ.chg(q.change)}</span></div></div>`).join("");
+  res.innerHTML = d.resources.map(r => `<div class="r"><div class="n">${r.name} ${r.spec}<span class="tag">${r.tag}</span><small>${r.mill} · ${r.warehouse} · ${r.qty} 吨</small></div><div class="p"><b>¥${r.price}</b><button onclick='HDZ.inquiry(${JSON.stringify({name:r.name,spec:r.spec})})'>询价</button></div></div>`).join("");
+  av.textContent = d.sales.avatar; sname.textContent = d.sales.name; stitle.textContent = `${d.company.short} · ${d.sales.title}`; sphone.textContent = d.sales.phone;
+  HDZ.qr(document.getElementById("qr"), 60);
+</script>
+</body>
+</html>

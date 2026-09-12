@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>03 · 涨价喜报风 · 货袋子行情海报落地页</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  :root { --brand: #c8102e; --gold: #f5c451; --deep: #8e0b1f; }
+  body { background: #6b0817; }
+  .page { background: linear-gradient(180deg, #c8102e 0%, #a30d24 40%, #fff6f0 40%, #fff6f0 100%); color: #222; }
+  .top { position: relative; padding: 22px 16px 0; color: #fff; text-align: center; overflow: hidden; }
+  .top::before { content: ""; position: absolute; inset: -40% -20% auto; height: 260px; background: repeating-conic-gradient(from 0deg, rgba(255,255,255,.08) 0 6deg, transparent 6deg 12deg); border-radius: 50%; animation: spin 40s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  .top .brand { position: relative; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; background: rgba(0,0,0,.18); padding: 4px 10px; border-radius: 999px; }
+  .top .logo { width: 20px; height: 20px; border-radius: 50%; background: var(--gold); color: var(--deep); font-weight: 900; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+  .top h1 { position: relative; font-size: 58px; font-weight: 900; letter-spacing: 6px; margin-top: 14px; color: var(--gold); text-shadow: 0 3px 0 #7a0a1a, 0 6px 18px rgba(0,0,0,.35); font-family: "STKaiti", "KaiTi", "Noto Serif SC", serif; }
+  .top .sub { position: relative; font-size: 13px; letter-spacing: 2px; margin-top: 4px; opacity: .95; }
+  .top .ribbon { position: relative; display: inline-block; margin-top: 12px; background: var(--gold); color: var(--deep); font-weight: 800; font-size: 13px; padding: 6px 18px; clip-path: polygon(6% 0, 94% 0, 100% 50%, 94% 100%, 6% 100%, 0 50%); }
+  .hero { position: relative; margin: 18px 16px 0; background: #fff; border-radius: 16px; padding: 18px 16px 14px; box-shadow: 0 14px 40px rgba(120,0,20,.25); border: 2px solid var(--gold); text-align: center; }
+  .hero .n { font-size: 14px; color: #666; }
+  .hero .p { font-size: 56px; font-weight: 900; color: var(--brand); line-height: 1; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .hero .p small { font-size: 14px; font-weight: 600; margin-left: 4px; color: #999; }
+  .hero .c { display: inline-block; margin-top: 8px; background: #fff0f0; color: var(--brand); font-weight: 800; padding: 4px 14px; border-radius: 999px; font-size: 14px; }
+  .hero .firework { position: absolute; font-size: 22px; animation: pop 1.6s ease-in-out infinite; }
+  @keyframes pop { 0%,100% { transform: scale(.9); opacity: .6 } 50% { transform: scale(1.15); opacity: 1 } }
+  .list { margin: 14px 16px 0; background: #fff; border-radius: 14px; padding: 6px 14px; box-shadow: 0 6px 20px rgba(120,0,20,.08); }
+  .list .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f3e6e6; }
+  .list .row:last-child { border: 0; }
+  .list .row .n b { font-size: 14px; } .list .row .n small { display: block; color: #999; font-size: 10px; }
+  .list .row .p { text-align: right; font-weight: 800; font-size: 16px; }
+  .list .row .p span { display: block; font-size: 11px; }
+  .sec { margin: 18px 16px 8px; display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 15px; color: var(--deep); }
+  .sec::before, .sec::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--brand)); }
+  .sec::after { background: linear-gradient(90deg, var(--brand), transparent); }
+  .goods { margin: 0 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .g { background: #fff; border-radius: 12px; padding: 12px; position: relative; overflow: hidden; box-shadow: 0 6px 18px rgba(120,0,20,.08); }
+  .g .tag { position: absolute; right: -22px; top: 8px; transform: rotate(45deg); background: var(--brand); color: #fff; font-size: 10px; padding: 2px 26px; }
+  .g .tag.hot { background: #ff7a00; }
+  .g b { font-size: 14px; display: block; }
+  .g small { color: #888; font-size: 10px; display: block; margin-top: 2px; }
+  .g .p { color: var(--brand); font-weight: 900; font-size: 18px; margin-top: 8px; }
+  .g .p i { font-style: normal; font-size: 11px; color: #999; font-weight: 500; margin-left: 4px; }
+  .g button { margin-top: 8px; width: 100%; height: 30px; border-radius: 8px; background: linear-gradient(90deg, #ff4d4f, var(--brand)); color: #fff; font-weight: 700; font-size: 12px; }
+  .card { margin: 16px 16px 0; background: linear-gradient(135deg, var(--deep), var(--brand)); border-radius: 14px; padding: 14px; color: #fff; display: flex; align-items: center; gap: 12px; }
+  .card .av { width: 52px; height: 52px; border-radius: 50%; background: var(--gold); color: var(--deep); font-weight: 900; font-size: 22px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; }
+  .card .info { flex: 1; } .card .info b { font-size: 15px; } .card .info small { display: block; opacity: .9; font-size: 11px; }
+  .card .qr { background: #fff; padding: 4px; border-radius: 6px; }
+  .foot { text-align: center; font-size: 10px; color: #a88; padding: 14px 0 6px; }
+  .cta-bar .primary { background: linear-gradient(90deg, #ff4d4f, var(--brand)); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <span class="brand"><span class="logo" id="logo"></span><span id="company"></span></span>
+    <h1>喜 报</h1>
+    <div class="sub" id="date"></div>
+    <div class="ribbon">钢价上涨 · 抓紧备货</div>
+  </div>
+
+  <div class="hero">
+    <span class="firework" style="left:10px;top:8px">🎉</span><span class="firework" style="right:10px;top:8px;animation-delay:.6s">🎊</span>
+    <div class="n">上海 · 螺纹钢 HRB400E Φ16-25</div>
+    <div class="p"><span id="big">0</span><small>元/吨</small></div>
+    <div class="c">▲ 上涨 20 元 · +0.55%</div>
+  </div>
+
+  <div class="list" id="quotes"></div>
+
+  <div class="sec">🔥 我司现货 · 涨前老价</div>
+  <div class="goods" id="res"></div>
+
+  <div class="card">
+    <div class="av" id="av"></div>
+    <div class="info"><b id="sname"></b><small id="stitle"></small><small id="sphone"></small><small style="margin-top:4px;color:var(--gold)">长按二维码 · 锁定今日价格</small></div>
+    <div class="qr" id="qr"></div>
+  </div>
+  <div class="foot">行情由货袋子平台提供 · 价格以当日实际成交为准 · <span id="code"></span></div>
+</div>
+
+<div class="cta-bar">
+  <button class="ghost" onclick="HDZ.call()">📞 电话</button>
+  <button class="ghost" onclick="HDZ.wechat()">💬 微信</button>
+  <button class="primary" onclick="HDZ.inquiry()">🔒 锁价询价</button>
+</div>
+<button class="fab" onclick="HDZ.poster({bg:'#fff6f0',fg:'#222',brand:'#c8102e',accent:'#c8102e',title:'涨价喜报',sub:'钢价上涨 · 抓紧备货'})">生成<br>海报</button>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+  const d = HDZ.data;
+  HDZ.mountCommon({ name: "03 喜报风" });
+  logo.textContent = d.company.logoText; company.textContent = d.company.short; date.textContent = `${d.date} ${d.weekday} · 华东钢市`; code.textContent = d.spreadCode;
+  HDZ.countUp(document.getElementById("big"), d.quotes[0].price, 1200);
+  quotes.innerHTML = d.quotes.slice(1).map(q => `<div class="row"><div class="n"><b>${q.name}</b><small>${q.spec}</small></div><div class="p ${HDZ.cls(q.change)}">${q.price}<span>${HDZ.chg(q.change)}</span></div></div>`).join("");
+  res.innerHTML = d.resources.slice(0, 4).map(r => `<div class="g"><span class="tag ${r.tag==='特价'?'hot':''}">${r.tag}</span><b>${r.name} ${r.spec}</b><small>${r.mill} · ${r.warehouse} · ${r.qty} 吨</small><div class="p">¥${r.price}<i>/吨</i></div><button onclick='HDZ.inquiry(${JSON.stringify({name:r.name,spec:r.spec})})'>锁价询价</button></div>`).join("");
+  av.textContent = d.sales.avatar; sname.textContent = d.sales.name; stitle.textContent = `${d.company.short} · ${d.sales.title}`; sphone.textContent = d.sales.phone;
+  HDZ.qr(document.getElementById("qr"), 60);
+</script>
+</body>
+</html>
