@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>07 · 杂志封面风 · 货袋子行情海报落地页</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  :root { --brand: #0b0b0b; --accent: #ffcc00; }
+  body { background: #d8d8d8; }
+  .page { background: #fff; color: #0b0b0b; }
+  .cover { position: relative; height: 560px; background: linear-gradient(160deg, #1b1b1f 0%, #34343c 60%, #4a4a55 100%); color: #fff; overflow: hidden; }
+  .cover::before { content: ""; position: absolute; right: -60px; bottom: -80px; width: 340px; height: 340px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #7b7b88, #2a2a30 70%); box-shadow: inset -30px -30px 60px rgba(0,0,0,.5); }
+  .cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,.7)); }
+  .cover .mast { position: relative; z-index: 2; padding: 22px 20px 0; }
+  .cover .mast .name { font-size: 62px; font-weight: 900; letter-spacing: -3px; line-height: .9; }
+  .cover .mast .name span { color: var(--accent); }
+  .cover .mast .issue { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 2px; margin-top: 8px; opacity: .8; text-transform: uppercase; }
+  .cover .tags { position: relative; z-index: 2; padding: 22px 20px 0; display: flex; flex-direction: column; gap: 10px; }
+  .cover .tags span { font-size: 12px; letter-spacing: 1px; }
+  .cover .tags span b { display: block; font-size: 15px; letter-spacing: 0; }
+  .cover .story { position: absolute; z-index: 2; left: 20px; right: 20px; bottom: 26px; }
+  .cover .story .kicker { display: inline-block; background: var(--accent); color: #000; font-size: 11px; font-weight: 800; padding: 3px 8px; letter-spacing: 2px; }
+  .cover .story h1 { font-size: 30px; font-weight: 900; line-height: 1.1; margin-top: 10px; letter-spacing: -.5px; }
+  .cover .story h1 em { font-style: normal; color: var(--accent); }
+  .cover .story p { font-size: 12px; opacity: .85; margin-top: 8px; }
+  .cover .brand { position: absolute; z-index: 2; right: 20px; top: 22px; display: flex; align-items: center; gap: 6px; font-size: 11px; opacity: .9; }
+  .cover .brand i { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #000; font-weight: 900; font-style: normal; display: flex; align-items: center; justify-content: center; }
+  .toc { padding: 24px 20px 0; }
+  .toc .h { font-size: 11px; letter-spacing: 4px; color: #777; text-transform: uppercase; border-bottom: 2px solid #0b0b0b; padding-bottom: 6px; display: flex; justify-content: space-between; }
+  .toc .h b { color: #0b0b0b; letter-spacing: 0; font-size: 18px; }
+  .q { display: grid; grid-template-columns: 1fr 1fr; }
+  .q .c { padding: 14px 0; border-bottom: 1px solid #e5e5e5; }
+  .q .c:nth-child(odd) { padding-right: 12px; border-right: 1px solid #e5e5e5; }
+  .q .c:nth-child(even) { padding-left: 12px; }
+  .q .c .no { font-size: 10px; color: #999; letter-spacing: 2px; }
+  .q .c .n { font-size: 15px; font-weight: 800; margin-top: 2px; }
+  .q .c .s { font-size: 10px; color: #888; }
+  .q .c .p { font-size: 24px; font-weight: 900; letter-spacing: -1px; margin-top: 4px; display: flex; align-items: baseline; gap: 6px; font-variant-numeric: tabular-nums; }
+  .q .c .p span { font-size: 11px; font-weight: 700; letter-spacing: 0; }
+  .feature { margin: 24px 20px 0; padding: 18px; background: #0b0b0b; color: #fff; }
+  .feature .lbl { font-size: 10px; letter-spacing: 4px; color: var(--accent); }
+  .feature h3 { font-size: 20px; font-weight: 900; margin-top: 6px; line-height: 1.2; }
+  .feature p { font-size: 12px; opacity: .8; margin-top: 8px; line-height: 1.7; }
+  .feature .spark { margin-top: 10px; color: #aaa; }
+  .res .item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #e5e5e5; }
+  .res .item .n b { font-size: 15px; font-weight: 800; }
+  .res .item .n b i { font-style: normal; background: var(--accent); font-size: 10px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; }
+  .res .item .n small { display: block; color: #888; font-size: 11px; margin-top: 2px; }
+  .res .item .p { text-align: right; }
+  .res .item .p b { display: block; font-size: 20px; font-weight: 900; letter-spacing: -.5px; }
+  .res .item .p button { font-size: 11px; letter-spacing: 2px; border-bottom: 2px solid #0b0b0b; padding-bottom: 1px; }
+  .card { margin: 24px 20px 0; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 16px 0; border-top: 3px solid #0b0b0b; border-bottom: 1px solid #0b0b0b; }
+  .card .av { width: 56px; height: 56px; background: #0b0b0b; color: var(--accent); font-size: 26px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+  .card .info b { font-size: 17px; font-weight: 900; } .card .info small { display: block; color: #666; font-size: 11px; margin-top: 2px; }
+  .foot { padding: 14px 20px 6px; font-size: 10px; color: #999; display: flex; justify-content: space-between; letter-spacing: 1px; }
+  .cta-bar .primary { background: #0b0b0b; }
+  .fab { background: #0b0b0b; color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="page">
+  <section class="cover">
+    <div class="brand"><i id="logo"></i><span id="company"></span></div>
+    <div class="mast">
+      <div class="name">STEEL<br><span>DAILY</span></div>
+      <div class="issue"><span id="date"></span><span>Vol. 09 · No. 12</span></div>
+    </div>
+    <div class="tags">
+      <span>今日焦点<b>建材小幅上涨</b></span>
+      <span>特别关注<b>钢厂调价预期偏强</b></span>
+    </div>
+    <div class="story">
+      <span class="kicker">COVER STORY</span>
+      <h1>螺纹钢 <em id="big">3680</em><br>周末小涨，下周或延续</h1>
+      <p>华东现货 · 一手货源 · 当日提货 —— 扫码直达报价</p>
+    </div>
+  </section>
+
+  <div class="toc"><div class="h"><span>Market</span><b>今日行情</b></div><div class="q" id="quotes"></div></div>
+
+  <div class="feature">
+    <div class="lbl">ANALYSIS · 走势</div>
+    <h3>近 8 日螺纹钢价格走势</h3>
+    <p id="comment"></p>
+    <div class="spark" id="spark"></div>
+  </div>
+
+  <div class="toc"><div class="h"><span>Stock</span><b>本店现货</b></div><div class="res" id="res"></div></div>
+
+  <div class="card">
+    <div class="av" id="av"></div>
+    <div class="info"><b id="sname"></b><small id="stitle"></small><small id="sphone"></small></div>
+    <div id="qr"></div>
+  </div>
+  <div class="foot"><span>HUODAIZI · STEEL PLATFORM</span><span id="code"></span></div>
+</div>
+
+<div class="cta-bar">
+  <button class="ghost" onclick="HDZ.call()">CALL</button>
+  <button class="ghost" onclick="HDZ.wechat()">WECHAT</button>
+  <button class="primary" onclick="HDZ.inquiry()">询价 INQUIRY</button>
+</div>
+<button class="fab" onclick="HDZ.poster({bg:'#0b0b0b',fg:'#fff',brand:'#ffcc00',accent:'#ffcc00',title:'STEEL DAILY',sub:'Vol. 09 · No. 12 · 螺纹钢周末小涨'})">生成<br>海报</button>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+  const d = HDZ.data;
+  HDZ.mountCommon({ name: "07 杂志封面风" });
+  logo.textContent = d.company.logoText; company.textContent = d.company.short; date.textContent = d.date.replace(/-/g, "."); comment.textContent = d.comment; code.textContent = d.spreadCode;
+  quotes.innerHTML = d.quotes.map((q, i) => `<div class="c"><div class="no">0${i+1}</div><div class="n">${q.name}</div><div class="s">${q.spec}</div><div class="p">${q.price}<span>${HDZ.chg(q.change)}</span></div></div>`).join("");
+  HDZ.spark(document.getElementById("spark"), d.trend, { color: "#ffcc00", labels: d.trendLabels, h: 90 });
+  res.innerHTML = d.resources.map(r => `<div class="item"><div class="n"><b>${r.name} ${r.spec}<i>${r.tag}</i></b><small>${r.mill} · ${r.warehouse} · ${r.qty} 吨</small></div><div class="p"><b>¥${r.price}</b><button onclick='HDZ.inquiry(${JSON.stringify({name:r.name,spec:r.spec})})'>询价</button></div></div>`).join("");
+  av.textContent = d.sales.avatar; sname.textContent = d.sales.name; stitle.textContent = `${d.company.short} · ${d.sales.title}`; sphone.textContent = `${d.sales.phone} · 微信 ${d.sales.wechat}`;
+  HDZ.qr(document.getElementById("qr"), 64);
+</script>
+</body>
+</html>

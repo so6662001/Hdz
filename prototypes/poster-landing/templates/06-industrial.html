@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>06 · 钢厂工业风 · 货袋子行情海报落地页</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  :root { --brand: #ff7a00; --steel: #2b2f36; --steel2: #3a3f48; --hazard: repeating-linear-gradient(45deg, #ffb400 0 12px, #1a1a1a 12px 24px); }
+  body { background: #17191d; }
+  .page { background: linear-gradient(180deg, #23262c, #1a1c21); color: #e8e9ec; font-family: "DIN Alternate", "Helvetica Neue", -apple-system, sans-serif; }
+  .page::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .05 0'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>"); }
+  .hazard { height: 10px; background: var(--hazard); }
+  .hdr { padding: 16px 16px 0; display: flex; justify-content: space-between; align-items: center; }
+  .hdr .brand { display: flex; align-items: center; gap: 8px; }
+  .hdr .logo { width: 34px; height: 34px; background: var(--brand); color: #111; font-weight: 900; font-size: 18px; display: flex; align-items: center; justify-content: center; clip-path: polygon(20% 0, 100% 0, 80% 100%, 0 100%); }
+  .hdr .brand b { font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
+  .hdr .brand small { display: block; font-size: 10px; color: #9aa0ab; letter-spacing: 2px; }
+  .hdr .no { font-size: 10px; color: #9aa0ab; text-align: right; line-height: 1.4; }
+  .hdr .no b { color: var(--brand); }
+  .plate { margin: 16px 16px 0; background: linear-gradient(180deg, var(--steel2), var(--steel)); border: 1px solid #4a505b; border-radius: 6px; padding: 16px; position: relative; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 30px rgba(0,0,0,.5); }
+  .plate .rivet { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #9aa0ab, #3a3f48); box-shadow: 0 1px 2px #000; }
+  .plate .rivet.tl { left: 6px; top: 6px } .plate .rivet.tr { right: 6px; top: 6px } .plate .rivet.bl { left: 6px; bottom: 6px } .plate .rivet.br { right: 6px; bottom: 6px }
+  .plate .lbl { font-size: 11px; letter-spacing: 3px; color: var(--brand); text-transform: uppercase; }
+  .plate .big { font-size: 62px; font-weight: 900; line-height: 1; margin-top: 6px; letter-spacing: -1px; font-variant-numeric: tabular-nums; text-shadow: 0 2px 0 #000; }
+  .plate .big small { font-size: 14px; color: #9aa0ab; letter-spacing: 0; margin-left: 6px; font-weight: 500; }
+  .plate .meta { display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; color: #c9ccd3; }
+  .plate .meta .up { color: #ff5c57; font-weight: 800; }
+  .stencil { margin: 20px 16px 6px; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: #9aa0ab; display: flex; align-items: center; gap: 10px; }
+  .stencil::after { content: ""; flex: 1; height: 2px; background: repeating-linear-gradient(90deg, #4a505b 0 8px, transparent 8px 14px); }
+  .gauge { margin: 0 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .gauge .g { background: #1d1f24; border: 1px solid #3a3f48; border-radius: 4px; padding: 10px; position: relative; }
+  .gauge .g::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--brand); }
+  .gauge .g .n { font-size: 11px; color: #9aa0ab; }
+  .gauge .g .p { font-size: 19px; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .gauge .g .c { font-size: 11px; font-weight: 700; margin-top: 2px; }
+  .gauge .g .c .up { color: #ff5c57 } .gauge .g .c .down { color: #2bd671 } .gauge .g .c .flat { color: #9aa0ab }
+  .trend { margin: 0 16px; padding: 10px; background: #1d1f24; border: 1px solid #3a3f48; border-radius: 4px; color: #9aa0ab; }
+  .inv { margin: 0 16px; }
+  .inv .row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 10px 12px; background: #1d1f24; border: 1px solid #3a3f48; border-left: 4px solid var(--brand); margin-bottom: 8px; border-radius: 3px; }
+  .inv .row.hot { border-left-color: #ffb400; }
+  .inv .n { font-size: 14px; font-weight: 700; }
+  .inv .n .tag { font-size: 10px; background: var(--brand); color: #111; padding: 1px 6px; margin-left: 6px; font-weight: 800; vertical-align: 1px; }
+  .inv .row.hot .n .tag { background: #ffb400; }
+  .inv .m { font-size: 11px; color: #9aa0ab; letter-spacing: .5px; }
+  .inv .p { grid-row: span 2; align-self: center; text-align: right; }
+  .inv .p b { display: block; color: var(--brand); font-size: 18px; }
+  .inv .p button { font-size: 11px; color: #e8e9ec; border: 1px solid #5a606b; padding: 2px 10px; border-radius: 2px; margin-top: 3px; letter-spacing: 1px; }
+  .card { margin: 18px 16px 0; padding: 14px; background: var(--brand); color: #111; display: flex; align-items: center; gap: 12px; clip-path: polygon(0 0, 100% 0, 100% 85%, 96% 100%, 0 100%); }
+  .card .av { width: 52px; height: 52px; background: #111; color: var(--brand); font-weight: 900; font-size: 24px; display: flex; align-items: center; justify-content: center; }
+  .card .info { flex: 1; } .card .info b { font-size: 16px; letter-spacing: 1px; } .card .info small { display: block; font-size: 11px; opacity: .85; }
+  .card .qr { background: #fff; padding: 4px; }
+  .foot { text-align: center; font-size: 10px; color: #6a707b; padding: 14px 0 6px; letter-spacing: 1px; }
+  .cta-bar { background: rgba(26,28,33,.95); border-top: 1px solid #3a3f48; }
+  .cta-bar .ghost { background: #2b2f36; color: #e8e9ec; }
+  .cta-bar .primary { background: var(--brand); color: #111; }
+  .fab { color: #111; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hazard"></div>
+  <div class="hdr">
+    <div class="brand"><span class="logo" id="logo"></span><div><b id="company"></b><small>STEEL SUPPLY · SHANGHAI</small></div></div>
+    <div class="no">报价单 NO.<b>20260912</b><br><span id="date"></span></div>
+  </div>
+
+  <div class="plate">
+    <i class="rivet tl"></i><i class="rivet tr"></i><i class="rivet bl"></i><i class="rivet br"></i>
+    <div class="lbl">Rebar · 螺纹钢 HRB400E Φ16-25</div>
+    <div class="big"><span id="big">0</span><small>CNY/T</small></div>
+    <div class="meta"><span>上海 · 08:30 更新</span><span class="up">▲ +20 元</span></div>
+  </div>
+
+  <div class="stencil">Market · 今日行情</div>
+  <div class="gauge" id="quotes"></div>
+
+  <div class="stencil">Trend · 近 8 日</div>
+  <div class="trend" id="spark"></div>
+
+  <div class="stencil">Inventory · 本店现货</div>
+  <div class="inv" id="res"></div>
+
+  <div class="card">
+    <div class="av" id="av"></div>
+    <div class="info"><b id="sname"></b><small id="stitle"></small><small id="sphone"></small><small style="margin-top:4px;font-weight:700">扫码询价 · 当日提货</small></div>
+    <div class="qr" id="qr"></div>
+  </div>
+  <div class="foot">HUODAIZI STEEL PLATFORM · <span id="code"></span></div>
+  <div class="hazard" style="margin-top:12px"></div>
+</div>
+
+<div class="cta-bar">
+  <button class="ghost" onclick="HDZ.call()">📞 电话</button>
+  <button class="ghost" onclick="HDZ.wechat()">💬 微信</button>
+  <button class="primary" onclick="HDZ.inquiry()">立即询价</button>
+</div>
+<button class="fab" onclick="HDZ.poster({bg:'#1d1f24',fg:'#e8e9ec',brand:'#ff7a00',accent:'#ff7a00',title:'今日钢价',sub:'STEEL SUPPLY · 报价单 NO.20260912'})">生成<br>海报</button>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+  const d = HDZ.data;
+  HDZ.mountCommon({ name: "06 钢厂工业风" });
+  logo.textContent = d.company.logoText; company.textContent = d.company.short; date.textContent = `${d.date} ${d.weekday}`; code.textContent = d.spreadCode;
+  HDZ.countUp(document.getElementById("big"), d.quotes[0].price, 1200);
+  quotes.innerHTML = d.quotes.map(q => `<div class="g"><div class="n">${q.name}</div><div class="p">${q.price}</div><div class="c">${HDZ.chg(q.change)}</div></div>`).join("");
+  HDZ.spark(document.getElementById("spark"), d.trend, { color: "#ff7a00", labels: d.trendLabels, h: 96 });
+  res.innerHTML = d.resources.map(r => `<div class="row ${r.tag==='特价'?'hot':''}"><div class="n">${r.name} ${r.spec}<span class="tag">${r.tag}</span></div><div class="m">${r.mill} · ${r.warehouse} · ${r.qty} T</div><div class="p"><b>¥${r.price}</b><button onclick='HDZ.inquiry(${JSON.stringify({name:r.name,spec:r.spec})})'>询价</button></div></div>`).join("");
+  av.textContent = d.sales.avatar; sname.textContent = d.sales.name; stitle.textContent = `${d.company.short} · ${d.sales.title}`; sphone.textContent = d.sales.phone;
+  HDZ.qr(document.getElementById("qr"), 60);
+</script>
+</body>
+</html>

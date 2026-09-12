@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>02 · 数据大屏科技风 · 货袋子行情海报落地页</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  :root { --brand: #00d4ff; --bg: #060b1a; --panel: rgba(255,255,255,.04); --line: rgba(0,212,255,.25); }
+  body { background: #02050f; }
+  .page { background: radial-gradient(120% 60% at 50% -10%, #0e2a5a 0%, var(--bg) 55%); color: #e6f1ff; }
+  .page::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(0,212,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,.06) 1px, transparent 1px); background-size: 24px 24px; pointer-events: none; mask-image: linear-gradient(#000, transparent 70%); }
+  .hdr { position: relative; padding: 18px 16px 6px; display: flex; justify-content: space-between; align-items: center; }
+  .hdr .brand { display: flex; align-items: center; gap: 8px; }
+  .hdr .logo { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #00d4ff, #3a7bff); color: #001; font-weight: 900; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 18px rgba(0,212,255,.5); }
+  .hdr .brand b { font-size: 14px; letter-spacing: 1px; }
+  .hdr .live { font-size: 10px; color: #8fd9ff; border: 1px solid var(--line); padding: 2px 8px; border-radius: 999px; display: flex; align-items: center; gap: 5px; }
+  .hdr .live i { width: 6px; height: 6px; border-radius: 50%; background: #2bff88; box-shadow: 0 0 8px #2bff88; animation: blink 1.2s infinite; }
+  @keyframes blink { 50% { opacity: .3 } }
+  .hero { position: relative; padding: 14px 16px 0; text-align: center; }
+  .hero .lbl { font-size: 11px; letter-spacing: 3px; color: #8fd9ff; }
+  .hero .big { font-size: 64px; font-weight: 900; letter-spacing: -2px; line-height: 1; margin-top: 6px; font-variant-numeric: tabular-nums; text-shadow: 0 0 30px rgba(0,212,255,.45); font-family: "DIN Alternate", "Helvetica Neue", sans-serif; }
+  .hero .big small { font-size: 16px; font-weight: 500; letter-spacing: 0; margin-left: 4px; color: #8fd9ff; }
+  .hero .chg { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 4px 12px; border-radius: 999px; background: rgba(229,49,43,.15); border: 1px solid rgba(229,49,43,.45); font-size: 13px; font-weight: 700; }
+  .hero .chg .up { color: #ff5c57; }
+  .hero .spec { font-size: 11px; color: #7f95b8; margin-top: 8px; }
+  .panel { position: relative; margin: 14px 16px 0; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); backdrop-filter: blur(6px); }
+  .panel::before, .panel::after { content: ""; position: absolute; width: 10px; height: 10px; border-color: var(--brand); border-style: solid; }
+  .panel::before { left: -1px; top: -1px; border-width: 2px 0 0 2px; border-radius: 12px 0 0 0; }
+  .panel::after { right: -1px; bottom: -1px; border-width: 0 2px 2px 0; border-radius: 0 0 12px 0; }
+  .panel h3 { font-size: 12px; letter-spacing: 2px; color: #8fd9ff; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .panel h3 span { font-size: 10px; color: #6d84a8; letter-spacing: 0; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cell { padding: 10px 8px; border-radius: 8px; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.05); }
+  .cell .n { font-size: 11px; color: #a9bbd6; }
+  .cell .p { font-size: 18px; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .cell .c { font-size: 11px; font-weight: 700; margin-top: 2px; }
+  .cell .c .up { color: #ff5c57 } .cell .c .down { color: #2bff88 } .cell .c .flat { color: #7f95b8 }
+  .bars .row { display: grid; grid-template-columns: 90px 1fr 60px; gap: 8px; align-items: center; font-size: 12px; padding: 7px 0; border-bottom: 1px dashed rgba(255,255,255,.06); }
+  .bars .row:last-child { border: 0; }
+  .bars .name b { display: block; font-size: 13px; }
+  .bars .name small { color: #6d84a8; font-size: 10px; }
+  .bars .bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,.06); overflow: hidden; }
+  .bars .bar i { display: block; height: 100%; background: linear-gradient(90deg, #00d4ff, #3a7bff); box-shadow: 0 0 10px rgba(0,212,255,.6); width: 0; transition: width 1s ease; }
+  .bars .val { text-align: right; }
+  .bars .val b { color: #00d4ff; display: block; }
+  .bars .val small { color: #6d84a8; font-size: 10px; }
+  .stats { display: flex; justify-content: space-around; text-align: center; }
+  .stats b { font-size: 20px; display: block; color: #fff; }
+  .stats span { font-size: 10px; color: #7f95b8; }
+  .card { display: flex; align-items: center; gap: 12px; }
+  .card .av { width: 50px; height: 50px; border-radius: 12px; background: linear-gradient(135deg,#00d4ff,#3a7bff); color: #001; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .card .info { flex: 1; } .card .info b { font-size: 15px; } .card .info small { display: block; color: #8fd9ff; font-size: 11px; }
+  .card .qr { padding: 4px; background: #fff; border-radius: 6px; }
+  .cta-bar { background: rgba(6,11,26,.9); border-top: 1px solid var(--line); }
+  .cta-bar .ghost { background: rgba(255,255,255,.08); color: #e6f1ff; }
+  .cta-bar .primary { background: linear-gradient(135deg,#00d4ff,#3a7bff); color: #001; }
+  .fab { background: linear-gradient(135deg,#00d4ff,#3a7bff); color: #001; }
+  .foot { text-align: center; font-size: 10px; color: #4f6890; padding: 14px 0 6px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hdr">
+    <div class="brand"><span class="logo" id="logo"></span><b id="company"></b></div>
+    <span class="live"><i></i>实时行情 · <span id="date"></span></span>
+  </div>
+
+  <div class="hero">
+    <div class="lbl">上海 · 螺纹钢 HRB400E</div>
+    <div class="big"><span id="big">0</span><small>元/吨</small></div>
+    <div class="chg"><span class="up">▲ 20</span><span style="color:#8fd9ff">较昨日 +0.55%</span></div>
+    <div class="spec">Φ16-25 · 数据更新 08:30 · 来源 货袋子行情</div>
+  </div>
+
+  <div class="panel">
+    <h3>主流品种 <span>元/吨</span></h3>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="panel">
+    <h3>近 8 日走势 <span>螺纹钢 · 元/吨</span></h3>
+    <div id="spark" style="color:#8fd9ff"></div>
+  </div>
+
+  <div class="panel bars">
+    <h3>本店现货库存 <span>点击询价</span></h3>
+    <div id="res"></div>
+  </div>
+
+  <div class="panel stats">
+    <div><b id="s1">0</b><span>今年成交(吨)</span></div>
+    <div><b id="s2">0</b><span>在库现货(吨)</span></div>
+    <div><b id="s3">0</b><span>合作年限</span></div>
+  </div>
+
+  <div class="panel card">
+    <div class="av" id="av"></div>
+    <div class="info"><b id="sname"></b><small id="stitle"></small><small id="sphone"></small></div>
+    <div class="qr" id="qr"></div>
+  </div>
+  <div class="foot">货袋子 · 钢铁现货资源平台 · 追踪码 <span id="code"></span></div>
+</div>
+
+<div class="cta-bar">
+  <button class="ghost" onclick="HDZ.call()">📞 电话</button>
+  <button class="ghost" onclick="HDZ.wechat()">💬 微信</button>
+  <button class="primary" onclick="HDZ.inquiry()">获取实时报价</button>
+</div>
+<button class="fab" onclick="HDZ.poster({bg:'#060b1a',fg:'#e6f1ff',brand:'#0aa7d6',accent:'#00d4ff',title:'今日钢市数据',sub:'实时行情 · 现货库存'})">生成<br>海报</button>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+  const d = HDZ.data;
+  HDZ.mountCommon({ name: "02 数据大屏风" });
+  logo.textContent = d.company.logoText; company.textContent = d.company.short; date.textContent = d.date; code.textContent = d.spreadCode;
+  HDZ.countUp(document.getElementById("big"), d.quotes[0].price, 1200);
+  grid.innerHTML = d.quotes.map(q => `<div class="cell"><div class="n">${q.name}</div><div class="p">${q.price}</div><div class="c">${HDZ.chg(q.change)}</div></div>`).join("");
+  HDZ.spark(document.getElementById("spark"), d.trend, { color: "#00d4ff", labels: d.trendLabels, h: 100 });
+  const max = Math.max(...d.resources.map(r => r.qty));
+  res.innerHTML = d.resources.map(r => `<div class="row" onclick='HDZ.inquiry(${JSON.stringify({name:r.name,spec:r.spec})})'><div class="name"><b>${r.name}</b><small>${r.spec} · ${r.mill}</small></div><div class="bar"><i data-w="${(r.qty/max*100).toFixed(0)}"></i></div><div class="val"><b>¥${r.price}</b><small>${r.qty} 吨 · ${r.warehouse}</small></div></div>`).join("");
+  requestAnimationFrame(() => setTimeout(() => document.querySelectorAll(".bar i").forEach(i => i.style.width = i.dataset.w + "%"), 100));
+  HDZ.countUp(document.getElementById("s1"), 186000, 1400);
+  HDZ.countUp(document.getElementById("s2"), d.resources.reduce((a, r) => a + r.qty, 0), 1200);
+  HDZ.countUp(document.getElementById("s3"), d.company.years, 900);
+  av.textContent = d.sales.avatar; sname.textContent = d.sales.name; stitle.textContent = `${d.company.short} · ${d.sales.title}`; sphone.textContent = d.sales.phone;
+  HDZ.qr(document.getElementById("qr"), 58);
+</script>
+</body>
+</html>

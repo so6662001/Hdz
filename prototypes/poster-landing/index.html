@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>货袋子 · 行情海报落地页风格库（高保真原型）</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0f1115; color: #e8ebf1; }
+  a { color: inherit; text-decoration: none; }
+  .hero { padding: 48px 40px 30px; background: radial-gradient(ellipse 60% 80% at 20% 0%, #1f5eff33, transparent), #0f1115; border-bottom: 1px solid #1f2430; }
+  .hero .brand { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #9aa3b8; }
+  .hero .brand i { width: 24px; height: 24px; border-radius: 6px; background: #1f5eff; color: #fff; display: flex; align-items: center; justify-content: center; font-style: normal; font-weight: 900; }
+  .hero h1 { font-size: 34px; margin-top: 14px; letter-spacing: -.5px; }
+  .hero p { color: #9aa3b8; margin-top: 8px; max-width: 760px; line-height: 1.7; font-size: 14px; }
+  .hero .loop { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+  .hero .loop span { background: #1a1f2b; border: 1px solid #262c3a; padding: 6px 12px; border-radius: 999px; font-size: 12px; color: #c5cbd8; }
+  .hero .loop span b { color: #7fb0ff; }
+  .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 24px 40px 0; }
+  .tool { border: 1px solid #262c3a; border-radius: 14px; padding: 18px; background: linear-gradient(135deg, #171b25, #12151d); display: flex; gap: 16px; align-items: center; transition: .2s; }
+  .tool:hover { border-color: #1f5eff; transform: translateY(-2px); }
+  .tool .ic { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; background: #1f5eff22; }
+  .tool b { font-size: 16px; display: block; } .tool small { color: #9aa3b8; line-height: 1.6; display: block; margin-top: 4px; font-size: 12px; }
+  .tool .go { margin-left: auto; color: #7fb0ff; font-size: 13px; white-space: nowrap; }
+  h2 { padding: 30px 40px 12px; font-size: 18px; display: flex; align-items: baseline; gap: 10px; }
+  h2 small { color: #9aa3b8; font-size: 12px; font-weight: 400; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; padding: 0 40px 50px; }
+  .card { border: 1px solid #262c3a; border-radius: 14px; overflow: hidden; background: #12151d; transition: .2s; display: block; }
+  .card:hover { border-color: #1f5eff; transform: translateY(-3px); box-shadow: 0 20px 40px rgba(0,0,0,.4); }
+  .shot { height: 380px; overflow: hidden; position: relative; background: #000; }
+  .shot iframe { width: 414px; height: 760px; border: 0; transform: scale(.5); transform-origin: 0 0; position: absolute; left: 50%; margin-left: -103.5px; top: 0; pointer-events: none; }
+  .shot::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 80%, #12151d); }
+  .meta { padding: 12px 14px 14px; }
+  .meta .no { font-size: 11px; color: #7fb0ff; letter-spacing: 2px; }
+  .meta b { display: block; font-size: 15px; margin-top: 2px; }
+  .meta small { color: #9aa3b8; font-size: 12px; line-height: 1.6; display: block; margin-top: 4px; }
+  .meta .tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+  .meta .tags span { font-size: 10px; background: #1a1f2b; border: 1px solid #262c3a; color: #c5cbd8; padding: 2px 6px; border-radius: 4px; }
+  .foot { padding: 20px 40px 40px; color: #6b7386; font-size: 12px; border-top: 1px solid #1f2430; line-height: 1.8; }
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="brand"><i>货</i>货袋子 · 行情海报营销工具</div>
+  <h1>行情海报落地页 · 10 种新风格 + 自定义设计器 + 视频海报</h1>
+  <p>行情数据 + 商家自有现货资源 + 销售员名片 → 一键生成海报与落地页 → 销售员转发朋友圈/微信群 → 客户扫码进入企业落地页 → 询价留资 → 线索归因到销售员与企业。每一套风格都是"海报图 + 落地页"同风格配套，二维码携带追踪码。</p>
+  <div class="loop"><span>① 平台行情 <b>+</b> 我的现货</span><span>② 生成 <b>海报 / 落地页 / 视频</b></span><span>③ 销售员转发 <b>朋友圈 / 社群</b></span><span>④ 客户扫码 → <b>落地页</b></span><span>⑤ 询价留资 → <b>线索归因</b></span></div>
+</section>
+
+<div class="tools">
+  <a class="tool" href="designer.html"><div class="ic">🎨</div><div><b>企业自定义设计器</b><small>选风格底稿 → 改品牌色/字体/板块排序 → 选行情品种与现货 → 配 CTA 与二维码 → 实时预览落地页 / 9:16 海报 / 1:1 方图 / 15s 视频 → 保存为企业模板、团队每人一码批量生成</small></div><span class="go">打开设计器 →</span></a>
+  <a class="tool" href="video.html"><div class="ic">🎬</div><div><b>视频海报生成器</b><small>5 段分镜（品牌开场 → 今日行情 → 走势点评 → 现货资源 → 名片二维码）· AI 配音与字幕 · 9:16 / 1:1 · 导出 MP4 · 每日 07:30 自动生成推送销售员</small></div><span class="go">打开生成器 →</span></a>
+</div>
+
+<h2>10 种新风格落地页 <small>点击卡片进入可交互原型（手机视口）· 每页含"生成海报"与"询价留资"闭环</small></h2>
+<div class="grid" id="grid"></div>
+
+<div class="foot">
+  说明：本目录为高保真 HTML 原型，数据为模拟（<code>shared/data.js</code>）。二维码为占位图形，真实环境由平台生成携带 <code>spread_code</code> 的小程序码/企微活码。<br>
+  设计原则：① 每套风格 = 海报 + 落地页配套，同风格同配色；② 首屏 3 秒内看到"今日主推价 + 涨跌"；③ 现货资源每条可直接询价；④ 销售员名片与二维码固定出现在末屏并可长按；⑤ 底部固定 CTA（电话 / 微信 / 询价）。
+</div>
+
+<script>
+  const T = [
+    ["01", "morning-brief", "钢市早报风", "报纸头版质感，宋体标题、双线报头。适合每日 7:30 固定推送，建立'每天第一份行情'的习惯锚点。", ["每日早报", "专业人设", "宋体"]],
+    ["02", "data-screen", "数据大屏科技风", "深色网格 + 霓光数据、数字滚动、库存条形图。强调'实时、权威、专业'，适合大型贸易商/钢厂代理。", ["深色", "数据感", "动效"]],
+    ["03", "red-celebration", "涨价喜报风", "红金喜报、涨价氛围、'涨前老价'资源卡。适合行情上涨日催单，制造紧迫感。", ["涨价日", "催单", "红金"]],
+    ["04", "minimal-white", "极简商务白", "大留白、无装饰、黑白灰 + 一处点睛蓝。适合品牌调性稳重的企业和高端客户群。", ["极简", "商务", "品牌感"]],
+    ["05", "guochao-ink", "国潮新中式", "宣纸底、印章、楷体、山水墨迹走势。差异化强，朋友圈辨识度高，适合节日/文化节点。", ["国风", "差异化", "节日"]],
+    ["06", "industrial", "钢厂工业风", "钢板铆钉、警示条纹、橙黑配色、报价单编号。行业属性最强，适合钢厂直营/加工配送企业。", ["工业", "行业感", "橙黑"]],
+    ["07", "magazine", "杂志封面风", "大字排版、封面故事、Vol./No. 期刊感。内容型企业首选，适合行情解读与观点输出。", ["编辑感", "观点", "大字"]],
+    ["08", "chat-card", "销售员对话风", "微信聊天气泡还原销售员'人'的口吻，行情卡片、现货卡片、快捷提问。转化率导向，亲切度最高。", ["人设 IP", "对话", "高转化"]],
+    ["09", "flash-sale", "特价清仓风", "黄黑撞色、倒计时、已抢进度条、'涨前老价'。适合库存去化、周末特价、尾货清仓。", ["促销", "倒计时", "库存"]],
+    ["10", "finance-kline", "金融收盘复盘风", "K 线图、开高低收、滚动 ticker、收盘复盘。适合下午/晚间推送，强化'专业分析师'定位。", ["K线", "复盘", "晚间"]]
+  ];
+  grid.innerHTML = T.map(([no, f, n, desc, tags]) => `<a class="card" href="templates/${no}-${f}.html"><div class="shot"><iframe src="templates/${no}-${f}.html" loading="lazy" tabindex="-1"></iframe></div><div class="meta"><div class="no">STYLE ${no}</div><b>${n}</b><small>${desc}</small><div class="tags">${tags.map(t => `<span>${t}</span>`).join("")}</div></div></a>`).join("");
+</script>
+</body>
+</html>

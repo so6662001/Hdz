@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>01 · 钢市早报风 · 货袋子行情海报落地页</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  :root { --brand: #1a3a6b; --accent: #c8102e; --paper: #f7f3ea; --ink: #1c1c1c; }
+  body { background: #d9d4c7; }
+  .page { background: var(--paper); color: var(--ink); font-family: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif; }
+  .masthead { padding: 18px 18px 10px; border-bottom: 3px double var(--ink); }
+  .masthead .top { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 1px; color: #555; font-family: -apple-system, sans-serif; }
+  .masthead h1 { font-size: 40px; font-weight: 900; letter-spacing: 6px; text-align: center; margin: 8px 0 4px; }
+  .masthead .sub { text-align: center; font-size: 12px; color: #444; letter-spacing: 2px; }
+  .masthead .brandline { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; font-family: -apple-system, sans-serif; font-size: 12px; }
+  .masthead .logo { width: 22px; height: 22px; border-radius: 4px; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; }
+  .headline { padding: 16px 18px 6px; }
+  .headline .kicker { display: inline-block; background: var(--accent); color: #fff; font-size: 11px; padding: 2px 8px; font-family: -apple-system, sans-serif; letter-spacing: 1px; }
+  .headline h2 { font-size: 24px; line-height: 1.25; margin-top: 8px; font-weight: 900; }
+  .headline p { font-size: 13px; color: #444; margin-top: 8px; text-indent: 2em; line-height: 1.7; }
+  .rule { border-top: 1px solid var(--ink); margin: 12px 18px; position: relative; }
+  .rule span { position: absolute; left: 0; top: -9px; background: var(--paper); padding-right: 8px; font-size: 12px; font-weight: 700; letter-spacing: 2px; }
+  table.quotes { width: calc(100% - 36px); margin: 14px 18px 0; border-collapse: collapse; font-family: -apple-system, sans-serif; }
+  table.quotes th { font-size: 11px; color: #666; text-align: left; padding: 4px 0; border-bottom: 1px solid #999; font-weight: 500; }
+  table.quotes td { padding: 8px 0; border-bottom: 1px dotted #b9b3a5; font-size: 13px; vertical-align: middle; }
+  table.quotes td.n b { font-size: 14px; }
+  table.quotes td.n small { display: block; color: #777; font-size: 10px; }
+  table.quotes td.p { text-align: right; font-weight: 800; font-size: 17px; font-variant-numeric: tabular-nums; }
+  table.quotes td.c { text-align: right; width: 56px; font-weight: 700; font-size: 12px; }
+  .trend { margin: 14px 18px 0; padding: 10px 10px 4px; border: 1px solid #b9b3a5; color: #333; }
+  .trend .t { font-size: 11px; color: #666; display: flex; justify-content: space-between; font-family: -apple-system, sans-serif; }
+  .res { margin: 6px 18px 0; }
+  .res .item { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 10px 0; border-bottom: 1px dotted #b9b3a5; font-family: -apple-system, sans-serif; }
+  .res .item .n { font-size: 14px; font-weight: 700; }
+  .res .item .n .tag { font-size: 10px; border: 1px solid var(--accent); color: var(--accent); padding: 0 4px; margin-left: 6px; vertical-align: 1px; font-weight: 500; }
+  .res .item .m { font-size: 11px; color: #666; }
+  .res .item .p { grid-row: span 2; align-self: center; text-align: right; }
+  .res .item .p b { display: block; font-size: 17px; color: var(--accent); }
+  .res .item .p button { font-size: 11px; color: var(--brand); border: 1px solid var(--brand); padding: 2px 8px; border-radius: 3px; margin-top: 2px; }
+  .card { margin: 16px 18px 0; padding: 14px; background: #fff; border: 1px solid #d8d2c3; display: flex; gap: 12px; align-items: center; font-family: -apple-system, sans-serif; }
+  .card .av { width: 52px; height: 52px; border-radius: 50%; background: var(--brand); color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center; font-family: serif; }
+  .card .info { flex: 1; }
+  .card .info b { font-size: 15px; }
+  .card .info small { display: block; color: #666; font-size: 11px; margin-top: 2px; }
+  .card .qr { text-align: center; font-size: 9px; color: #666; }
+  .footer { padding: 14px 18px 8px; text-align: center; font-size: 10px; color: #777; font-family: -apple-system, sans-serif; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <div class="top"><span id="date"></span><span>第 <b>1863</b> 期 · 华东版</span></div>
+    <h1>钢 市 早 报</h1>
+    <div class="sub">STEEL MORNING BRIEF · 现货 · 行情 · 观点</div>
+    <div class="brandline"><span class="logo" id="logo"></span><b id="company"></b><span style="color:#888">出品</span></div>
+  </header>
+
+  <section class="headline">
+    <span class="kicker">今日头条</span>
+    <h2 id="headline">沪市建材小幅上涨，螺纹钢报 <span class="up">3680</span> 元/吨</h2>
+    <p id="comment"></p>
+  </section>
+
+  <div class="rule"><span>今日行情</span></div>
+  <table class="quotes">
+    <thead><tr><th>品种 / 规格</th><th style="text-align:right">价格(元/吨)</th><th style="text-align:right">涨跌</th></tr></thead>
+    <tbody id="quotes"></tbody>
+  </table>
+
+  <div class="trend">
+    <div class="t"><span>螺纹钢 Φ16-25 · 近 8 日走势</span><span>单位：元/吨</span></div>
+    <div id="spark"></div>
+  </div>
+
+  <div class="rule" style="margin-top:18px"><span>本店现货</span></div>
+  <div class="res" id="res"></div>
+
+  <div class="card">
+    <div class="av" id="av"></div>
+    <div class="info"><b id="sname"></b><small id="stitle"></small><small id="sphone"></small></div>
+    <div class="qr"><div id="qr"></div>长按识别</div>
+  </div>
+
+  <div class="footer">行情数据由货袋子平台提供 · 仅供参考 · 以实际成交为准<br>追踪码 <span id="code"></span></div>
+</div>
+
+<div class="cta-bar">
+  <button class="ghost" onclick="HDZ.call()">📞 电话</button>
+  <button class="ghost" onclick="HDZ.wechat()">💬 微信</button>
+  <button class="primary" onclick="HDZ.inquiry()">立即询价</button>
+</div>
+<button class="fab" onclick="HDZ.poster({bg:'#f7f3ea',fg:'#1c1c1c',brand:'#1a3a6b',accent:'#c8102e',title:'钢市早报',sub:'第 1863 期 · 华东版',font:'serif'})">生成<br>海报</button>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+  const d = HDZ.data;
+  HDZ.mountCommon({ name: "01 早报风" });
+  date.textContent = `${d.date} ${d.weekday} · ${d.lunar}`;
+  logo.textContent = d.company.logoText; company.textContent = d.company.name; comment.textContent = d.comment; code.textContent = d.spreadCode;
+  quotes.innerHTML = d.quotes.map(q => `<tr><td class="n"><b>${q.name}</b><small>${q.spec}</small></td><td class="p ${HDZ.cls(q.change)}">${q.price}</td><td class="c">${HDZ.chg(q.change)}</td></tr>`).join("");
+  HDZ.spark(document.getElementById("spark"), d.trend, { color: "#c8102e", labels: d.trendLabels, h: 96 });
+  res.innerHTML = d.resources.map((r, i) => `<div class="item"><div class="n">${r.name} ${r.spec}<span class="tag">${r.tag}</span></div><div class="m">${r.mill} · ${r.warehouse} · ${r.qty} 吨</div><div class="p"><b>¥${r.price}</b><button onclick='HDZ.inquiry(${JSON.stringify({name:r.name,spec:r.spec})})'>询价</button></div></div>`).join("");
+  av.textContent = d.sales.avatar; sname.textContent = d.sales.name; stitle.textContent = `${d.company.short} · ${d.sales.title}`; sphone.textContent = d.sales.phone;
+  HDZ.qr(document.getElementById("qr"), 64);
+</script>
+</body>
+</html>

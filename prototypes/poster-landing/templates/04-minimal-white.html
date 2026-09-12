@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>04 · 极简商务白 · 货袋子行情海报落地页</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  :root { --brand: #111; --accent: #1f5eff; --muted: #8a8f99; --line: #ececf0; }
+  body { background: #f2f2f4; }
+  .page { background: #fff; color: #111; }
+  .nav { padding: 20px 22px 0; display: flex; justify-content: space-between; align-items: center; }
+  .nav .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+  .nav .logo { width: 26px; height: 26px; border-radius: 50%; background: #111; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .nav .date { font-size: 11px; color: var(--muted); }
+  .hero { padding: 36px 22px 10px; }
+  .hero .eyebrow { font-size: 11px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
+  .hero h1 { font-size: 34px; font-weight: 800; letter-spacing: -1px; line-height: 1.15; margin-top: 10px; }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p { color: #555; font-size: 13px; margin-top: 12px; line-height: 1.7; }
+  .kpi { display: flex; padding: 18px 22px 0; gap: 0; }
+  .kpi div { flex: 1; border-left: 1px solid var(--line); padding-left: 12px; }
+  .kpi div:first-child { border: 0; padding-left: 0; }
+  .kpi b { font-size: 22px; font-weight: 800; display: block; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
+  .kpi small { font-size: 11px; color: var(--muted); }
+  .sec { padding: 30px 22px 10px; display: flex; justify-content: space-between; align-items: baseline; }
+  .sec h2 { font-size: 15px; font-weight: 700; }
+  .sec span { font-size: 11px; color: var(--muted); }
+  .quotes { padding: 0 22px; }
+  .quotes .row { display: grid; grid-template-columns: 1fr auto auto; gap: 14px; align-items: center; padding: 13px 0; border-top: 1px solid var(--line); }
+  .quotes .row:last-child { border-bottom: 1px solid var(--line); }
+  .quotes .n b { font-size: 14px; font-weight: 600; } .quotes .n small { display: block; color: var(--muted); font-size: 11px; margin-top: 1px; }
+  .quotes .p { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .quotes .c { width: 54px; text-align: right; font-size: 12px; font-weight: 600; }
+  .trend { padding: 0 22px; color: #333; }
+  .res { padding: 0 22px; }
+  .res .item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
+  .res .item:last-child { border-bottom: 1px solid var(--line); }
+  .res .n b { font-size: 14px; font-weight: 600; } .res .n small { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
+  .res .n .tag { display: inline-block; font-size: 10px; padding: 0 6px; border: 1px solid #111; border-radius: 999px; margin-left: 6px; vertical-align: 1px; }
+  .res .p { text-align: right; }
+  .res .p b { display: block; font-size: 16px; font-weight: 700; }
+  .res .p button { font-size: 12px; color: var(--accent); margin-top: 2px; text-decoration: underline; text-underline-offset: 3px; }
+  .card { margin: 30px 22px 0; padding: 22px; border: 1px solid #111; border-radius: 4px; display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; }
+  .card .name { font-size: 20px; font-weight: 800; letter-spacing: -.5px; }
+  .card .t { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .card .ct { font-size: 13px; margin-top: 12px; line-height: 1.7; }
+  .card .qr { text-align: center; font-size: 10px; color: var(--muted); }
+  .foot { padding: 20px 22px 8px; font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; }
+  .cta-bar .primary { background: #111; }
+  .fab { background: #111; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="nav">
+    <div class="brand"><span class="logo" id="logo"></span><span id="company"></span></div>
+    <span class="date" id="date"></span>
+  </div>
+
+  <section class="hero">
+    <div class="eyebrow">Daily Steel Report · 上海</div>
+    <h1>今日螺纹钢<br><em id="big">3,680</em> 元/吨，小幅上行。</h1>
+    <p id="comment"></p>
+  </section>
+
+  <div class="kpi">
+    <div><b class="up">+20</b><small>螺纹钢涨跌</small></div>
+    <div><b>6</b><small>主流品种</small></div>
+    <div><b id="stock">0</b><small>在库现货(吨)</small></div>
+  </div>
+
+  <div class="sec"><h2>主流品种价格</h2><span>元/吨 · 08:30 更新</span></div>
+  <div class="quotes" id="quotes"></div>
+
+  <div class="sec"><h2>近 8 日走势</h2><span>螺纹钢 Φ16-25</span></div>
+  <div class="trend" id="spark"></div>
+
+  <div class="sec"><h2>本店现货</h2><span>价格实在 · 当日提货</span></div>
+  <div class="res" id="res"></div>
+
+  <div class="card">
+    <div>
+      <div class="name" id="sname"></div>
+      <div class="t" id="stitle"></div>
+      <div class="ct" id="sct"></div>
+    </div>
+    <div class="qr"><div id="qr"></div>长按识别</div>
+  </div>
+  <div class="foot"><span>数据来源：货袋子行情</span><span id="code"></span></div>
+</div>
+
+<div class="cta-bar">
+  <button class="ghost" onclick="HDZ.call()">电话</button>
+  <button class="ghost" onclick="HDZ.wechat()">微信</button>
+  <button class="primary" onclick="HDZ.inquiry()">询价</button>
+</div>
+<button class="fab" onclick="HDZ.poster({bg:'#fff',fg:'#111',brand:'#111',accent:'#1f5eff',title:'今日钢市',sub:'Daily Steel Report · 上海'})">生成<br>海报</button>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+  const d = HDZ.data;
+  HDZ.mountCommon({ name: "04 极简商务白" });
+  logo.textContent = d.company.logoText; company.textContent = d.company.short; date.textContent = `${d.date} · ${d.weekday}`; comment.textContent = d.comment; code.textContent = d.spreadCode;
+  HDZ.countUp(document.getElementById("stock"), d.resources.reduce((a, r) => a + r.qty, 0), 1000);
+  quotes.innerHTML = d.quotes.map(q => `<div class="row"><div class="n"><b>${q.name}</b><small>${q.spec}</small></div><div class="p">${q.price.toLocaleString()}</div><div class="c">${HDZ.chg(q.change)}</div></div>`).join("");
+  HDZ.spark(document.getElementById("spark"), d.trend, { color: "#111", fill: false, labels: d.trendLabels, h: 96, stroke: 1.6 });
+  res.innerHTML = d.resources.map(r => `<div class="item"><div class="n"><b>${r.name} ${r.spec}</b><span class="tag">${r.tag}</span><small>${r.mill} · ${r.warehouse} · ${r.qty} 吨</small></div><div class="p"><b>¥${r.price.toLocaleString()}</b><button onclick='HDZ.inquiry(${JSON.stringify({name:r.name,spec:r.spec})})'>询价 →</button></div></div>`).join("");
+  sname.textContent = d.sales.name; stitle.textContent = `${d.company.name} · ${d.sales.title}`; sct.innerHTML = `${d.sales.phone}<br>微信 ${d.sales.wechat}`;
+  HDZ.qr(document.getElementById("qr"), 72);
+</script>
+</body>
+</html>

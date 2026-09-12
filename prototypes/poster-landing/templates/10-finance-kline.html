@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>10 · 金融收盘复盘风 · 货袋子行情海报落地页</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  :root { --brand: #1f5eff; --bg: #0f1218; --panel: #161b24; --line: #232a36; --txt: #d9dee8; --mute: #7a869c; }
+  body { background: #0a0c11; }
+  .page { background: var(--bg); color: var(--txt); font-family: "Helvetica Neue", -apple-system, "PingFang SC", sans-serif; }
+  .hdr { padding: 16px 16px 0; display: flex; justify-content: space-between; align-items: center; }
+  .hdr .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+  .hdr .logo { width: 28px; height: 28px; border-radius: 6px; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+  .hdr .tag { font-size: 10px; color: var(--mute); border: 1px solid var(--line); padding: 2px 8px; border-radius: 4px; }
+  .ticker { margin-top: 12px; background: var(--panel); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow: hidden; white-space: nowrap; font-size: 11px; padding: 6px 0; }
+  .ticker .in { display: inline-block; animation: mv 24s linear infinite; }
+  @keyframes mv { to { transform: translateX(-50%) } }
+  .ticker span { margin: 0 14px; color: var(--mute); } .ticker b { color: var(--txt); margin-left: 4px; }
+  .main { padding: 16px 16px 0; }
+  .main .n { font-size: 13px; color: var(--mute); display: flex; justify-content: space-between; }
+  .main .p { display: flex; align-items: baseline; gap: 10px; margin-top: 4px; }
+  .main .p b { font-size: 46px; font-weight: 800; letter-spacing: -1px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .main .p .c { font-size: 15px; font-weight: 700; }
+  .main .p .pct { font-size: 12px; padding: 2px 6px; border-radius: 4px; background: rgba(229,49,43,.15); }
+  .main .meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px; }
+  .main .meta div { font-size: 10px; color: var(--mute); }
+  .main .meta div b { display: block; color: var(--txt); font-size: 13px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .chart { margin: 14px 16px 0; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  .chart .tabs { display: flex; gap: 14px; font-size: 12px; color: var(--mute); margin-bottom: 8px; }
+  .chart .tabs span.on { color: var(--txt); font-weight: 700; border-bottom: 2px solid var(--brand); padding-bottom: 2px; }
+  .chart svg { display: block; width: 100%; }
+  .sec { padding: 20px 16px 8px; font-size: 13px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+  .sec span { font-size: 10px; color: var(--mute); font-weight: 400; }
+  table { width: calc(100% - 32px); margin: 0 16px; border-collapse: collapse; font-size: 13px; }
+  th { font-size: 10px; color: var(--mute); text-align: right; font-weight: 500; padding: 4px 0; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; }
+  td { padding: 9px 0; border-bottom: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; }
+  td .n b { font-weight: 600; } td .n small { display: block; color: var(--mute); font-size: 10px; }
+  td.p { font-weight: 700; font-size: 14px; }
+  td.c { font-weight: 700; font-size: 12px; }
+  td.c .up { color: #ff5c57 } td.c .down { color: #2bd671 }
+  .comment { margin: 14px 16px 0; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; line-height: 1.8; color: #b8c0cf; }
+  .comment b { color: var(--txt); display: block; margin-bottom: 4px; }
+  .res .row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  .res .row .n b { font-size: 13px; font-weight: 600; } .res .row .n small { display: block; color: var(--mute); font-size: 10px; }
+  .res .row .n i { font-style: normal; font-size: 9px; background: rgba(31,94,255,.2); color: #8fb0ff; padding: 0 5px; border-radius: 3px; margin-left: 4px; }
+  .res .row .p { font-weight: 700; font-size: 15px; color: #ff5c57; }
+  .res .row button { font-size: 11px; color: var(--txt); background: rgba(255,255,255,.08); padding: 5px 10px; border-radius: 4px; }
+  .card { margin: 18px 16px 0; padding: 14px; background: linear-gradient(135deg, #1a2b5a, #0f1a3a); border: 1px solid #253a6b; border-radius: 10px; display: flex; align-items: center; gap: 12px; }
+  .card .av { width: 50px; height: 50px; border-radius: 10px; background: var(--brand); color: #fff; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .card .info { flex: 1; } .card .info b { font-size: 15px; } .card .info small { display: block; color: #9fb3d9; font-size: 11px; }
+  .card .qr { background: #fff; padding: 4px; border-radius: 6px; }
+  .foot { text-align: center; font-size: 10px; color: var(--mute); padding: 14px 0 6px; }
+  .cta-bar { background: rgba(15,18,24,.95); border-top: 1px solid var(--line); }
+  .cta-bar .ghost { background: rgba(255,255,255,.08); color: var(--txt); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hdr">
+    <div class="brand"><span class="logo" id="logo"></span><span id="company"></span></div>
+    <span class="tag">收盘复盘 · <span id="date"></span></span>
+  </div>
+  <div class="ticker"><div class="in" id="ticker"></div></div>
+
+  <div class="main">
+    <div class="n"><span>螺纹钢 HRB400E Φ16-25 · 上海</span><span>已收盘 17:00</span></div>
+    <div class="p"><b id="big">0</b><span class="c up">+20</span><span class="pct up">+0.55%</span></div>
+    <div class="meta">
+      <div>今开<b>3665</b></div><div>最高<b>3685</b></div><div>最低<b>3655</b></div><div>昨收<b>3660</b></div>
+    </div>
+  </div>
+
+  <div class="chart">
+    <div class="tabs"><span class="on">日K</span><span>周K</span><span>分时</span><span>库存</span></div>
+    <div id="kline"></div>
+  </div>
+
+  <div class="sec">主流品种收盘 <span>元/吨</span></div>
+  <table><thead><tr><th>品种</th><th>收盘</th><th>涨跌</th></tr></thead><tbody id="quotes"></tbody></table>
+
+  <div class="comment"><b>📝 今日复盘</b><span id="comment"></span></div>
+
+  <div class="sec">本店现货报价 <span>点击询价 · 报价仅您可见</span></div>
+  <div class="res" id="res"></div>
+
+  <div class="card">
+    <div class="av" id="av"></div>
+    <div class="info"><b id="sname"></b><small id="stitle"></small><small id="sphone"></small><small style="color:#8fb0ff;margin-top:4px">扫码订阅 · 每日收盘复盘</small></div>
+    <div class="qr" id="qr"></div>
+  </div>
+  <div class="foot">数据源：货袋子行情 · 仅供参考 · <span id="code"></span></div>
+</div>
+
+<div class="cta-bar">
+  <button class="ghost" onclick="HDZ.call()">📞 电话</button>
+  <button class="ghost" onclick="HDZ.wechat()">💬 微信</button>
+  <button class="primary" onclick="HDZ.inquiry()">询价 / 订阅复盘</button>
+</div>
+<button class="fab" onclick="HDZ.poster({bg:'#0f1218',fg:'#d9dee8',brand:'#1f5eff',accent:'#ff5c57',title:'收盘复盘',sub:'螺纹钢 3680 · +0.55% · 上海'})">生成<br>海报</button>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+  const d = HDZ.data;
+  HDZ.mountCommon({ name: "10 金融复盘风" });
+  logo.textContent = d.company.logoText; company.textContent = d.company.short; date.textContent = d.date; comment.textContent = d.comment; code.textContent = d.spreadCode;
+  HDZ.countUp(document.getElementById("big"), d.quotes[0].price, 1200);
+  const tk = d.quotes.map(q => `<span>${q.name}<b class="${HDZ.cls(q.change)}">${q.price} ${q.change>0?'+':''}${q.change}</b></span>`).join("");
+  ticker.innerHTML = tk + tk;
+  // K 线（模拟 OHLC）
+  const base = d.trend, W = 360, H = 130, pad = 6;
+  const ohlc = base.map((c, i) => { const o = i ? base[i-1] : c - 10; const hi = Math.max(o, c) + 8; const lo = Math.min(o, c) - 8; return { o, c, hi, lo }; });
+  const mn = Math.min(...ohlc.map(k => k.lo)), mx = Math.max(...ohlc.map(k => k.hi));
+  const y = v => pad + (1 - (v - mn) / (mx - mn)) * (H - pad * 2 - 14);
+  const cw = (W - pad * 2) / ohlc.length;
+  let svg = `<svg viewBox="0 0 ${W} ${H}">`;
+  [0, .5, 1].forEach(t => { const yy = pad + t * (H - pad * 2 - 14); svg += `<line x1="0" x2="${W}" y1="${yy}" y2="${yy}" stroke="#232a36" stroke-dasharray="3 3"/><text x="${W-2}" y="${yy-2}" font-size="9" fill="#7a869c" text-anchor="end">${Math.round(mx - t * (mx - mn))}</text>`; });
+  ohlc.forEach((k, i) => { const x = pad + i * cw + cw / 2; const up = k.c >= k.o; const col = up ? "#ff5c57" : "#2bd671"; svg += `<line x1="${x}" x2="${x}" y1="${y(k.hi)}" y2="${y(k.lo)}" stroke="${col}" stroke-width="1.2"/><rect x="${x - cw * .3}" y="${y(Math.max(k.o, k.c))}" width="${cw * .6}" height="${Math.max(2, Math.abs(y(k.o) - y(k.c)))}" fill="${up ? col : col}" ${up ? '' : ''}/><text x="${x}" y="${H - 2}" font-size="9" fill="#7a869c" text-anchor="middle">${d.trendLabels[i]}</text>`; });
+  svg += "</svg>";
+  kline.innerHTML = svg;
+  quotes.innerHTML = d.quotes.map(q => `<tr><td><div class="n"><b>${q.name}</b><small>${q.spec}</small></div></td><td class="p">${q.price}</td><td class="c">${HDZ.chg(q.change)}<br><span style="font-size:10px;color:var(--mute);font-weight:400">${q.change>0?'+':''}${(q.change / (q.price - q.change) * 100).toFixed(2)}%</span></td></tr>`).join("");
+  res.innerHTML = d.resources.map(r => `<div class="row"><div class="n"><b>${r.name} ${r.spec}</b><i>${r.tag}</i><small>${r.mill} · ${r.warehouse} · ${r.qty} 吨</small></div><div class="p">¥${r.price}</div><button onclick='HDZ.inquiry(${JSON.stringify({name:r.name,spec:r.spec})})'>询价</button></div>`).join("");
+  av.textContent = d.sales.avatar; sname.textContent = d.sales.name; stitle.textContent = `${d.company.short} · ${d.sales.title}`; sphone.textContent = d.sales.phone;
+  HDZ.qr(document.getElementById("qr"), 58);
+</script>
+</body>
+</html>
