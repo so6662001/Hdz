@@ -128,10 +128,16 @@ img { display: block; max-width: 100%; }
 .poster-actions button.primary { background: var(--brand, #1f5eff); color: #fff; }
 .poster-hint { color: rgba(255,255,255,.7); font-size: 12px; }
 
+/* 尊重系统"减少动态效果"设置 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
 /* 原型说明角标（仅原型可见） */
 .proto-badge {
-  position: fixed; left: 12px; top: 12px; z-index: 300;
+  position: fixed; left: calc(50% - 207px + 12px); bottom: 104px; z-index: 300;
   background: rgba(0,0,0,.6); color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 6px;
   backdrop-filter: blur(6px);
 }
 .proto-badge a { color: #ffd76a; margin-left: 6px; }
+@media (max-width: 414px) { .proto-badge { left: 12px; } }

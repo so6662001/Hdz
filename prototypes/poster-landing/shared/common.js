@@ -161,6 +161,7 @@
   /* ---------- 挂载通用层 ---------- */
   H.mountCommon = function (opts) {
     opts = opts || {};
+    if (window.self !== window.top) opts.badge = false; // 被画廊 iframe 嵌入时不显示原型角标
     const wrap = document.createElement("div");
     wrap.innerHTML = `
       <div class="sheet-mask" id="hdz-sheet" onclick="if(event.target===this)HDZ.closeSheet()"><div class="sheet"></div></div>

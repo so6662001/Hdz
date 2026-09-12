@@ -37,7 +37,8 @@
   .g .tag.y { background: var(--yellow); color: var(--black); }
   .g .n { font-size: 15px; font-weight: 900; }
   .g .m { font-size: 11px; color: #666; }
-  .g .p { grid-row: span 2; align-self: center; text-align: right; }
+  .g .n, .g .m { grid-column: 1; }
+  .g .p { grid-column: 2; grid-row: 1 / span 2; align-self: center; text-align: right; }
   .g .p b { display: block; color: var(--brand); font-size: 22px; font-weight: 900; letter-spacing: -.5px; }
   .g .p button { background: var(--black); color: var(--yellow); font-weight: 900; font-size: 12px; padding: 5px 12px; margin-top: 4px; }
   .g .bar { grid-column: 1 / -1; height: 10px; background: #eee; border: 2px solid var(--black); position: relative; margin-top: 4px; }
