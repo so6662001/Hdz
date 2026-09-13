@@ -5,7 +5,8 @@
  * - HDZ.countUp(el, to, ms)     数字滚动
  * - HDZ.inquiry()               打开留资底部弹层（闭环关键：扫码 → 留资 → 归因到销售员/企业）
  * - HDZ.call() / HDZ.wechat()   拨号 / 复制微信
- * - HDZ.poster(opts)            一键生成 9:16 海报图预览层（同风格）
+ * - HDZ.poster(opts)            一键生成 9:16 海报图预览层（同风格）；opts.style 对应 mobile-poster.html 的风格 id
+ * - HDZ.openGenerator()         跳转手机端 Canvas 海报生成器（mobile-poster.html）
  * - HDZ.mountCommon()           注入留资弹层、海报层、原型角标
  */
 (function () {
@@ -129,6 +130,7 @@
     opts = Object.assign({ bg: "#fff", fg: "#111", accent: "#e5312b", brand: "#1f5eff", title: "今日钢市行情", sub: "" }, opts || {});
     const m = document.getElementById("hdz-poster");
     if (!m) return;
+    H._posterStyle = opts.style || "brief";
     const d = D();
     m.classList.add("show");
     const card = m.querySelector(".poster-card");
@@ -157,6 +159,11 @@
     H.qr(card.querySelector("#poster-qr"), 62);
   };
   H.closePoster = function () { document.getElementById("hdz-poster").classList.remove("show"); };
+  // 进入手机端 Canvas 海报生成器（真实生成 1080×1920 图片，可切换 10 种风格/调整内容/保存相册）
+  H.openGenerator = function () {
+    const base = location.pathname.includes("/templates/") ? "../mobile-poster.html" : "mobile-poster.html";
+    location.href = `${base}?style=${H._posterStyle || "brief"}&back=1`;
+  };
 
   /* ---------- 挂载通用层 ---------- */
   H.mountCommon = function (opts) {
@@ -167,8 +174,8 @@
       <div class="sheet-mask" id="hdz-sheet" onclick="if(event.target===this)HDZ.closeSheet()"><div class="sheet"></div></div>
       <div class="poster-mask" id="hdz-poster" onclick="if(event.target===this)HDZ.closePoster()">
         <div class="poster-card"></div>
-        <div class="poster-actions"><button onclick="HDZ.closePoster()">返回</button><button class="primary" onclick="alert('原型：真实环境服务端渲染为图片并保存到相册 / 直接分享到微信')">保存海报图</button><button onclick="HDZ.share()">分享到微信</button></div>
-        <div class="poster-hint">海报与落地页同风格 · 二维码携带销售员追踪码</div>
+        <div class="poster-actions"><button onclick="HDZ.closePoster()">返回</button><button class="primary" onclick="HDZ.openGenerator()">生成高清海报图</button><button onclick="HDZ.share()">分享到微信</button></div>
+        <div class="poster-hint">快速预览 · 点「生成高清海报图」进入手机端生成器：10 种风格可切换、内容可调、保存到相册</div>
       </div>
       ${opts.badge === false ? "" : `<div class="proto-badge">原型 · ${opts.name || ""}<a href="../index.html">← 全部风格</a></div>`}`;
     document.body.appendChild(wrap);
