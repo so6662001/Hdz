@@ -12,8 +12,11 @@
   .top { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; font-size: 16px; font-weight: 700; }
   .top a, .top button { font-size: 13px; color: #9aa3b8; font-weight: 400; }
   .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 16px 0; position: relative; min-height: 0; }
-  .canvas-wrap { position: relative; width: 100%; max-width: 300px; aspect-ratio: 9 / 16; border-radius: 14px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.6); background: #222; touch-action: pan-y; }
+  .canvas-wrap { position: relative; width: 100%; max-width: 300px; aspect-ratio: var(--ar, 9 / 16); border-radius: 14px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.6); background: #222; touch-action: pan-y; }
   .canvas-wrap canvas { width: 100%; height: 100%; display: block; }
+  .canvas-wrap.long { max-height: 100%; }
+  .canvas-wrap .longtag { position: absolute; right: 8px; top: 8px; background: rgba(255,106,43,.9); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 999px; display: none; }
+  .canvas-wrap.long .longtag { display: block; }
   .sname .hint { color: #5d6678; transition: opacity .6s; }
   .stage.moved .hint { opacity: 0; }
   .sname em { font-style: normal; color: #f5c451; font-size: 11px; margin-right: 6px; }
@@ -71,6 +74,7 @@
   <div class="stage">
     <div class="canvas-wrap" id="wrap">
       <canvas id="cv" width="1080" height="1920"></canvas>
+      <span class="longtag">长图</span>
     </div>
     <button class="arrow l" onclick="step(-1)">‹</button><button class="arrow r" onclick="step(1)">›</button>
     <div class="dots" id="dots"></div>
@@ -119,6 +123,7 @@
   const d = HDZ.data;
   const SANS = '"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif', SERIF = '"Songti SC","STSong","Noto Serif SC",serif', KAI = '"STKaiti","KaiTi","Noto Serif SC",serif';
   const THEMES = [
+    { id: "navy", name: "深夜行情早报", bg: "#0a1020", fg: "#f2f5fa", mute: "#8b96ab", accent: "#ff6a2b", brand: "#ff6a2b", panel: "rgba(255,255,255,.05)", font: SANS, title: "行情早报", sub: "长图 · 头条 + 6 品种 + 看点 + 现货 + 推广位", deco: "navy", long: true },
     { id: "brief", name: "钢市早报", bg: "#f7f3ea", fg: "#1c1c1c", mute: "#666", accent: "#c8102e", brand: "#1a3a6b", panel: "rgba(0,0,0,.05)", font: SERIF, title: "钢市早报", sub: "STEEL MORNING BRIEF · 现货 · 行情 · 观点", deco: "brief" },
     { id: "screen", name: "数据大屏", bg: "#060b1a", fg: "#e6f1ff", mute: "#7f95b8", accent: "#00d4ff", brand: "#0aa7d6", panel: "rgba(255,255,255,.06)", font: SANS, title: "今日钢市数据", sub: "REALTIME · 实时行情 · 现货库存", deco: "grid" },
     { id: "red", name: "涨价喜报", bg: "#fff6f0", fg: "#222", mute: "#777", accent: "#c8102e", brand: "#c8102e", panel: "rgba(200,16,46,.06)", font: SANS, title: "喜 报", sub: "钢价上涨 · 抓紧备货", deco: "red" },
@@ -146,8 +151,18 @@
   const chgTxt = (c) => c > 0 ? `▲${c}` : c < 0 ? `▼${-c}` : "— 平";
 
   /* ---------- 主渲染 ---------- */
+  function fitCanvas(h) {
+    if (cv.height !== h) cv.height = h;
+    const wrap = document.getElementById("wrap"), stage = document.querySelector(".stage");
+    wrap.style.setProperty("--ar", `1080 / ${h}`); wrap.classList.toggle("long", h > 1920);
+    // 长图在有限舞台高度内按比例缩小宽度
+    const maxH = stage.clientHeight - 60; const wByH = maxH * 1080 / h; wrap.style.maxWidth = Math.max(160, Math.min(300, wByH)) + "px";
+  }
   function render() {
-    const t = T(); const dark = ["screen", "ind", "mag", "fin"].includes(t.id);
+    const t = T();
+    if (t.deco === "navy") { renderNavy(t); return; }
+    fitCanvas(H);
+    const dark = ["screen", "ind", "mag", "fin"].includes(t.id);
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, H);
     // 装饰背景
@@ -242,6 +257,99 @@
     document.querySelectorAll("#chips button").forEach((x, i) => x.classList.toggle("on", i === S.i));
   }
 
+  /* ---------- 深夜行情早报（长图，高度按内容自适应） ---------- */
+  function renderNavy(t) {
+    const pad = 64, cw = W - pad * 2, NUM = '"DIN Alternate","Helvetica Neue",Arial,sans-serif';
+    const fmt = n => n.toLocaleString("en-US");
+    const up = "#ff6a2b", down = "#3ddc84", flat = t.mute;
+    const cc = c => c > 0 ? up : c < 0 ? down : flat;
+    const hero = d.quotes.find(q => q.name === S.hero) || d.quotes[0];
+    const lead = [...d.quotes].sort((a, b) => b.change - a.change)[0];
+    const qs = d.quotes.slice(0, 6), rs = d.resources.slice(0, S.rn);
+    // ---- 先算总高度 ----
+    ctx.font = `400 30px ${SANS}`; const sumLines = wrapLinesN(d.summary, 30, cw);
+    const hHead = 230, hSec = 70, hTitle = 236, hSum = sumLines.length * 46 + 30, hGrid = 2 * 236 + 22 + 50, hLook = S.comment ? 230 : 0, hResT = 84, hRes = rs.length * 178 + 56, hPromo = 170, hFoot = 260, hBottom = 90;
+    const total = hHead + hSec + hTitle + hSum + hGrid + hLook + hResT + hRes + hPromo + hFoot + hBottom;
+    fitCanvas(total); const HH = total;
+    // ---- 背景 ----
+    const g = ctx.createLinearGradient(0, 0, W * .4, HH); g.addColorStop(0, "#0e1730"); g.addColorStop(.5, "#0a1020"); g.addColorStop(1, "#070b17"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, HH);
+    ctx.save(); ctx.globalAlpha = .35; for (let i = 0; i < 14; i++) { const x = -300 + i * 160; const lg = ctx.createLinearGradient(x, 0, x + 900, HH); lg.addColorStop(0, "rgba(255,255,255,0)"); lg.addColorStop(.5, i % 3 === 0 ? "rgba(120,150,255,.10)" : "rgba(255,255,255,.035)"); lg.addColorStop(1, "rgba(255,255,255,0)"); ctx.fillStyle = lg; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 40, 0); ctx.lineTo(x + 40 + HH * .55, HH); ctx.lineTo(x + HH * .55, HH); ctx.closePath(); ctx.fill(); } ctx.restore();
+    const rg = ctx.createRadialGradient(W * .85, 200, 20, W * .85, 200, 700); rg.addColorStop(0, "rgba(255,106,43,.16)"); rg.addColorStop(1, "rgba(255,106,43,0)"); ctx.fillStyle = rg; ctx.fillRect(0, 0, W, 900);
+    let y = 0;
+    // ---- 头部 ----
+    ctx.beginPath(); ctx.arc(pad + 44, 118, 44, 0, 7); ctx.fillStyle = up; ctx.fill(); txt(d.company.logoText, pad + 44, 134, 44, "#fff", { weight: 900, align: "center" });
+    txt(`${d.company.short} · 行情早报`, pad + 110, 112, 40, t.fg, { weight: 800 });
+    txt(`${d.company.name} · ${d.company.certified || "认证商家"}`, pad + 110, 158, 24, t.mute);
+    txt(`第 ${d.issue} 期`, W - pad, 112, 32, up, { weight: 800, align: "right", font: NUM });
+    txt(`${d.date.replace(/-/g, ".")} ${d.weekday}`, W - pad, 158, 24, t.mute, { align: "right", font: NUM });
+    y = hHead;
+    // ---- 板块标签 ----
+    ctx.beginPath(); ctx.arc(pad + 8, y + 22, 8, 0, 7); ctx.fillStyle = up; ctx.fill(); txt(`${d.market || "上海市场"} · 今日行情`, pad + 30, y + 32, 26, up, { weight: 600 });
+    y += hSec;
+    // ---- 头条 ----
+    const line1 = [[lead.name + " ", t.fg], [(lead.change > 0 ? "+" : "") + lead.change, up], [lead.change > 0 ? " 领涨" : " 领跌", t.fg]];
+    let x = pad; line1.forEach(([s2, c]) => { txt(s2, x, y + 90, 92, c, { weight: 900, ls: -2 }); x += measureN(s2, 92, 900); });
+    txt(S.title || d.headline2, pad, y + 196, 92, t.fg, { weight: 900, ls: -2 });
+    y += hTitle;
+    // ---- 摘要（数字加粗高亮） ----
+    sumLines.forEach((ln, i) => richN(ln, pad, y + 36 + i * 46, 30, t.mute, t.fg));
+    y += hSum;
+    // ---- 3×2 行情卡 ----
+    const gw = (cw - 44) / 3, gh = 236;
+    qs.forEach((q, i) => {
+      const gx = pad + (i % 3) * (gw + 22), gy = y + Math.floor(i / 3) * (gh + 22), isLead = q.name === lead.name;
+      rr(gx, gy, gw, gh, 22, isLead ? "rgba(255,106,43,.10)" : "rgba(255,255,255,.045)", isLead ? up : "rgba(255,255,255,.08)", isLead ? 3 : 2);
+      if (isLead) { rr(gx + gw - 92, gy + 14, 76, 34, 17, up); txt("领涨", gx + gw - 54, gy + 38, 20, "#fff", { weight: 800, align: "center" }); }
+      txt(q.name, gx + 26, gy + 56, 26, t.mute);
+      txt(fmt(q.price), gx + 26, gy + 128, 60, t.fg, { weight: 900, font: NUM, ls: -2 });
+      txt("元/吨", gx + 26 + measureN(fmt(q.price), 60, 900, NUM) + 4, gy + 128, 20, t.mute);
+      txt(q.change > 0 ? `▲ +${q.change}` : q.change < 0 ? `▼ ${q.change}` : "— 持平", gx + 26, gy + 172, 26, cc(q.change), { weight: 800, font: NUM });
+      txt(`周环比 ${q.week > 0 ? "+" : ""}${q.week}`, gx + 26, gy + 210, 20, t.mute, { font: NUM });
+    });
+    y += hGrid;
+    // ---- 今日看点 ----
+    if (S.comment) { rr(pad, y, cw, 180, 20, "rgba(255,255,255,.05)"); ctx.fillStyle = up; ctx.fillRect(pad, y + 24, 6, 132); txt("今日看点", pad + 34, y + 54, 26, up, { weight: 800 }); wrapN(d.comment, pad + 34, y + 104, 28, t.fg, cw - 68, 42); y += hLook; }
+    // ---- 优势现货 ----
+    txt("优势现货 · 今日可提", pad, y + 44, 36, t.fg, { weight: 900 }); txt("价格截至 08:00 · 以电话确认为准", W - pad, y + 42, 20, t.mute, { align: "right" });
+    y += hResT;
+    rs.forEach((r, i) => {
+      const ry = y + i * 178, first = i === 0;
+      rr(pad, ry, cw, 158, 22, first ? "rgba(255,106,43,.08)" : "rgba(255,255,255,.045)", first ? up : "rgba(255,255,255,.08)", first ? 3 : 2);
+      txt(r.name, pad + 28, ry + 52, 32, t.fg, { weight: 900 }); txt(r.spec, pad + 28 + measureN(r.name, 32, 900) + 14, ry + 52, 24, t.mute);
+      txt(`钢厂 ${r.mill} · ${r.warehouse} · 现货 ${r.qty} 吨`, pad + 28, ry + 92, 22, t.mute);
+      let tx = pad + 28; (r.tags || [r.tag]).slice(0, 3).forEach(tg => { const tw = measureN(tg, 18, 600) + 20; rr(tx, ry + 110, tw, 30, 6, "rgba(255,106,43,.14)"); txt(tg, tx + tw / 2, ry + 131, 18, up, { align: "center", weight: 600 }); tx += tw + 10; });
+      const pr = S.pm === "hide" ? "电议" : fmt(r.price); txt(pr, W - pad - 28 - (S.pm === "hide" ? 0 : 66), ry + 68, 52, t.fg, { weight: 900, align: "right", font: NUM, ls: -2 }); if (S.pm !== "hide") txt("元/吨", W - pad - 28, ry + 68, 20, t.mute, { align: "right" });
+      if (S.pm !== "hide" && r.avg && r.avg > r.price) { const lab = `低于均价 ${r.avg - r.price}`; const lw = measureN(lab, 20, 700) + 28; rr(W - pad - 28 - lw, ry + 96, lw, 36, 18, "rgba(61,220,132,.14)"); txt(lab, W - pad - 28 - lw / 2, ry + 121, 20, down, { weight: 700, align: "center" }); }
+    });
+    txt(`另有 ${d.moreResources || 12} 项现货资源，扫码查看完整清单`, W / 2, y + rs.length * 178 + 30, 22, t.mute, { align: "center" });
+    y += hRes;
+    // ---- 推广位 ----
+    const pg = ctx.createLinearGradient(pad, y, W - pad, y + 130); pg.addColorStop(0, "#152552"); pg.addColorStop(1, "#0f1a3a"); rr(pad, y, cw, 130, 22, pg, "rgba(120,150,255,.25)", 2);
+    txt(d.promo.title, pad + 32, y + 56, 30, t.fg, { weight: 800 }); txt(d.promo.sub, pad + 32, y + 96, 22, t.mute);
+    txt(d.promo.price, W - pad - 32, y + 60, 40, up, { weight: 900, align: "right", font: NUM }); txt(`货袋子${d.promo.unit}`, W - pad - 32, y + 96, 20, t.mute, { align: "right" });
+    y += hPromo;
+    // ---- 名片 + 二维码 ----
+    ctx.beginPath(); ctx.arc(pad + 60, y + 100, 60, 0, 7); ctx.fillStyle = up; ctx.fill(); txt(d.sales.avatar, pad + 60, y + 122, 56, "#fff", { weight: 900, align: "center" });
+    const sales2 = document.getElementById("sales").value.split(" · ");
+    txt(sales2[0], pad + 150, y + 78, 40, t.fg, { weight: 900 }); txt(d.sales.role || `${d.company.short}顾问 · 每天 8:00 准时更新`, pad + 150, y + 122, 24, t.mute);
+    if (S.phone) txt(d.sales.phone, pad + 150, y + 168, 30, t.fg, { weight: 800, font: NUM });
+    const qsz = 176, qx = W - pad - qsz - 12, qy = y + 10; rr(qx - 12, qy - 12, qsz + 24, qsz + 24, 18, "#fff", up, 4); qr(qx, qy, qsz, "#111", "#fff");
+    txt("扫码看实时报价", qx + qsz / 2, qy + qsz + 48, 20, up, { weight: 700, align: "center" });
+    y += hFoot;
+    txt("长按识别二维码 · 每日行情 / 现货资源 / 免费试用", W / 2, y + 30, 20, t.mute, { align: "center" });
+    txt(`货袋子 · ${d.spreadCode}`, W / 2, y + 62, 16, "rgba(139,150,171,.6)", { align: "center", font: NUM });
+    document.getElementById("fit").textContent = "长图 1080×" + HH;
+    document.getElementById("sname").innerHTML = `<b>${S.i + 1}/${THEMES.length} ${t.name}</b>`;
+    document.querySelectorAll("#dots i").forEach((x2, i) => x2.classList.toggle("on", i === S.i));
+    document.querySelectorAll("#chips button").forEach((x2, i) => x2.classList.toggle("on", i === S.i));
+  }
+  function measureN(s, size, weight, font) { ctx.font = `${weight || 400} ${size}px ${font || SANS}`; return ctx.measureText(s).width; }
+  function wrapLinesN(s, size, maxW) { ctx.font = `400 ${size}px ${SANS}`; const lines = []; let line = ""; for (const ch of s) { if (ctx.measureText(line + ch).width > maxW && line) { lines.push(line); line = ch; } else line += ch; } if (line) lines.push(line); return lines; }
+  function wrapN(s, x, y, size, color, maxW, lh) { wrapLinesN(s, size, maxW).forEach((ln, i) => txt(ln, x, y + i * lh, size, color, { font: SANS })); }
+  function richN(s, x, y, size, color, strong) { // 数字与其后一个字加粗高亮
+    let i = 0; while (i < s.length) { const m = /^\d+[\s]?[涨跌平个项条]?/.exec(s.slice(i)); const seg2 = m ? m[0] : s[i]; const isNum = !!m; txt(seg2, x, y, size, isNum ? strong : color, { weight: isNum ? 800 : 400, font: SANS }); x += measureN(seg2, size, isNum ? 800 : 400); i += seg2.length; }
+  }
+
   /* ---------- 交互 ---------- */
   document.getElementById("dots").innerHTML = THEMES.map(() => "<i></i>").join("");
   document.getElementById("chips").innerHTML = THEMES.map((t, i) => `<button onclick="go(${i})"><i style="background:linear-gradient(160deg,${t.bg} 55%,${t.brand})"></i>${t.name}</button>`).join("");
@@ -258,11 +366,13 @@
   wrapEl.addEventListener("touchstart", e => sx = e.touches[0].clientX, { passive: true });
   wrapEl.addEventListener("touchend", e => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1); sx = null; });
   wrapEl.addEventListener("mousedown", e => sx = e.clientX); wrapEl.addEventListener("mouseup", e => { if (sx === null) return; const dx = e.clientX - sx; if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1); sx = null; });
-  window.save = (mode) => { const url = cv.toDataURL("image/png"); document.getElementById("saveimg").src = url; document.getElementById("dl").href = url; document.getElementById("dl").download = `hdz-${T().id}-${d.date}.png`; document.getElementById("savet").textContent = mode === "wx" ? "海报已生成 · 发送到微信" : "海报已生成（1080×1920）"; document.getElementById("save").classList.add("show"); };
+  window.save = (mode) => { const url = cv.toDataURL("image/png"); document.getElementById("saveimg").src = url; document.getElementById("dl").href = url; document.getElementById("dl").download = `hdz-${T().id}-${d.date}.png`; document.getElementById("savet").textContent = mode === "wx" ? "海报已生成 · 发送到微信" : `海报已生成（1080×${cv.height}）`; document.getElementById("save").classList.add("show"); };
 
   const qsP = new URLSearchParams(location.search), qsI = qsP.get("style"); if (qsI) { const k = THEMES.findIndex(t => t.id === qsI); if (k >= 0) S.i = k; }
   if (qsP.get("back") && history.length > 1) { const bk = document.getElementById("back"); bk.textContent = "‹ 返回落地页"; bk.onclick = e => { e.preventDefault(); history.back(); }; }
-  document.fonts && document.fonts.ready ? document.fonts.ready.then(render) : render();
+  // ?raw=1：仅输出原尺寸画布（用于导出校验/自动化截图）
+  if (qsP.get("raw")) { render(); document.body.innerHTML = ""; document.body.style.background = "#000"; document.body.appendChild(cv); cv.style.cssText = "display:block;width:1080px;height:auto"; }
+  else { window.addEventListener("resize", render); document.fonts && document.fonts.ready ? document.fonts.ready.then(render) : render(); }
   render();
 </script>
 </body>
