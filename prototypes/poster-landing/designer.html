@@ -98,7 +98,7 @@
       <div class="field"><label>Logo</label><div class="upload" style="flex:1" onclick="toast('原型：上传企业 Logo / 从资质库选择')"><b>上传 Logo</b>PNG / SVG · 建议 200×200</div></div>
       <div class="field"><label>主色</label><input type="color" id="f-brand"><div class="swatches" id="sw"></div></div>
       <div class="field"><label>强调色</label><input type="color" id="f-accent"></div>
-      <div class="field"><label>背景</label><select id="f-bg"><option value="light">浅色</option><option value="dark">深色</option><option value="paper">纸质</option><option value="brand">品牌色</option></select></div>
+      <div class="field"><label>背景</label><select id="f-bg"><option value="light">浅色</option><option value="dark">深色</option><option value="paper">纸质</option><option value="brand">品牌色</option><option value="navy">深夜蓝</option></select></div>
       <div class="field"><label>字体</label><select id="f-font"><option value="sans">现代黑体</option><option value="serif">典雅宋体</option><option value="kai">国风楷体</option><option value="din">数字 DIN</option></select></div>
       <div class="field"><label>圆角</label><input type="range" id="f-radius" min="0" max="20" value="12"></div>
       <div class="field"><label>信息密度</label><select id="f-density"><option value="loose">宽松</option><option value="normal" selected>标准</option><option value="dense">紧凑</option></select></div>
@@ -140,6 +140,7 @@
       <button class="on" onclick="mode('page',this)">落地页</button>
       <button onclick="mode('poster',this)">海报图 9:16</button>
       <button onclick="mode('square',this)">方图 1:1</button>
+      <button onclick="mode('long',this)">长图海报</button>
       <button onclick="mode('video',this)">视频 15s</button>
     </div>
     <div class="phone"><div class="screen" id="screen"></div></div>
@@ -152,6 +153,7 @@
       <button class="big" onclick="publish()">生成落地页 + 海报图</button>
       <button class="big sec2" onclick="location.href='video.html'">生成 15s 视频海报</button>
       <button class="big ghost" onclick="toast('原型：为团队每个销售员批量生成专属码海报（每人一码）')">团队批量生成（每人一码）</button>
+      <button class="big ghost" onclick="window.open('mobile-poster.html?style=navy&raw=1','_blank')">导出长图原图（1080 宽 PNG · 新窗口）</button>
     </div>
     <div class="sec">
       <h4>追踪二维码</h4>
@@ -194,7 +196,8 @@
     { id: "mag", n: "杂志", brand: "#0b0b0b", accent: "#ffcc00", bg: "light", font: "sans" },
     { id: "chat", n: "对话", brand: "#07c160", accent: "#fa5151", bg: "light", font: "sans" },
     { id: "sale", n: "特价", brand: "#111111", accent: "#ff3b30", bg: "brand", font: "sans" },
-    { id: "fin", n: "金融", brand: "#1f5eff", accent: "#ff5c57", bg: "dark", font: "sans" }
+    { id: "fin", n: "金融", brand: "#1f5eff", accent: "#ff5c57", bg: "dark", font: "sans" },
+    { id: "navy", n: "深夜早报", brand: "#ff6a2b", accent: "#ff6a2b", bg: "navy", font: "sans", long: true }
   ];
   const FONT = { sans: '-apple-system,"PingFang SC","Microsoft YaHei",sans-serif', serif: '"Songti SC","STSong","Noto Serif SC",serif', kai: '"STKaiti","KaiTi","Noto Serif SC",serif', din: '"DIN Alternate","Helvetica Neue",sans-serif' };
   const BLOCKS = [["hero", "主推行情大字"], ["quotes", "行情列表"], ["trend", "走势图"], ["comment", "今日点评"], ["resources", "现货资源"], ["card", "销售员名片 + 二维码"], ["urgency", "紧迫感（倒计时/库存）"]];
@@ -231,12 +234,22 @@
   }
   window.mv = (k, d) => { const i = S.blocks.indexOf(k); if (i < 0) return; const j = i + d; if (j < 0 || j >= S.blocks.length) return; [S.blocks[i], S.blocks[j]] = [S.blocks[j], S.blocks[i]]; renderBlocks(); render(); };
   window.tg = (k) => { if (S.blocks.includes(k)) { S.blocks = S.blocks.filter(x => x !== k); S.hidden.push(k); } else { S.hidden = S.hidden.filter(x => x !== k); S.blocks.push(k); } renderBlocks(); render(); };
-  function applyTpl(id) { const t = TPL.find(x => x.id === id); Object.assign(S, { tpl: id, brand: t.brand, accent: t.accent, bg: t.bg, font: t.font }); $("f-brand").value = t.brand; $("f-accent").value = t.accent; $("f-bg").value = t.bg; $("f-font").value = t.font; document.querySelectorAll("#tpl button").forEach(b => b.classList.toggle("on", b.dataset.id === id)); render(); }
+  function applyTpl(id) {
+    const t = TPL.find(x => x.id === id); Object.assign(S, { tpl: id, brand: t.brand, accent: t.accent, bg: t.bg, font: t.font });
+    $("f-brand").value = t.brand; $("f-accent").value = t.accent; $("f-bg").value = t.bg; $("f-font").value = t.font;
+    document.querySelectorAll("#tpl button").forEach(b => b.classList.toggle("on", b.dataset.id === id));
+    if (t.long) { // 长图风格：标题作为头条第二行，预览切到长图
+      if (S.title === "今日钢市行情") { S.title = D.headline2; $("f-title").value = S.title; }
+      setMode("long");
+    } else if (S.viewMode === "long") setMode("page");
+    render();
+  }
+  function setMode(m) { S.viewMode = m; document.querySelectorAll(".seg button").forEach(b => b.classList.toggle("on", b.getAttribute("onclick").includes(`'${m}'`))); }
   window.randomize = () => { applyTpl(TPL[Math.floor(Math.random() * TPL.length)].id); S.radius = Math.floor(Math.random() * 20); $("f-radius").value = S.radius; S.blocks = S.blocks.sort(() => Math.random() - .5); if (S.blocks.indexOf("card") !== S.blocks.length - 1) { S.blocks = S.blocks.filter(x => x !== "card").concat("card"); } renderBlocks(); render(); };
 
   /* ---------- 渲染引擎：由配置生成落地页 HTML ---------- */
   function theme() {
-    const bg = { light: ["#ffffff", "#111111", "rgba(0,0,0,.05)"], dark: ["#0f1218", "#e6e9ef", "rgba(255,255,255,.06)"], paper: ["#f6f1e6", "#1f1f1f", "rgba(0,0,0,.05)"], brand: [S.brand, "#ffffff", "rgba(255,255,255,.14)"] }[S.bg];
+    const bg = { light: ["#ffffff", "#111111", "rgba(0,0,0,.05)"], dark: ["#0f1218", "#e6e9ef", "rgba(255,255,255,.06)"], paper: ["#f6f1e6", "#1f1f1f", "rgba(0,0,0,.05)"], brand: [S.brand, "#ffffff", "rgba(255,255,255,.14)"], navy: ["#0a1020", "#f2f5fa", "rgba(255,255,255,.05)"] }[S.bg];
     return { bg: bg[0], fg: bg[1], panel: bg[2], onBrand: "#fff" };
   }
   function pageHTML() {
@@ -285,6 +298,59 @@
         <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px;background:${isBrandBg ? "rgba(0,0,0,.25)" : S.brand};color:#fff;display:flex;align-items:center;gap:10px"><div id="pq" style="background:#fff;padding:3px;border-radius:5px"></div><div style="flex:1"><div style="font-size:12px;font-weight:800">${D.sales.name} · ${D.sales.title}</div><div style="font-size:10px;opacity:.9">${D.sales.phone}</div><div style="font-size:9px;opacity:.8;margin-top:2px">长按识别 · 查看更多现货并询价</div></div></div>
       </div><script src="shared/data.js"><\/script><script src="shared/common.js"><\/script><script>HDZ.qr(document.getElementById('pq'),${square ? 44 : 54});<\/script></body></html>`;
   }
+  /* ---------- 长图海报（深夜行情早报版式，可套任意配色） ---------- */
+  function longHTML() {
+    const t = theme(); const navy = S.bg === "navy"; const acc = S.bg === "brand" ? "#fff" : S.accent; const up = navy ? acc : "#ff5c57", down = "#3ddc84";
+    const qsAll = D.quotes.filter(q => S.quotes.includes(q.name)); const qs = qsAll.slice(0, 6);
+    const lead = [...(qs.length ? qs : D.quotes)].sort((a, b) => b.change - a.change)[0];
+    const rs = S.resources.map(i => D.resources[i]);
+    const fmt = n => n.toLocaleString("en-US");
+    const price = p => S.priceMode === "hide" ? "电议" : S.priceMode === "range" ? `${fmt(p - 20)}~${fmt(p + 20)}` : fmt(p);
+    const has = k => S.blocks.includes(k);
+    const cc = c => c > 0 ? up : c < 0 ? down : "inherit";
+    const chgT = c => c > 0 ? `▲ +${c}` : c < 0 ? `▼ ${c}` : "— 持平";
+    const u = qs.filter(q => q.change > 0).length, f = qs.filter(q => !q.change).length, dn = qs.filter(q => q.change < 0).length;
+    const tail = D.summary.split("，").slice(1).join("，");
+    const summary = `<b>${qs.length}</b> 个主流品种 <b>${u}</b> 涨 <b>${f}</b> 平 <b>${dn}</b> 跌，${tail}`;
+    const mute = navy ? "#8b96ab" : "rgba(127,127,127,.95)", card = navy ? "rgba(255,255,255,.045)" : t.panel, line = navy ? "rgba(255,255,255,.08)" : "rgba(127,127,127,.18)";
+    const bg = navy ? "#0a1020" : t.bg;
+    const streaks = navy ? `background-image:repeating-linear-gradient(115deg,transparent 0 46px,rgba(255,255,255,.035) 46px 52px),radial-gradient(circle at 85% 4%,rgba(255,106,43,.16),transparent 30%),linear-gradient(160deg,#0e1730,#0a1020 50%,#070b17);background-attachment:fixed;` : "";
+    const R = Math.min(S.radius, 14) + "px";
+    const sv = $("f-sales").value || ""; const salesName = sv.includes(" · ") ? sv.split(" · ")[0] : D.sales.name;
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+      *{box-sizing:border-box;margin:0;padding:0}body{background:${bg};${streaks}color:${t.fg};font-family:${FONT[S.font]};padding:0 22px 18px;font-size:12px;min-height:100vh}
+      .hd{display:flex;justify-content:space-between;align-items:flex-start;padding-top:22px}.hd .lg{display:flex;gap:9px;align-items:center}.hd .lg i{width:32px;height:32px;border-radius:50%;background:${acc};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-style:normal;font-size:16px}
+      .hd b{font-size:15px;display:block}.hd small{color:${mute};font-size:9px;display:block;margin-top:2px}.hd .r{text-align:right}.hd .r b{color:${acc};font-size:12px}
+      .lab{color:${acc};font-size:10px;margin-top:22px;display:flex;align-items:center;gap:6px}.lab::before{content:"";width:6px;height:6px;border-radius:50%;background:${acc}}
+      h1{font-size:31px;line-height:1.22;font-weight:900;letter-spacing:-.5px;margin-top:6px}h1 em{font-style:normal;color:${acc}}
+      .sum{color:${mute};font-size:11px;line-height:1.7;margin-top:10px}.sum b{color:${t.fg}}
+      .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.g{background:${card};border:1px solid ${line};border-radius:${R};padding:10px 9px;position:relative}.g.lead{border-color:${acc};background:${navy ? "rgba(255,106,43,.10)" : card}}
+      .g small{color:${mute};font-size:9px;display:block}.g .p{font-size:21px;font-weight:900;letter-spacing:-.5px;margin-top:4px;font-variant-numeric:tabular-nums}.g .p span{font-size:8px;color:${mute};font-weight:400;margin-left:2px}.g .c{font-size:10px;font-weight:800;margin-top:3px}.g .w{color:${mute};font-size:8px;margin-top:3px}.g .tag{position:absolute;right:6px;top:6px;background:${acc};color:#fff;font-size:8px;padding:1px 6px;border-radius:999px;font-weight:700}
+      .look{margin-top:16px;background:${card};border-radius:${R};padding:11px 12px 11px 14px;border-left:3px solid ${acc}}.look b{color:${acc};font-size:10px;display:block;margin-bottom:4px}.look p{font-size:11px;line-height:1.7}
+      h2{font-size:15px;font-weight:900;margin-top:20px;display:flex;justify-content:space-between;align-items:baseline}h2 small{color:${mute};font-size:8px;font-weight:400}
+      .rs{background:${card};border:1px solid ${line};border-radius:${R};padding:10px 11px;margin-top:8px;display:flex;justify-content:space-between;align-items:center}.rs.first{border-color:${acc};background:${navy ? "rgba(255,106,43,.08)" : card}}
+      .rs b{font-size:13px}.rs b span{font-size:9px;color:${mute};font-weight:400;margin-left:5px}.rs .m{color:${mute};font-size:9px;margin-top:3px}.rs .tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}.rs .tags i{font-style:normal;font-size:7px;color:${acc};background:${navy ? "rgba(255,106,43,.14)" : "rgba(127,127,127,.12)"};padding:2px 5px;border-radius:3px}
+      .rs .pr{text-align:right;flex:none}.rs .pr b{font-size:19px;letter-spacing:-.5px;font-variant-numeric:tabular-nums}.rs .pr b span{font-size:8px;margin-left:2px}.rs .pr i{display:inline-block;font-style:normal;font-size:8px;color:${down};background:rgba(61,220,132,.14);padding:2px 7px;border-radius:999px;margin-top:5px;font-weight:700}
+      .more{text-align:center;color:${mute};font-size:9px;margin-top:10px}
+      .promo{margin-top:16px;border-radius:${R};padding:12px 13px;background:${navy ? "linear-gradient(90deg,#152552,#0f1a3a)" : card};border:1px solid ${navy ? "rgba(120,150,255,.25)" : line};display:flex;justify-content:space-between;align-items:center}.promo b{font-size:12px;display:block}.promo small{color:${mute};font-size:8px}.promo .pp{text-align:right}.promo .pp b{color:${acc};font-size:16px}
+      .card{display:flex;align-items:center;gap:12px;margin-top:20px}.card .av{width:46px;height:46px;border-radius:50%;background:${acc};color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;flex:none}.card .in{flex:1}.card .in b{font-size:15px;display:block}.card .in small{color:${mute};font-size:9px;display:block;margin-top:2px}.card .in .ph{font-size:12px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+      .card .q{text-align:center;flex:none}.card .q div{background:#fff;padding:4px;border-radius:8px;border:2px solid ${acc};display:inline-block}.card .q small{display:block;color:${acc};font-size:8px;font-weight:700;margin-top:4px}
+      .ft{text-align:center;color:${mute};font-size:8px;margin-top:16px;line-height:1.8}
+    </style></head><body>
+      <div class="hd"><div class="lg"><i>${D.company.logoText}</i><div><b>${S.short} · 行情早报</b><small>${D.company.name} · ${D.company.certified}</small></div></div><div class="r"><b>第 ${D.issue} 期</b><small>${D.date.replace(/-/g, ".")} ${D.weekday}</small></div></div>
+      <div class="lab">${D.market} · 今日行情</div>
+      <h1>${lead.name} <em>${lead.change > 0 ? "+" : ""}${lead.change}</em> ${lead.change > 0 ? "领涨" : lead.change < 0 ? "领跌" : "持平"}<br>${S.title}</h1>
+      <p class="sum">${summary}</p>
+      ${has("quotes") && qs.length ? `<div class="grid">${qs.map(q => `<div class="g ${q.name === lead.name ? "lead" : ""}">${q.name === lead.name ? `<span class="tag">${lead.change > 0 ? "领涨" : "领跌"}</span>` : ""}<small>${q.name}</small><div class="p">${fmt(q.price)}<span>元/吨</span></div><div class="c" style="color:${cc(q.change)}">${chgT(q.change)}</div><div class="w">周环比 ${q.week > 0 ? "+" : ""}${q.week}</div></div>`).join("")}</div>` : ""}
+      ${has("comment") ? `<div class="look"><b>今日看点</b><p>${S.comment}</p></div>` : ""}
+      ${has("resources") && rs.length ? `<h2>优势现货 · 今日可提<small>价格截至 08:00 · 以电话确认为准</small></h2>${rs.map((r, i) => `<div class="rs ${i ? "" : "first"}"><div><b>${r.name}<span>${r.spec}</span></b><div class="m">钢厂 ${r.mill} · ${r.warehouse} · 现货 ${r.qty} 吨</div><div class="tags">${(r.tags || [r.tag]).map(x => `<i>${x}</i>`).join("")}</div></div><div class="pr"><b>${price(r.price)}${S.priceMode === "hide" ? "" : "<span>元/吨</span>"}</b>${S.priceMode !== "hide" && r.avg > r.price ? `<br><i>低于均价 ${r.avg - r.price}</i>` : ""}</div></div>`).join("")}<div class="more">另有 ${D.moreResources} 项现货资源，扫码查看完整清单</div>` : ""}
+      ${S.footer ? `<div class="promo"><div><b>${D.promo.title}</b><small>${D.promo.sub}</small></div><div class="pp"><b>${D.promo.price}</b><br><small>货袋子${D.promo.unit}</small></div></div>` : ""}
+      ${has("card") ? `<div class="card"><div class="av">${salesName[0]}</div><div class="in"><b>${salesName}</b><small>${S.short}顾问 · 每天 8:00 准时更新</small><div class="ph">${D.sales.phone}</div></div><div class="q"><div id="lq"></div><small>扫码看实时报价</small></div></div>` : ""}
+      <div class="ft">长按识别二维码 · 每日行情 / 现货资源 / 免费试用<br>货袋子 · ${D.spreadCode}</div>
+      <script src="shared/data.js"><\/script><script src="shared/common.js"><\/script><script>var lq=document.getElementById('lq');if(lq)HDZ.qr(lq,64);<\/script>
+    </body></html>`;
+  }
+
   function videoHTML() {
     const t = theme(); const isBrandBg = S.bg === "brand"; const accent = isBrandBg ? "#fff" : S.accent;
     const heroQ = D.quotes.find(q => q.name === S.hero) || D.quotes[0];
@@ -305,20 +371,22 @@
   }
 
   function render() {
-    const html = S.viewMode === "page" ? pageHTML() : S.viewMode === "poster" ? posterHTML(false) : S.viewMode === "square" ? posterHTML(true) : videoHTML();
+    const html = S.viewMode === "page" ? pageHTML() : S.viewMode === "poster" ? posterHTML(false) : S.viewMode === "square" ? posterHTML(true) : S.viewMode === "long" ? longHTML() : videoHTML();
     const scr = $("screen");
     let f = scr.querySelector("iframe");
     if (!f) { f = document.createElement("iframe"); scr.appendChild(f); }
     f.srcdoc = html;
     $("json").value = JSON.stringify({ template: S.tpl, brand: { short: S.short, title: S.title, slogan: S.slogan, color: S.brand, accent: S.accent, bg: S.bg, font: S.font, radius: S.radius, density: S.density }, blocks: S.blocks, quotes: S.quotes, hero: S.hero, trend: S.trend, resources: S.resources, priceMode: S.priceMode, cta: [S.cta, S.cta2], urgency: S.urgency, footer: S.footer, tracking: { spreadCode: D.spreadCode, sales: D.sales.name } }, null, 2);
   }
-  window.mode = (m, btn) => { S.viewMode = m; document.querySelectorAll(".seg button").forEach(b => b.classList.remove("on")); btn.classList.add("on"); render(); };
+  window.mode = (m) => { setMode(m); render(); };
   window.toast = (m) => { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2200); };
   window.saveTpl = () => { const el = document.createElement("div"); el.className = "m"; el.innerHTML = `<i>${S.title[0]}</i><span>${S.short} · ${S.title}</span><small>刚刚</small>`; $("mytpl").prepend(el); toast("已保存为企业模板，团队成员可直接套用"); };
   window.publish = () => toast("原型：服务端渲染落地页 + 海报图（9:16 / 1:1），生成带追踪码的小程序码，推送到销售员微信");
   window.copyJson = () => { navigator.clipboard && navigator.clipboard.writeText($("json").value); toast("配置 JSON 已复制（可用于 API 批量生成）"); };
 
-  initControls(); applyTpl("min");
+  initControls(); $("f-sales").addEventListener("change", render);
+  const qp = new URLSearchParams(location.search); applyTpl(TPL.some(t => t.id === qp.get("tpl")) ? qp.get("tpl") : "min");
+  if (qp.get("mode")) { setMode(qp.get("mode")); render(); }
   HDZ.qr($("qr"), 72); $("code").textContent = D.spreadCode;
 </script>
 </body>
