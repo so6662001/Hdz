@@ -16,7 +16,8 @@
   .hero .loop { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
   .hero .loop span { background: #1a1f2b; border: 1px solid #262c3a; padding: 6px 12px; border-radius: 999px; font-size: 12px; color: #c5cbd8; }
   .hero .loop span b { color: #7fb0ff; }
-  .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 24px 40px 0; }
+  .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 24px 40px 0; }
+  @media (max-width: 1100px) { .tools { grid-template-columns: 1fr; } }
   .tool { border: 1px solid #262c3a; border-radius: 14px; padding: 18px; background: linear-gradient(135deg, #171b25, #12151d); display: flex; gap: 16px; align-items: center; transition: .2s; }
   .tool:hover { border-color: #1f5eff; transform: translateY(-2px); }
   .tool .ic { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; background: #1f5eff22; }
@@ -49,6 +50,7 @@
 
 <div class="tools">
   <a class="tool" href="designer.html"><div class="ic">🎨</div><div><b>企业自定义设计器</b><small>选风格底稿 → 改品牌色/字体/板块排序 → 选行情品种与现货 → 配 CTA 与二维码 → 实时预览落地页 / 9:16 海报 / 1:1 方图 / 15s 视频 → 保存为企业模板、团队每人一码批量生成</small></div><span class="go">打开设计器 →</span></a>
+  <a class="tool" href="wechat-share-preview.html"><div class="ic">💬</div><div><b>转发到微信群的呈现效果</b><small>模拟群聊中 H5 链接卡片 / 小程序卡片 / 海报图 三种形态，以及"未配置分享参数"的默认丑链接；右侧可实时调整标题、描述、缩略图，附 JS-SDK 分享配置要点</small></div><span class="go">查看模拟 →</span></a>
   <a class="tool" href="video.html"><div class="ic">🎬</div><div><b>视频海报生成器</b><small>5 段分镜（品牌开场 → 今日行情 → 走势点评 → 现货资源 → 名片二维码）· AI 配音与字幕 · 9:16 / 1:1 · 导出 MP4 · 每日 07:30 自动生成推送销售员</small></div><span class="go">打开生成器 →</span></a>
 </div>
 
