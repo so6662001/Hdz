@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>生成海报 · 货袋子 手机端</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  :root { --brand: #1f5eff; }
+  body { background: #0f1115; color: #fff; }
+  .page { background: #0f1115; padding-bottom: 0; min-height: 100vh; display: flex; flex-direction: column; }
+  .top { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; font-size: 16px; font-weight: 700; }
+  .top a, .top button { font-size: 13px; color: #9aa3b8; font-weight: 400; }
+  .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 16px 0; position: relative; min-height: 0; }
+  .canvas-wrap { position: relative; width: 100%; max-width: 300px; aspect-ratio: var(--ar, 9 / 16); border-radius: 14px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.6); background: #222; touch-action: pan-y; }
+  .canvas-wrap canvas { width: 100%; height: 100%; display: block; }
+  .canvas-wrap.long { max-height: 100%; }
+  .canvas-wrap .longtag { position: absolute; right: 8px; top: 8px; background: rgba(255,106,43,.9); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 999px; display: none; }
+  .canvas-wrap.long .longtag { display: block; }
+  .sname .hint { color: #5d6678; transition: opacity .6s; }
+  .stage.moved .hint { opacity: 0; }
+  .sname em { font-style: normal; color: #f5c451; font-size: 11px; margin-right: 6px; }
+  .sname em:not(:empty)::before { content: "· "; color: #5d6678; }
+  .arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .arrow.l { left: 0 } .arrow.r { right: 0 }
+  .dots { display: flex; gap: 5px; margin: 10px 0 4px; }
+  .dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.25); transition: .2s; }
+  .dots i.on { background: #fff; width: 16px; border-radius: 3px; }
+  .sname { font-size: 12px; color: #9aa3b8; }
+  .sname b { color: #fff; margin-right: 6px; }
+  .sheet2 { background: #171a21; border-radius: 18px 18px 0 0; padding: 12px 0 0; }
+  .tabs { display: flex; gap: 18px; padding: 0 16px; border-bottom: 1px solid #262b36; }
+  .tabs button { padding: 8px 0 10px; font-size: 14px; color: #9aa3b8; position: relative; }
+  .tabs button.on { color: #fff; font-weight: 700; }
+  .tabs button.on::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--brand); border-radius: 1px; }
+  .pane { display: none; padding: 12px 16px 6px; min-height: 132px; }
+  .pane.on { display: block; }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chips button { flex: none; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 11px; color: #c5cbd8; }
+  .chips button i { width: 44px; height: 60px; border-radius: 8px; border: 2px solid transparent; display: block; }
+  .chips button.on i { border-color: #fff; }
+  .chips button.on { color: #fff; font-weight: 700; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #22262f; font-size: 13px; }
+  .row:last-child { border: 0; }
+  .row .l { color: #c5cbd8; }
+  .seg { display: inline-flex; background: #0f1115; border-radius: 8px; padding: 2px; }
+  .seg button { padding: 5px 10px; border-radius: 6px; font-size: 12px; color: #9aa3b8; }
+  .seg button.on { background: #2a2f3a; color: #fff; }
+  .toggle { width: 40px; height: 22px; border-radius: 11px; background: #2a2f3a; position: relative; }
+  .toggle::after { content: ""; position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: .2s; }
+  .toggle.on { background: var(--brand); } .toggle.on::after { left: 20px; }
+  select, input[type=text] { background: #0f1115; color: #fff; border: 1px solid #2a2f3a; border-radius: 6px; height: 30px; padding: 0 8px; font-size: 12px; max-width: 200px; }
+  .actions { display: flex; gap: 8px; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); background: #171a21; }
+  .actions button { flex: 1; height: 46px; border-radius: 12px; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .actions .ghost { background: #262b36; color: #fff; }
+  .actions .pri { background: var(--brand); color: #fff; flex: 1.4; }
+  .actions .wx { background: #07c160; color: #fff; }
+  /* 保存结果层 */
+  .save-mask { position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px; }
+  .save-mask.show { display: flex; }
+  .save-mask img { max-height: 70vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+  .save-mask p { color: #fff; font-size: 14px; font-weight: 700; }
+  .save-mask small { color: #9aa3b8; font-size: 12px; text-align: center; line-height: 1.6; }
+  .save-mask .btns { display: flex; gap: 10px; }
+  .save-mask .btns a, .save-mask .btns button { padding: 10px 18px; border-radius: 999px; background: #fff; color: #111; font-weight: 700; font-size: 13px; }
+  .save-mask .btns .g { background: #07c160; color: #fff; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top"><a href="index.html" id="back">‹ 返回</a><span>生成海报</span><button onclick="location.href='designer.html'">高级编辑</button></div>
+
+  <div class="stage">
+    <div class="canvas-wrap" id="wrap">
+      <canvas id="cv" width="1080" height="1920"></canvas>
+      <span class="longtag">长图</span>
+    </div>
+    <button class="arrow l" onclick="step(-1)">‹</button><button class="arrow r" onclick="step(1)">›</button>
+    <div class="dots" id="dots"></div>
+    <div class="sname"><span id="sname"></span><em id="fit"></em><span class="hint">· 左右滑动切换</span></div>
+  </div>
+
+  <div class="sheet2">
+    <div class="tabs">
+      <button class="on" onclick="tab(0,this)">风格</button>
+      <button onclick="tab(1,this)">内容</button>
+      <button onclick="tab(2,this)">名片</button>
+    </div>
+    <div class="pane on" id="p0"><div class="chips" id="chips"></div></div>
+    <div class="pane" id="p1">
+      <div class="row"><span class="l">主推品种</span><select id="hero"></select></div>
+      <div class="row"><span class="l">行情品种数</span><div class="seg" data-k="qn"><button data-v="4">4</button><button data-v="6" class="on">6</button></div></div>
+      <div class="row"><span class="l">走势图</span><i class="toggle on" data-k="trend"></i></div>
+      <div class="row"><span class="l">今日点评</span><i class="toggle on" data-k="comment"></i></div>
+      <div class="row"><span class="l">现货条数</span><div class="seg" data-k="rn"><button data-v="2">2</button><button data-v="3" class="on">3</button><button data-v="4">4</button></div></div>
+      <div class="row"><span class="l">现货价格</span><div class="seg" data-k="pm"><button data-v="show" class="on">明码</button><button data-v="hide">电议</button></div></div>
+    </div>
+    <div class="pane" id="p2">
+      <div class="row"><span class="l">销售员</span><select id="sales"><option>王建国 · 销售总监</option><option>李敏 · 销售经理</option></select></div>
+      <div class="row"><span class="l">显示电话</span><i class="toggle on" data-k="phone"></i></div>
+      <div class="row"><span class="l">二维码</span><select><option>我的专属码（带追踪）</option><option>企业统一码</option><option>企微活码</option></select></div>
+      <div class="row"><span class="l">自定义标题</span><input type="text" id="title" placeholder="留空用风格默认"></div>
+    </div>
+    <div class="actions">
+      <button class="ghost" onclick="alert('原型：生成携带追踪码的落地页链接并复制')">🔗 链接</button>
+      <button class="wx" onclick="save('wx')">分享微信</button>
+      <button class="pri" onclick="save()">⬇ 保存到相册</button>
+    </div>
+  </div>
+</div>
+
+<div class="save-mask" id="save" onclick="if(event.target===this)this.classList.remove('show')">
+  <img id="saveimg" alt="海报">
+  <p id="savet">海报已生成</p>
+  <small>长按图片保存到相册，或点击下方按钮<br>二维码携带您的追踪码 · 扫码留资归您</small>
+  <div class="btns"><a id="dl" download="hdz-poster.png">下载图片</a><button class="g" onclick="alert('原型：调起微信分享图片')">发到微信</button><button onclick="document.getElementById('save').classList.remove('show')">返回</button></div>
+</div>
+
+<script src="shared/data.js"></script>
+<script src="shared/common.js"></script>
+<script>
+  const d = HDZ.data;
+  const SANS = '"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif', SERIF = '"Songti SC","STSong","Noto Serif SC",serif', KAI = '"STKaiti","KaiTi","Noto Serif SC",serif';
+  const THEMES = [
+    { id: "navy", name: "深夜行情早报", bg: "#0a1020", fg: "#f2f5fa", mute: "#8b96ab", accent: "#ff6a2b", brand: "#ff6a2b", panel: "rgba(255,255,255,.05)", font: SANS, title: "行情早报", sub: "长图 · 头条 + 6 品种 + 看点 + 现货 + 推广位", deco: "navy", long: true },
+    { id: "brief", name: "钢市早报", bg: "#f7f3ea", fg: "#1c1c1c", mute: "#666", accent: "#c8102e", brand: "#1a3a6b", panel: "rgba(0,0,0,.05)", font: SERIF, title: "钢市早报", sub: "STEEL MORNING BRIEF · 现货 · 行情 · 观点", deco: "brief" },
+    { id: "screen", name: "数据大屏", bg: "#060b1a", fg: "#e6f1ff", mute: "#7f95b8", accent: "#00d4ff", brand: "#0aa7d6", panel: "rgba(255,255,255,.06)", font: SANS, title: "今日钢市数据", sub: "REALTIME · 实时行情 · 现货库存", deco: "grid" },
+    { id: "red", name: "涨价喜报", bg: "#fff6f0", fg: "#222", mute: "#777", accent: "#c8102e", brand: "#c8102e", panel: "rgba(200,16,46,.06)", font: SANS, title: "喜 报", sub: "钢价上涨 · 抓紧备货", deco: "red" },
+    { id: "min", name: "极简商务", bg: "#ffffff", fg: "#111", mute: "#8a8f99", accent: "#1f5eff", brand: "#111", panel: "rgba(0,0,0,.04)", font: SANS, title: "今日钢市", sub: "DAILY STEEL REPORT · 上海", deco: "min" },
+    { id: "ink", name: "国潮新中式", bg: "#f4efe4", fg: "#2b2b2b", mute: "#777", accent: "#b8323a", brand: "#1f3d2b", panel: "rgba(31,61,43,.07)", font: KAI, title: "钢市观澜", sub: "STEEL MARKET · DAILY VIEW", deco: "ink" },
+    { id: "ind", name: "钢厂工业", bg: "#1d1f24", fg: "#e8e9ec", mute: "#9aa0ab", accent: "#ff7a00", brand: "#ff7a00", panel: "rgba(255,255,255,.06)", font: SANS, title: "今日钢价", sub: "STEEL SUPPLY · 报价单 NO.20260912", deco: "hazard" },
+    { id: "mag", name: "杂志封面", bg: "#0b0b0b", fg: "#fff", mute: "#999", accent: "#ffcc00", brand: "#ffcc00", panel: "rgba(255,255,255,.08)", font: SANS, title: "STEEL DAILY", sub: "Vol.09 · No.12 · 螺纹钢周末小涨", deco: "mag" },
+    { id: "chat", name: "销售员人设", bg: "#f2f3f5", fg: "#111", mute: "#888", accent: "#fa5151", brand: "#07c160", panel: "#ffffff", font: SANS, title: "今日行情", sub: "每天第一时间 · 一手现货报价", deco: "chat" },
+    { id: "sale", name: "特价清仓", bg: "#ffd600", fg: "#111", mute: "#6b5a00", accent: "#ff3b30", brand: "#111", panel: "#ffffff", font: SANS, title: "特价清仓", sub: "周末限时 · 现货老价不涨", deco: "sale" },
+    { id: "fin", name: "金融复盘", bg: "#0f1218", fg: "#d9dee8", mute: "#7a869c", accent: "#ff5c57", brand: "#1f5eff", panel: "rgba(255,255,255,.05)", font: SANS, title: "收盘复盘", sub: "上海 · 螺纹钢 3680 · +0.55%", deco: "fin" }
+  ];
+  const S = { i: 0, qn: 6, trend: true, comment: true, rn: 3, pm: "show", phone: true, hero: d.quotes[0].name, title: "" };
+  const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  const W = 1080, H = 1920;
+
+  /* ---------- 绘图工具 ---------- */
+  function rr(x, y, w, h, r, fill, stroke, lw) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw || 2; ctx.stroke(); } }
+  function txt(s, x, y, size, color, opts) { opts = opts || {}; ctx.font = `${opts.weight || 400} ${size}px ${opts.font || T().font}`; ctx.fillStyle = color; ctx.textAlign = opts.align || "left"; ctx.textBaseline = opts.base || "alphabetic"; if (opts.ls) ctx.letterSpacing = opts.ls + "px"; else ctx.letterSpacing = "0px"; ctx.fillText(s, x, y); }
+  function wrap(s, x, y, size, color, maxW, lh, opts) { ctx.font = `${(opts && opts.weight) || 400} ${size}px ${T().font}`; let line = "", yy = y; for (const ch of s) { const test = line + ch; if (ctx.measureText(test).width > maxW && line) { txt(line, x, yy, size, color, opts); line = ch; yy += lh; } else line = test; } if (line) txt(line, x, yy, size, color, opts); return yy + lh; }
+  function qr(x, y, size, dark, light) { const n = 25, c = size / n; let seed = 7; const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280); ctx.fillStyle = light; ctx.fillRect(x, y, size, size); ctx.fillStyle = dark; const fin = (fx, fy) => { ctx.fillStyle = dark; ctx.fillRect(x + fx * c, y + fy * c, c * 7, c * 7); ctx.fillStyle = light; ctx.fillRect(x + (fx + 1) * c, y + (fy + 1) * c, c * 5, c * 5); ctx.fillStyle = dark; ctx.fillRect(x + (fx + 2) * c, y + (fy + 2) * c, c * 3, c * 3); }; for (let yy = 0; yy < n; yy++) for (let xx = 0; xx < n; xx++) { const inF = (xx < 8 && yy < 8) || (xx > n - 9 && yy < 8) || (xx < 8 && yy > n - 9); if (inF) continue; if (rnd() > .55) ctx.fillRect(x + xx * c, y + yy * c, c, c); } fin(0, 0); fin(n - 7, 0); fin(0, n - 7); }
+  function spark(x, y, w, h, arr, color) { const min = Math.min(...arr), max = Math.max(...arr), rng = max - min || 1; const pts = arr.map((v, i) => [x + i / (arr.length - 1) * w, y + h - (v - min) / rng * h]); ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.lineTo(pts[pts.length - 1][0], y + h + 10); ctx.lineTo(pts[0][0], y + h + 10); ctx.closePath(); const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, alpha(color, .33)); g.addColorStop(1, alpha(color, 0)); ctx.fillStyle = g; ctx.fill(); ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.strokeStyle = color; ctx.lineWidth = 6; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.stroke(); pts.forEach((p, i) => { ctx.beginPath(); ctx.arc(p[0], p[1], i === pts.length - 1 ? 12 : 6, 0, 7); ctx.fillStyle = i === pts.length - 1 ? color : T().bg; ctx.fill(); ctx.strokeStyle = color; ctx.lineWidth = 4; ctx.stroke(); }); }
+  const T = () => THEMES[S.i];
+  const alpha = (hex, a) => { let h = hex.replace("#", ""); if (h.length === 3) h = h.split("").map(c => c + c).join(""); const n = parseInt(h, 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; };
+  const chgColor = (c, t) => c > 0 ? "#e5312b" : c < 0 ? "#0aa35a" : t.mute;
+  const chgTxt = (c) => c > 0 ? `▲${c}` : c < 0 ? `▼${-c}` : "— 平";
+
+  /* ---------- 主渲染 ---------- */
+  function fitCanvas(h) {
+    if (cv.height !== h) cv.height = h;
+    const wrap = document.getElementById("wrap"), stage = document.querySelector(".stage");
+    wrap.style.setProperty("--ar", `1080 / ${h}`); wrap.classList.toggle("long", h > 1920);
+    // 长图在有限舞台高度内按比例缩小宽度
+    const maxH = stage.clientHeight - 60; const wByH = maxH * 1080 / h; wrap.style.maxWidth = Math.max(160, Math.min(300, wByH)) + "px";
+  }
+  function render() {
+    const t = T();
+    if (t.deco === "navy") { renderNavy(t); return; }
+    fitCanvas(H);
+    const dark = ["screen", "ind", "mag", "fin"].includes(t.id);
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, H);
+    // 装饰背景
+    if (t.deco === "grid") { ctx.strokeStyle = "rgba(0,212,255,.08)"; ctx.lineWidth = 1; for (let i = 0; i < W; i += 60) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 900); ctx.stroke(); } for (let i = 0; i < 900; i += 60) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke(); } const g = ctx.createRadialGradient(W / 2, 0, 50, W / 2, 0, 900); g.addColorStop(0, "rgba(14,42,90,.9)"); g.addColorStop(1, "rgba(6,11,26,0)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 900); }
+    if (t.deco === "red") { const g = ctx.createLinearGradient(0, 0, 0, 760); g.addColorStop(0, "#c8102e"); g.addColorStop(1, "#a30d24"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 760); }
+    if (t.deco === "hazard") { for (const yy of [0, H - 28]) { for (let i = -40; i < W + 40; i += 56) { ctx.fillStyle = "#ffb400"; ctx.beginPath(); ctx.moveTo(i, yy); ctx.lineTo(i + 28, yy); ctx.lineTo(i + 56, yy + 28); ctx.lineTo(i + 28, yy + 28); ctx.fill(); } } }
+    if (t.deco === "ink") { ctx.strokeStyle = t.brand; ctx.lineWidth = 3; ctx.strokeRect(36, 36, W - 72, H - 72); ctx.lineWidth = 1; ctx.strokeStyle = "rgba(31,61,43,.4)"; ctx.strokeRect(48, 48, W - 96, H - 96); }
+    if (t.deco === "sale") { ctx.strokeStyle = "rgba(0,0,0,.05)"; ctx.lineWidth = 14; for (let i = -H; i < W; i += 56) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + H, H); ctx.stroke(); } }
+    if (t.deco === "mag") { const g = ctx.createRadialGradient(W - 100, 900, 50, W - 100, 900, 700); g.addColorStop(0, "#4a4a55"); g.addColorStop(1, "#0b0b0b"); ctx.fillStyle = g; ctx.fillRect(0, 300, W, 1000); }
+
+    const pad = 72; let y = 96;
+    // 品牌行
+    const brandCol = t.deco === "red" ? "#fff" : t.fg;
+    rr(pad, y - 40, 64, 64, 14, t.deco === "red" ? "#f5c451" : t.brand); txt(d.company.logoText, pad + 32, y + 6, 36, t.deco === "red" ? "#8e0b1f" : (t.brand === "#ffcc00" || t.brand === "#00d4ff" ? "#111" : "#fff"), { weight: 900, align: "center" });
+    txt(d.company.short, pad + 84, y + 4, 34, brandCol, { weight: 700 });
+    txt(`${d.date} ${d.weekday}`, W - pad, y + 2, 26, t.deco === "red" ? "rgba(255,255,255,.85)" : t.mute, { align: "right" });
+    y += 110;
+    // 标题
+    const title = S.title || t.title;
+    if (t.deco === "brief") { ctx.fillStyle = t.fg; ctx.fillRect(pad, y - 8, W - pad * 2, 4); ctx.fillRect(pad, y + 2, W - pad * 2, 2); y += 96; txt(title, W / 2, y, 112, t.fg, { weight: 900, align: "center", ls: 18 }); y += 40; txt(t.sub, W / 2, y, 24, t.mute, { align: "center", ls: 4, font: SANS }); y += 22; ctx.fillRect(pad, y, W - pad * 2, 2); ctx.fillRect(pad, y + 8, W - pad * 2, 4); y += 60; }
+    else if (t.deco === "red") { y += 100; ctx.save(); ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = 20; ctx.shadowOffsetY = 8; txt(title, W / 2, y, 150, "#f5c451", { weight: 900, align: "center", ls: 20, font: KAI }); ctx.restore(); y += 50; txt(t.sub, W / 2, y, 30, "rgba(255,255,255,.95)", { align: "center", ls: 6 }); y += 70; }
+    else if (t.deco === "ink") { y += 90; txt(title, W / 2, y, 120, t.brand, { weight: 900, align: "center", ls: 30 }); y += 40; txt(t.sub, W / 2, y, 22, t.mute, { align: "center", ls: 8, font: SANS }); y += 36; ctx.fillStyle = "#c9a24a"; ctx.fillRect(W / 2 - 160, y, 320, 2); y += 50; }
+    else if (t.deco === "mag") { y += 110; txt(title, pad, y, 132, "#fff", { weight: 900, ls: -4 }); y += 44; txt(t.sub, pad, y, 24, t.mute, { ls: 3 }); y += 60; }
+    else if (t.deco === "sale") { y += 20; ctx.save(); ctx.translate(W / 2, y + 30); ctx.rotate(-0.05); rr(-240, -34, 480, 68, 0, t.accent); ctx.fillStyle = "#111"; ctx.fillRect(-232, 42, 480, 10); txt("周末限时 · 库存直降", 0, 12, 30, "#fff", { weight: 900, align: "center", ls: 4 }); ctx.restore(); y += 190; ctx.save(); ctx.shadowColor = "#fff"; ctx.shadowOffsetX = 10; ctx.shadowOffsetY = 10; txt(title, W / 2, y, 150, "#111", { weight: 900, align: "center", ls: -4 }); ctx.restore(); y += 48; txt(t.sub, W / 2, y, 30, "#111", { weight: 800, align: "center" }); y += 60; }
+    else { y += 80; txt(title, pad, y, 84, t.fg, { weight: 900, ls: t.deco === "grid" ? 4 : -1 }); y += 44; txt(t.sub, pad, y, 26, t.mute, { ls: 2 }); y += 56; }
+
+    /* ---- 自适应排版：根据剩余高度选择常规/紧凑尺寸，仍溢出则自动精简模块 ---- */
+    const fh = 220, fy = H - fh - (t.deco === "hazard" ? 28 : 0);
+    const avail = fy - 36 - y;
+    const NORMAL = { hero: 230, heroGap: 40, row: 78, listPad: 24, listGap: 28, trend: 240, trendGap: 28, comment: 150, resHead: 60, res: 96, resGap: 14 };
+    const COMPACT = { hero: 196, heroGap: 26, row: 62, listPad: 20, listGap: 20, trend: 190, trendGap: 20, comment: 122, resHead: 50, res: 82, resGap: 10 };
+    const hero = d.quotes.find(q => q.name === S.hero) || d.quotes[0];
+    const qsAll = d.quotes.filter(q => q.name !== hero.name);
+    let L = { D: NORMAL, qn: S.qn - 1, trend: S.trend, comment: S.comment, rn: S.rn, trimmed: false };
+    const need = (l) => { const D = l.D; let h = D.hero + D.heroGap + l.qn * D.row + D.listPad + D.listGap; if (l.trend) h += D.trend + D.trendGap; if (l.comment) h += D.comment; if (l.rn) h += D.resHead + l.rn * (D.res + D.resGap); return h; };
+    if (need(L) > avail) { L.D = COMPACT; L.trimmed = true; }
+    if (need(L) > avail && L.qn > 3) { L.qn = 3; }
+    if (need(L) > avail && L.trend) { L.trend = false; }
+    while (need(L) > avail && L.rn > 1) L.rn--;
+    if (need(L) > avail && L.comment) L.comment = false;
+    const D = L.D;
+
+    // 主推行情
+    const heroBg = t.deco === "red" ? "#fff" : t.panel;
+    const hh = D.hero, hs = hh / 230; // 高度比例，用于紧凑模式缩放字号
+    rr(pad, y, W - pad * 2, hh, t.deco === "min" ? 0 : 24, heroBg, t.deco === "red" ? "#f5c451" : (t.deco === "sale" ? "#111" : null), 6);
+    if (t.deco === "grid") { ctx.strokeStyle = t.accent; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(pad, y + 30); ctx.lineTo(pad, y); ctx.lineTo(pad + 30, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(W - pad, y + hh - 30); ctx.lineTo(W - pad, y + hh); ctx.lineTo(W - pad - 30, y + hh); ctx.stroke(); }
+    txt(`上海 · ${hero.name} ${hero.spec}`, pad + 36, y + 58 * hs, 28, t.mute);
+    const bigPx = Math.round(128 * (hs < 1 ? .9 : 1));
+    ctx.save(); if (t.deco === "grid") { ctx.shadowColor = t.accent; ctx.shadowBlur = 40; }
+    txt(String(hero.price), pad + 36, y + hh - 52, bigPx, t.deco === "red" || t.deco === "sale" ? t.accent : (t.deco === "grid" ? "#fff" : t.fg), { weight: 900, ls: -4, font: SANS }); ctx.restore();
+    ctx.font = `900 ${bigPx}px ${SANS}`; ctx.letterSpacing = "-4px"; const pw = ctx.measureText(String(hero.price)).width; ctx.letterSpacing = "0px";
+    txt("元/吨", pad + 36 + pw + 14, y + hh - 58, 28, t.mute);
+    rr(W - pad - 250, y + hh - 110, 214, 64, 32, alpha(chgColor(hero.change, t), .13)); txt(`${chgTxt(hero.change)} · ${hero.change > 0 ? "+" : ""}${(hero.change / (hero.price - hero.change) * 100).toFixed(2)}%`, W - pad - 143, y + hh - 67, 28, chgColor(hero.change, t), { weight: 800, align: "center", font: SANS });
+    y += hh + D.heroGap;
+
+    // 行情列表
+    const qs = qsAll.slice(0, L.qn);
+    const rowH = D.row, fs = rowH / 78;
+    rr(pad, y, W - pad * 2, qs.length * rowH + D.listPad, t.deco === "min" ? 0 : 20, t.deco === "red" || t.deco === "sale" || t.deco === "chat" ? "#fff" : t.panel, t.deco === "sale" ? "#111" : null, 6);
+    qs.forEach((q, i) => { const yy = y + D.listPad / 2 + i * rowH, base = yy + rowH * .64; if (i) { ctx.strokeStyle = dark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.moveTo(pad + 30, yy); ctx.lineTo(W - pad - 30, yy); ctx.stroke(); ctx.setLineDash([]); } const nameSz = Math.round(32 * (fs < 1 ? .9 : 1)); txt(q.name, pad + 34, base, nameSz, t.fg, { weight: 700 }); ctx.font = `700 ${nameSz}px ${t.font}`; const nw = ctx.measureText(q.name).width; txt(q.spec, pad + 34 + nw + 16, base, 22, t.mute, { font: SANS }); txt(chgTxt(q.change), W - pad - 34, base, 26, chgColor(q.change, t), { weight: 800, align: "right", font: SANS }); txt(String(q.price), W - pad - 150, base + 2, Math.round(38 * (fs < 1 ? .92 : 1)), t.fg, { weight: 800, align: "right", font: SANS }); });
+    y += qs.length * rowH + D.listPad + D.listGap;
+
+    // 走势
+    if (L.trend) { const th = D.trend; rr(pad, y, W - pad * 2, th, t.deco === "min" ? 0 : 20, t.deco === "red" || t.deco === "sale" || t.deco === "chat" ? "#fff" : t.panel, t.deco === "sale" ? "#111" : null, 6); txt(`${hero.name} · 近 8 日走势`, pad + 30, y + 44, 24, t.mute, { font: SANS }); txt("元/吨", W - pad - 30, y + 44, 22, t.mute, { align: "right", font: SANS }); spark(pad + 40, y + 76, W - pad * 2 - 80, th - 130, d.trend, t.accent === "#ffcc00" || t.accent === "#00d4ff" ? t.accent : (t.deco === "min" ? "#111" : t.accent)); d.trendLabels.forEach((l, i) => txt(l, pad + 40 + i / 7 * (W - pad * 2 - 80), y + th - 14, 18, t.mute, { align: "center", font: SANS })); y += th + D.trendGap; }
+
+    // 点评
+    if (L.comment) { const ch = D.comment; ctx.fillStyle = t.accent; ctx.fillRect(pad, y, 8, ch - 30); txt("今日点评", pad + 30, y + 30, 24, t.deco === "red" ? t.accent : t.fg, { weight: 800 }); wrap(d.comment, pad + 30, y + 70, ch < 150 ? 22 : 24, t.mute, W - pad * 2 - 40, ch < 150 ? 32 : 38); y += ch; }
+
+    // 现货
+    if (L.rn) {
+      const rs = d.resources.slice(0, L.rn), rh = D.res;
+      txt("本店现货", pad, y + 34, 34, t.fg, { weight: 900 }); txt("当日提货 · 扫码询价", W - pad, y + 32, 22, t.mute, { align: "right", font: SANS }); y += D.resHead;
+      rs.forEach(r => { const cardBg = t.deco === "red" || t.deco === "sale" || t.deco === "chat" ? "#fff" : t.panel; rr(pad, y, W - pad * 2, rh, t.deco === "min" ? 0 : 16, cardBg, t.deco === "sale" ? "#111" : null, 6); if (t.deco === "ind") { ctx.fillStyle = t.accent; ctx.fillRect(pad, y, 8, rh); } const l1 = y + rh * .44, l2 = y + rh * .8; txt(`${r.name} ${r.spec}`, pad + 30, l1, 28, t.fg, { weight: 700 }); ctx.font = `700 28px ${t.font}`; const nw = ctx.measureText(`${r.name} ${r.spec}`).width; rr(pad + 30 + nw + 12, l1 - 22, 64, 28, 6, null, t.accent, 2); txt(r.tag, pad + 30 + nw + 44, l1 - 1, 18, t.accent, { align: "center", font: SANS }); txt(`${r.mill} · ${r.warehouse} · ${r.qty} 吨`, pad + 30, l2, 20, t.mute, { font: SANS }); txt(S.pm === "hide" ? "电议" : `¥${r.price}`, W - pad - 30, y + rh * .63, 40, t.accent === "#ffcc00" ? "#ffcc00" : (t.deco === "min" ? t.fg : t.accent), { weight: 900, align: "right", font: SANS }); y += rh + D.resGap; });
+    }
+    document.getElementById("fit").textContent = L.trimmed ? (L.trend === S.trend && L.rn === S.rn && L.comment === S.comment ? "已紧凑排版" : "版面不足，已自动精简") : "";
+
+    // 底部名片
+    const footBg = t.deco === "red" ? "#8e0b1f" : t.deco === "sale" ? "#111" : t.deco === "chat" ? "#07c160" : t.deco === "grid" ? "#0aa7d6" : t.brand;
+    ctx.fillStyle = footBg; ctx.fillRect(0, fy, W, fh);
+    qr(pad, fy + 30, 160, "#111", "#fff");
+    const fc = footBg === "#ffcc00" ? "#111" : "#fff";
+    txt(`${d.sales.name} · ${d.sales.title}`, pad + 190, fy + 80, 36, fc, { weight: 800 });
+    if (S.phone) txt(d.sales.phone + "  ·  微信 " + d.sales.wechat, pad + 190, fy + 128, 26, fc, { font: SANS });
+    txt("长按识别二维码 · 查看全部现货并询价", pad + 190, fy + 176, 24, footBg === "#ffcc00" ? "#333" : "rgba(255,255,255,.85)", { font: SANS });
+    txt("货袋子", W - pad, fy + 190, 20, footBg === "#ffcc00" ? "#333" : "rgba(255,255,255,.6)", { align: "right", font: SANS });
+    txt(d.spreadCode, W - pad, fy + 160, 18, footBg === "#ffcc00" ? "#333" : "rgba(255,255,255,.5)", { align: "right", font: SANS });
+
+    // UI
+    document.getElementById("sname").innerHTML = `<b>${S.i + 1}/${THEMES.length} ${t.name}</b>`;
+    document.querySelectorAll("#dots i").forEach((x, i) => x.classList.toggle("on", i === S.i));
+    document.querySelectorAll("#chips button").forEach((x, i) => x.classList.toggle("on", i === S.i));
+  }
+
+  /* ---------- 深夜行情早报（长图，高度按内容自适应） ---------- */
+  function renderNavy(t) {
+    const pad = 64, cw = W - pad * 2, NUM = '"DIN Alternate","Helvetica Neue",Arial,sans-serif';
+    const fmt = n => n.toLocaleString("en-US");
+    const up = "#ff6a2b", down = "#3ddc84", flat = t.mute;
+    const cc = c => c > 0 ? up : c < 0 ? down : flat;
+    const hero = d.quotes.find(q => q.name === S.hero) || d.quotes[0];
+    const lead = [...d.quotes].sort((a, b) => b.change - a.change)[0];
+    const qs = d.quotes.slice(0, 6), rs = d.resources.slice(0, S.rn);
+    // ---- 先算总高度 ----
+    ctx.font = `400 30px ${SANS}`; const sumLines = wrapLinesN(d.summary, 30, cw);
+    const hHead = 230, hSec = 70, hTitle = 236, hSum = sumLines.length * 46 + 30, hGrid = 2 * 236 + 22 + 50, hLook = S.comment ? 230 : 0, hResT = 84, hRes = rs.length * 178 + 56, hPromo = 170, hFoot = 260, hBottom = 90;
+    const total = hHead + hSec + hTitle + hSum + hGrid + hLook + hResT + hRes + hPromo + hFoot + hBottom;
+    fitCanvas(total); const HH = total;
+    // ---- 背景 ----
+    const g = ctx.createLinearGradient(0, 0, W * .4, HH); g.addColorStop(0, "#0e1730"); g.addColorStop(.5, "#0a1020"); g.addColorStop(1, "#070b17"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, HH);
+    ctx.save(); ctx.globalAlpha = .35; for (let i = 0; i < 14; i++) { const x = -300 + i * 160; const lg = ctx.createLinearGradient(x, 0, x + 900, HH); lg.addColorStop(0, "rgba(255,255,255,0)"); lg.addColorStop(.5, i % 3 === 0 ? "rgba(120,150,255,.10)" : "rgba(255,255,255,.035)"); lg.addColorStop(1, "rgba(255,255,255,0)"); ctx.fillStyle = lg; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 40, 0); ctx.lineTo(x + 40 + HH * .55, HH); ctx.lineTo(x + HH * .55, HH); ctx.closePath(); ctx.fill(); } ctx.restore();
+    const rg = ctx.createRadialGradient(W * .85, 200, 20, W * .85, 200, 700); rg.addColorStop(0, "rgba(255,106,43,.16)"); rg.addColorStop(1, "rgba(255,106,43,0)"); ctx.fillStyle = rg; ctx.fillRect(0, 0, W, 900);
+    let y = 0;
+    // ---- 头部 ----
+    ctx.beginPath(); ctx.arc(pad + 44, 118, 44, 0, 7); ctx.fillStyle = up; ctx.fill(); txt(d.company.logoText, pad + 44, 134, 44, "#fff", { weight: 900, align: "center" });
+    txt(`${d.company.short} · 行情早报`, pad + 110, 112, 40, t.fg, { weight: 800 });
+    txt(`${d.company.name} · ${d.company.certified || "认证商家"}`, pad + 110, 158, 24, t.mute);
+    txt(`第 ${d.issue} 期`, W - pad, 112, 32, up, { weight: 800, align: "right", font: NUM });
+    txt(`${d.date.replace(/-/g, ".")} ${d.weekday}`, W - pad, 158, 24, t.mute, { align: "right", font: NUM });
+    y = hHead;
+    // ---- 板块标签 ----
+    ctx.beginPath(); ctx.arc(pad + 8, y + 22, 8, 0, 7); ctx.fillStyle = up; ctx.fill(); txt(`${d.market || "上海市场"} · 今日行情`, pad + 30, y + 32, 26, up, { weight: 600 });
+    y += hSec;
+    // ---- 头条 ----
+    const line1 = [[lead.name + " ", t.fg], [(lead.change > 0 ? "+" : "") + lead.change, up], [lead.change > 0 ? " 领涨" : " 领跌", t.fg]];
+    let x = pad; line1.forEach(([s2, c]) => { txt(s2, x, y + 90, 92, c, { weight: 900, ls: -2 }); x += measureN(s2, 92, 900); });
+    txt(S.title || d.headline2, pad, y + 196, 92, t.fg, { weight: 900, ls: -2 });
+    y += hTitle;
+    // ---- 摘要（数字加粗高亮） ----
+    sumLines.forEach((ln, i) => richN(ln, pad, y + 36 + i * 46, 30, t.mute, t.fg));
+    y += hSum;
+    // ---- 3×2 行情卡 ----
+    const gw = (cw - 44) / 3, gh = 236;
+    qs.forEach((q, i) => {
+      const gx = pad + (i % 3) * (gw + 22), gy = y + Math.floor(i / 3) * (gh + 22), isLead = q.name === lead.name;
+      rr(gx, gy, gw, gh, 22, isLead ? "rgba(255,106,43,.10)" : "rgba(255,255,255,.045)", isLead ? up : "rgba(255,255,255,.08)", isLead ? 3 : 2);
+      if (isLead) { rr(gx + gw - 92, gy + 14, 76, 34, 17, up); txt("领涨", gx + gw - 54, gy + 38, 20, "#fff", { weight: 800, align: "center" }); }
+      txt(q.name, gx + 26, gy + 56, 26, t.mute);
+      txt(fmt(q.price), gx + 26, gy + 128, 60, t.fg, { weight: 900, font: NUM, ls: -2 });
+      txt("元/吨", gx + 26 + measureN(fmt(q.price), 60, 900, NUM) + 4, gy + 128, 20, t.mute);
+      txt(q.change > 0 ? `▲ +${q.change}` : q.change < 0 ? `▼ ${q.change}` : "— 持平", gx + 26, gy + 172, 26, cc(q.change), { weight: 800, font: NUM });
+      txt(`周环比 ${q.week > 0 ? "+" : ""}${q.week}`, gx + 26, gy + 210, 20, t.mute, { font: NUM });
+    });
+    y += hGrid;
+    // ---- 今日看点 ----
+    if (S.comment) { rr(pad, y, cw, 180, 20, "rgba(255,255,255,.05)"); ctx.fillStyle = up; ctx.fillRect(pad, y + 24, 6, 132); txt("今日看点", pad + 34, y + 54, 26, up, { weight: 800 }); wrapN(d.comment, pad + 34, y + 104, 28, t.fg, cw - 68, 42); y += hLook; }
+    // ---- 优势现货 ----
+    txt("优势现货 · 今日可提", pad, y + 44, 36, t.fg, { weight: 900 }); txt("价格截至 08:00 · 以电话确认为准", W - pad, y + 42, 20, t.mute, { align: "right" });
+    y += hResT;
+    rs.forEach((r, i) => {
+      const ry = y + i * 178, first = i === 0;
+      rr(pad, ry, cw, 158, 22, first ? "rgba(255,106,43,.08)" : "rgba(255,255,255,.045)", first ? up : "rgba(255,255,255,.08)", first ? 3 : 2);
+      txt(r.name, pad + 28, ry + 52, 32, t.fg, { weight: 900 }); txt(r.spec, pad + 28 + measureN(r.name, 32, 900) + 14, ry + 52, 24, t.mute);
+      txt(`钢厂 ${r.mill} · ${r.warehouse} · 现货 ${r.qty} 吨`, pad + 28, ry + 92, 22, t.mute);
+      let tx = pad + 28; (r.tags || [r.tag]).slice(0, 3).forEach(tg => { const tw = measureN(tg, 18, 600) + 20; rr(tx, ry + 110, tw, 30, 6, "rgba(255,106,43,.14)"); txt(tg, tx + tw / 2, ry + 131, 18, up, { align: "center", weight: 600 }); tx += tw + 10; });
+      const pr = S.pm === "hide" ? "电议" : fmt(r.price); txt(pr, W - pad - 28 - (S.pm === "hide" ? 0 : 66), ry + 68, 52, t.fg, { weight: 900, align: "right", font: NUM, ls: -2 }); if (S.pm !== "hide") txt("元/吨", W - pad - 28, ry + 68, 20, t.mute, { align: "right" });
+      if (S.pm !== "hide" && r.avg && r.avg > r.price) { const lab = `低于均价 ${r.avg - r.price}`; const lw = measureN(lab, 20, 700) + 28; rr(W - pad - 28 - lw, ry + 96, lw, 36, 18, "rgba(61,220,132,.14)"); txt(lab, W - pad - 28 - lw / 2, ry + 121, 20, down, { weight: 700, align: "center" }); }
+    });
+    txt(`另有 ${d.moreResources || 12} 项现货资源，扫码查看完整清单`, W / 2, y + rs.length * 178 + 30, 22, t.mute, { align: "center" });
+    y += hRes;
+    // ---- 推广位 ----
+    const pg = ctx.createLinearGradient(pad, y, W - pad, y + 130); pg.addColorStop(0, "#152552"); pg.addColorStop(1, "#0f1a3a"); rr(pad, y, cw, 130, 22, pg, "rgba(120,150,255,.25)", 2);
+    txt(d.promo.title, pad + 32, y + 56, 30, t.fg, { weight: 800 }); txt(d.promo.sub, pad + 32, y + 96, 22, t.mute);
+    txt(d.promo.price, W - pad - 32, y + 60, 40, up, { weight: 900, align: "right", font: NUM }); txt(`货袋子${d.promo.unit}`, W - pad - 32, y + 96, 20, t.mute, { align: "right" });
+    y += hPromo;
+    // ---- 名片 + 二维码 ----
+    ctx.beginPath(); ctx.arc(pad + 60, y + 100, 60, 0, 7); ctx.fillStyle = up; ctx.fill(); txt(d.sales.avatar, pad + 60, y + 122, 56, "#fff", { weight: 900, align: "center" });
+    const sales2 = document.getElementById("sales").value.split(" · ");
+    txt(sales2[0], pad + 150, y + 78, 40, t.fg, { weight: 900 }); txt(d.sales.role || `${d.company.short}顾问 · 每天 8:00 准时更新`, pad + 150, y + 122, 24, t.mute);
+    if (S.phone) txt(d.sales.phone, pad + 150, y + 168, 30, t.fg, { weight: 800, font: NUM });
+    const qsz = 176, qx = W - pad - qsz - 12, qy = y + 10; rr(qx - 12, qy - 12, qsz + 24, qsz + 24, 18, "#fff", up, 4); qr(qx, qy, qsz, "#111", "#fff");
+    txt("扫码看实时报价", qx + qsz / 2, qy + qsz + 48, 20, up, { weight: 700, align: "center" });
+    y += hFoot;
+    txt("长按识别二维码 · 每日行情 / 现货资源 / 免费试用", W / 2, y + 30, 20, t.mute, { align: "center" });
+    txt(`货袋子 · ${d.spreadCode}`, W / 2, y + 62, 16, "rgba(139,150,171,.6)", { align: "center", font: NUM });
+    document.getElementById("fit").textContent = "长图 1080×" + HH;
+    document.getElementById("sname").innerHTML = `<b>${S.i + 1}/${THEMES.length} ${t.name}</b>`;
+    document.querySelectorAll("#dots i").forEach((x2, i) => x2.classList.toggle("on", i === S.i));
+    document.querySelectorAll("#chips button").forEach((x2, i) => x2.classList.toggle("on", i === S.i));
+  }
+  function measureN(s, size, weight, font) { ctx.font = `${weight || 400} ${size}px ${font || SANS}`; return ctx.measureText(s).width; }
+  function wrapLinesN(s, size, maxW) { ctx.font = `400 ${size}px ${SANS}`; const lines = []; let line = ""; for (const ch of s) { if (ctx.measureText(line + ch).width > maxW && line) { lines.push(line); line = ch; } else line += ch; } if (line) lines.push(line); return lines; }
+  function wrapN(s, x, y, size, color, maxW, lh) { wrapLinesN(s, size, maxW).forEach((ln, i) => txt(ln, x, y + i * lh, size, color, { font: SANS })); }
+  function richN(s, x, y, size, color, strong) { // 数字与其后一个字加粗高亮
+    let i = 0; while (i < s.length) { const m = /^\d+[\s]?[涨跌平个项条]?/.exec(s.slice(i)); const seg2 = m ? m[0] : s[i]; const isNum = !!m; txt(seg2, x, y, size, isNum ? strong : color, { weight: isNum ? 800 : 400, font: SANS }); x += measureN(seg2, size, isNum ? 800 : 400); i += seg2.length; }
+  }
+
+  /* ---------- 交互 ---------- */
+  document.getElementById("dots").innerHTML = THEMES.map(() => "<i></i>").join("");
+  document.getElementById("chips").innerHTML = THEMES.map((t, i) => `<button onclick="go(${i})"><i style="background:linear-gradient(160deg,${t.bg} 55%,${t.brand})"></i>${t.name}</button>`).join("");
+  document.getElementById("hero").innerHTML = d.quotes.map(q => `<option>${q.name}</option>`).join("");
+  document.getElementById("hero").onchange = e => { S.hero = e.target.value; render(); };
+  document.getElementById("title").oninput = e => { S.title = e.target.value; render(); };
+  document.querySelectorAll(".seg").forEach(seg => seg.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; seg.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); const k = seg.dataset.k; S[k] = isNaN(+b.dataset.v) ? b.dataset.v : +b.dataset.v; render(); }));
+  document.querySelectorAll(".toggle").forEach(tg => tg.addEventListener("click", () => { tg.classList.toggle("on"); S[tg.dataset.k] = tg.classList.contains("on"); render(); }));
+  window.go = i => { S.i = (i + THEMES.length) % THEMES.length; render(); document.querySelector(".stage").classList.add("moved"); };
+  window.step = dx => go(S.i + dx);
+  window.tab = (i, b) => { document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b)); document.querySelectorAll(".pane").forEach((p, k) => p.classList.toggle("on", k === i)); };
+  // 滑动
+  let sx = null; const wrapEl = document.getElementById("wrap");
+  wrapEl.addEventListener("touchstart", e => sx = e.touches[0].clientX, { passive: true });
+  wrapEl.addEventListener("touchend", e => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1); sx = null; });
+  wrapEl.addEventListener("mousedown", e => sx = e.clientX); wrapEl.addEventListener("mouseup", e => { if (sx === null) return; const dx = e.clientX - sx; if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1); sx = null; });
+  window.save = (mode) => { const url = cv.toDataURL("image/png"); document.getElementById("saveimg").src = url; document.getElementById("dl").href = url; document.getElementById("dl").download = `hdz-${T().id}-${d.date}.png`; document.getElementById("savet").textContent = mode === "wx" ? "海报已生成 · 发送到微信" : `海报已生成（1080×${cv.height}）`; document.getElementById("save").classList.add("show"); };
+
+  const qsP = new URLSearchParams(location.search), qsI = qsP.get("style"); if (qsI) { const k = THEMES.findIndex(t => t.id === qsI); if (k >= 0) S.i = k; }
+  if (qsP.get("back") && history.length > 1) { const bk = document.getElementById("back"); bk.textContent = "‹ 返回落地页"; bk.onclick = e => { e.preventDefault(); history.back(); }; }
+  // ?raw=1：仅输出原尺寸画布（用于导出校验/自动化截图）
+  if (qsP.get("raw")) { render(); document.body.innerHTML = ""; document.body.style.background = "#000"; document.body.appendChild(cv); cv.style.cssText = "display:block;width:1080px;height:auto"; }
+  else { render(); window.addEventListener("resize", render); if (document.fonts && document.fonts.ready) document.fonts.ready.then(render); }
+</script>
+</body>
+</html>

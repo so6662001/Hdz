@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>转发到微信群的呈现效果模拟 · 货袋子</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  :root { --brand: #1f5eff; }
+  body { background: #e9ebef; color: #1c1f26; font-size: 13px; }
+  .wrap { display: grid; grid-template-columns: 375px 375px 1fr; gap: 26px; padding: 26px; max-width: 1400px; margin: 0 auto; align-items: start; }
+  .hd { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; }
+  .hd h1 { font-size: 20px; } .hd h1 small { display: block; font-size: 12px; color: #7c8492; font-weight: 400; margin-top: 4px; }
+  .hd a { color: #1f5eff; font-size: 12px; }
+  .phone { width: 375px; background: #000; border-radius: 40px; padding: 10px; box-shadow: 0 30px 70px rgba(0,0,0,.28); }
+  .scr { border-radius: 32px; overflow: hidden; background: #ededed; height: 760px; position: relative; }
+  .status { height: 44px; background: #ededed; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 22px 6px; font-size: 12px; font-weight: 700; }
+  .navbar { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; background: #ededed; border-bottom: 1px solid #dcdcdc; font-size: 16px; font-weight: 600; }
+  .navbar span.b { font-size: 20px; font-weight: 400; }
+  .chat { padding: 12px 12px 0; height: calc(760px - 44px - 44px - 52px); overflow-y: auto; }
+  .tm { text-align: center; font-size: 11px; color: #9a9a9a; margin: 6px 0 12px; }
+  .m { display: flex; gap: 8px; margin-bottom: 16px; align-items: flex-start; }
+  .m .av { width: 38px; height: 38px; border-radius: 5px; flex: none; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 15px; }
+  .m .body { max-width: 78%; }
+  .m .nick { font-size: 11px; color: #8a8a8a; margin-bottom: 3px; }
+  .bub { background: #fff; border-radius: 6px; padding: 9px 11px; font-size: 15px; line-height: 1.45; position: relative; }
+  .bub::before { content: ""; position: absolute; left: -5px; top: 12px; border: 5px solid transparent; border-right-color: #fff; border-left: 0; }
+  .m.me { flex-direction: row-reverse; }
+  .m.me .body { display: flex; flex-direction: column; align-items: flex-end; }
+  .m.me .bub { background: #95ec69; } .m.me .bub::before { left: auto; right: -5px; border-right: 0; border-left: 5px solid #95ec69; }
+  /* H5 链接卡片 */
+  .link { width: 240px; background: #fff; border-radius: 6px; overflow: hidden; }
+  .link .t { padding: 10px 10px 6px; font-size: 15px; line-height: 1.35; color: #111; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .link .row { display: flex; gap: 8px; padding: 0 10px 10px; align-items: flex-start; }
+  .link .row .d { flex: 1; font-size: 12px; color: #888; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .link .row .th { width: 48px; height: 48px; border-radius: 3px; flex: none; overflow: hidden; background: #f2f2f2; }
+  .link .ft { border-top: 1px solid #eee; padding: 6px 10px; font-size: 11px; color: #999; display: flex; align-items: center; gap: 5px; }
+  .link .ft i { width: 14px; height: 14px; border-radius: 3px; background: #1f5eff; color: #fff; font-style: normal; font-size: 9px; display: inline-flex; align-items: center; justify-content: center; font-weight: 900; }
+  /* 小程序卡片 */
+  .mp { width: 240px; background: #fff; border-radius: 6px; overflow: hidden; }
+  .mp .hd2 { display: flex; align-items: center; gap: 5px; padding: 8px 10px 6px; font-size: 12px; color: #888; }
+  .mp .hd2 i { width: 16px; height: 16px; border-radius: 50%; background: #1f5eff; color: #fff; font-style: normal; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; font-weight: 900; }
+  .mp .t { padding: 0 10px 8px; font-size: 15px; color: #111; line-height: 1.35; }
+  .mp .img { height: 192px; overflow: hidden; position: relative; }
+  .mp .ft { border-top: 1px solid #eee; padding: 6px 10px; font-size: 11px; color: #999; display: flex; align-items: center; gap: 4px; }
+  .mp .ft b { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #999; display: inline-block; }
+  /* 海报图片 */
+  .pic { width: 150px; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  /* 默认丑链接 */
+  .ugly .t { color: #111; }
+  .ugly .row .th { display: flex; align-items: center; justify-content: center; color: #bbb; font-size: 20px; }
+  /* 缩略图内容 */
+  .th-brand { width: 100%; height: 100%; background: #1f5eff; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; }
+  .th-price { width: 100%; height: 100%; background: #111; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; line-height: 1.1; }
+  .th-price b { font-size: 15px; color: #ffcc00; font-variant-numeric: tabular-nums; }
+  .th-face { width: 100%; height: 100%; background: linear-gradient(135deg, #07c160, #10aeff); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; }
+  .th-poster { width: 100%; height: 100%; background: linear-gradient(180deg, #c8102e 0 40%, #fff6f0 40%); position: relative; }
+  .th-poster b { position: absolute; left: 0; right: 0; top: 8px; text-align: center; color: #f5c451; font-size: 12px; font-weight: 900; letter-spacing: 2px; }
+  .th-poster span { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; color: #c8102e; font-size: 13px; font-weight: 900; }
+  .inputbar { position: absolute; left: 0; right: 0; bottom: 0; height: 52px; background: #f7f7f7; border-top: 1px solid #dcdcdc; display: flex; align-items: center; gap: 10px; padding: 0 10px; }
+  .inputbar .v { width: 28px; height: 28px; border: 1.5px solid #333; border-radius: 50%; }
+  .inputbar .in { flex: 1; height: 36px; background: #fff; border-radius: 6px; }
+  .inputbar .e { width: 28px; height: 28px; border: 1.5px solid #333; border-radius: 50%; }
+  .inputbar .p { width: 28px; height: 28px; border: 1.5px solid #333; border-radius: 50%; position: relative; }
+  .inputbar .p::after { content: "+"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; line-height: 1; }
+  /* 第二部手机：点开后的 H5 */
+  .webnav { height: 44px; background: #ededed; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-bottom: 1px solid #dcdcdc; font-size: 15px; }
+  .webnav .x { font-size: 22px; font-weight: 300; }
+  .webnav .t { flex: 1; text-align: center; font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 8px; }
+  .webnav .dots { width: 44px; height: 24px; border: 1px solid #ccc; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 3px; }
+  .webnav .dots i { width: 4px; height: 4px; border-radius: 50%; background: #333; }
+  .web iframe { width: 100%; height: calc(760px - 44px - 44px); border: 0; display: block; }
+  .cap { text-align: center; font-size: 12px; color: #7c8492; margin-top: 10px; }
+  /* 右侧说明 */
+  .panel { background: #fff; border-radius: 14px; padding: 18px; border: 1px solid #e3e6ec; }
+  .panel h3 { font-size: 14px; margin-bottom: 10px; }
+  .panel .sec { border-top: 1px solid #eef0f4; padding-top: 12px; margin-top: 12px; }
+  .opt { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .opt button { padding: 6px 10px; border-radius: 6px; border: 1px solid #e3e6ec; font-size: 12px; background: #fafbfc; }
+  .opt button.on { background: #111; color: #fff; border-color: #111; }
+  .field { margin-bottom: 8px; }
+  .field label { display: block; font-size: 11px; color: #7c8492; margin-bottom: 3px; }
+  .field input { width: 100%; height: 32px; border: 1px solid #e3e6ec; border-radius: 6px; padding: 0 8px; font-size: 12px; }
+  .field .cnt { font-size: 10px; color: #aab; text-align: right; }
+  .kv { display: grid; grid-template-columns: 96px 1fr; gap: 6px 10px; font-size: 12px; line-height: 1.6; }
+  .kv b { color: #333; }
+  .kv span { color: #555; }
+  .good { color: #0aa35a; } .bad { color: #e5312b; }
+  .note { background: #fff8e6; border: 1px solid #ffe2a0; border-radius: 8px; padding: 10px; font-size: 12px; line-height: 1.7; color: #6b4e00; margin-top: 10px; }
+  code { background: #f1f3f6; padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+  @media (max-width: 1200px) { .wrap { grid-template-columns: 375px 375px; } .panel { grid-column: 1 / -1; } }
+  /* ?tall：展开完整群聊用于截图/演示 */
+  body.tall .scr:not(.web) { height: auto; }
+  body.tall .chat { height: auto; overflow: visible; padding-bottom: 60px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <h1>H5 落地页转发到微信群 · 呈现效果模拟<small>左：群聊中的三种形态（H5 链接卡片 / 小程序卡片 / 海报图）以及"未配置分享"的默认效果；中：点开链接后在微信内打开的落地页；右：可调参数与研发说明</small></h1>
+    <a href="index.html">← 返回风格库</a>
+  </div>
+
+  <!-- 手机 1：微信群 -->
+  <div>
+    <div class="phone"><div class="scr">
+      <div class="status"><span>08:32</span><span>▂▄▆ ᯤ ▮</span></div>
+      <div class="navbar"><span class="b">‹</span><span>华东钢贸现货交流群(238)</span><span class="b">···</span></div>
+      <div class="chat" id="chat">
+        <div class="tm">08:31</div>
+        <!-- 销售员打招呼 -->
+        <div class="m"><div class="av" style="background:linear-gradient(135deg,#07c160,#10aeff)">王</div><div class="body"><div class="nick">鑫钢-王建国 13800008888</div><div class="bub">早上好各位老板，今日行情出来了 👋 沪市建材小幅上涨，螺纹 3680 涨 20。我这边现货还是老价，宝山库当天装车，点下面链接看👇</div></div></div>
+
+        <!-- 形态 A：H5 链接卡片 -->
+        <div class="m" id="mA"><div class="av" style="background:linear-gradient(135deg,#07c160,#10aeff)">王</div><div class="body"><div class="nick">鑫钢-王建国 13800008888</div>
+          <div class="link" id="linkCard">
+            <div class="t" id="lt"></div>
+            <div class="row"><div class="d" id="ld"></div><div class="th" id="lth"></div></div>
+            <div class="ft"><i>货</i><span id="lsrc">货袋子</span></div>
+          </div>
+        </div></div>
+
+        <!-- 群友互动 -->
+        <div class="m"><div class="av" style="background:#c8102e">李</div><div class="body"><div class="nick">宏达建材-李总</div><div class="bub">Φ16 还有多少？</div></div></div>
+        <div class="m"><div class="av" style="background:linear-gradient(135deg,#07c160,#10aeff)">王</div><div class="body"><div class="nick">鑫钢-王建国 13800008888</div><div class="bub">李总，沙钢 Φ16 还有 320 吨，页面里直接点"询价"留个量，我马上给您专属价 🤝</div></div></div>
+
+        <div class="tm">08:40</div>
+        <!-- 形态 B：小程序卡片 -->
+        <div class="m" id="mB"><div class="av" style="background:linear-gradient(135deg,#07c160,#10aeff)">王</div><div class="body"><div class="nick">鑫钢-王建国 13800008888</div>
+          <div class="mp">
+            <div class="hd2"><i>货</i>货袋子</div>
+            <div class="t" id="mpt"></div>
+            <div class="img" id="mpimg"></div>
+            <div class="ft"><b></b>小程序</div>
+          </div>
+        </div></div>
+
+        <!-- 形态 C：海报图 -->
+        <div class="m" id="mC"><div class="av" style="background:linear-gradient(135deg,#07c160,#10aeff)">王</div><div class="body"><div class="nick">鑫钢-王建国 13800008888</div>
+          <div class="pic" id="pic"></div>
+        </div></div>
+
+        <div class="tm">09:05</div>
+        <!-- 反例：未配置分享参数 -->
+        <div class="m" id="mD"><div class="av" style="background:#8a8f99">张</div><div class="body"><div class="nick">某某钢贸-小张（未配置分享）</div>
+          <div class="link ugly">
+            <div class="t">货袋子</div>
+            <div class="row"><div class="d">https://m.huodaizi.com/s/HDZ-9F3K2A?from=groupmessage&isappinstalled=0</div><div class="th">🔗</div></div>
+          </div>
+        </div></div>
+        <div style="height:20px"></div>
+      </div>
+      <div class="inputbar"><span class="v"></span><span class="in"></span><span class="e"></span><span class="p"></span></div>
+    </div></div>
+    <div class="cap">① 微信群聊中的呈现（可在右侧切换缩略图 / 标题 / 描述，实时生效）</div>
+  </div>
+
+  <!-- 手机 2：点开后的落地页 -->
+  <div>
+    <div class="phone"><div class="scr web">
+      <div class="status"><span>08:33</span><span>▂▄▆ ᯤ ▮</span></div>
+      <div class="webnav"><span class="x">×</span><span class="t" id="webtitle"></span><span class="dots"><i></i><i></i><i></i></span></div>
+      <iframe id="web" src="templates/08-chat-card.html"></iframe>
+    </div></div>
+    <div class="cap">② 点开卡片后：在微信内置浏览器中打开落地页（顶部为微信标题栏，右上"···"可再次转发）</div>
+    <div class="opt" style="justify-content:center;margin-top:8px" id="tplopt"></div>
+  </div>
+
+  <!-- 右侧说明 -->
+  <div class="panel">
+    <h3>分享卡片参数（销售员转发时微信实际读取的三要素）</h3>
+    <div class="field"><label>标题 title（群聊显示 2 行，约 28 字内最佳）</label><input id="in-t" maxlength="40"><div class="cnt"><span id="ct">0</span>/40</div></div>
+    <div class="field"><label>描述 desc（群聊显示 1~3 行，朋友圈不显示）</label><input id="in-d" maxlength="60"><div class="cnt"><span id="cd">0</span>/60</div></div>
+    <div class="field"><label>缩略图 imgUrl（正方形 ≥300×300，群聊显示 48px 小图）</label>
+      <div class="opt" id="thopt"><button data-th="price" class="on">行情大字</button><button data-th="brand">企业 Logo</button><button data-th="face">销售员头像</button><button data-th="poster">海报缩略</button></div>
+    </div>
+    <div class="field"><label>标题文案模板</label>
+      <div class="opt" id="tplt"><button data-i="0" class="on">行情型</button><button data-i="1">现货型</button><button data-i="2">人设型</button><button data-i="3">促销型</button></div>
+    </div>
+
+    <div class="sec">
+      <h3>三种形态怎么选</h3>
+      <div class="kv">
+        <b>H5 链接卡片</b><span>最通用。标题 + 描述 + 48px 小图 + 来源。<span class="good">优点：</span>可放完整行情文案，点开即落地页，支持 URL 带追踪码。<span class="bad">注意：</span>必须配 JS-SDK 分享参数，否则退化为下方"默认丑链接"。</span>
+        <b>小程序卡片</b><span>标题 + 大图（5:4）+ "小程序"标识。<span class="good">优点：</span>大图最抢眼，群里曝光最好，且天然带用户身份，扫码后留资可免填手机号。<span class="bad">注意：</span>需要小程序，图要专门出一张 5:4 封面。</span>
+        <b>海报图片</b><span>纯图片消息，长按识别二维码进落地页。<span class="good">优点：</span>朋友圈/群里视觉最完整，不依赖任何分享配置。<span class="bad">注意：</span>群里是缩略显示，需点开放大再长按，比链接多一步。</span>
+      </div>
+      <div class="note"><b>建议组合：</b>销售员在群里先发 <b>一句话 + H5 链接卡片</b>（点开即看），紧跟 <b>一张海报图</b>（视觉冲击 + 可保存转发）；朋友圈发 <b>海报图 + 链接</b>。小程序卡片在有小程序后作为群里的主力形态。</div>
+    </div>
+
+    <div class="sec">
+      <h3>研发落地要点</h3>
+      <div class="kv">
+        <b>分享配置</b><span>落地页接入微信 JS-SDK，调用 <code>updateAppMessageShareData</code>（好友/群）与 <code>updateTimelineShareData</code>（朋友圈），传 <code>title / desc / link / imgUrl</code>。<b>不配即出现右下方那种"只有域名 + 一串 URL"的默认卡片，转化率会断崖式下降。</b></span>
+        <b>动态文案</b><span>title/desc 由服务端按当日行情 + 销售员 + 模板实时生成（如"螺纹 3680 ▲20 | 鑫钢现货老价"），每天不同，避免群里看到重复卡片。</span>
+        <b>追踪码</b><span><code>link</code> 中保留 <code>spread_code</code>；被转发者再转发时 SDK 会带上原链接，所有归因仍指向首个销售员（可选择二次分享生成新码归因给转发者）。</span>
+        <b>缩略图</b><span>服务端渲染 300×300 正方形：优先"行情大字"（价格 + 涨跌）或"海报缩略"，识别度高于 Logo。</span>
+        <b>域名与备案</b><span>H5 域名需在公众号"JS 接口安全域名"配置；避免被微信拦截需 ICP 备案并注意频繁投诉。</span>
+        <b>打开即留资</b><span>微信内打开可静默获取 openid（需公众号授权），已授权老客可一键询价免填手机；这是链接卡片相对海报图的最大转化优势。</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared/data.js"></script>
+<script src="shared/common.js"></script>
+<script>
+  const d = HDZ.data;
+  const TITLES = [
+    [`9.12 沪市行情｜螺纹 ${d.quotes[0].price} ▲${d.quotes[0].change}，热卷 3750 ▼10 ｜${d.company.short}现货`, `${d.company.short} · 沙钢 Φ16 现货 320 吨 ¥3690，宝山库当日提。点开看全部现货并询价`],
+    [`${d.company.short}今日现货｜Φ16 ¥3690 · Φ20 特价 ¥3670 · 热卷 ¥3760，当日装车`, `今日沪市螺纹 3680 ▲20。我司宝山/月浦库现货 6 个规格，点开直接询价，30 分钟内回复`],
+    [`王建国：今日钢市早报 · 沪市建材小幅上涨，下周初或延续小涨`, `12 年钢贸老兵每日行情解读 + 一手现货报价。点开看今日 6 大品种价格与我司库存`],
+    [`【周末特价】螺纹 Φ20 涨前老价 ¥3670，仅剩 186 吨，今日 18:00 截止`, `市价已涨到 3680，我司特价资源不涨价！宝山库当日提，点开锁价询价`]
+  ];
+  const $ = id => document.getElementById(id);
+  const S = { t: 0, th: "price" };
+  function thHTML(kind, big) {
+    if (kind === "brand") return `<div class="th-brand">${d.company.logoText}</div>`;
+    if (kind === "face") return `<div class="th-face">${d.sales.avatar}</div>`;
+    if (kind === "poster") return `<div class="th-poster"><b>喜报</b><span>3680</span></div>`;
+    return `<div class="th-price"><span>螺纹钢</span><b>${d.quotes[0].price}</b><span style="color:#ff5c57">▲${d.quotes[0].change}</span></div>`;
+  }
+  function render() {
+    $("lt").textContent = $("in-t").value; $("ld").textContent = $("in-d").value;
+    $("ct").textContent = $("in-t").value.length; $("cd").textContent = $("in-d").value.length;
+    $("lth").innerHTML = thHTML(S.th);
+    $("mpt").textContent = $("in-t").value;
+    $("webtitle").textContent = $("in-t").value.split("｜")[0].split("|")[0];
+  }
+  function setTitle(i) { S.t = i; $("in-t").value = TITLES[i][0]; $("in-d").value = TITLES[i][1]; document.querySelectorAll("#tplt button").forEach(b => b.classList.toggle("on", +b.dataset.i === i)); render(); }
+  $("tplt").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTitle(+b.dataset.i); });
+  $("thopt").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S.th = b.dataset.th; document.querySelectorAll("#thopt button").forEach(x => x.classList.toggle("on", x === b)); render(); });
+  $("in-t").addEventListener("input", render); $("in-d").addEventListener("input", render);
+
+  // 小程序卡片大图（5:4 封面）：用喜报风缩略版
+  $("mpimg").innerHTML = `<div style="width:100%;height:100%;background:linear-gradient(180deg,#c8102e 0 45%,#fff6f0 45%);position:relative;font-family:-apple-system,sans-serif">
+    <div style="position:absolute;left:10px;top:8px;font-size:10px;color:#fff;opacity:.9">${d.company.short} · ${d.date}</div>
+    <div style="position:absolute;left:0;right:0;top:26px;text-align:center;color:#f5c451;font-size:34px;font-weight:900;letter-spacing:6px;text-shadow:0 2px 0 #7a0a1a">喜 报</div>
+    <div style="position:absolute;left:14px;right:14px;top:92px;background:#fff;border-radius:8px;border:2px solid #f5c451;padding:8px;text-align:center"><div style="font-size:10px;color:#666">上海 · 螺纹钢 HRB400E</div><div style="font-size:26px;font-weight:900;color:#c8102e;line-height:1.1">3680<span style="font-size:10px;color:#999;font-weight:500"> 元/吨</span></div><div style="font-size:10px;color:#c8102e;font-weight:800">▲ 上涨 20 元 · 我司现货老价</div></div>
+  </div>`;
+  // 海报图消息（150px 宽缩略）
+  $("pic").innerHTML = `<div style="width:150px;height:267px;background:#f7f3ea;position:relative;font-family:serif;color:#1c1c1c">
+    <div style="padding:10px 8px 4px;border-bottom:2px double #1c1c1c;text-align:center"><div style="font-size:18px;font-weight:900;letter-spacing:3px">钢市早报</div><div style="font-size:6px;letter-spacing:1px;color:#555">STEEL MORNING BRIEF</div></div>
+    <div style="padding:6px 8px;font-size:7px;line-height:1.5">${d.quotes.slice(0,5).map(q => `<div style="display:flex;justify-content:space-between;border-bottom:1px dotted #bbb;padding:2px 0"><span>${q.name}</span><b class="${HDZ.cls(q.change)}">${q.price}</b></div>`).join("")}</div>
+    <div style="padding:0 8px;font-size:6px;color:#444">本店现货 · 沙钢Φ16 ¥3690 · 永钢Φ20 ¥3670</div>
+    <div style="position:absolute;left:0;right:0;bottom:0;background:#1a3a6b;color:#fff;padding:6px 8px;display:flex;gap:6px;align-items:center"><div id="picqr" style="background:#fff;padding:2px;border-radius:2px"></div><div style="font-size:6px;line-height:1.4"><b style="font-size:8px">${d.sales.name}</b><br>${d.sales.phone}<br>长按识别二维码</div></div>
+  </div>`;
+  HDZ.qr($("picqr"), 30);
+
+  // 第二部手机模板切换
+  const TPLS = [["08-chat-card", "对话风"], ["01-morning-brief", "早报风"], ["03-red-celebration", "喜报风"], ["02-data-screen", "数据屏"], ["09-flash-sale", "特价风"]];
+  $("tplopt").innerHTML = TPLS.map(([f, n], i) => `<button class="${i ? "" : "on"}" data-f="${f}">${n}</button>`).join("");
+  $("tplopt").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; $("web").src = `templates/${b.dataset.f}.html`; document.querySelectorAll("#tplopt button").forEach(x => x.classList.toggle("on", x === b)); });
+
+  setTitle(0);
+  if (location.search.includes("tall")) document.body.classList.add("tall");
+</script>
+</body>
+</html>
