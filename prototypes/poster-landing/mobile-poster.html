@@ -372,8 +372,7 @@
   if (qsP.get("back") && history.length > 1) { const bk = document.getElementById("back"); bk.textContent = "‹ 返回落地页"; bk.onclick = e => { e.preventDefault(); history.back(); }; }
   // ?raw=1：仅输出原尺寸画布（用于导出校验/自动化截图）
   if (qsP.get("raw")) { render(); document.body.innerHTML = ""; document.body.style.background = "#000"; document.body.appendChild(cv); cv.style.cssText = "display:block;width:1080px;height:auto"; }
-  else { window.addEventListener("resize", render); document.fonts && document.fonts.ready ? document.fonts.ready.then(render) : render(); }
-  render();
+  else { render(); window.addEventListener("resize", render); if (document.fonts && document.fonts.ready) document.fonts.ready.then(render); }
 </script>
 </body>
 </html>
