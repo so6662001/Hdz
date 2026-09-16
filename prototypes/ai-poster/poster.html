@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>海报原图 · 1080 宽</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #1a1d24; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 28px 16px 60px; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; color: #cbd5e1; }
+  .tip { font-size: 12px; margin-bottom: 14px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  .tip b { color: #fff; } .tip button { font: inherit; border: 0; background: #1f5eff; color: #fff; padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700; }
+  #out { box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  @media (max-width: 1120px) { #out { zoom: .5; } }
+</style>
+</head>
+<body>
+<div class="tip"><b>海报原图</b>1080 宽 · 与工作台预览使用同一套渲染代码（前后端一致） · 右键图片区域可另存 / 正式版由服务端无头渲染输出 PNG <button onclick="window.print()">打印 / 存为 PDF</button></div>
+<div id="out"></div>
+<script src="shared/engine.js"></script>
+<script>
+  const qp = new URLSearchParams(location.search);
+  let spec = null; try { spec = AP.decode(qp.get("d")); } catch (e) {}
+  if (!spec) spec = AP.mockPlan(AP.SCENES[1].example, { assets: AP.sampleAssets, brand: AP.defaultBrand });
+  let assets = AP.sampleAssets; try { const st = JSON.parse(localStorage.getItem("ap-assets") || "null"); if (st && st.length) assets = st.concat(AP.sampleAssets.filter((a) => !st.some((b) => b.id === a.id))); } catch (e) {}
+  document.getElementById("out").innerHTML = AP.renderPoster(spec, { assets, brand: AP.defaultBrand, date: "2026.09.16" }, 1080);
+</script>
+</body>
+</html>

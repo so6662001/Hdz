@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>货袋子 · AI 经营海报（H5 原型）</title>
+<style>
+  :root { --bg: #f4f6fa; --ink: #111827; --mute: #6b7280; --brand: #1f5eff; --accent: #ff6a2b; --line: #e6e9f0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--ink); max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  button { font: inherit; border: 0; background: none; color: inherit; cursor: pointer; } textarea, input { font: inherit; }
+  .nav { height: 48px; display: flex; align-items: center; padding: 0 12px; background: #fff; border-bottom: 1px solid var(--line); flex: none; gap: 8px; }
+  .nav b { font-size: 16px; flex: 1; text-align: center; } .nav button { width: 40px; height: 40px; font-size: 18px; color: var(--mute); } .nav .r { font-size: 12px; color: var(--brand); width: auto; padding: 0 4px; }
+  .page { flex: 1; overflow: auto; display: none; flex-direction: column; } .page.on { display: flex; }
+  /* 第一步 */
+  .sec { padding: 14px 16px 0; } .sec h3 { font-size: 13px; color: var(--mute); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; } .sec h3 a { color: var(--brand); font-weight: 500; font-size: 12px; }
+  .scenes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; } .scenes button { background: #fff; border-radius: 12px; padding: 10px 4px 8px; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 1.5px solid transparent; color: #374151; } .scenes button span { font-size: 22px; } .scenes button.on { border-color: var(--brand); background: #eef3ff; color: var(--brand); font-weight: 700; }
+  .ta { background: #fff; border-radius: 14px; padding: 12px; border: 1.5px solid var(--line); } .ta textarea { width: 100%; min-height: 96px; border: 0; resize: none; font-size: 15px; line-height: 1.6; outline: none; } .ta .ex { font-size: 12px; color: var(--mute); border-top: 1px dashed var(--line); padding-top: 8px; display: flex; gap: 8px; align-items: center; } .ta .ex a { color: var(--brand); flex: 1; line-height: 1.5; } .ta .ex button { font-size: 12px; color: var(--mute); background: #f1f3f8; padding: 5px 10px; border-radius: 999px; flex: none; }
+  .assets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; } .ast { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: #fff; border: 2px solid transparent; } .ast img { width: 100%; height: 100%; object-fit: cover; display: block; } .ast.logo img { object-fit: contain; padding: 8px; } .ast small { position: absolute; left: 0; right: 0; bottom: 0; font-size: 9px; padding: 2px 4px; background: rgba(0,0,0,.55); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ast.on { border-color: var(--brand); } .ast.up::after { content: "新"; position: absolute; top: 3px; right: 3px; font-size: 9px; background: var(--accent); color: #fff; padding: 1px 4px; border-radius: 4px; }
+  .ast.add { border: 1.5px dashed #c7d0e0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--mute); font-size: 11px; background: #fafbfe; } .ast.add span { font-size: 22px; line-height: 1; margin-bottom: 4px; }
+  .brand { background: #fff; border-radius: 14px; padding: 4px 12px; } .brand .row { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; } .brand .row:last-child { border: 0; } .brand .row label { width: 52px; color: var(--mute); font-size: 12px; } .brand .row input { flex: 1; border: 0; outline: none; text-align: right; font-size: 13px; }
+  .foot { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid var(--line); flex: none; }
+  .btn { width: 100%; height: 48px; border-radius: 12px; background: var(--brand); color: #fff; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; } .btn small { font-size: 11px; opacity: .8; font-weight: 500; }
+  /* 生成中 */
+  .gen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+  .gen .orb { width: 96px; height: 96px; border-radius: 50%; background: conic-gradient(from 0deg, var(--brand), var(--accent), #ffd166, var(--brand)); animation: spin 1.6s linear infinite; position: relative; margin-bottom: 22px; } .gen .orb::after { content: "🎨"; position: absolute; inset: 8px; border-radius: 50%; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 34px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .gen h2 { font-size: 18px; margin-bottom: 4px; } .gen p { font-size: 12px; color: var(--mute); margin-bottom: 20px; }
+  .steps { width: 100%; background: #fff; border-radius: 14px; padding: 6px 14px; }
+  .step { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--line); opacity: .4; font-size: 13px; } .step:last-child { border: 0; } .step.on, .step.done { opacity: 1; }
+  .step i { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #c7d0e0; flex: none; display: flex; align-items: center; justify-content: center; font-size: 10px; font-style: normal; } .step.on i { border-color: var(--brand); border-top-color: transparent; animation: spin .8s linear infinite; } .step.done i { background: #07c160; border-color: #07c160; color: #fff; }
+  .step b { display: block; } .step small { color: var(--mute); font-size: 11px; } .step em { font-style: normal; font-size: 10px; color: var(--brand); background: #eef3ff; padding: 1px 5px; border-radius: 4px; margin-left: 4px; }
+  /* 结果 */
+  .result { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .view { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 14px 16px 6px; min-height: 0; }
+  .frame { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.18); background: #fff; } .frame .inner { transform-origin: 0 0; position: absolute; left: 0; top: 0; }
+  .arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.9); box-shadow: 0 2px 8px rgba(0,0,0,.15); font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--ink); } .arrow.l { left: 6px; } .arrow.r { right: 6px; } .arrow[disabled] { opacity: .3; }
+  .meta { display: flex; justify-content: space-between; align-items: center; padding: 6px 16px; font-size: 12px; color: var(--mute); } .meta b { color: var(--ink); } .meta .dots { display: flex; gap: 4px; } .meta .dots i { width: 6px; height: 6px; border-radius: 50%; background: #c7d0e0; } .meta .dots i.on { background: var(--brand); width: 14px; border-radius: 3px; }
+  .acts { display: flex; gap: 8px; padding: 6px 16px; } .acts button { flex: 1; height: 38px; border-radius: 10px; background: #fff; border: 1px solid var(--line); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; } .acts button.pri { background: #07c160; color: #fff; border-color: #07c160; }
+  .chatbox { background: #fff; border-top: 1px solid var(--line); flex: none; max-height: 46%; display: flex; flex-direction: column; }
+  .msgs { overflow: auto; padding: 10px 14px 4px; display: flex; flex-direction: column; gap: 8px; max-height: 150px; } .msg { font-size: 12px; line-height: 1.55; padding: 8px 11px; border-radius: 10px; max-width: 88%; } .msg.ai { background: #f3f5f9; align-self: flex-start; border-top-left-radius: 3px; } .msg.user { background: var(--brand); color: #fff; align-self: flex-end; border-top-right-radius: 3px; } .msg .ch { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; } .msg .ch span { font-size: 10px; background: #fff; border: 1px solid var(--line); padding: 2px 7px; border-radius: 999px; } .msg .ch span.re { color: var(--accent); border-color: #ffd7c2; }
+  .msg .note { margin-top: 6px; font-size: 11px; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; padding: 5px 8px; border-radius: 8px; }
+  .quick { display: flex; gap: 6px; overflow-x: auto; padding: 8px 14px 4px; } .quick button { flex: none; font-size: 12px; padding: 6px 11px; border-radius: 999px; background: #f1f3f8; color: #374151; }
+  .input { display: flex; gap: 8px; padding: 8px 14px calc(10px + env(safe-area-inset-bottom)); align-items: flex-end; } .input textarea { flex: 1; min-height: 40px; max-height: 96px; border: 1.5px solid var(--line); border-radius: 12px; padding: 9px 12px; font-size: 14px; line-height: 1.4; resize: none; outline: none; } .input textarea:focus { border-color: var(--brand); } .input button { width: 40px; height: 40px; border-radius: 12px; background: var(--brand); color: #fff; font-size: 16px; flex: none; } .input button.mic { background: #f1f3f8; color: var(--ink); }
+  .toast { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%); background: rgba(17,17,17,.92); color: #fff; padding: 9px 14px; border-radius: 10px; font-size: 12px; opacity: 0; transition: .25s; pointer-events: none; z-index: 9; max-width: 86vw; text-align: center; } .toast.show { opacity: 1; }
+  .sheet { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: flex-end; justify-content: center; z-index: 8; } .sheet.show { display: flex; } .sheet .card { width: 100%; max-width: 480px; background: #fff; border-radius: 18px 18px 0 0; padding: 16px 16px calc(20px + env(safe-area-inset-bottom)); } .sheet h4 { font-size: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; } .sheet h4 a { font-size: 13px; color: var(--mute); font-weight: 500; }
+  .sheet .g { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; text-align: center; font-size: 11px; color: #374151; } .sheet .g button { display: flex; flex-direction: column; align-items: center; gap: 6px; } .sheet .g span { width: 50px; height: 50px; border-radius: 14px; background: #f1f3f8; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .proto { position: fixed; left: 8px; bottom: 8px; font-size: 9px; color: #fff; background: rgba(0,0,0,.45); padding: 2px 6px; border-radius: 4px; z-index: 5; }
+</style>
+</head>
+<body>
+<div class="nav"><button onclick="back()">‹</button><b id="title">AI 经营海报</b><button class="r" id="navR" onclick="restart()">重新开始</button></div>
+<div class="proto">H5 原型 · 大模型为规则模拟</div>
+
+<!-- 第一步：需求 -->
+<div class="page on" id="p-input">
+  <div class="sec"><h3>想做什么海报？<a onclick="setScene(null)">不选，让 AI 识别</a></h3><div class="scenes" id="scenes"></div></div>
+  <div class="sec"><h3>用一句话描述需求</h3>
+    <div class="ta"><textarea id="prompt" placeholder="例如：招 5 名钢材销售，底薪 6000 加高提成，五险包住，电话 138 0000 8888。可以说风格：喜庆 / 商务 / 简洁 / 黑金…"></textarea>
+      <div class="ex"><a id="exLink" onclick="useExample()">💡 试试示例：招 5 名钢材销售，底薪 6000 加高提成…</a><button onclick="toast('原型：调用微信 JS-SDK 语音识别，说话即输入')">🎤 语音</button></div></div>
+  </div>
+  <div class="sec"><h3>素材（选一张做主视觉，Logo 自动带上）<a onclick="$('file').click()">上传</a></h3><div class="assets" id="assets"></div><input type="file" id="file" accept="image/*" multiple hidden></div>
+  <div class="sec" style="padding-bottom:16px"><h3>品牌信息（已保存，海报自动带上）<a onclick="$('b-company').focus()">编辑</a></h3>
+    <div class="brand" id="brand">
+      <div class="row"><label>企业</label><input id="b-company"></div><div class="row"><label>联系人</label><input id="b-person"></div><div class="row"><label>电话</label><input id="b-phone"></div><div class="row"><label>地址</label><input id="b-addr"></div>
+    </div>
+  </div>
+</div>
+<div class="foot" id="f-input"><button class="btn" onclick="generate()">✨ 生成海报 <small>约 6~10 秒</small></button></div>
+
+<!-- 第二步：生成中 -->
+<div class="page" id="p-gen"><div class="gen"><div class="orb"></div><h2 id="gtitle">AI 正在设计你的海报</h2><p id="gsub">理解需求 → 设计版式 → 生成视觉 → 精确排版 → 质检</p><div class="steps" id="steps"></div></div></div>
+
+<!-- 第三步：结果 + 微调 -->
+<div class="page" id="p-result"><div class="result">
+  <div class="view" id="view"><button class="arrow l" id="prev" onclick="goVer(S.cur-1)">‹</button><div class="frame" id="frame"><div class="inner" id="inner"></div></div><button class="arrow r" id="next" onclick="goVer(S.cur+1)">›</button></div>
+  <div class="meta"><span id="minfo"></span><span class="dots" id="dots"></span></div>
+  <div class="acts"><button onclick="openSheet()">⚙ 画幅 / 版式</button><button onclick="regen()">🎲 再来一版</button><button onclick="exportPng()">⤓ 保存原图</button><button class="pri" onclick="toast('原型：调用微信 JS-SDK，海报图分享到会话 / 朋友圈')">分享微信</button></div>
+  <div class="chatbox">
+    <div class="msgs" id="msgs"></div>
+    <div class="quick" id="quick"></div>
+    <div class="input"><button class="mic" onclick="toast('原型：语音说「字大一点，换成红色」即可微调')">🎤</button><textarea id="refine" rows="1" placeholder="怎么改？如：字大一点 / 换成红色"></textarea><button onclick="sendRefine()">➤</button></div>
+  </div>
+</div></div>
+
+<div class="sheet" id="sheet" onclick="if(event.target===this)this.classList.remove('show')"><div class="card"><h4>画幅与版式 <a onclick="$('sheet').classList.remove('show')">关闭</a></h4>
+  <div class="g"><button onclick="quick('改成 3:4 朋友圈')"><span>▯</span>3:4 朋友圈</button><button onclick="quick('改成竖屏 9:16')"><span>▮</span>9:16 竖屏</button><button onclick="quick('改成 1:1 方图')"><span>▢</span>1:1 方图</button><button onclick="quick('换个版式')"><span>⇄</span>换个版式</button></div>
+  <h4 style="margin-top:16px">风格</h4>
+  <div class="g" id="styles"></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script src="shared/engine.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const S = { assets: AP.sampleAssets.map((a) => Object.assign({}, a)), brand: Object.assign({}, AP.defaultBrand), scene: null, photoPick: null, versions: [], cur: -1, page: "input", busy: false };
+  const ctx = () => ({ assets: S.assets, brand: S.brand, scene: S.scene, ratio: "3:4", date: "2026.09.16" });
+  const toast = (m) => { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2200); }; window.toast = toast;
+  const cur = () => S.versions[S.cur] && S.versions[S.cur].spec;
+
+  function show(p) { S.page = p; ["input", "gen", "result"].forEach((k) => $("p-" + k).classList.toggle("on", k === p)); $("f-input").style.display = p === "input" ? "" : "none"; $("title").textContent = { input: "AI 经营海报", gen: "生成中", result: "海报预览" }[p]; $("navR").style.display = p === "result" ? "" : "none"; }
+  window.back = () => { if (S.page === "result") show("input"); else toast("返回营销工具首页（原型）"); };
+  window.restart = () => { show("input"); };
+
+  /* 场景 */
+  $("scenes").innerHTML = AP.SCENES.map((s) => `<button data-id="${s.id}" onclick="setScene('${s.id}')"><span>${s.icon}</span>${s.name}</button>`).join("");
+  window.setScene = (id) => { S.scene = S.scene === id ? null : id; document.querySelectorAll("#scenes button").forEach((b) => b.classList.toggle("on", b.dataset.id === S.scene)); const sc = AP.SCENES.find((s) => s.id === S.scene) || AP.SCENES[0]; $("exLink").textContent = `💡 试试示例：${sc.example.slice(0, 22)}…`; };
+  window.useExample = () => { const sc = AP.SCENES.find((s) => s.id === S.scene) || AP.SCENES[0]; $("prompt").value = sc.example; };
+
+  /* 素材 */
+  function renderAssets() { $("assets").innerHTML = S.assets.map((a) => `<div class="ast ${a.type === "logo" ? "logo" : ""} ${a.uploaded ? "up" : ""} ${S.photoPick === a.id ? "on" : ""}" onclick="pick('${a.id}')"><img src="${a.url}"><small>${AP.esc(a.name)}</small></div>`).join("") + `<div class="ast add" onclick="$('file').click()"><span>＋</span>上传 / 拍照</div>`; }
+  window.pick = (id) => { const a = S.assets.find((x) => x.id === id); if (a.type === "logo") return toast("Logo 自动用于海报左上角"); S.photoPick = S.photoPick === id ? null : id; renderAssets(); };
+  $("file").addEventListener("change", (e) => { [...e.target.files].filter((f) => f.type.startsWith("image/")).forEach((f) => { const rd = new FileReader(); rd.onload = () => { const id = "up_" + Date.now(); S.assets.push({ id, type: "photo", name: f.name.replace(/\.[^.]+$/, "").slice(0, 8), tags: ["上传", "实拍"], url: rd.result, uploaded: true }); S.photoPick = id; renderAssets(); toast("已上传，已设为主视觉 · 正式版自动抠图与打标"); }; rd.readAsDataURL(f); }); });
+  [["company", "b-company"], ["person", "b-person"], ["phone", "b-phone"], ["addr", "b-addr"]].forEach(([k, id]) => { $(id).value = S.brand[k]; $(id).addEventListener("input", () => (S.brand[k] = $(id).value)); });
+
+  /* 生成 */
+  function runSteps(keys, per, done, title, sub) {
+    show("gen"); $("gtitle").textContent = title; $("gsub").textContent = sub; const steps = AP.STEPS.filter((s) => keys.includes(s.k));
+    const paint = (i) => { $("steps").innerHTML = steps.map((s, j) => `<div class="step ${j < i ? "done" : j === i ? "on" : ""}"><i>${j < i ? "✓" : ""}</i><div><b>${s.t}<em>${s.model}</em></b><small>${s.d}</small></div></div>`).join(""); };
+    let i = 0; paint(0); const tick = () => { i++; if (i < steps.length) { paint(i); setTimeout(tick, per); } else { paint(i); setTimeout(done, 300); } }; setTimeout(tick, per);
+  }
+  window.generate = (fast) => {
+    const t = $("prompt").value.trim(); if (!t) return toast("先用一句话描述你要的海报");
+    const go = () => { const spec = AP.mockPlan(t, ctx()); if (S.photoPick) { spec.assets.photo = S.photoPick; if (spec.layout !== "split") spec.layout = "split"; } S.versions = [{ spec, label: "生成" }]; S.cur = 0; $("msgs").innerHTML = ""; aiMsg(`${spec._meta.reason} 直接告诉我怎么改就行。`, [`${spec._meta.sceneName}`, `${spec._meta.styleName}`, AP.LAYOUT_NAMES[spec.layout]], true, spec.notes); show("result"); draw(); };
+    fast ? go() : runSteps(["understand", "plan", "visual", "render", "qa"], 560, go, "AI 正在设计你的海报", "理解需求 → 设计版式 → 生成视觉 → 精确排版 → 质检");
+  };
+  function push(spec, label) { S.versions = S.versions.slice(0, S.cur + 1); S.versions.push({ spec, label }); S.cur = S.versions.length - 1; draw(); }
+  window.goVer = (i) => { if (i < 0 || i >= S.versions.length) return; S.cur = i; draw(); };
+  window.regen = () => { const sp = AP.clone(cur()); const keys = Object.keys(AP.STYLES); const ns = keys[(keys.indexOf(sp.style) + 3) % keys.length]; sp.style = ns; sp.palette = AP.clone(AP.STYLES[ns].palette); sp.bgfx = AP.STYLES[ns].bgfx; const L = ["hero", "list", "card", "split"]; sp.layout = L[(L.indexOf(sp.layout) + 1) % L.length]; if (sp.layout === "split" && !sp.assets.photo) sp.layout = "hero"; runSteps(["plan", "visual", "render"], 420, () => { push(sp, "再来一版"); show("result"); aiMsg(`换了一种思路：「${AP.STYLES[ns].name}」+「${AP.LAYOUT_NAMES[sp.layout]}」。左右滑动可对比各版。`, [AP.STYLES[ns].name, AP.LAYOUT_NAMES[sp.layout]], true); }, "换一种思路", "重新设计版式与视觉"); };
+
+  /* 渲染 */
+  function draw() {
+    const spec = cur(); if (!spec) return; const [w, h] = AP.RATIOS[spec.ratio]; const v = $("view"); const maxW = v.clientWidth - 32, maxH = v.clientHeight - 20; const sc = Math.min(maxW / w, maxH / h);
+    const fr = $("frame"); fr.style.width = w * sc + "px"; fr.style.height = h * sc + "px"; $("inner").style.transform = `scale(${sc})`; $("inner").innerHTML = AP.renderPoster(spec, ctx(), w);
+    $("minfo").innerHTML = `v${S.cur + 1}/${S.versions.length} · <b>${AP.esc(S.versions[S.cur].label)}</b> · ${AP.STYLES[spec.style].name} · ${spec.ratio}`;
+    $("dots").innerHTML = S.versions.map((_, i) => `<i class="${i === S.cur ? "on" : ""}"></i>`).join(""); $("prev").disabled = S.cur === 0; $("next").disabled = S.cur === S.versions.length - 1;
+  }
+  window.addEventListener("resize", () => S.page === "result" && draw());
+  let tx = null; $("view").addEventListener("touchstart", (e) => (tx = e.touches[0].clientX), { passive: true }); $("view").addEventListener("touchend", (e) => { if (tx == null) return; const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) goVer(S.cur + (dx < 0 ? 1 : -1)); tx = null; });
+
+  /* 对话微调 */
+  function aiMsg(text, changes, regen, notes) { const d = document.createElement("div"); d.className = "msg ai"; d.innerHTML = `${AP.esc(text)}${changes && changes.length ? `<div class="ch">${changes.map((c) => `<span>${AP.esc(c)}</span>`).join("")}${regen ? '<span class="re">已重绘背景</span>' : ""}</div>` : ""}${notes && notes.length ? `<div class="note">⚠ ${notes.map(AP.esc).join("<br>⚠ ")}</div>` : ""}`; $("msgs").appendChild(d); $("msgs").scrollTop = 1e9; }
+  function userMsg(t) { const d = document.createElement("div"); d.className = "msg user"; d.textContent = t; $("msgs").appendChild(d); $("msgs").scrollTop = 1e9; }
+  window.sendRefine = (fast) => { const t = $("refine").value.trim(); if (!t || S.busy) return; $("refine").value = ""; userMsg(t); const r = AP.mockRefine(cur(), t, ctx()); const go = () => { push(r.spec, t.slice(0, 6)); show("result"); draw(); aiMsg(r.reply, r.changes, r.regen); }; if (fast) return go(); if (r.regen) runSteps(["understand", "visual", "render", "qa"], 340, go, "正在应用修改", "理解指令 → 重绘视觉 → 精确排版 → 质检"); else { S.busy = true; setTimeout(() => { S.busy = false; go(); }, 350); } };
+  window.quick = (c) => { $("sheet").classList.remove("show"); $("refine").value = c; sendRefine(); };
+  $("quick").innerHTML = AP.quickChips.map((c) => `<button onclick="quick('${c}')">${c}</button>`).join("");
+  $("styles").innerHTML = Object.entries(AP.STYLES).map(([k, v]) => `<button onclick="quick('换成${v.name}风格')"><span style="background:linear-gradient(135deg,${v.palette.bg2},${v.palette.accent})"></span>${v.name}</button>`).join("");
+  $("refine").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendRefine(); } });
+  window.openSheet = () => $("sheet").classList.add("show");
+  window.exportPng = () => { try { localStorage.setItem("ap-assets", JSON.stringify(S.assets.map((a) => ({ id: a.id, type: a.type, name: a.name, tags: a.tags, url: a.url })))); } catch (e) {} window.open("poster.html?d=" + encodeURIComponent(AP.encode(cur())), "_blank"); toast("原型：正式版在微信内长按保存到相册"); };
+
+  /* 初始化 */
+  renderAssets(); setScene(null); show("input");
+  const qp = new URLSearchParams(location.search);
+  if (qp.get("demo")) { const s = AP.SCENES.find((x) => x.id === qp.get("demo")); if (s) { setScene(s.id); $("prompt").value = qp.get("prompt") || s.example; if (qp.get("step") === "gen") { runSteps(["understand", "plan", "visual", "render", "qa"], 1e6, () => {}, "AI 正在设计你的海报", "理解需求 → 设计版式 → 生成视觉 → 精确排版 → 质检"); setTimeout(() => { document.querySelectorAll(".step")[0].className = "step done"; document.querySelectorAll(".step")[0].querySelector("i").textContent = "✓"; document.querySelectorAll(".step")[1].className = "step done"; document.querySelectorAll(".step")[1].querySelector("i").textContent = "✓"; document.querySelectorAll(".step")[2].className = "step on"; }, 50); } else if (qp.get("step") !== "input") { generate(true); (qp.get("refine") || "").split("|").filter(Boolean).forEach((r) => { $("refine").value = r; sendRefine(true); }); } } }
+</script>
+</body>
+</html>

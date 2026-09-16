@@ -1,0 +1,44 @@
+# AI 企业经营海报 · 高保真原型
+
+> 用户上传素材库 → 输入一句需求 → AI 生成海报 → 自然语言反复微调；支持 PC 与 H5。
+> 设计方案：[`docs/ai-poster/01-方案-AI企业经营海报生成.md`](../../docs/ai-poster/01-方案-AI企业经营海报生成.md)。
+> 纯前端、无构建、无外部依赖。原型中的"大模型"由规则模拟（`shared/engine.js` 的 `mockPlan / mockRefine`），正式实现时替换为 ModelGateway 调用，渲染引擎可直接复用。
+
+## 打开方式
+
+```bash
+cd prototypes/ai-poster && python3 -m http.server 8080
+# http://localhost:8080/index.html
+```
+
+| 文件 | 说明 |
+|------|------|
+| `index.html` | 总览与入口 |
+| `pc.html` | PC 三栏工作台：素材库（可真实上传，拖拽）与品牌信息、场景；画布 / 画幅 / 版本条 / 生成过程；对话式生成与微调、设计 JSON 查看、导出、保存模板。`?demo=<场景id>&refine=指令1|指令2&ratio=9:16` 可直达某状态 |
+| `h5.html` | 手机端分步：需求页（场景九宫格 / 一句话 / 素材 / 品牌）→ 生成过程 → 结果页（左右滑动切换版本、底部对话微调、快捷 chips、画幅与风格面板、保存 / 分享）。`?demo=<场景id>&step=input|gen|result&refine=…` |
+| `poster.html` | 1080 宽原图渲染页（`?d=<base64 设计 JSON>`），与预览同一套渲染代码 |
+| `shared/engine.js` | 场景库（12 类）、风格库（8 套）、模拟规划 / 微调、渲染引擎（4 版式 × 3 画幅） |
+
+## 原型支持的微调指令（规则模拟）
+
+- 文本：`标题改为「…」`、`副标题改为…`、`电话改成 139…`、`地址改成…`、`联系人改成…`、`价格改成 3690`、`薪资 8K~15K`、`把 A 改成 B`、`换一种说法`
+- 排版：`字大一点 / 小一点`、`更简洁 / 更丰富`、`换个版式`、`版式改成 上图下文 / 大字 / 要点 / 卡片`
+- 风格：`红色 / 喜庆 / 商务 / 工业 / 简洁 / 科技 / 黑金 / 国风 / 绿色`、`换个背景`、`背景亮一点`、`加点金色粒子`、`再好看一点`
+- 元素：`加 / 去掉 二维码`、`去掉地址`、`去掉电话`、`去掉 Logo`、`去掉副标题`、`去掉图片`、`用第二张图`、`换成刚上传的图`
+- 画幅：`改成竖屏 9:16`、`改成 1:1 方图`、`改成 3:4 朋友圈`
+- 版本：工作台「撤销」、版本条点击；H5 左右滑动
+
+## 12 类场景
+
+招聘 · 促销特价 · 节日祝福 · 开业周年 · 企业介绍 · 产品目录 · 资质荣誉 · 活动邀请 · 到货通知 · 客户感谢 · 招商合作 · 通知公告（每类内置示例提示词与文案模板；正式版由大模型生成文案）。
+
+## 与正式实现的对应关系
+
+| 原型 | 正式实现 |
+|------|---------|
+| `AP.mockPlan(prompt, ctx)` | `ModelGateway.plan()` → 豆包 Seed 2.0 Pro（备：Qwen3.5 Plus），JSON Schema 约束输出 |
+| `AP.mockRefine(spec, instr)` | `ModelGateway.refine()` → Seed 2.0 Lite 输出 JSON Patch |
+| CSS 渐变 / 图案背景（`bgLayer`） | `ModelGateway.genImage()` → Seedream 5.0（备：Qwen-Image 2.0）生成无文字背景，按 `visual.prompt + seed` 缓存 |
+| `AP.renderPoster()` | 同一份渲染代码：浏览器预览 + 服务端无头渲染导出 PNG |
+| 生成过程步骤动画 | SSE 流式事件：understand / plan / visual / render / qa |
+| `localStorage` 模板 | `poster_template` 表，企业 / 团队 / 平台三级 |
