@@ -15,6 +15,7 @@
   .page { flex: 1; overflow: auto; display: none; flex-direction: column; } .page.on { display: flex; }
   /* 第一步 */
   .sec { padding: 14px 16px 0; } .sec h3 { font-size: 13px; color: var(--mute); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; } .sec h3 a { color: var(--brand); font-weight: 500; font-size: 12px; }
+  .gtabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 10px; padding-bottom: 2px; -webkit-overflow-scrolling: touch; } .gtabs::-webkit-scrollbar { display: none; } .gtabs button { flex: none; font-size: 12px; padding: 6px 12px; border-radius: 999px; background: #fff; color: #374151; border: 1px solid var(--line); } .gtabs button.on { background: var(--ink); color: #fff; border-color: var(--ink); } .gtabs button i { font-style: normal; font-size: 10px; opacity: .7; margin-left: 2px; }
   .scenes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; } .scenes button { background: #fff; border-radius: 12px; padding: 10px 4px 8px; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 1.5px solid transparent; color: #374151; } .scenes button span { font-size: 22px; } .scenes button.on { border-color: var(--brand); background: #eef3ff; color: var(--brand); font-weight: 700; }
   .ta { background: #fff; border-radius: 14px; padding: 12px; border: 1.5px solid var(--line); } .ta textarea { width: 100%; min-height: 96px; border: 0; resize: none; font-size: 15px; line-height: 1.6; outline: none; } .ta .ex { font-size: 12px; color: var(--mute); border-top: 1px dashed var(--line); padding-top: 8px; display: flex; gap: 8px; align-items: center; } .ta .ex a { color: var(--brand); flex: 1; line-height: 1.5; } .ta .ex button { font-size: 12px; color: var(--mute); background: #f1f3f8; padding: 5px 10px; border-radius: 999px; flex: none; }
   .assets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; } .ast { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: #fff; border: 2px solid transparent; } .ast img { width: 100%; height: 100%; object-fit: cover; display: block; } .ast.logo img { object-fit: contain; padding: 8px; } .ast small { position: absolute; left: 0; right: 0; bottom: 0; font-size: 9px; padding: 2px 4px; background: rgba(0,0,0,.55); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ast.on { border-color: var(--brand); } .ast.up::after { content: "新"; position: absolute; top: 3px; right: 3px; font-size: 9px; background: var(--accent); color: #fff; padding: 1px 4px; border-radius: 4px; }
@@ -55,7 +56,7 @@
 
 <!-- 第一步：需求 -->
 <div class="page on" id="p-input">
-  <div class="sec"><h3>想做什么海报？<a onclick="setScene(null)">不选，让 AI 识别</a></h3><div class="scenes" id="scenes"></div></div>
+  <div class="sec"><h3>想做什么海报？<a onclick="setScene(null)">不选，让 AI 识别</a></h3><div class="gtabs" id="gtabs"></div><div class="scenes" id="scenes"></div></div>
   <div class="sec"><h3>用一句话描述需求</h3>
     <div class="ta"><textarea id="prompt" placeholder="例如：招 5 名钢材销售，底薪 6000 加高提成，五险包住，电话 138 0000 8888。可以说风格：喜庆 / 商务 / 简洁 / 黑金…"></textarea>
       <div class="ex"><a id="exLink" onclick="useExample()">💡 试试示例：招 5 名钢材销售，底薪 6000 加高提成…</a><button onclick="toast('原型：调用微信 JS-SDK 语音识别，说话即输入')">🎤 语音</button></div></div>
@@ -85,7 +86,7 @@
 </div></div>
 
 <div class="sheet" id="sheet" onclick="if(event.target===this)this.classList.remove('show')"><div class="card"><h4>画幅与版式 <a onclick="$('sheet').classList.remove('show')">关闭</a></h4>
-  <div class="g"><button onclick="quick('改成 3:4 朋友圈')"><span>▯</span>3:4 朋友圈</button><button onclick="quick('改成竖屏 9:16')"><span>▮</span>9:16 竖屏</button><button onclick="quick('改成 1:1 方图')"><span>▢</span>1:1 方图</button><button onclick="quick('换个版式')"><span>⇄</span>换个版式</button></div>
+  <div class="g"><button onclick="quick('改成 3:4 朋友圈')"><span>▯</span>3:4 朋友圈</button><button onclick="quick('改成竖屏 9:16')"><span>▮</span>9:16 竖屏</button><button onclick="quick('改成 1:1 方图')"><span>▢</span>1:1 方图</button><button onclick="quick('换个版式')"><span>⇄</span>换个版式</button><button onclick="quick('全图铺满')"><span>🖼</span>全图实拍</button><button onclick="quick('多图拼贴')"><span>▦</span>多图拼贴</button><button onclick="quick('版式改成要点')"><span>☰</span>要点卡</button><button onclick="quick('版式改成卡片')"><span>▣</span>居中卡片</button></div>
   <h4 style="margin-top:16px">风格</h4>
   <div class="g" id="styles"></div>
 </div></div>
@@ -104,8 +105,11 @@
   window.restart = () => { show("input"); };
 
   /* 场景 */
-  $("scenes").innerHTML = AP.SCENES.map((s) => `<button data-id="${s.id}" onclick="setScene('${s.id}')"><span>${s.icon}</span>${s.name}</button>`).join("");
-  window.setScene = (id) => { S.scene = S.scene === id ? null : id; document.querySelectorAll("#scenes button").forEach((b) => b.classList.toggle("on", b.dataset.id === S.scene)); const sc = AP.SCENES.find((s) => s.id === S.scene) || AP.SCENES[0]; $("exLink").textContent = `💡 试试示例：${sc.example.slice(0, 22)}…`; };
+  S.group = AP.GROUPS[0].id;
+  function renderScenes() { $("gtabs").innerHTML = AP.GROUPS.map((g) => `<button class="${S.group === g.id ? "on" : ""}" onclick="setGroup('${g.id}')">${g.name}<i>${AP.SCENES.filter((s) => s.g === g.id).length}</i></button>`).join(""); $("scenes").innerHTML = AP.SCENES.filter((s) => s.g === S.group).map((s) => `<button data-id="${s.id}" class="${S.scene === s.id ? "on" : ""}" onclick="setScene('${s.id}')"><span>${s.icon}</span>${s.name}</button>`).join(""); }
+  window.setGroup = (id) => { S.group = id; renderScenes(); };
+  renderScenes();
+  window.setScene = (id) => { S.scene = S.scene === id ? null : id; if (S.scene) S.group = AP.SCENES.find((s) => s.id === S.scene).g; renderScenes(); const sc = AP.SCENES.find((s) => s.id === S.scene) || AP.SCENES[0]; $("exLink").textContent = `💡 试试示例：${sc.example.slice(0, 22)}…`; };
   window.useExample = () => { const sc = AP.SCENES.find((s) => s.id === S.scene) || AP.SCENES[0]; $("prompt").value = sc.example; };
 
   /* 素材 */
@@ -122,12 +126,12 @@
   }
   window.generate = (fast) => {
     const t = $("prompt").value.trim(); if (!t) return toast("先用一句话描述你要的海报");
-    const go = () => { const spec = AP.mockPlan(t, ctx()); if (S.photoPick) { spec.assets.photo = S.photoPick; if (spec.layout !== "split") spec.layout = "split"; } S.versions = [{ spec, label: "生成" }]; S.cur = 0; $("msgs").innerHTML = ""; aiMsg(`${spec._meta.reason} 直接告诉我怎么改就行。`, [`${spec._meta.sceneName}`, `${spec._meta.styleName}`, AP.LAYOUT_NAMES[spec.layout]], true, spec.notes); show("result"); draw(); };
+    const go = () => { const spec = AP.mockPlan(t, ctx()); if (S.photoPick) { spec.assets.photo = S.photoPick; spec.assets.photos = [S.photoPick, ...(spec.assets.photos || []).filter((x) => x !== S.photoPick)].slice(0, 3); if (!["split", "photo", "gallery"].includes(spec.layout)) spec.layout = "split"; } S.versions = [{ spec, label: "生成" }]; S.cur = 0; $("msgs").innerHTML = ""; aiMsg(`${spec._meta.reason} 直接告诉我怎么改就行。`, [`${spec._meta.sceneName}`, `${spec._meta.styleName}`, AP.LAYOUT_NAMES[spec.layout]], true, spec.notes); show("result"); draw(); };
     fast ? go() : runSteps(["understand", "plan", "visual", "render", "qa"], 560, go, "AI 正在设计你的海报", "理解需求 → 设计版式 → 生成视觉 → 精确排版 → 质检");
   };
   function push(spec, label) { S.versions = S.versions.slice(0, S.cur + 1); S.versions.push({ spec, label }); S.cur = S.versions.length - 1; draw(); }
   window.goVer = (i) => { if (i < 0 || i >= S.versions.length) return; S.cur = i; draw(); };
-  window.regen = () => { const sp = AP.clone(cur()); const keys = Object.keys(AP.STYLES); const ns = keys[(keys.indexOf(sp.style) + 3) % keys.length]; sp.style = ns; sp.palette = AP.clone(AP.STYLES[ns].palette); sp.bgfx = AP.STYLES[ns].bgfx; const L = ["hero", "list", "card", "split"]; sp.layout = L[(L.indexOf(sp.layout) + 1) % L.length]; if (sp.layout === "split" && !sp.assets.photo) sp.layout = "hero"; runSteps(["plan", "visual", "render"], 420, () => { push(sp, "再来一版"); show("result"); aiMsg(`换了一种思路：「${AP.STYLES[ns].name}」+「${AP.LAYOUT_NAMES[sp.layout]}」。左右滑动可对比各版。`, [AP.STYLES[ns].name, AP.LAYOUT_NAMES[sp.layout]], true); }, "换一种思路", "重新设计版式与视觉"); };
+  window.regen = () => { const sp = AP.clone(cur()); const keys = Object.keys(AP.STYLES); const ns = keys[(keys.indexOf(sp.style) + 3) % keys.length]; sp.style = ns; sp.palette = AP.clone(AP.STYLES[ns].palette); sp.bgfx = AP.STYLES[ns].bgfx; const L = sp.assets.photo ? ["hero", "split", "list", "photo", "card", "gallery"] : ["hero", "list", "card"]; sp.layout = L[(L.indexOf(sp.layout) + 1) % L.length]; if (sp.layout === "gallery" && (sp.assets.photos || []).length < 2) sp.assets.photos = [sp.assets.photo, ...S.assets.filter((a) => a.type !== "logo" && a.id !== sp.assets.photo).map((a) => a.id)].slice(0, 3); runSteps(["plan", "visual", "render"], 420, () => { push(sp, "再来一版"); show("result"); aiMsg(`换了一种思路：「${AP.STYLES[ns].name}」+「${AP.LAYOUT_NAMES[sp.layout]}」。左右滑动可对比各版。`, [AP.STYLES[ns].name, AP.LAYOUT_NAMES[sp.layout]], true); }, "换一种思路", "重新设计版式与视觉"); };
 
   /* 渲染 */
   function draw() {

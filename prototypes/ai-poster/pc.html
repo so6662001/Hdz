@@ -29,6 +29,8 @@
   .field { display: grid; grid-template-columns: 56px 1fr; align-items: center; gap: 8px; margin-bottom: 8px; } .field label { font-size: 12px; color: var(--mute); } .field input { height: 32px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; font-size: 13px; width: 100%; } .field input[type=color] { width: 44px; padding: 2px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; } .chips button { font-size: 12px; padding: 6px 10px; border-radius: 999px; background: #f1f3f8; color: #374151; } .chips button.on { background: var(--ink); color: #fff; }
   .chips button.sc { display: flex; gap: 4px; align-items: center; }
+  .grp { margin-bottom: 10px; } .grp:last-child { margin-bottom: 0; } .grp .gt { font-size: 11px; color: var(--mute); margin-bottom: 6px; display: flex; gap: 6px; align-items: center; } .grp .gt::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .sec .cnt { font-size: 11px; color: var(--mute); font-weight: 500; margin-left: 4px; }
   .stage { display: flex; flex-direction: column; min-width: 0; background: #e9edf3; }
   .bar { height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 16px; background: #fff; border-bottom: 1px solid var(--line); }
   .seg { display: flex; background: #f1f3f8; border-radius: 8px; padding: 3px; } .seg button { padding: 6px 12px; border-radius: 6px; font-size: 12px; color: var(--mute); font-weight: 600; white-space: nowrap; } .seg button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
@@ -86,7 +88,7 @@
       <div class="field"><label>地址</label><input id="b-addr"></div>
       <div class="field"><label>口号</label><input id="b-slogan"></div>
     </div>
-    <div class="sec"><h3>3 · 场景（可不选，AI 会从需求里识别）<a onclick="setScene(null)">清除</a></h3><div class="chips" id="scenes"></div></div>
+    <div class="sec"><h3>3 · 场景<span class="cnt" id="sccnt"></span><a onclick="setScene(null)">清除</a></h3><div class="hint" style="font-size:11px;color:var(--mute);margin:-4px 0 10px">可不选，AI 会从需求里识别；点场景可看示例提示词</div><div id="scenes"></div></div>
   </div>
   <!-- 中：画布 -->
   <div class="stage">
@@ -139,8 +141,9 @@
   [["company", "b-company"], ["short", "b-short"], ["person", "b-person"], ["phone", "b-phone"], ["addr", "b-addr"], ["slogan", "b-slogan"]].forEach(([k, id]) => { $(id).value = S.brand[k]; $(id).addEventListener("input", () => { S.brand[k] = $(id).value; if (S.cur >= 0) { const sp = AP.clone(cur()); sp.contact.company = S.brand.company; sp.contact.person = S.brand.person; sp.contact.phone = S.brand.phone; sp.contact.addr = S.brand.addr; S.versions[S.cur].spec = sp; draw(); } }); });
 
   /* 场景 */
-  $("scenes").innerHTML = AP.SCENES.map((s) => `<button class="sc" data-id="${s.id}" onclick="setScene('${s.id}')">${s.icon} ${s.name}</button>`).join("");
-  window.setScene = (id) => { S.scene = S.scene === id ? null : id; document.querySelectorAll("#scenes button").forEach((b) => b.classList.toggle("on", b.dataset.id === S.scene)); const sc = AP.SCENES.find((s) => s.id === S.scene); if (sc && !$("prompt").value.trim()) { $("prompt").placeholder = `例如：${sc.example}`; } };
+  $("scenes").innerHTML = AP.GROUPS.map((g) => `<div class="grp"><div class="gt">${g.name}</div><div class="chips">${AP.SCENES.filter((s) => s.g === g.id).map((s) => `<button class="sc" data-id="${s.id}" title="${AP.esc(s.example)}" onclick="setScene('${s.id}')">${s.icon} ${s.name}</button>`).join("")}</div></div>`).join("");
+  $("sccnt").textContent = `${AP.GROUPS.length} 类 ${AP.SCENES.length} 场景`;
+  window.setScene = (id) => { S.scene = S.scene === id ? null : id; document.querySelectorAll("#scenes button").forEach((b) => b.classList.toggle("on", b.dataset.id === S.scene)); const sc = AP.SCENES.find((s) => s.id === S.scene); if (sc) { $("prompt").placeholder = `例如：${sc.example}`; if (!$("prompt").value.trim() || AP.SCENES.some((x) => x.example === $("prompt").value.trim())) $("prompt").value = sc.example; } };
 
   /* 画幅 */
   $("ratio").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; S.ratio = b.dataset.r; document.querySelectorAll("#ratio button").forEach((x) => x.classList.toggle("on", x === b)); if (S.cur >= 0) { const sp = AP.clone(cur()); sp.ratio = S.ratio; push(sp, "画幅 " + S.ratio); aiMsg(`画幅改为 ${S.ratio}，背景已按新尺寸扩图重绘。`, [`画幅 ${S.ratio}`], true); } });
@@ -153,7 +156,7 @@
   }
   window.goVer = (i) => { S.cur = i; S.ratio = cur().ratio; document.querySelectorAll("#ratio button").forEach((x) => x.classList.toggle("on", x.dataset.r === S.ratio)); draw(); renderVersions(); };
   window.undo = () => { if (S.cur <= 0) return toast("已是第一版"); goVer(S.cur - 1); toast(`已回到 v${S.cur + 1}，可以从这版继续微调`); };
-  window.regen = () => { if (S.cur < 0) return toast("先生成一版"); const sp = AP.clone(cur()); const keys = Object.keys(AP.STYLES); const i = keys.indexOf(sp.style); const ns = keys[(i + 3) % keys.length]; sp.style = ns; sp.palette = AP.clone(AP.STYLES[ns].palette); sp.bgfx = AP.STYLES[ns].bgfx; sp.visual.seed = (sp.visual.seed + 7) % 10000; const L = ["hero", "list", "card", "split"]; sp.layout = L[(L.indexOf(sp.layout) + 1) % L.length]; if (sp.layout === "split" && !sp.assets.photo) sp.layout = "hero"; runSteps(["plan", "visual", "render", "qa"], 450, () => { push(sp, "再来一版"); aiMsg(`换了一种思路：「${AP.STYLES[ns].name}」风格 + 「${AP.LAYOUT_NAMES[sp.layout]}」版式。喜欢哪一版可以点下方版本切换，或继续微调。`, [`风格 ${AP.STYLES[ns].name}`, `版式 ${AP.LAYOUT_NAMES[sp.layout]}`], true); }); };
+  window.regen = () => { if (S.cur < 0) return toast("先生成一版"); const sp = AP.clone(cur()); const keys = Object.keys(AP.STYLES); const i = keys.indexOf(sp.style); const ns = keys[(i + 3) % keys.length]; sp.style = ns; sp.palette = AP.clone(AP.STYLES[ns].palette); sp.bgfx = AP.STYLES[ns].bgfx; sp.visual.seed = (sp.visual.seed + 7) % 10000; const L = sp.assets.photo ? ["hero", "split", "list", "photo", "card", "gallery"] : ["hero", "list", "card"]; sp.layout = L[(L.indexOf(sp.layout) + 1) % L.length]; if (sp.layout === "gallery" && (sp.assets.photos || []).length < 2) sp.assets.photos = [sp.assets.photo, ...S.assets.filter((a) => a.type !== "logo" && a.id !== sp.assets.photo).map((a) => a.id)].slice(0, 3); runSteps(["plan", "visual", "render", "qa"], 450, () => { push(sp, "再来一版"); aiMsg(`换了一种思路：「${AP.STYLES[ns].name}」风格 + 「${AP.LAYOUT_NAMES[sp.layout]}」版式。喜欢哪一版可以点下方版本切换，或继续微调。`, [`风格 ${AP.STYLES[ns].name}`, `版式 ${AP.LAYOUT_NAMES[sp.layout]}`], true); }); };
 
   /* 渲染 */
   function draw() {
@@ -177,7 +180,7 @@
   }
   function welcome() {
     const d = document.createElement("div"); d.className = "msg ai";
-    d.innerHTML = `<div class="who"><b>AI 设计师</b>· 在线</div>你好，我是货袋子 AI 设计师。左侧上传 Logo / 实拍图，再告诉我要做什么海报，我会根据素材和品牌信息设计版式、写文案、生成背景。试试这些：<div class="ex">${["recruit", "promo", "festival", "intro"].map((id) => { const s = AP.SCENES.find((x) => x.id === id); return `<button onclick="useExample('${id}')">${s.icon} ${AP.esc(s.example)}</button>`; }).join("")}</div>`;
+    d.innerHTML = `<div class="who"><b>AI 设计师</b>· 在线</div>你好，我是货袋子 AI 设计师。左侧上传 Logo / 实拍图，再告诉我要做什么海报，我会根据素材和品牌信息设计版式、写文案、生成背景。试试这些：<div class="ex">${["shipping", "visit", "case", "newproduct", "holidaypromo", "anniversary"].map((id) => { const s = AP.SCENES.find((x) => x.id === id); return `<button onclick="useExample('${id}')">${s.icon} ${AP.esc(s.example)}</button>`; }).join("")}</div>`;
     $("chat").appendChild(d);
   }
   window.useExample = (id) => { const s = AP.SCENES.find((x) => x.id === id); $("prompt").value = s.example; send(); };
@@ -197,7 +200,7 @@
   window.send = (fast) => {
     const t = $("prompt").value.trim(); if (!t || S.busy) return; userMsg(t); $("prompt").value = "";
     if (S.cur < 0 || /^(重新生成|再做一张|新海报|重新做)/.test(t)) {
-      const go = () => { const spec = AP.mockPlan(t.replace(/^(重新生成|再做一张|新海报|重新做)[，,：:]?/, ""), ctx()); if (S.photoPick) { spec.assets.photo = S.photoPick; if (spec.layout !== "split") spec.layout = "split"; } push(spec, "生成"); aiMsg(`${spec._meta.reason} 已生成第 ${S.versions.length} 版。你可以直接说怎么改，比如「字大一点」「换成红色」「电话改成…」。`, [`场景 ${spec._meta.sceneName}`, `风格 ${spec._meta.styleName}`, `版式 ${AP.LAYOUT_NAMES[spec.layout]}`, `画幅 ${spec.ratio}`], true, spec.notes); };
+      const go = () => { const spec = AP.mockPlan(t.replace(/^(重新生成|再做一张|新海报|重新做)[，,：:]?/, ""), ctx()); if (S.photoPick) { spec.assets.photo = S.photoPick; spec.assets.photos = [S.photoPick, ...(spec.assets.photos || []).filter((x) => x !== S.photoPick)].slice(0, 3); if (!["split", "photo", "gallery"].includes(spec.layout)) spec.layout = "split"; } push(spec, "生成"); aiMsg(`${spec._meta.reason} 已生成第 ${S.versions.length} 版。你可以直接说怎么改，比如「字大一点」「换成红色」「电话改成…」。`, [`场景 ${spec._meta.sceneName}`, `风格 ${spec._meta.styleName}`, `版式 ${AP.LAYOUT_NAMES[spec.layout]}`, `画幅 ${spec.ratio}`], true, spec.notes); };
       fast ? go() : runSteps(["understand", "plan", "visual", "render", "qa"], 520, go);
     } else {
       const r = AP.mockRefine(cur(), t, ctx()); const go = () => { push(r.spec, t.slice(0, 8)); if (r.spec.ratio !== S.ratio) { S.ratio = r.spec.ratio; document.querySelectorAll("#ratio button").forEach((x) => x.classList.toggle("on", x.dataset.r === S.ratio)); } aiMsg(r.reply, r.changes, r.regen); };
