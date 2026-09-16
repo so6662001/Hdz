@@ -22,7 +22,10 @@
   let spec = null; try { spec = AP.decode(qp.get("d")); } catch (e) {}
   if (!spec) spec = AP.mockPlan(AP.SCENES[1].example, { assets: AP.sampleAssets, brand: AP.defaultBrand });
   let assets = AP.sampleAssets; try { const st = JSON.parse(localStorage.getItem("ap-assets") || "null"); if (st && st.length) assets = st.concat(AP.sampleAssets.filter((a) => !st.some((b) => b.id === a.id))); } catch (e) {}
-  document.getElementById("out").innerHTML = AP.renderPoster(spec, { assets, brand: AP.defaultBrand, date: "2026.09.16" }, 1080);
+  // ?t=<渠道码>&ch=<渠道名>：分享出图时按渠道码重绘二维码（设计不变）
+  const track = qp.get("t") ? { url: "hdz.cn/q/" + qp.get("t"), ch: qp.get("ch") || "" } : null;
+  if (track) document.querySelector(".tip").insertAdjacentHTML("beforeend", `<span style="background:#0f3d2e;color:#a7f3d0;padding:5px 10px;border-radius:8px">渠道码 <b style="font-family:ui-monospace,monospace">${AP.esc(track.url)}</b>${track.ch ? ` · 首发渠道：${AP.esc(track.ch)}` : ""}</span>`);
+  document.getElementById("out").innerHTML = AP.renderPoster(spec, { assets, brand: AP.defaultBrand, date: "2026.09.16", track }, 1080);
 </script>
 </body>
 </html>

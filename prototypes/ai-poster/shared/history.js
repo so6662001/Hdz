@@ -31,24 +31,49 @@
   H.owner = (id) => H.OWNERS.find((o) => o.id === id) || { id, name: "已离职", role: "", color: "#94a3b8" };
   H.avatar = (id, size) => { const o = H.owner(id); size = size || 18; return `<i class="av" title="${o.name} · ${o.role}" style="display:inline-flex;width:${size}px;height:${size}px;border-radius:50%;background:${o.color};color:#fff;font-style:normal;font-size:${Math.round(size * .55)}px;align-items:center;justify-content:center;font-weight:700;flex:none">${o.name.slice(0, 1)}</i>`; };
 
-  /* ---------- 扫码追踪 ---------- */
-  // 每条记录一个追踪码：二维码指向 /q/{code}，落地到商家店铺页 / 发布人名片；扫码事件按来源（朋友圈 / 微信群 / 单聊 / 其他）与日期归集
-  H.SOURCES = [["moments", "朋友圈"], ["group", "微信群"], ["chat", "单聊转发"], ["other", "其他"]];
+  /* ---------- 扫码追踪：分享即出渠道码 ---------- */
+  // 同一张海报、同一份设计，二维码里的码却按"发到哪里"不同：用户点分享时先选渠道（朋友圈 / 微信群 / 发给客户 / 打印或其他），
+  // 系统为该渠道生成（或复用）一个追踪码 = 记录基码 + 渠道后缀（如 Q0ABC-M），只重绘二维码区域。扫码落到 /q/{code}，由码反查渠道，
+  // 所以"来源"不是猜的，是"哪个码被扫了"——口径叫「首发渠道」（图片被二次转发到别处仍记在首发渠道）。
+  // 一条记录 = 一个 poster_session；r.channels[ch] = 一条 poster_share（code / 首次分享时间 / 分享次数 / 扫码 / 咨询）。
+  H.SOURCES = [["moments", "朋友圈"], ["group", "微信群"], ["chat", "发给客户"], ["other", "打印 / 其他"]];
   H.SRC_NAME = Object.fromEntries(H.SOURCES);
+  H.CH = { moments: { sfx: "M", icon: "🟢", desc: "保存图片后发朋友圈，同一海报复用同一个码", tip: "去朋友圈发布" }, group: { sfx: "G", icon: "👥", desc: "发到客户群 / 同行群，可多群共用", tip: "去群里发送" }, chat: { sfx: "S", icon: "💬", desc: "一对一发给客户，适合关怀 / 报价类", tip: "去发给客户" }, other: { sfx: "O", icon: "🖨", desc: "打印张贴、发抖音 / 快手、放到店铺页等", tip: "已复制链接" } };
   H.DAYS = 14;
   H.newCode = () => { const A = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"; let s = ""; for (let i = 0; i < 6; i++) s += A[Math.floor(Math.random() * A.length)]; return s; };
-  H.emptyTrack = () => ({ scans: 0, leads: 0, scanDays: Array(H.DAYS).fill(0), scanFrom: { moments: 0, group: 0, chat: 0, other: 0 }, leadList: [] });
+  H.emptyTrack = () => ({ scans: 0, leads: 0, scanDays: Array(H.DAYS).fill(0), scanFrom: { moments: 0, group: 0, chat: 0, other: 0 }, leadList: [], channels: {} });
+  H.chCode = (r, ch) => `${r.code}-${H.CH[ch].sfx}`;
+  H.chUrl = (r, ch) => `hdz.cn/q/${H.chCode(r, ch)}`;
+  // 渠道列表（已出码的在前，按扫码数排序）
+  H.channelsOf = (r) => H.SOURCES.map(([k, name]) => Object.assign({ key: k, name, icon: H.CH[k].icon, has: !!(r.channels || {})[k] }, (r.channels || {})[k] ? { code: H.chCode(r, k), url: H.chUrl(r, k) } : {}, (r.channels || {})[k] || { shares: 0, scans: 0, leads: 0, at: 0 }));
+  // 分享 = 出渠道码（原型：PC / H5 分享弹层选渠道后调用；正式版 POST /posters/sessions/{id}/shares {channel} → {code, url, image}）
+  H.share = (id, ch) => {
+    const list = H.load(); const r = list.find((x) => x.id === id); if (!r) return null; H.ensureTrack(r);
+    const reused = !!r.channels[ch]; const c = r.channels[ch] || (r.channels[ch] = { at: H.now(), shares: 0, scans: 0, leads: 0 });
+    c.shares++; c.lastAt = H.now(); r.shares = (r.shares || 0) + 1; r.status = "已分享"; if (!r.publishedAt) r.publishedAt = H.now();
+    write(list); return { code: H.chCode(r, ch), url: H.chUrl(r, ch), reused, share: c, rec: r };
+  };
   const LEAD_CITIES = ["苏州", "无锡", "常州", "南通", "嘉兴", "上海浦东", "上海松江", "杭州", "宁波", "合肥"];
   const LEAD_TYPES = ["工程项目方", "钢材门店", "终端用料企业", "小贸易商", "个人采购"];
   // 记一次扫码（原型：分享页 / 表格里"模拟扫码"，正式版由 /q/{code} 落地页上报）
+  // 只有已出码的渠道才可能被扫（正式版由 /q/{code} 反查 poster_share 得到渠道）
   H.scan = (id, src, lead) => {
     const list = H.load(); const r = list.find((x) => x.id === id); if (!r) return;
-    H.ensureTrack(r); src = src || H.SOURCES[Math.floor(Math.random() * 3)][0];
-    r.scans++; r.scanDays[H.DAYS - 1]++; r.scanFrom[src] = (r.scanFrom[src] || 0) + 1;
-    if (lead) { r.leads++; r.leadList.unshift({ t: H.now(), src, city: LEAD_CITIES[Math.floor(Math.random() * LEAD_CITIES.length)], type: LEAD_TYPES[Math.floor(Math.random() * LEAD_TYPES.length)], isNew: Math.random() < .7 }); r.leadList = r.leadList.slice(0, 20); }
+    H.ensureTrack(r); const has = Object.keys(r.channels); if (!has.length) return null; if (!src || !r.channels[src]) src = has[Math.floor(Math.random() * has.length)];
+    r.scans++; r.scanDays[H.DAYS - 1]++; r.scanFrom[src] = (r.scanFrom[src] || 0) + 1; r.channels[src].scans++;
+    if (lead) { r.leads++; r.channels[src].leads++; r.leadList.unshift({ t: H.now(), src, city: LEAD_CITIES[Math.floor(Math.random() * LEAD_CITIES.length)], type: LEAD_TYPES[Math.floor(Math.random() * LEAD_TYPES.length)], isNew: Math.random() < .7 }); r.leadList = r.leadList.slice(0, 20); }
     write(list); return r;
   };
-  H.ensureTrack = (r) => { const e = H.emptyTrack(); ["scans", "leads"].forEach((k) => { if (typeof r[k] !== "number") r[k] = 0; }); if (!Array.isArray(r.scanDays) || r.scanDays.length !== H.DAYS) r.scanDays = e.scanDays; r.scanFrom = Object.assign(e.scanFrom, r.scanFrom || {}); if (!Array.isArray(r.leadList)) r.leadList = []; if (!r.owner) r.owner = H.me().id; if (!r.code) r.code = H.newCode(); return r; };
+  H.ensureTrack = (r) => { const e = H.emptyTrack(); ["scans", "leads"].forEach((k) => { if (typeof r[k] !== "number") r[k] = 0; }); if (!Array.isArray(r.scanDays) || r.scanDays.length !== H.DAYS) r.scanDays = e.scanDays; r.scanFrom = Object.assign(e.scanFrom, r.scanFrom || {}); if (!Array.isArray(r.leadList)) r.leadList = []; if (!r.owner) r.owner = H.me().id; if (!r.code) r.code = H.newCode();
+    if (!r.channels) { // 旧数据回填：按来源分布反推每个渠道一条 poster_share
+      r.channels = {}; const srcs = H.SOURCES.map((x) => x[0]).filter((k) => r.scanFrom[k] > 0); const at = r.publishedAt || r.updatedAt || H.now();
+      if (!srcs.length && r.shares) srcs.push("moments");
+      const per = Math.max(1, Math.floor((r.shares || srcs.length) / (srcs.length || 1)));
+      srcs.forEach((k, i) => { r.channels[k] = { at: at + i * 3600e3, lastAt: at + i * 3600e3, shares: i === srcs.length - 1 ? Math.max(1, (r.shares || srcs.length) - per * (srcs.length - 1)) : per, scans: r.scanFrom[k], leads: r.leadList.filter((l) => l.src === k).length }; });
+      const sumLeads = Object.values(r.channels).reduce((a, c) => a + c.leads, 0); if (r.leads > sumLeads && srcs.length) r.channels[srcs[0]].leads += r.leads - sumLeads;
+      r.shares = Object.values(r.channels).reduce((a, c) => a + c.shares, 0); // 新口径：分享次数 = 各渠道出码 / 复用次数之和
+    }
+    return r; };
   H.statusOf = (r) => (r.leads ? { key: "lead", name: "已带来咨询", color: "#dc2626" } : r.scans ? { key: "scan", name: "已被扫码", color: "#d97706" } : r.shares ? { key: "shared", name: "已分享", color: "#059669" } : r.exports ? { key: "exported", name: "已导出", color: "#059669" } : { key: "draft", name: "草稿", color: "#6b7280" });
   H.rate = (leads, scans) => (scans ? Math.round((leads / scans) * 100) + "%" : "—");
   H.trackUrl = (r) => `hdz.cn/q/${r.code}`;
@@ -56,13 +81,13 @@
   /* ---------- 存取 ---------- */
   function read() { try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { return null; } }
   function write(list) { try { localStorage.setItem(KEY, JSON.stringify(list)); return true; } catch (e) { return false; } }
-  H.load = () => { let list = read(); if (!list) { list = H.seed(); write(list); } let dirty = false; list.forEach((r) => { if (typeof r.scans !== "number" || !r.owner) { H.ensureTrack(r); dirty = true; } }); if (dirty) write(list); return list; };
+  H.load = () => { let list = read(); if (!list) { list = H.seed(); write(list); } let dirty = false; list.forEach((r) => { if (typeof r.scans !== "number" || !r.owner || !r.channels) { H.ensureTrack(r); dirty = true; } }); if (dirty) write(list); return list; };
   H.save = (list) => write(list);
   H.get = (id) => H.load().find((r) => r.id === id);
   H.remove = (id) => { const list = H.load().filter((r) => r.id !== id); write(list); return list; };
   H.clearDemo = () => { const list = H.load().filter((r) => !r.demo); write(list); return list; };
   H.star = (id) => { const list = H.load(); const r = list.find((x) => x.id === id); if (r) r.starred = !r.starred; write(list); return r && r.starred; };
-  H.bump = (id, field) => { const list = H.load(); const r = list.find((x) => x.id === id); if (r) { r[field] = (r[field] || 0) + 1; r.status = field === "shares" ? "已分享" : field === "exports" ? "已导出" : r.status; if (field === "shares" && !r.publishedAt) r.publishedAt = H.now(); write(list); } };
+  H.bump = (id, field) => { if (field === "shares") return H.share(id, "moments"); const list = H.load(); const r = list.find((x) => x.id === id); if (r) { r[field] = (r[field] || 0) + 1; r.status = field === "exports" && r.status === "草稿" ? "已导出" : r.status; write(list); } };
   // 会话 → 记录（每次生成 / 微调后调用，按 id 覆盖）
   H.upsert = (sess) => {
     const list = H.load(); const spec = sess.versions[sess.cur] && sess.versions[sess.cur].spec; if (!spec) return list;
@@ -182,8 +207,12 @@
         tr.leads = Math.round(tr.scans * (LEAD_R[it.scene] || .05) * (0.7 + rnd(i, 40) * .6));
         for (let k = 0; k < Math.min(tr.leads, 6); k++) tr.leadList.push({ t: t0 + Math.round(rnd(i, 50 + k) * Math.min(it.d, 13) * 864e5) + 3600e3 * (1 + Math.round(rnd(i, 60 + k) * 10)), src: H.SOURCES[Math.floor(rnd(i, 70 + k) * 3)][0], city: LEAD_CITIES[Math.floor(rnd(i, 80 + k) * LEAD_CITIES.length)], type: LEAD_TYPES[Math.floor(rnd(i, 90 + k) * LEAD_TYPES.length)], isNew: rnd(i, 100 + k) < .7 });
         tr.leadList.sort((a, b) => b.t - a.t);
+        // 每个有扫码的渠道一条 poster_share；分享次数按渠道扫码占比分摊，至少 1 次
+        const srcs = H.SOURCES.map((x) => x[0]).filter((k) => tr.scanFrom[k] > 0); if (!srcs.length) srcs.push("moments");
+        let left = Math.max(it.shares, srcs.length); srcs.forEach((k, j) => { const n = j === srcs.length - 1 ? left : Math.max(1, Math.round(it.shares * (tr.scanFrom[k] / Math.max(1, tr.scans)))); left -= n; tr.channels[k] = { at: t0 + it.refine.length * 90e3 + 600e3 + j * 5400e3, lastAt: t0 + it.refine.length * 90e3 + 600e3 + j * 5400e3 + Math.round(rnd(i, 110 + j) * 2) * 864e5, shares: n, scans: tr.scanFrom[k], leads: tr.leadList.filter((l) => l.src === k).length }; });
+        const sumLeads = Object.values(tr.channels).reduce((a, c) => a + c.leads, 0); if (tr.leads > sumLeads) tr.channels[srcs[0]].leads += tr.leads - sumLeads;
       }
-      return Object.assign({ id: "demo_" + i, demo: true, title: last.copy.headline, scene: sc.id, sceneName: sc.name, group: sc.g, groupName: g.name, style: last.style, layout: last.layout, ratio: last.ratio, prompt, channel: it.ch, owner, code: "Q" + (1000 + i * 37).toString(36).toUpperCase().padStart(5, "0"), publishedAt: it.shares ? t0 + it.refine.length * 90e3 + 600e3 : 0, createdAt: t0, updatedAt: t0 + it.refine.length * 90e3, date: H.posterDate(t0), versions, cur: versions.length - 1, exports: it.exports, shares: it.shares, starred: !!it.starred, status: it.shares ? "已分享" : it.exports ? "已导出" : "草稿", assets: [] }, tr);
+      return Object.assign({ id: "demo_" + i, demo: true, title: last.copy.headline, scene: sc.id, sceneName: sc.name, group: sc.g, groupName: g.name, style: last.style, layout: last.layout, ratio: last.ratio, prompt, channel: it.ch, owner, code: "Q" + (1000 + i * 37).toString(36).toUpperCase().padStart(5, "0"), publishedAt: it.shares ? t0 + it.refine.length * 90e3 + 600e3 : 0, createdAt: t0, updatedAt: t0 + it.refine.length * 90e3, date: H.posterDate(t0), versions, cur: versions.length - 1, exports: it.exports, shares: Object.values(tr.channels).reduce((a, c) => a + c.shares, 0), starred: !!it.starred, status: it.shares ? "已分享" : it.exports ? "已导出" : "草稿", assets: [] }, tr);
     });
   };
 })();

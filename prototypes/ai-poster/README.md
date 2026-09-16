@@ -19,7 +19,7 @@ cd prototypes/ai-poster && python3 -m http.server 8080
 | `poster.html` | 1080 宽原图渲染页（`?d=<base64 设计 JSON>`），与预览同一套渲染代码 |
 | `scenes.html` | 44 个场景的样张总览（`?g=<大类id>&n=<每行列数>`），点击进入 PC 工作台 |
 | `templates.html` | **样板库**：同一场景多个可直接套用的成品（提示词 + 风格 / 版式建议），当前客户关怀 10 场景 35 个样板（生日祝福 4 款、合作纪念 4 款、老客户专享 3 款、关怀慰问 4 款、喜事恭贺 4 款、心意礼品 4 款、老友问候 3 款、节日 / 节气 / 致谢各 3 款），`?g=care`；每张可 `PC 打开` / `H5 打开`（`pc.html?demo=birthday&sample=1`、`h5.html?demo=birthday&sample=1&step=gen`） |
-| `shared/history.js` | 历史记录模块：一条记录 = 一次会话（版本链 + 需求 + 场景 + 端 + 使用次数 + 收藏），localStorage 持久化，PC / H5 共用；首次打开写入 21 条示例记录（可一键清除） |
+| `shared/history.js` | 历史记录模块：一条记录 = 一次会话（版本链 + 需求 + 场景 + 端 + 使用次数 + 收藏 + 发布人 + 基码 + 各渠道码 `channels[ch]`），`share(id, ch)` 出码 / 复用、`scan()` 仅对已出码渠道计数，localStorage 持久化，PC / H5 共用；首次打开写入 21 条示例记录（可一键清除） |
 | `shared/knowledge.js` | 企业资料库：9 类条目（企业 / 品牌 / 产品 / 服务 / 优势 / 资质 / 案例 / 团队 / 承诺）与 12 条示例，localStorage 持久化 CRUD，`retrieve`（场景 + 关键词检索，模拟向量检索 RAG）、`apply`（资料融入文案）、`distill`（从一段介绍提炼要点） |
 | `shared/engine.js` | 场景库（7 大类 44 场景）、样板库（`SAMPLES` / `samplesOf`，规划时可按样板指定 `ctx.style / ctx.layout`）、风格库（9 套，含暖心橙）、图片库分类、冲击力等级（`IMPACT` / `visualPrompt` / `impactLayer`）、模拟规划（含资料检索引用与多选图）/ 微调、渲染引擎（7 版式 × 3 画幅） |
 
@@ -34,6 +34,7 @@ cd prototypes/ai-poster && python3 -m http.server 8080
 - 画幅：`改成竖屏 9:16`、`改成 1:1 方图`、`改成 3:4 朋友圈`
 - 版本：工作台「撤销」、版本条点击；H5 左右滑动
 - 历史：每次生成 / 微调自动保存；PC 顶栏「历史记录」抽屉（分类 / 时间 / 状态 / 排序 / 收藏 / 搜索，打开继续改 / 再做类似 / 导出 / 删除），欢迎区「最近做过的海报」；H5 首页「最近做的海报」条 + 历史页（分类页签、按日分组、⋯ 操作面板）
+- 分享即出渠道码：PC / H5 点「分享」先选发到哪里（朋友圈 / 微信群 / 发给客户 / 打印或其他），系统为该渠道生成或复用追踪码（基码 + 后缀，如 `Q7K2MV-M`），预览图二维码与短链即时替换、设计不变，再保存图片去发；扫码归到「首发渠道」。`pc.html?share=<记录id>&ch=moments`、`h5.html?demo=birthday&share=1&ch=chat` 可直达；`poster.html?t=<渠道码>&ch=<渠道名>` 输出带渠道码的原图
 
 ## 企业素材库与视觉冲击力
 

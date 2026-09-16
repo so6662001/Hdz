@@ -105,6 +105,13 @@
   .hdet .src { display: grid; gap: 6px; } .hdet .src div { display: grid; grid-template-columns: 64px 1fr 56px; align-items: center; gap: 8px; font-size: 11px; color: var(--mute); } .hdet .src i { height: 8px; border-radius: 4px; background: #e2e8f0; overflow: hidden; display: block; } .hdet .src i b { display: block; height: 100%; background: #d97706; border-radius: 4px; } .hdet .src span { text-align: right; color: var(--ink); font-weight: 600; }
   .hdet .meta { font-size: 11px; color: var(--mute); line-height: 1.9; } .hdet .meta b { color: var(--ink); font-weight: 600; } .hdet .meta code { background: #f1f3f8; padding: 1px 5px; border-radius: 4px; color: var(--brand); font-size: 11px; }
   .hdet .leads { display: grid; gap: 5px; } .hdet .leads div { display: grid; grid-template-columns: 74px 1fr auto; gap: 8px; font-size: 11px; color: var(--mute); align-items: center; } .hdet .leads b { color: var(--ink); font-weight: 600; } .hdet .leads .new { font-size: 10px; background: #fee2e2; color: #dc2626; padding: 0 5px; border-radius: 4px; } .hdet .leads .old { font-size: 10px; background: #f1f3f8; color: var(--mute); padding: 0 5px; border-radius: 4px; }
+  .chtbl { width: 100%; border-collapse: collapse; font-size: 11px; } .chtbl th { text-align: left; color: var(--mute); font-weight: 500; padding: 3px 4px; border-bottom: 1px solid var(--line); white-space: nowrap; } .chtbl td { padding: 5px 4px; border-bottom: 1px dashed #e5e7eb; white-space: nowrap; vertical-align: middle; } .chtbl td.r, .chtbl th.r { text-align: right; font-variant-numeric: tabular-nums; } .chtbl code { background: #f1f3f8; padding: 1px 5px; border-radius: 4px; font-size: 10.5px; } .chtbl .no { color: #9ca3af; } .chtbl button { font-size: 10px; padding: 2px 6px; border-radius: 5px; background: #fff; border: 1px dashed #c7d0e0; color: var(--mute); margin-left: 3px; } .chtbl button.mk { border-style: solid; color: var(--brand); border-color: #bfd0ff; }
+  .shdlg { position: fixed; inset: 0; background: rgba(15,23,42,.5); display: none; z-index: 30; align-items: center; justify-content: center; } .shdlg.show { display: flex; } .shp { background: #fff; border-radius: 16px; width: 760px; max-width: calc(100vw - 40px); max-height: calc(100vh - 40px); overflow: auto; box-shadow: 0 30px 80px rgba(0,0,0,.35); display: grid; grid-template-columns: 300px 1fr; }
+  .shp .pv { background: #f1f3f8; padding: 18px; display: flex; align-items: center; justify-content: center; border-radius: 16px 0 0 16px; } .shp .pv .fr { position: relative; width: 264px; overflow: hidden; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.2); } .shp .pv .fr .in { transform-origin: 0 0; position: absolute; left: 0; top: 0; }
+  .shp .bd { padding: 18px 20px 16px; } .shp .bd h3 { margin: 0 0 4px; font-size: 16px; } .shp .bd p { margin: 0 0 12px; font-size: 12px; color: var(--mute); line-height: 1.6; } .shp .bd p b { color: var(--ink); }
+  .chs { display: grid; gap: 8px; } .chs button { display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; align-items: center; text-align: left; padding: 10px 12px; border-radius: 12px; background: #f8fafc; border: 1.5px solid var(--line); } .chs button:hover { border-color: var(--brand); background: #eef3ff; } .chs button .ic { font-size: 20px; } .chs button b { font-size: 13px; display: block; } .chs button small { font-size: 11px; color: var(--mute); display: block; margin-top: 2px; } .chs button .st { font-size: 11px; text-align: right; color: var(--mute); line-height: 1.5; } .chs button .st code { background: #fff; border: 1px solid var(--line); padding: 1px 5px; border-radius: 4px; font-size: 10.5px; } .chs button .st em { font-style: normal; color: #059669; font-weight: 700; }
+  .shdone { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 12px 14px; font-size: 12px; line-height: 1.7; color: #065f46; } .shdone code { background: #fff; padding: 1px 6px; border-radius: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: #111; } .shdone .ops { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; } .shdone .ops button { font-size: 12px; padding: 7px 12px; border-radius: 8px; background: #fff; border: 1px solid #a7f3d0; color: #065f46; } .shdone .ops button.pri { background: #059669; color: #fff; border-color: #059669; }
+  .shp .ft { font-size: 11px; color: var(--mute); margin-top: 12px; line-height: 1.6; border-top: 1px dashed var(--line); padding-top: 10px; }
   .hdet .sim { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; } .hdet .sim button { font-size: 11px; padding: 4px 8px; border-radius: 6px; background: #fff; border: 1px dashed #c7d0e0; color: var(--mute); }
   /* 分析视图 */
   .hkpi { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 14px; } .hkpi div { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; } .hkpi small { display: block; font-size: 11px; color: var(--mute); margin-bottom: 4px; } .hkpi b { font-size: 22px; font-weight: 800; color: var(--ink); letter-spacing: -.5px; } .hkpi b.sk { color: #d97706; } .hkpi b.ld { color: #dc2626; } .hkpi i { font-style: normal; font-size: 11px; color: var(--mute); margin-left: 6px; } .hkpi i.up { color: #059669; } .hkpi i.down { color: #dc2626; }
@@ -207,6 +214,7 @@
     <details class="json"><summary>设计 JSON（大模型输出 · 渲染引擎输入）</summary><pre id="json"></pre></details>
   </div>
 </div>
+<div class="shdlg" id="shdlg" onclick="if(event.target===this)closeShare()"><div class="shp"><div class="pv"><div class="fr" id="shpv"></div></div><div class="bd" id="shbd"></div></div></div>
 <div class="hist" id="hist" onclick="if(event.target===this)closeHist()"><div class="hpanel">
   <div class="hhead"><b>🕘 海报历史记录</b><span class="st" id="hstats"></span>
     <div class="hview" id="hview"><button data-v="card" class="on" onclick="setHistView('card')">▦ 卡片</button><button data-v="table" onclick="setHistView('table')">☰ 表格</button><button data-v="stats" onclick="setHistView('stats')">📈 扫码分析</button></div>
@@ -384,7 +392,31 @@
   };
 
   /* 导出 / 模板 */
-  window.share = () => { if (S.cur < 0) return toast("先生成一版"); AP.History.bump(S.sid, "shares"); updateHistBadge(); toast("原型：调用微信 JS-SDK 分享海报图到会话 / 朋友圈（历史记录已标记为已分享；二维码绑定追踪码，扫码将计入「扫码分析」）"); };
+  /* 分享即出渠道码：选渠道 → 为该渠道生成 / 复用追踪码 → 只重绘二维码 → 保存图片去发。扫码落到 /q/{code}，由码反查渠道，来源口径 = 首发渠道 */
+  const SH = { id: null, ch: null };
+  window.share = (id) => { id = id || S.sid; if (!id && S.cur < 0) return toast("先生成一版"); if (!id) return; if (id === S.sid) saveHist(); const r = AP.History.get(id); if (!r) return toast("记录不存在"); SH.id = id; SH.ch = null; renderShare(); $("shdlg").classList.add("show"); };
+  window.closeShare = () => { $("shdlg").classList.remove("show"); if ($("hist").classList.contains("show")) renderHist(); };
+  const shareSpec = (r) => r.versions[r.cur].spec;
+  function renderShare() {
+    const H = AP.History; const r = H.get(SH.id); if (!r) return; const spec = shareSpec(r); const chs = H.channelsOf(r); const ch = SH.ch && chs.find((c) => c.key === SH.ch);
+    const W = 1080; const [w0, h0] = AP.RATIOS[spec.ratio] || AP.RATIOS["3:4"]; const fw = 264; const fh = Math.round((fw * h0) / w0);
+    const track = ch ? { url: ch.url, ch: ch.name } : null; const assets = [...S.assets, ...(r.assets || [])];
+    $("shpv").style.height = fh + "px"; $("shpv").innerHTML = `<div class="in" style="transform:scale(${fw / W})">${AP.renderPoster(spec, { assets, brand: S.brand, date: "2026.09.16", track }, W)}</div>`;
+    if (!ch) {
+      $("shbd").innerHTML = `<h3>分享到哪里？</h3><p>同一张海报，<b>发到不同地方用不同的二维码</b>。选一个渠道，系统只换二维码不改设计，之后谁扫了哪个码就知道来源。已出过码的渠道直接复用。</p>
+        <div class="chs">${chs.map((c) => `<button onclick="pickShare('${c.key}')"><span class="ic">${c.icon}</span><span><b>${c.name}</b><small>${H.CH[c.key].desc}</small></span><span class="st">${c.has ? `<code>${c.code}</code><br>已分享 ${c.shares} 次 · <em>扫码 ${c.scans}</em>${c.leads ? ` · 咨询 ${c.leads}` : ""}` : `<span style="color:#9ca3af">尚未出码</span><br>点击生成专用码`}</span></button>`).join("")}</div>
+        <div class="ft">基码 <code>${r.code}</code> 属于这张海报；渠道码 = 基码 + 渠道后缀（-M 朋友圈 / -G 微信群 / -S 发给客户 / -O 打印或其他）。图片被别人再转发到其他地方，仍记在<b>首发渠道</b>；如果扫码落地页是小程序，还能补记「扫码方式」（相机 / 长按图片 / 相册）和群 ID。</div>`;
+    } else {
+      const res = SH.res;
+      $("shbd").innerHTML = `<h3>${ch.icon} ${ch.name} · 渠道码已就绪</h3><p>二维码已换成 <b>${ch.name}专用码</b>，${res && res.reused ? `复用之前的码（该渠道第 ${ch.shares} 次分享）` : "新生成"}，扫码记入「扫码分析 → ${ch.name}」。</p>
+        <div class="shdone">追踪码 <code>${ch.code}</code> → <code>${ch.url}</code><br>落地页：${sceneLanding(r)} · 发布人：${H.owner(r.owner).name}
+          <div class="ops"><button class="pri" onclick="exportShare()">⤓ 保存这张图（去${ch.name}发布）</button><button onclick="navigator.clipboard&&navigator.clipboard.writeText('https://${ch.url}');toast('已复制链接 https://${ch.url}')">复制短链</button><button onclick="simScan('${r.id}','${ch.key}',false);renderShare()">模拟：有人扫了这个码</button></div></div>
+        <p style="margin-top:12px">该渠道累计：分享 <b>${ch.shares}</b> 次 · 扫码 <b>${ch.scans}</b> · 咨询 <b>${ch.leads}</b>（转化 ${H.rate(ch.leads, ch.scans)}）</p>
+        <div class="ft">正式版：H5 调微信 JS-SDK 保存图片到相册 / PC 弹出图片供下载或扫码传手机；「发给客户」可直接选联系人发送。<a onclick="SH.ch=null;renderShare()" style="color:var(--brand);cursor:pointer">← 换个渠道</a> · <a onclick="closeShare()" style="color:var(--brand);cursor:pointer">完成</a></div>`;
+    }
+  }
+  window.pickShare = (ch) => { SH.res = AP.History.share(SH.id, ch); SH.ch = ch; updateHistBadge(); renderShare(); };
+  window.exportShare = () => { const H = AP.History; const r = H.get(SH.id); if (!r || !SH.ch) return; H.bump(r.id, "exports"); const ch = H.channelsOf(r).find((c) => c.key === SH.ch); try { localStorage.setItem("ap-assets", JSON.stringify([...S.assets, ...(r.assets || [])].map((a) => ({ id: a.id, type: a.type, name: a.name, tags: a.tags, url: a.url })))); } catch (e) {} window.open(`poster.html?d=${encodeURIComponent(AP.encode(shareSpec(r)))}&t=${encodeURIComponent(ch.code)}&ch=${encodeURIComponent(ch.name)}`, "_blank"); };
   window.exportPng = () => { if (S.cur < 0) return toast("先生成一版"); AP.History.bump(S.sid, "exports"); updateHistBadge(); try { localStorage.setItem("ap-assets", JSON.stringify(S.assets.map((a) => ({ id: a.id, type: a.type, name: a.name, tags: a.tags, url: a.url })))); } catch (e) { toast("上传素材过大，导出页将使用示例素材"); } window.open("poster.html?d=" + encodeURIComponent(AP.encode(cur())), "_blank"); };
   window.saveTpl = () => { if (S.cur < 0) return toast("先生成一版"); const list = JSON.parse(localStorage.getItem("ap-templates") || "[]"); list.unshift({ name: cur().copy.headline, spec: cur(), t: Date.now() }); localStorage.setItem("ap-templates", JSON.stringify(list.slice(0, 20))); toast("已保存为企业模板：下次只需替换文字与素材，团队成员可直接套用"); };
 
@@ -417,7 +449,7 @@
     return `<div class="hc" data-id="${r.id}">
       <div class="th" onclick="openRecord('${r.id}')">${H.thumb(r, ctx(), 150, 200)}</div>
       <button class="star ${r.starred ? "on" : ""}" title="收藏 / 置顶" onclick="starRecord('${r.id}')">★</button>${r.demo ? '<span class="demo">示例</span>' : ""}
-      <div class="ops"><button class="pri" onclick="openRecord('${r.id}')">打开继续改</button><button onclick="redoRecord('${r.id}')">再做类似</button><button onclick="exportRecord('${r.id}')">导出</button><button class="del" onclick="delRecord('${r.id}')">删除</button></div>
+      <div class="ops"><button class="pri" onclick="openRecord('${r.id}')">打开继续改</button><button onclick="redoRecord('${r.id}')">再做类似</button><button onclick="share('${r.id}')">分享</button><button onclick="exportRecord('${r.id}')">导出</button><button class="del" onclick="delRecord('${r.id}')">删除</button></div>
       <div class="ti" title="${AP.esc(r.prompt)}" onclick="openRecord('${r.id}')">${AP.esc(r.title)}</div>
       <div class="mt"><span class="sc">${sc.icon || ""} ${AP.esc(r.sceneName)}</span><span class="ow" title="发布人 ${o.name} · ${o.role}">${H.avatar(r.owner, 16)}${o.name}</span><span class="ch" title="${r.ratio}">${r.channel === "h5" ? "📱" : "🖥"}</span></div>
       <div class="ft"><span>${H.fmtTime(r.updatedAt)} · ${r.versions.length} 版</span>${r.shares || r.scans ? `<span class="kp" title="分享 ${r.shares} 次 · 扫码 ${r.scans} 次 · 咨询 ${r.leads} 条"><span>↗ <b>${r.shares}</b></span><span class="sk">▣ <b>${r.scans}</b></span>${r.leads ? `<span class="ld">💬 <b>${r.leads}</b></span>` : ""}</span>` : `<span class="stt draft">${st.name}</span>`}</div></div>`;
@@ -435,12 +467,12 @@
         <td><span class="ow">${H.avatar(r.owner, 22)}<span>${o.name}<br><small>${o.role} · ${r.channel === "h5" ? "📱 手机" : "🖥 PC"}</small></span></span></td>
         <td class="num">${r.versions.length}</td>
         <td><div class="tm" title="创建 ${new Date(r.createdAt).toLocaleString("zh-CN")} · 修改 ${new Date(r.updatedAt).toLocaleString("zh-CN")}"><b>${H.fmtTime(r.createdAt)}</b>${r.updatedAt - r.createdAt > 60e3 ? `改于 ${H.fmtTime(r.updatedAt)}` : "未再修改"}</div></td>
-        <td class="num" title="分享 ${r.shares} 次 · 导出 ${r.exports} 次"><span class="big">${r.shares || "–"}</span>${r.exports ? `<small style="color:var(--mute);font-size:10px"> / ${r.exports}</small>` : ""}</td>
+        <td class="num" title="分享 ${r.shares} 次 · 已出 ${Object.keys(r.channels || {}).length} 个渠道码 · 导出 ${r.exports} 次"><span class="big">${r.shares || "–"}</span>${Object.keys(r.channels || {}).length ? `<small style="color:var(--mute);font-size:10px"> · ${Object.keys(r.channels).length} 码</small>` : ""}</td>
         <td class="num"><div class="scn">${r.scans ? H.spark(r.scanDays, 64, 18, "#d97706") : ""}<span class="big sk">${r.scans || "–"}</span></div></td>
         <td class="num"><span class="big ld">${r.leads || "–"}</span></td>
         <td class="num">${H.rate(r.leads, r.scans)}</td>
         <td><span class="stt" style="background:${st.color}">${st.name}</span></td>
-        <td class="ops"><button class="an" onclick="toggleScan('${r.id}')">${open ? "收起" : "📈 分析"}</button><button class="pri" onclick="openRecord('${r.id}')">打开</button><button title="再做类似" onclick="redoRecord('${r.id}')">🔁</button><button title="导出原图" onclick="exportRecord('${r.id}')">⤓</button><button class="del" title="删除" onclick="delRecord('${r.id}')">🗑</button></td></tr>${open ? `<tr class="open"><td colspan="13" style="white-space:normal">${scanDetail(r)}</td></tr>` : ""}`;
+        <td class="ops"><button class="an" onclick="toggleScan('${r.id}')">${open ? "收起" : "📈 分析"}</button><button class="pri" onclick="openRecord('${r.id}')">打开</button><button title="分享 · 出渠道码" onclick="share('${r.id}')">↗</button><button title="再做类似" onclick="redoRecord('${r.id}')">🔁</button><button title="导出原图" onclick="exportRecord('${r.id}')">⤓</button><button class="del" title="删除" onclick="delRecord('${r.id}')">🗑</button></td></tr>${open ? `<tr class="open"><td colspan="13" style="white-space:normal">${scanDetail(r)}</td></tr>` : ""}`;
     }).join("");
     const sum = (k) => list.reduce((a, r) => a + (r[k] || 0), 0);
     return `<table class="htbl"><thead><tr><th></th><th></th>${th("title", "海报 / 需求")}${th("scene", "场景")}${th("owner", "发布人 / 端")}${th("versions", "版本", 1)}${th("created", "创建 / 修改")}${th("shares", "分享 / 导出", 1)}${th("scans", "扫码 · 14 天", 1)}${th("leads", "咨询", 1)}${th("rate", "扫码→咨询", 1)}${th("status", "状态")}<th>操作</th></tr></thead><tbody>${rows}</tbody>
@@ -450,23 +482,24 @@
   function scanDetail(r) {
     const H = AP.History; const o = H.owner(r.owner); const mx = Math.max(1, ...Object.values(r.scanFrom)); const labels = H.trendLabels();
     return `<div class="hdet">
-      <div><h5>扫码来源 <small>共 ${r.scans} 次 · 分享 ${r.shares} 次 · 每次分享带来 ${r.shares ? (r.scans / r.shares).toFixed(1) : "—"} 次扫码</small></h5>
-        <div class="src">${H.SOURCES.map(([k, name]) => `<div><span style="text-align:left;color:var(--mute);font-weight:500">${name}</span><i><b style="width:${Math.round((r.scanFrom[k] / mx) * 100)}%"></b></i><span>${r.scanFrom[k]} <small style="color:var(--mute);font-weight:500">(${r.scans ? Math.round((r.scanFrom[k] / r.scans) * 100) : 0}%)</small></span></div>`).join("")}</div>
-        <h5 style="margin-top:12px">近 14 天扫码趋势</h5>${H.bars(r.scanDays, labels, 56, "#d97706")}
-        <div class="sim"><span style="font-size:11px;color:var(--mute);align-self:center">原型模拟：</span><button onclick="simScan('${r.id}','moments',false)">+1 朋友圈扫码</button><button onclick="simScan('${r.id}','group',false)">+1 群扫码</button><button onclick="simScan('${r.id}','chat',true)">+1 扫码并咨询</button></div></div>
+      <div><h5>渠道码 · 首发渠道 <small>共扫码 ${r.scans} 次 · 分享 ${r.shares} 次 · 每次分享带来 ${r.shares ? (r.scans / r.shares).toFixed(1) : "—"} 次扫码</small></h5>
+        <table class="chtbl"><tr><th>渠道</th><th>追踪码</th><th class="r">分享</th><th class="r">扫码</th><th class="r">咨询</th><th></th></tr>${H.channelsOf(r).map((c) => c.has
+          ? `<tr><td>${c.icon} ${c.name}</td><td><code>${c.code}</code></td><td class="r">${c.shares}</td><td class="r"><b>${c.scans}</b> <small style="color:var(--mute)">${r.scans ? Math.round((c.scans / r.scans) * 100) : 0}%</small></td><td class="r">${c.leads}</td><td><button onclick="simScan('${r.id}','${c.key}',false)" title="原型模拟：有人扫了这个码">+扫码</button><button onclick="simScan('${r.id}','${c.key}',true)" title="原型模拟：扫码后发起咨询">+咨询</button></td></tr>`
+          : `<tr class="no"><td>${c.icon} ${c.name}</td><td class="no">未出码</td><td class="r no">—</td><td class="r no">—</td><td class="r no">—</td><td><button class="mk" onclick="share('${r.id}')">出码分享</button></td></tr>`).join("")}</table>
+        <h5 style="margin-top:12px">近 14 天扫码趋势</h5>${H.bars(r.scanDays, labels, 56, "#d97706")}</div>
       <div><h5>发布信息</h5><div class="meta">
         发布人：<b>${H.avatar(r.owner, 16)} ${o.name}</b> · ${o.role}<br>
         海报联系人：<b>${AP.esc(r.versions[r.cur].spec.contact.person || "—")}</b> · ${AP.esc(r.versions[r.cur].spec.contact.phone || "")}<br>
-        追踪码：<code>${r.code}</code> → <code>${H.trackUrl(r)}</code><br>
+        基码：<code>${r.code}</code>（渠道码 = 基码 + 后缀，如 <code>${r.code}-M</code>）<br>
         落地页：<b>${sceneLanding(r)}</b><br>
         首次分享：<b>${r.publishedAt ? H.fmtTime(r.publishedAt) : "尚未分享"}</b> · 生成端：${r.channel === "h5" ? "手机" : "PC"} · ${r.versions.length} 版<br>
-        <span style="font-size:10px">二维码由引擎绘制并绑定本条记录的追踪码；换版本不换码，同一海报多次分享累计统计。</span></div></div>
+        <span style="font-size:10px">分享时先选渠道再出图，二维码按渠道换码、设计不变；换版本不换码。来源口径为「首发渠道」，二次转发仍记在首发渠道。</span></div></div>
       <div><h5>扫码带来的咨询 <small>${r.leads} 条 · 转化率 ${H.rate(r.leads, r.scans)}</small></h5>
         ${r.leadList.length ? `<div class="leads">${r.leadList.slice(0, 6).map((l) => `<div><span>${H.fmtTime(l.t)}</span><span><b>${l.city}</b> · ${l.type} · 来自${H.SRC_NAME[l.src]}</span><span class="${l.isNew ? "new" : "old"}">${l.isNew ? "新客" : "老客"}</span></div>`).join("")}${r.leadList.length > 6 ? `<div style="color:var(--mute);font-size:11px">…还有 ${r.leadList.length - 6} 条，正式版跳转「线索中心」按海报筛选</div>` : ""}</div>` : `<div style="font-size:11px;color:var(--mute)">还没有人通过这张海报发起咨询。${r.scans ? "有扫码但未咨询，可以试试在海报上加「限时」「今日价」等更强的行动号召。" : ""}</div>`}</div>
     </div>`;
   }
   function sceneLanding(r) { const g = r.group; return g === "supply" ? "店铺 · 现货资源列表（带发布人名片）" : g === "promo" ? "活动页 · 促销品种 + 一键咨询" : g === "talent" ? "招聘 / 招商详情 + 发布人名片" : "店铺主页 + 发布人名片"; }
-  window.simScan = (id, src, lead) => { AP.History.scan(id, src, lead); renderHist(); toast(lead ? "模拟：扫码后发起咨询，已计入线索" : "模拟：+1 扫码（正式版由 /q/{code} 落地页上报）"); };
+  window.simScan = (id, src, lead) => { const r = AP.History.scan(id, src, lead); if (r === null) return toast("这张海报还没出过渠道码，先点「分享」选渠道出码"); renderHist(); toast(lead ? "模拟：扫码后发起咨询，已计入线索" : `模拟：+1 ${AP.History.SRC_NAME[src] || ""}扫码（正式版由 /q/{code} 落地页上报，由码反查渠道）`); };
   /* 扫码分析视图 */
   function histStats(list, all) {
     const H = AP.History; const st = H.stats(list); const owners = H.byOwner(list); const scenes = H.byScene(list).slice(0, 8); const groups = H.byScene(list, "group"); const src = H.bySource(list); const top = H.topScanned(list, 5); const labels = H.trendLabels();
@@ -481,7 +514,7 @@
       <div><small>发布人</small><b>${owners.length}</b><i>${owners[0] ? `扫码最多：${H.owner(owners[0].owner).name}` : ""}</i></div></div>
     <div class="hana">
       <div class="hbox"><h5>近 14 天扫码趋势 <small>按天 · 所有来源</small></h5>${H.bars(H.trend(list), labels, 110, "#d97706")}</div>
-      <div class="hbox"><h5>扫码来源 <small>微信场景值识别</small></h5><div class="srcs">${src.map((s) => `<div><span style="text-align:left;color:var(--ink)">${s.name}</span><i><b style="width:${s.pct}%;background:${SRC_C[s.key]}"></b></i><span><b>${s.n}</b> · ${s.pct}%</span></div>`).join("")}</div>
+      <div class="hbox"><h5>扫码来源 <small>按渠道码归集 · 首发渠道口径</small></h5><div class="srcs">${src.map((s) => `<div><span style="text-align:left;color:var(--ink)">${s.name}</span><i><b style="width:${s.pct}%;background:${SRC_C[s.key]}"></b></i><span><b>${s.n}</b> · ${s.pct}%</span></div>`).join("")}</div>
         <div style="font-size:11px;color:var(--mute);margin-top:12px;line-height:1.7">朋友圈占比高说明"广撒网"有效；微信群 / 单聊扫码的咨询转化通常更高——分析视图可用来决定业务员该把海报发到哪里。</div></div></div>
     <div class="hana">
       <div class="hbox"><h5>按发布人 <small>谁的海报更能带来扫码与咨询</small></h5><table class="rank"><thead><tr><th>发布人</th><th class="num">海报</th><th class="num">分享</th><th class="num">扫码</th><th></th><th class="num">篇均</th><th class="num">咨询</th><th class="num">转化</th><th>最近发布</th></tr></thead><tbody>
@@ -523,7 +556,8 @@
   if (qp.get("open")) openRecord(qp.get("open"));
   if (qp.get("hist")) { if (qp.get("hview")) HF.view = qp.get("hview"); if (qp.get("hopen")) { HF.open = qp.get("hopen"); HF.tsort = "scans"; } openHist(); if (qp.get("howner")) { $("howner").value = qp.get("howner"); renderHist(); } if (qp.get("hgroup")) setHistGroup(qp.get("hgroup")); }
   if (qp.get("ratio")) { S.ratio = qp.get("ratio"); document.querySelectorAll("#ratio button").forEach((x) => x.classList.toggle("on", x.dataset.r === S.ratio)); }
-  if (qp.get("demo")) { const s = AP.SCENES.find((x) => x.id === qp.get("demo")); if (s) { if (qp.get("sample") != null && AP.samplesOf(s.id)[+qp.get("sample")]) useSample(s.id, +qp.get("sample"), true); else if (!qp.get("prompt")) setScene(s.id); $("prompt").value = qp.get("prompt") || $("prompt").value || s.example; send(true); (qp.get("refine") || "").split("|").filter(Boolean).forEach((r) => { $("prompt").value = r; send(true); }); } }
+  if (qp.get("demo")) { const s = AP.SCENES.find((x) => x.id === qp.get("demo")); if (s) { if (qp.get("sample") != null && AP.samplesOf(s.id)[+qp.get("sample")]) useSample(s.id, +qp.get("sample"), true); else if (!qp.get("prompt")) setScene(s.id); $("prompt").value = qp.get("prompt") || $("prompt").value || s.example; send(true); (qp.get("refine") || "").split("|").filter(Boolean).forEach((r) => { $("prompt").value = r; send(true); }); if (qp.get("share")) { share(); if (qp.get("ch")) pickShare(qp.get("ch")); } } }
+  if (qp.get("share") && !qp.get("demo") && qp.get("share") !== "1") { share(qp.get("share")); if (qp.get("ch")) pickShare(qp.get("ch")); }
 </script>
 </body>
 </html>
