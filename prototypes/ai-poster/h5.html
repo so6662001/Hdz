@@ -62,6 +62,24 @@
   .sheet .list button { display: flex; width: 100%; align-items: center; gap: 10px; padding: 13px 4px; font-size: 15px; border-bottom: 1px solid var(--line); } .sheet .list button:last-child { border: 0; } .sheet .list button.del { color: #dc2626; } .sheet .list button span { width: 28px; text-align: center; }
   .sheet .rh { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; } .sheet .rh .th { width: 54px; height: 66px; border-radius: 8px; overflow: hidden; background: #e9edf3; display: flex; align-items: center; justify-content: center; flex: none; } .sheet .rh .th > div { border-radius: 4px; overflow: hidden; } .sheet .rh b { font-size: 14px; display: block; } .sheet .rh small { font-size: 11px; color: var(--mute); }
   .proto { position: fixed; left: 8px; bottom: 8px; font-size: 9px; color: #fff; background: rgba(0,0,0,.45); padding: 2px 6px; border-radius: 4px; z-index: 5; }
+  /* 企业素材库 */
+  .ltabs { display: flex; background: #e9edf3; border-radius: 10px; padding: 3px; margin-bottom: 10px; } .ltabs button { flex: 1; padding: 7px 0; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--mute); } .ltabs button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); } .ltabs button i { font-style: normal; font-size: 10px; opacity: .7; margin-left: 2px; }
+  .cats { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 8px; -webkit-overflow-scrolling: touch; } .cats::-webkit-scrollbar { display: none; } .cats button { flex: none; font-size: 11px; padding: 5px 10px; border-radius: 999px; background: #fff; color: #4b5563; border: 1px solid var(--line); } .cats button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .ast.on::after { content: attr(data-n); position: absolute; top: 3px; left: 3px; font-size: 9px; background: var(--brand); color: #fff; padding: 1px 5px; border-radius: 4px; font-weight: 700; }
+  .pickbar { font-size: 11px; color: var(--mute); margin-top: 8px; line-height: 1.5; } .pickbar b { color: var(--ink); }
+  .kbi { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: #fff; border-radius: 12px; border: 1.5px solid transparent; margin-bottom: 8px; } .kbi.on { border-color: var(--brand); background: #f5f8ff; }
+  .kbi .ck { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid #c7d0e0; flex: none; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; } .kbi.on .ck { background: var(--brand); border-color: var(--brand); }
+  .kbi .th { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; flex: none; background: #eef1f6; }
+  .kbi .bd { flex: 1; min-width: 0; } .kbi .bd b { font-size: 13px; display: block; } .kbi .bd b em { font-style: normal; font-size: 10px; color: var(--brand); background: #eef3ff; padding: 0 5px; border-radius: 4px; margin-right: 4px; font-weight: 600; } .kbi .bd small { font-size: 11px; color: var(--mute); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; margin-top: 2px; }
+  .kbi .ed { flex: none; font-size: 12px; color: var(--brand); padding: 4px 8px; }
+  .kbmode { font-size: 11px; color: var(--mute); background: #fff; border: 1px dashed #c7d0e0; border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; line-height: 1.5; } .kbmode b { color: var(--ink); }
+  .kbnew { border: 1.5px dashed #c7d0e0; border-radius: 12px; padding: 12px; text-align: center; color: var(--mute); font-size: 12px; background: #fafbfe; }
+  .impseg { display: flex; background: #fff; border-radius: 12px; padding: 4px; border: 1.5px solid var(--line); } .impseg button { flex: 1; padding: 8px 0; border-radius: 9px; font-size: 13px; color: var(--mute); font-weight: 600; } .impseg button.on { background: var(--ink); color: #fff; } .impseg button.on.i3 { background: #c2410c; }
+  .imphint { font-size: 11px; color: var(--mute); margin-top: 6px; line-height: 1.5; }
+  .msg .ch span.kb { color: var(--brand); border-color: #c7d7ff; background: #eef3ff; } .msg .ch span.imp { color: #c2410c; border-color: #ffd7c2; background: #fff3ec; }
+  .kbf { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; max-height: 70vh; overflow: auto; } .kbf > div { min-width: 0; } .kbf label { font-size: 11px; color: var(--mute); display: flex; justify-content: space-between; margin-bottom: 4px; } .kbf label a { color: var(--brand); } .kbf input, .kbf textarea, .kbf select { width: 100%; border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 11px; font-size: 14px; background: #fff; outline: none; } .kbf textarea { min-height: 70px; resize: none; line-height: 1.5; }
+  .kbf .imgs { display: flex; gap: 6px; overflow-x: auto; } .kbf .imgs img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 2px solid transparent; flex: none; background: #eef1f6; } .kbf .imgs img.on { border-color: var(--brand); } .kbf .imgs img.dim { opacity: .35; }
+  .kbf .btns { display: flex; gap: 8px; } .kbf .btns button { flex: 1; height: 44px; border-radius: 12px; background: #f1f3f8; font-size: 14px; font-weight: 700; } .kbf .btns button.pri { background: var(--brand); color: #fff; } .kbf .btns button.del { color: #dc2626; flex: 0 0 72px; }
 </style>
 </head>
 <body>
@@ -76,7 +94,13 @@
     <div class="ta"><textarea id="prompt" placeholder="例如：招 5 名钢材销售，底薪 6000 加高提成，五险包住，电话 138 0000 8888。可以说风格：喜庆 / 商务 / 简洁 / 黑金…"></textarea>
       <div class="ex"><a id="exLink" onclick="useExample()">💡 试试示例：招 5 名钢材销售，底薪 6000 加高提成…</a><button onclick="toast('原型：调用微信 JS-SDK 语音识别，说话即输入')">🎤 语音</button></div></div>
   </div>
-  <div class="sec"><h3>素材（选一张做主视觉，Logo 自动带上）<a onclick="$('file').click()">上传</a></h3><div class="assets" id="assets"></div><input type="file" id="file" accept="image/*" multiple hidden></div>
+  <div class="sec"><h3>视觉冲击力<a onclick="toast('AI 营销海报默认「强冲击」：超大标题 + 焦点数字 + 光效层 + 高对比视觉；日签 / 感谢类可选柔和')">什么是冲击力？</a></h3>
+    <div class="impseg" id="impseg"><button data-i="3" class="i3 on">🔥 强冲击</button><button data-i="2">标准</button><button data-i="1">柔和</button></div><div class="imphint" id="imphint"></div></div>
+  <div class="sec"><h3>企业素材库<a id="libAct" onclick="$('file').click()">上传 / 拍照</a></h3>
+    <div class="ltabs"><button class="on" id="lt-img" onclick="libTab('img')">🖼 图片库<i id="imgN"></i></button><button id="lt-kb" onclick="libTab('kb')">📚 资料库<i id="kbN"></i></button></div>
+    <div id="lib-img"><div class="cats" id="acats"></div><div class="assets" id="assets"></div><input type="file" id="file" accept="image/*" multiple hidden><div class="pickbar" id="pickInfo"></div></div>
+    <div id="lib-kb" style="display:none"><div class="kbmode" id="kbmode"></div><div id="kbl"></div><div class="kbnew" onclick="editKB()">＋ 新增资料（粘贴一段介绍，AI 帮你提炼要点）</div></div>
+  </div>
   <div class="sec" style="padding-bottom:16px"><h3>品牌信息（已保存，海报自动带上）<a onclick="$('b-company').focus()">编辑</a></h3>
     <div class="brand" id="brand">
       <div class="row"><label>企业</label><input id="b-company"></div><div class="row"><label>联系人</label><input id="b-person"></div><div class="row"><label>电话</label><input id="b-phone"></div><div class="row"><label>地址</label><input id="b-addr"></div>
@@ -86,13 +110,13 @@
 <div class="foot" id="f-input"><button class="btn" onclick="generate()">✨ 生成海报 <small>约 6~10 秒</small></button></div>
 
 <!-- 第二步：生成中 -->
-<div class="page" id="p-gen"><div class="gen"><div class="orb"></div><h2 id="gtitle">AI 正在设计你的海报</h2><p id="gsub">理解需求 → 设计版式 → 生成视觉 → 精确排版 → 质检</p><div class="steps" id="steps"></div></div></div>
+<div class="page" id="p-gen"><div class="gen"><div class="orb"></div><h2 id="gtitle">AI 正在设计你的海报</h2><p id="gsub">理解需求 → 检索企业资料 → 设计版式 → 生成视觉 → 精确排版 → 质检</p><div class="steps" id="steps"></div></div></div>
 
 <!-- 第三步：结果 + 微调 -->
 <div class="page" id="p-result"><div class="result">
   <div class="view" id="view"><button class="arrow l" id="prev" onclick="goVer(S.cur-1)">‹</button><div class="frame" id="frame"><div class="inner" id="inner"></div></div><button class="arrow r" id="next" onclick="goVer(S.cur+1)">›</button></div>
   <div class="meta"><span id="minfo"></span><span class="dots" id="dots"></span></div>
-  <div class="acts"><button onclick="openSheet()">⚙ 画幅 / 版式</button><button onclick="regen()">🎲 再来一版</button><button onclick="exportPng()">⤓ 保存原图</button><button class="pri" onclick="AP.History.bump(S.sid,'shares');toast('原型：调用微信 JS-SDK，海报图分享到会话 / 朋友圈（已记入历史）')">分享微信</button></div>
+  <div class="acts"><button onclick="openSheet()">⚙ 冲击力 / 版式</button><button onclick="regen()">🎲 再来一版</button><button onclick="exportPng()">⤓ 保存原图</button><button class="pri" onclick="AP.History.bump(S.sid,'shares');toast('原型：调用微信 JS-SDK，海报图分享到会话 / 朋友圈（已记入历史）')">分享微信</button></div>
   <div class="chatbox">
     <div class="msgs" id="msgs"></div>
     <div class="quick" id="quick"></div>
@@ -108,7 +132,10 @@
   <div id="hlist" style="padding-bottom:20px"></div>
 </div>
 <div class="sheet" id="rsheet" onclick="if(event.target===this)this.classList.remove('show')"><div class="card"><div class="rh" id="rsheetHead"></div><div class="list" id="rsheetList"></div></div></div>
-<div class="sheet" id="sheet" onclick="if(event.target===this)this.classList.remove('show')"><div class="card"><h4>画幅与版式 <a onclick="$('sheet').classList.remove('show')">关闭</a></h4>
+<div class="sheet" id="kbsheet" onclick="if(event.target===this)this.classList.remove('show')"><div class="card"><h4 id="kbsheetT">编辑资料 <a onclick="$('kbsheet').classList.remove('show')">关闭</a></h4><div class="kbf" id="kbform"></div></div></div>
+<div class="sheet" id="sheet" onclick="if(event.target===this)this.classList.remove('show')"><div class="card"><h4>视觉冲击力 <a onclick="$('sheet').classList.remove('show')">关闭</a></h4>
+  <div class="g"><button onclick="quick('更有冲击力')"><span>🔥</span>更有冲击力</button><button onclick="quick('柔和一点')"><span>🌿</span>柔和一点</button><button onclick="quick('去掉光线装饰')"><span>✂️</span>去掉光效层</button><button onclick="quick('字大一点')"><span>Aa</span>字大一点</button></div>
+  <h4 style="margin-top:16px">画幅与版式</h4>
   <div class="g"><button onclick="quick('改成 3:4 朋友圈')"><span>▯</span>3:4 朋友圈</button><button onclick="quick('改成竖屏 9:16')"><span>▮</span>9:16 竖屏</button><button onclick="quick('改成 1:1 方图')"><span>▢</span>1:1 方图</button><button onclick="quick('换个版式')"><span>⇄</span>换个版式</button><button onclick="quick('全图铺满')"><span>🖼</span>全图实拍</button><button onclick="quick('多图拼贴')"><span>▦</span>多图拼贴</button><button onclick="quick('版式改成要点')"><span>☰</span>要点卡</button><button onclick="quick('版式改成卡片')"><span>▣</span>居中卡片</button></div>
   <h4 style="margin-top:16px">风格</h4>
   <div class="g" id="styles"></div>
@@ -116,11 +143,12 @@
 <div class="toast" id="toast"></div>
 
 <script src="shared/engine.js"></script>
+<script src="shared/knowledge.js"></script>
 <script src="shared/history.js"></script>
 <script>
   const $ = (id) => document.getElementById(id);
-  const S = { assets: AP.sampleAssets.map((a) => Object.assign({}, a)), brand: Object.assign({}, AP.defaultBrand), scene: null, photoPick: null, versions: [], cur: -1, page: "input", busy: false, sid: null, prompt: "", hgroup: "" };
-  const ctx = () => ({ assets: S.assets, brand: S.brand, scene: S.scene, ratio: "3:4", date: "2026.09.16" });
+  const S = { assets: AP.sampleAssets.map((a) => Object.assign({}, a)), brand: Object.assign({}, AP.defaultBrand), scene: null, picks: [], kbPick: [], acat: "", impact: 3, versions: [], cur: -1, page: "input", busy: false, sid: null, prompt: "", hgroup: "" };
+  const ctx = () => ({ assets: S.assets, brand: S.brand, scene: S.scene, ratio: "3:4", impact: S.impact, photoPick: S.picks, kbPick: S.kbPick, kb: AP.KB.load(), date: "2026.09.16" });
   const toast = (m) => { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2200); }; window.toast = toast;
   const cur = () => S.versions[S.cur] && S.versions[S.cur].spec;
 
@@ -129,7 +157,7 @@
   window.back = () => { if (S.page === "result" || S.page === "history") show("input"); else toast("返回营销工具首页（原型）"); };
   window.navRight = () => { if (S.page === "input") show("history"); else if (S.page === "history") { newPoster(); } else restart(); };
   window.restart = () => { newPoster(); };
-  window.newPoster = () => { S.versions = []; S.cur = -1; S.sid = null; S.prompt = ""; S.photoPick = null; $("prompt").value = ""; renderAssets(); show("input"); };
+  window.newPoster = () => { S.versions = []; S.cur = -1; S.sid = null; S.prompt = ""; S.picks = []; S.kbPick = []; $("prompt").value = ""; renderAssets(); renderKBList(); show("input"); };
 
   /* 场景 */
   S.group = AP.GROUPS[0].id;
@@ -139,10 +167,46 @@
   window.setScene = (id) => { S.scene = S.scene === id ? null : id; if (S.scene) S.group = AP.SCENES.find((s) => s.id === S.scene).g; renderScenes(); const sc = AP.SCENES.find((s) => s.id === S.scene) || AP.SCENES[0]; $("exLink").textContent = `💡 试试示例：${sc.example.slice(0, 22)}…`; };
   window.useExample = () => { const sc = AP.SCENES.find((s) => s.id === S.scene) || AP.SCENES[0]; $("prompt").value = sc.example; };
 
-  /* 素材 */
-  function renderAssets() { $("assets").innerHTML = S.assets.map((a) => `<div class="ast ${a.type === "logo" ? "logo" : ""} ${a.uploaded ? "up" : ""} ${S.photoPick === a.id ? "on" : ""}" onclick="pick('${a.id}')"><img src="${a.url}"><small>${AP.esc(a.name)}</small></div>`).join("") + `<div class="ast add" onclick="$('file').click()"><span>＋</span>上传 / 拍照</div>`; }
-  window.pick = (id) => { const a = S.assets.find((x) => x.id === id); if (a.type === "logo") return toast("Logo 自动用于海报左上角"); S.photoPick = S.photoPick === id ? null : id; renderAssets(); };
-  $("file").addEventListener("change", (e) => { [...e.target.files].filter((f) => f.type.startsWith("image/")).forEach((f) => { const rd = new FileReader(); rd.onload = () => { const id = "up_" + Date.now(); S.assets.push({ id, type: "photo", name: f.name.replace(/\.[^.]+$/, "").slice(0, 8), tags: ["上传", "实拍"], url: rd.result, uploaded: true }); S.photoPick = id; renderAssets(); toast("已上传，已设为主视觉 · 正式版自动抠图与打标"); }; rd.readAsDataURL(f); }); });
+  /* 企业素材库：图片库（可多选 3 张） */
+  window.libTab = (t) => { $("lt-img").classList.toggle("on", t === "img"); $("lt-kb").classList.toggle("on", t === "kb"); $("lib-img").style.display = t === "img" ? "" : "none"; $("lib-kb").style.display = t === "kb" ? "" : "none"; $("libAct").textContent = t === "img" ? "上传 / 拍照" : "新增资料"; $("libAct").onclick = t === "img" ? () => $("file").click() : () => editKB(); if (t === "kb") renderKBList(); };
+  function renderAssets() {
+    const cnt = (c) => S.assets.filter((a) => (a.cat || "upload") === c).length;
+    $("acats").innerHTML = `<button class="${!S.acat ? "on" : ""}" onclick="setACat('')">全部 ${S.assets.length}</button>` + AP.ASSET_CATS.filter((c) => cnt(c.id)).map((c) => `<button class="${S.acat === c.id ? "on" : ""}" onclick="setACat('${c.id}')">${c.icon} ${c.name} ${cnt(c.id)}</button>`).join("");
+    const list = S.assets.filter((a) => !S.acat || (a.cat || "upload") === S.acat);
+    $("assets").innerHTML = list.map((a) => { const n = S.picks.indexOf(a.id) + 1; return `<div class="ast ${a.type === "logo" ? "logo" : ""} ${a.uploaded ? "up" : ""} ${n ? "on" : ""}" data-n="${n === 1 ? "主视觉" : n ? `第 ${n} 张` : ""}" onclick="pick('${a.id}')"><img src="${a.url}"><small>${AP.esc(a.name)}</small></div>`; }).join("") + `<div class="ast add" onclick="$('file').click()"><span>＋</span>上传 / 拍照</div>`;
+    $("imgN").textContent = S.assets.length; $("pickInfo").innerHTML = S.picks.length ? `已选 <b>${S.picks.length}</b> 张：${S.picks.map((id) => AP.esc((S.assets.find((a) => a.id === id) || {}).name)).join("、")}${S.picks.length >= 2 ? " · 将做多图拼贴" : " · 作主视觉"}` : "点图片选入本次海报（最多 3 张，第 1 张为主视觉）；不选则 AI 按场景从图片库挑";
+  }
+  window.setACat = (c) => { S.acat = c; renderAssets(); };
+  window.pick = (id) => { const a = S.assets.find((x) => x.id === id); if (a.type === "logo") return toast("Logo 自动用于海报左上角"); if (S.picks.includes(id)) S.picks = S.picks.filter((x) => x !== id); else { if (S.picks.length >= 3) return toast("最多选 3 张，先取消一张"); S.picks.push(id); } renderAssets(); };
+  $("file").addEventListener("change", (e) => { [...e.target.files].filter((f) => f.type.startsWith("image/")).forEach((f) => { const rd = new FileReader(); rd.onload = () => { const id = "up_" + Date.now(); S.assets.push({ id, type: "photo", cat: "upload", name: f.name.replace(/\.[^.]+$/, "").slice(0, 8), tags: ["上传", "实拍"], url: rd.result, uploaded: true }); if (S.picks.length < 3) S.picks.push(id); S.acat = ""; renderAssets(); toast("已上传并选入本次海报 · 正式版自动抠图、归类与打标"); }; rd.readAsDataURL(f); }); });
+  /* 企业素材库：资料库 */
+  function renderKBList() {
+    const list = AP.KB.load(); $("kbN").textContent = list.length; const ptxt = $("prompt").value.trim(); const e = AP.extract(ptxt); e._t = ptxt;
+    const auto = AP.KB.retrieve(S.scene || (AP.detectScene(ptxt) || { id: "intro" }).id, e, list, [], ptxt);
+    $("kbmode").innerHTML = S.kbPick.length ? `<b>精确引用 ${S.kbPick.length} 条</b>：只结合勾选的资料生成。` : `<b>AI 自动检索</b>：按场景与需求匹配最相关的 1~2 条并标注来源${auto.items.length ? `，当前预计引用 ${auto.items.map((it) => `「${AP.KB.shortTitle(it)}」`).join("")}` : ""}。勾选可精确控制。`;
+    $("kbl").innerHTML = list.map((it) => { const c = AP.KB.cat(it.cat); const img = (it.images || []).map((id) => S.assets.find((a) => a.id === id)).filter(Boolean)[0]; return `<div class="kbi ${S.kbPick.includes(it.id) ? "on" : ""}" onclick="toggleKB('${it.id}')"><span class="ck">✓</span>${img ? `<img class="th" src="${img.url}">` : `<span class="th" style="display:flex;align-items:center;justify-content:center;font-size:18px">${c.icon}</span>`}<div class="bd"><b><em>${c.name}</em>${AP.esc(AP.KB.shortTitle(it))}</b><small>${it.points.map(AP.esc).join(" · ")}</small></div><button class="ed" onclick="event.stopPropagation();editKB('${it.id}')">编辑</button></div>`; }).join("");
+  }
+  window.toggleKB = (id) => { S.kbPick = S.kbPick.includes(id) ? S.kbPick.filter((x) => x !== id) : [...S.kbPick, id]; renderKBList(); };
+  window.editKB = (id) => {
+    const it = id ? AP.KB.get(id) : { id: "", cat: "product", title: "", points: [], body: "", tags: [], images: [] }; if (!it) return;
+    $("kbsheetT").firstChild.textContent = id ? `编辑：${AP.KB.shortTitle(it)} ` : "新增资料 ";
+    $("kbform").innerHTML = `<div><label>分类</label><select id="kf-cat">${AP.KB.CATS.map((c) => `<option value="${c.id}" ${c.id === it.cat ? "selected" : ""}>${c.icon} ${c.name}</option>`).join("")}</select></div>
+      <div><label>标题</label><input id="kf-title" value="${AP.esc(it.title)}" placeholder="如：产品 · 工字钢"></div>
+      <div><label>完整介绍（供 AI 理解）<a onclick="distillKB()">✨ AI 提炼要点</a></label><textarea id="kf-body" placeholder="粘贴一段介绍，点「AI 提炼要点」自动生成海报短句">${AP.esc(it.body || "")}</textarea></div>
+      <div><label>海报要点（每行一条，带数字更有说服力）</label><textarea id="kf-points">${AP.esc(it.points.join("\n"))}</textarea></div>
+      <div><label>标签（检索匹配用，逗号分隔）</label><input id="kf-tags" value="${AP.esc((it.tags || []).join("，"))}"></div>
+      <div><label>关联图片（生成时优先选用）</label><div class="imgs" id="kf-imgs">${S.assets.filter((a) => a.type !== "logo").map((a) => `<img src="${a.url}" data-id="${a.id}" class="${(it.images || []).includes(a.id) ? "on" : "dim"}" onclick="this.classList.toggle('on');this.classList.toggle('dim')">`).join("")}</div></div>
+      <div class="btns">${id ? `<button class="del" onclick="delKB('${id}')">删除</button>` : ""}<button onclick="$('kbsheet').classList.remove('show')">取消</button><button class="pri" onclick="saveKB('${id || ""}')">保存</button></div>`;
+    $("kbsheet").classList.add("show");
+  };
+  window.distillKB = () => { const body = $("kf-body").value.trim(); if (body.length < 10) return toast("先粘贴一段介绍"); const pts = AP.KB.distill(body); if (!pts.length) return toast("没提炼出带数字 / 事实的要点"); $("kf-points").value = pts.join("\n"); toast(`已提炼 ${pts.length} 条（原型为规则模拟；正式版由 Seed 2.0 Lite 提炼）`); };
+  window.saveKB = (id) => { const title = $("kf-title").value.trim(); const points = $("kf-points").value.split("\n").map((x) => x.trim()).filter(Boolean); if (!title) return toast("请填写标题"); if (!points.length) return toast("至少一条海报要点"); const item = { cat: $("kf-cat").value, title, points, body: $("kf-body").value.trim(), tags: $("kf-tags").value.split(/[,，、\s]+/).filter(Boolean), images: [...document.querySelectorAll("#kf-imgs img.on")].map((i) => i.dataset.id) }; if (id) item.id = id; AP.KB.upsert(item); $("kbsheet").classList.remove("show"); renderKBList(); toast(id ? "已保存，后续生成会使用新内容" : "已新增，生成时会被自动检索引用"); };
+  window.delKB = (id) => { if (!confirm("删除这条资料？")) return; AP.KB.remove(id); S.kbPick = S.kbPick.filter((x) => x !== id); $("kbsheet").classList.remove("show"); renderKBList(); };
+  /* 冲击力 */
+  const impHint = () => { $("imphint").textContent = AP.IMPACT[S.impact].desc + (S.impact === 3 ? " — AI 营销海报的基本要求，生成后还可以说「更有冲击力」「柔和一点」" : ""); };
+  $("impseg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; S.impact = +b.dataset.i; document.querySelectorAll("#impseg button").forEach((x) => x.classList.toggle("on", x === b)); impHint(); });
+  impHint();
+  $("prompt").addEventListener("input", () => { if ($("lib-kb").style.display !== "none") renderKBList(); });
   [["company", "b-company"], ["person", "b-person"], ["phone", "b-phone"], ["addr", "b-addr"]].forEach(([k, id]) => { $(id).value = S.brand[k]; $(id).addEventListener("input", () => (S.brand[k] = $(id).value)); });
 
   /* 生成 */
@@ -153,8 +217,8 @@
   }
   window.generate = (fast) => {
     const t = $("prompt").value.trim(); if (!t) return toast("先用一句话描述你要的海报");
-    const go = () => { S.sid = AP.History.newId(); S.prompt = t; const spec = AP.mockPlan(t, ctx()); if (S.photoPick) { spec.assets.photo = S.photoPick; spec.assets.photos = [S.photoPick, ...(spec.assets.photos || []).filter((x) => x !== S.photoPick)].slice(0, 3); if (!["split", "photo", "gallery"].includes(spec.layout)) spec.layout = "split"; } S.versions = [{ spec, label: "生成", t: Date.now() }]; S.cur = 0; saveHist(); $("msgs").innerHTML = ""; aiMsg(`${spec._meta.reason} 已自动存入历史记录。直接告诉我怎么改就行。`, [`${spec._meta.sceneName}`, `${spec._meta.styleName}`, AP.LAYOUT_NAMES[spec.layout]], true, spec.notes); show("result"); draw(); };
-    fast ? go() : runSteps(["understand", "plan", "visual", "render", "qa"], 560, go, "AI 正在设计你的海报", "理解需求 → 设计版式 → 生成视觉 → 精确排版 → 质检");
+    const go = () => { S.sid = AP.History.newId(); S.prompt = t; const spec = AP.mockPlan(t, ctx()); S.versions = [{ spec, label: "生成", t: Date.now() }]; S.cur = 0; saveHist(); $("msgs").innerHTML = ""; aiMsg(`${spec._meta.reason} 已自动存入历史记录。直接告诉我怎么改就行，比如「更有冲击力」「加上产品介绍」。`, [`${spec._meta.sceneName}`, `${spec._meta.styleName}`, AP.LAYOUT_NAMES[spec.layout], { t: `冲击力 ${spec._meta.impactName}`, c: "imp" }, ...spec._meta.cited.map((x) => ({ t: `📚 ${x}`, c: "kb" }))], true, spec.notes); show("result"); draw(); };
+    fast ? go() : runSteps(["understand", "retrieve", "plan", "visual", "render", "qa"], 500, go, "AI 正在设计你的海报", "理解需求 → 检索企业资料 → 设计版式 → 生成视觉 → 精确排版 → 质检");
   };
   function push(spec, label) { S.versions = S.versions.slice(0, S.cur + 1); S.versions.push({ spec, label, t: Date.now() }); S.cur = S.versions.length - 1; draw(); saveHist(); }
   window.goVer = (i) => { if (i < 0 || i >= S.versions.length) return; S.cur = i; draw(); };
@@ -171,7 +235,7 @@
   let tx = null; $("view").addEventListener("touchstart", (e) => (tx = e.touches[0].clientX), { passive: true }); $("view").addEventListener("touchend", (e) => { if (tx == null) return; const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) goVer(S.cur + (dx < 0 ? 1 : -1)); tx = null; });
 
   /* 对话微调 */
-  function aiMsg(text, changes, regen, notes) { const d = document.createElement("div"); d.className = "msg ai"; d.innerHTML = `${AP.esc(text)}${changes && changes.length ? `<div class="ch">${changes.map((c) => `<span>${AP.esc(c)}</span>`).join("")}${regen ? '<span class="re">已重绘背景</span>' : ""}</div>` : ""}${notes && notes.length ? `<div class="note">⚠ ${notes.map(AP.esc).join("<br>⚠ ")}</div>` : ""}`; $("msgs").appendChild(d); $("msgs").scrollTop = 1e9; }
+  function aiMsg(text, changes, regen, notes) { const d = document.createElement("div"); d.className = "msg ai"; d.innerHTML = `${AP.esc(text)}${changes && changes.length ? `<div class="ch">${changes.map((c) => typeof c === "string" ? `<span>${AP.esc(c)}</span>` : `<span class="${c.c}">${AP.esc(c.t)}</span>`).join("")}${regen ? '<span class="re">已重绘背景</span>' : ""}</div>` : ""}${notes && notes.length ? `<div class="note">⚠ ${notes.map(AP.esc).join("<br>⚠ ")}</div>` : ""}`; $("msgs").appendChild(d); $("msgs").scrollTop = 1e9; }
   function userMsg(t) { const d = document.createElement("div"); d.className = "msg user"; d.textContent = t; $("msgs").appendChild(d); $("msgs").scrollTop = 1e9; }
   window.sendRefine = (fast) => { const t = $("refine").value.trim(); if (!t || S.busy) return; $("refine").value = ""; userMsg(t); const r = AP.mockRefine(cur(), t, ctx()); const go = () => { push(r.spec, t.slice(0, 6)); show("result"); draw(); aiMsg(r.reply, r.changes, r.regen); }; if (fast) return go(); if (r.regen) runSteps(["understand", "visual", "render", "qa"], 340, go, "正在应用修改", "理解指令 → 重绘视觉 → 精确排版 → 质检"); else { S.busy = true; setTimeout(() => { S.busy = false; go(); }, 350); } };
   window.quick = (c) => { $("sheet").classList.remove("show"); $("refine").value = c; sendRefine(); };
@@ -193,17 +257,23 @@
     if (!list.length) { $("hlist").innerHTML = `<div class="hempty"><div class="big">🗂️</div>还没有海报<br><small>回到首页写一句需求，生成后会自动保存在这里</small></div>`; return; }
     $("hlist").innerHTML = AP.History.groupByDay(list).map((d) => `<div class="hday">${d.key}<small style="font-weight:500">${d.items.length} 张</small></div><div class="hgrid">${d.items.map((r) => { const used = (r.exports || 0) + (r.shares || 0); const sc = AP.SCENES.find((x) => x.id === r.scene) || {}; return `<div class="hc"><div class="th" onclick="openRecord('${r.id}')">${AP.History.thumb(r, ctx(), 140, 186)}</div><button class="star ${r.starred ? "on" : ""}" onclick="AP.History.star('${r.id}');renderHist()">★</button><button class="more" onclick="recSheet('${r.id}')">⋯</button>${r.demo ? '<span class="demo">示例</span>' : ""}<div class="ti" onclick="openRecord('${r.id}')">${AP.esc(r.title)}</div><div class="mt"><span class="sc">${sc.icon || ""} ${AP.esc(r.sceneName)}</span><span class="stt ${used ? "" : "draft"}">${used ? `已用 ${used} 次` : "草稿"}</span></div><div class="tm">${AP.History.fmtTime(r.updatedAt)} · ${r.channel === "h5" ? "手机" : "PC"} · ${r.versions.length} 版</div></div>`; }).join("")}</div>`).join("");
   };
-  window.openRecord = (id) => { const r = AP.History.get(id); if (!r) return; (r.assets || []).forEach((a) => { if (!S.assets.some((x) => x.id === a.id)) S.assets.push(Object.assign({}, a)); }); renderAssets(); S.sid = r.id; S.prompt = r.prompt; S.versions = r.versions.map((v) => ({ spec: AP.clone(v.spec), label: v.label, t: v.t })); S.cur = r.cur; $("msgs").innerHTML = ""; $("rsheet").classList.remove("show"); show("result"); draw(); aiMsg(`已打开「${r.title}」（${r.sceneName} · ${AP.History.fmtTime(r.createdAt)} · ${r.versions.length} 版）。继续说怎么改，会保存到同一条记录；左右滑动可看历史版本。`, [r.sceneName, AP.STYLES[cur().style].name, `${r.versions.length} 版`], false); };
+  window.openRecord = (id) => { const r = AP.History.get(id); if (!r) return; (r.assets || []).forEach((a) => { if (!S.assets.some((x) => x.id === a.id)) S.assets.push(Object.assign({}, a)); }); S.picks = ((r.versions[r.cur].spec.assets || {}).photos || []).filter((id) => S.assets.some((a) => a.id === id)).slice(0, 3); renderAssets(); S.sid = r.id; S.prompt = r.prompt; S.versions = r.versions.map((v) => ({ spec: AP.clone(v.spec), label: v.label, t: v.t })); S.cur = r.cur; $("msgs").innerHTML = ""; $("rsheet").classList.remove("show"); show("result"); draw(); aiMsg(`已打开「${r.title}」（${r.sceneName} · ${AP.History.fmtTime(r.createdAt)} · ${r.versions.length} 版）。继续说怎么改，会保存到同一条记录；左右滑动可看历史版本。`, [r.sceneName, AP.STYLES[cur().style].name, `${r.versions.length} 版`], false); };
   window.recSheet = (id) => { const r = AP.History.get(id); if (!r) return; $("rsheetHead").innerHTML = `<div class="th">${AP.History.thumb(r, ctx(), 50, 62)}</div><div><b>${AP.esc(r.title)}</b><small>${AP.esc(r.sceneName)} · ${AP.History.fmtTime(r.createdAt)} 创建 · ${r.versions.length} 版 · ${r.channel === "h5" ? "手机" : "PC"}</small><br><small style="display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px">需求：${AP.esc(r.prompt)}</small></div>`; $("rsheetList").innerHTML = `<button onclick="openRecord('${r.id}')"><span>✏️</span>打开继续微调</button><button onclick="redoRecord('${r.id}')"><span>🔁</span>再做一张类似的（带入原需求）</button><button onclick="AP.History.bump('${r.id}','exports');window.open('poster.html?d='+encodeURIComponent(AP.encode(AP.History.get('${r.id}').versions[${r.cur}].spec)),'_blank');$('rsheet').classList.remove('show');renderHist()"><span>⤓</span>保存原图</button><button onclick="AP.History.star('${r.id}');renderHist();$('rsheet').classList.remove('show')"><span>★</span>${r.starred ? "取消收藏" : "收藏（置顶）"}</button><button class="del" onclick="if(confirm('删除这张海报及其 ${r.versions.length} 个版本？')){AP.History.remove('${r.id}');renderHist();$('rsheet').classList.remove('show');toast('已删除，正式版 30 天内可从回收站恢复')}"><span>🗑</span>删除</button>`; $("rsheet").classList.add("show"); };
   window.redoRecord = (id) => { const r = AP.History.get(id); if (!r) return; $("rsheet").classList.remove("show"); newPoster(); S.scene = null; setScene(r.scene); $("prompt").value = r.prompt || r.title; toast("已带入原需求，可修改后重新生成"); };
 
   /* 初始化 */
-  renderAssets(); setScene(null); show("input");
+  renderAssets(); renderKBList(); setScene(null); show("input");
   const qp = new URLSearchParams(location.search);
+  if (qp.get("lib") === "kb") libTab("kb");
+  if (qp.get("kbedit")) editKB(qp.get("kbedit") === "new" ? "" : qp.get("kbedit"));
+  if (qp.get("picks")) { S.picks = qp.get("picks").split(",").filter((id) => S.assets.some((a) => a.id === id)); renderAssets(); }
+  if (qp.get("kbpick")) { S.kbPick = qp.get("kbpick").split(",").filter((id) => AP.KB.get(id)); renderKBList(); }
+  if (qp.get("impact")) { S.impact = +qp.get("impact") || 3; document.querySelectorAll("#impseg button").forEach((x) => x.classList.toggle("on", +x.dataset.i === S.impact)); impHint(); }
+  if (qp.get("sheet") === "1") openSheet();
   if (qp.get("step") === "history") { show("history"); if (qp.get("hgroup")) setHGroup(qp.get("hgroup")); }
   if (qp.get("open")) openRecord(qp.get("open"));
   if (qp.get("rsheet")) recSheet(qp.get("rsheet"));
-  if (qp.get("demo")) { const s = AP.SCENES.find((x) => x.id === qp.get("demo")); if (s) { setScene(s.id); $("prompt").value = qp.get("prompt") || s.example; if (qp.get("step") === "gen") { runSteps(["understand", "plan", "visual", "render", "qa"], 1e6, () => {}, "AI 正在设计你的海报", "理解需求 → 设计版式 → 生成视觉 → 精确排版 → 质检"); setTimeout(() => { document.querySelectorAll(".step")[0].className = "step done"; document.querySelectorAll(".step")[0].querySelector("i").textContent = "✓"; document.querySelectorAll(".step")[1].className = "step done"; document.querySelectorAll(".step")[1].querySelector("i").textContent = "✓"; document.querySelectorAll(".step")[2].className = "step on"; }, 50); } else if (qp.get("step") !== "input") { generate(true); (qp.get("refine") || "").split("|").filter(Boolean).forEach((r) => { $("refine").value = r; sendRefine(true); }); } } }
+  if (qp.get("demo")) { const s = AP.SCENES.find((x) => x.id === qp.get("demo")); if (s) { setScene(s.id); $("prompt").value = qp.get("prompt") || s.example; if (qp.get("step") === "gen") { runSteps(["understand", "retrieve", "plan", "visual", "render", "qa"], 1e6, () => {}, "AI 正在设计你的海报", "理解需求 → 检索企业资料 → 设计版式 → 生成视觉 → 精确排版 → 质检"); setTimeout(() => { document.querySelectorAll(".step")[0].className = "step done"; document.querySelectorAll(".step")[0].querySelector("i").textContent = "✓"; document.querySelectorAll(".step")[1].className = "step done"; document.querySelectorAll(".step")[1].querySelector("i").textContent = "✓"; document.querySelectorAll(".step")[2].className = "step on"; }, 50); } else if (qp.get("step") !== "input") { generate(true); (qp.get("refine") || "").split("|").filter(Boolean).forEach((r) => { $("refine").value = r; sendRefine(true); }); } } }
 </script>
 </body>
 </html>

@@ -16,7 +16,7 @@
 <body>
 <div class="tip"><b>海报原图</b>1080 宽 · 与工作台预览使用同一套渲染代码（前后端一致） · 右键图片区域可另存 / 正式版由服务端无头渲染输出 PNG <button onclick="window.print()">打印 / 存为 PDF</button></div>
 <div id="out"></div>
-<script src="shared/engine.js"></script>
+<script src="shared/engine.js"></script><script src="shared/knowledge.js"></script>
 <script>
   const qp = new URLSearchParams(location.search);
   let spec = null; try { spec = AP.decode(qp.get("d")); } catch (e) {}

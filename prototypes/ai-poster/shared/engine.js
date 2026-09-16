@@ -1,6 +1,8 @@
 /* AI 企业经营海报 · 原型引擎
- * - GROUPS / SCENES / STYLES：场景库（6 大类 36 场景）与风格库
- * - mockPlan(prompt, ctx)：模拟"多模态大模型规划"，输出设计 JSON（正式版由 ModelGateway.plan 替换）
+ * - GROUPS / SCENES / STYLES：场景库（6 大类 37 场景）与风格库
+ * - sampleAssets / ASSET_CATS：企业图片库（按 品牌 / 产品 / 现场 / 加工物流 / 人物 / 资质 分类）；资料库见 knowledge.js
+ * - IMPACT：视觉冲击力等级（强 / 标准 / 柔和），影响标题比例、焦点数字、光效层与图像模型提示词
+ * - mockPlan(prompt, ctx)：模拟"多模态大模型规划"，输出设计 JSON（正式版由 ModelGateway.plan 替换）；会检索并引用企业资料库
  * - mockRefine(spec, instruction, ctx)：模拟"微调指令 → JSON Patch"（正式版由 ModelGateway.refine 替换）
  * - renderPoster(spec, ctx, width)：渲染引擎（前后端共用），7 种版式 × 3 种画幅，输出 HTML 字符串
  * 说明：原型中的"大模型"为规则模拟，仅用于演示交互与版式；精确信息（电话/价格/企业名）始终由引擎排版，不经过图像模型。
@@ -13,16 +15,23 @@
 
   const svg = (s) => "data:image/svg+xml;utf8," + encodeURIComponent(s);
   const ph = (w, h, bg, draw) => svg(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${w} ${h}'><rect width='${w}' height='${h}' fill='${bg}'/>${draw}</svg>`);
+  // 图片库分类（正式版由多模态模型自动打标归类，用户可改）
+  AP.ASSET_CATS = [
+    { id: "brand", name: "品牌 / 门头", icon: "🏷️" }, { id: "product", name: "产品", icon: "🧱" }, { id: "site", name: "仓库 / 现场", icon: "🏭" },
+    { id: "service", name: "加工 / 物流", icon: "🚚" }, { id: "people", name: "人物 / 团队", icon: "👥" }, { id: "cert", name: "资质", icon: "🏅" }, { id: "upload", name: "我上传的", icon: "⬆️" },
+  ];
   AP.sampleAssets = [
-    { id: "ast_logo", type: "logo", name: "企业 Logo", tags: ["logo", "透明底"], url: svg(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><rect width='200' height='200' rx='40' fill='#1f5eff'/><text x='100' y='128' font-size='96' font-weight='900' text-anchor='middle' fill='#fff' font-family='PingFang SC,Microsoft YaHei,sans-serif'>鑫</text></svg>`) },
-    { id: "ast_ware", type: "photo", name: "仓库实拍", tags: ["仓库", "钢卷", "现场"], url: ph(800, 600, "#2a3140", `<defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3b4557'/><stop offset='1' stop-color='#141a24'/></linearGradient></defs><rect width='800' height='600' fill='url(#g)'/><g fill='#6b7a90'><ellipse cx='200' cy='420' rx='150' ry='150'/><ellipse cx='460' cy='430' rx='140' ry='140'/><ellipse cx='690' cy='440' rx='120' ry='120'/></g><g fill='#2a3242'><ellipse cx='200' cy='420' rx='60' ry='60'/><ellipse cx='460' cy='430' rx='55' ry='55'/><ellipse cx='690' cy='440' rx='48' ry='48'/></g><rect y='560' width='800' height='40' fill='#0d1117'/><g stroke='#8b98ad' stroke-width='6' opacity='.5'><line x1='0' y1='90' x2='800' y2='90'/><line x1='120' y1='0' x2='120' y2='90'/><line x1='400' y1='0' x2='400' y2='90'/><line x1='680' y1='0' x2='680' y2='90'/></g>`) },
-    { id: "ast_rebar", type: "photo", name: "螺纹钢产品", tags: ["产品", "螺纹钢"], url: ph(800, 600, "#1b1f27", `<g transform='rotate(-18 400 300)'>${Array.from({ length: 9 }, (_, i) => `<rect x='-100' y='${120 + i * 44}' width='1000' height='26' rx='13' fill='${i % 2 ? "#6f5a45" : "#8a6f52"}'/><rect x='-100' y='${126 + i * 44}' width='1000' height='6' rx='3' fill='#b08c66' opacity='.6'/>`).join("")}</g>`) },
-    { id: "ast_truck", type: "photo", name: "装车发货", tags: ["发货", "装车", "现场", "物流"], url: ph(800, 600, "#4a5568", `<rect y='420' width='800' height='180' fill='#2d3748'/><rect x='80' y='250' width='520' height='170' rx='10' fill='#c53030'/><rect x='600' y='300' width='150' height='120' rx='12' fill='#e53e3e'/><rect x='620' y='315' width='90' height='50' rx='6' fill='#bee3f8'/><g fill='#8a6f52'>${Array.from({ length: 6 }, (_, i) => `<rect x='${100 + i * 80}' y='210' width='64' height='40' rx='6'/>`).join("")}</g><circle cx='180' cy='430' r='46' fill='#111'/><circle cx='480' cy='430' r='46' fill='#111'/><circle cx='690' cy='430' r='46' fill='#111'/><rect x='0' y='60' width='800' height='30' fill='#f6ad55' opacity='.6'/><rect x='300' y='0' width='40' height='250' fill='#a0aec0'/>`) },
-    { id: "ast_machine", type: "photo", name: "加工车间", tags: ["加工", "车间", "现场", "开平"], url: ph(800, 600, "#1a202c", `<rect x='60' y='200' width='680' height='260' rx='16' fill='#4a5568'/><rect x='100' y='240' width='600' height='40' fill='#2d3748'/><circle cx='200' cy='380' r='70' fill='#718096'/><circle cx='200' cy='380' r='30' fill='#2d3748'/><rect x='300' y='330' width='400' height='24' fill='#cbd5e0'/><rect x='300' y='370' width='400' height='8' fill='#f6ad55'/><g fill='#f6e05e' opacity='.9'><circle cx='560' cy='320' r='5'/><circle cx='590' cy='300' r='4'/><circle cx='540' cy='295' r='3'/></g><rect y='460' width='800' height='140' fill='#0d1117'/>`) },
-    { id: "ast_visit", type: "photo", name: "客户接待", tags: ["接待", "客户", "人物", "现场"], url: ph(800, 600, "#3b4557", `<rect y='0' width='800' height='320' fill='#2a3140'/><g fill='#6b7a90'><ellipse cx='150' cy='300' rx='120' ry='120'/><ellipse cx='400' cy='300' rx='110' ry='110'/><ellipse cx='650' cy='300' rx='110' ry='110'/></g><g><circle cx='330' cy='330' r='40' fill='#e2c9a8'/><rect x='285' y='372' width='90' height='200' rx='30' fill='#1a365d'/><circle cx='450' cy='340' r='40' fill='#e2c9a8'/><rect x='405' y='382' width='90' height='190' rx='30' fill='#2b6cb0'/><circle cx='560' cy='335' r='38' fill='#e2c9a8'/><rect x='517' y='375' width='86' height='195' rx='30' fill='#4a5568'/></g><rect y='570' width='800' height='30' fill='#0d1117'/>`) },
-    { id: "ast_site", type: "photo", name: "工程现场", tags: ["工程", "案例", "工地", "现场"], url: ph(800, 600, "#a0aec0", `<rect y='0' width='800' height='300' fill='#bee3f8'/><g fill='#718096'>${Array.from({ length: 5 }, (_, i) => `<rect x='${60 + i * 150}' y='${180 - i * 20}' width='110' height='${420 + i * 20}'/>`).join("")}</g><g stroke='#e53e3e' stroke-width='10'><line x1='100' y1='60' x2='700' y2='60'/><line x1='700' y1='60' x2='700' y2='240'/></g><g fill='#2d3748'>${Array.from({ length: 12 }, (_, i) => `<rect x='${70 + (i % 4) * 80}' y='${360 + Math.floor(i / 4) * 70}' width='40' height='40'/>`).join("")}</g><rect y='560' width='800' height='40' fill='#4a5568'/>`) },
-    { id: "ast_cert", type: "cert", name: "代理授权书", tags: ["资质", "授权"], url: ph(600, 800, "#f7f1e3", `<rect x='30' y='30' width='540' height='740' fill='none' stroke='#c9a14a' stroke-width='8'/><text x='300' y='180' font-size='44' text-anchor='middle' fill='#8a2b1d' font-weight='900' font-family='Songti SC,serif'>授权证书</text><g fill='#7a7a7a'>${Array.from({ length: 9 }, (_, i) => `<rect x='90' y='${260 + i * 40}' width='${420 - (i % 3) * 60}' height='12' rx='6'/>`).join("")}</g><circle cx='440' cy='680' r='60' fill='none' stroke='#c8102e' stroke-width='6' opacity='.8'/>`) },
-    { id: "ast_team", type: "photo", name: "团队合影", tags: ["人物", "团队"], url: ph(800, 600, "#dfe6f0", `<g fill='#2f3a4f'>${[120, 260, 400, 540, 680].map((x, i) => `<circle cx='${x}' cy='${250 + (i % 2) * 20}' r='48'/><rect x='${x - 90}' y='${300 + (i % 2) * 20}' width='180' height='300' rx='60'/>`).join("")}</g>`) },
+    { id: "ast_logo", type: "logo", cat: "brand", name: "企业 Logo", tags: ["logo", "透明底"], url: svg(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><rect width='200' height='200' rx='40' fill='#1f5eff'/><text x='100' y='128' font-size='96' font-weight='900' text-anchor='middle' fill='#fff' font-family='PingFang SC,Microsoft YaHei,sans-serif'>鑫</text></svg>`) },
+    { id: "ast_shop", type: "photo", cat: "brand", name: "公司门头", tags: ["门头", "公司", "品牌", "办公"], url: ph(800, 600, "#cbd5e1", `<rect y='380' width='800' height='220' fill='#94a3b8'/><rect x='60' y='120' width='680' height='300' fill='#f8fafc'/><rect x='60' y='120' width='680' height='90' fill='#1f5eff'/><text x='400' y='185' font-size='56' font-weight='900' text-anchor='middle' fill='#fff' font-family='PingFang SC,Microsoft YaHei,sans-serif'>鑫钢贸易</text><rect x='120' y='240' width='160' height='180' fill='#bfdbfe'/><rect x='520' y='240' width='160' height='180' fill='#bfdbfe'/><rect x='330' y='250' width='140' height='170' rx='6' fill='#1e293b'/><rect x='0' y='0' width='800' height='120' fill='#e2e8f0'/>`) },
+    { id: "ast_ware", type: "photo", cat: "site", name: "仓库实拍", tags: ["仓库", "钢卷", "现场"], url: ph(800, 600, "#2a3140", `<defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3b4557'/><stop offset='1' stop-color='#141a24'/></linearGradient></defs><rect width='800' height='600' fill='url(#g)'/><g fill='#6b7a90'><ellipse cx='200' cy='420' rx='150' ry='150'/><ellipse cx='460' cy='430' rx='140' ry='140'/><ellipse cx='690' cy='440' rx='120' ry='120'/></g><g fill='#2a3242'><ellipse cx='200' cy='420' rx='60' ry='60'/><ellipse cx='460' cy='430' rx='55' ry='55'/><ellipse cx='690' cy='440' rx='48' ry='48'/></g><rect y='560' width='800' height='40' fill='#0d1117'/><g stroke='#8b98ad' stroke-width='6' opacity='.5'><line x1='0' y1='90' x2='800' y2='90'/><line x1='120' y1='0' x2='120' y2='90'/><line x1='400' y1='0' x2='400' y2='90'/><line x1='680' y1='0' x2='680' y2='90'/></g>`) },
+    { id: "ast_rebar", type: "photo", cat: "product", name: "螺纹钢产品", tags: ["产品", "螺纹钢"], url: ph(800, 600, "#1b1f27", `<g transform='rotate(-18 400 300)'>${Array.from({ length: 9 }, (_, i) => `<rect x='-100' y='${120 + i * 44}' width='1000' height='26' rx='13' fill='${i % 2 ? "#6f5a45" : "#8a6f52"}'/><rect x='-100' y='${126 + i * 44}' width='1000' height='6' rx='3' fill='#b08c66' opacity='.6'/>`).join("")}</g>`) },
+    { id: "ast_pipe", type: "photo", cat: "product", name: "镀锌管产品", tags: ["产品", "镀锌管", "方管"], url: ph(800, 600, "#e5e7eb", `<g transform='rotate(-12 400 300)'>${Array.from({ length: 6 }, (_, i) => `<rect x='-100' y='${110 + i * 62}' width='1000' height='44' rx='22' fill='${i % 2 ? "#9ca3af" : "#b8bec8"}'/><rect x='-100' y='${118 + i * 62}' width='1000' height='10' rx='5' fill='#f3f4f6' opacity='.7'/>`).join("")}</g><ellipse cx='690' cy='150' rx='34' ry='22' fill='#6b7280'/><ellipse cx='690' cy='150' rx='24' ry='14' fill='#e5e7eb'/>`) },
+    { id: "ast_truck", type: "photo", cat: "service", name: "装车发货", tags: ["发货", "装车", "现场", "物流"], url: ph(800, 600, "#4a5568", `<rect y='420' width='800' height='180' fill='#2d3748'/><rect x='80' y='250' width='520' height='170' rx='10' fill='#c53030'/><rect x='600' y='300' width='150' height='120' rx='12' fill='#e53e3e'/><rect x='620' y='315' width='90' height='50' rx='6' fill='#bee3f8'/><g fill='#8a6f52'>${Array.from({ length: 6 }, (_, i) => `<rect x='${100 + i * 80}' y='210' width='64' height='40' rx='6'/>`).join("")}</g><circle cx='180' cy='430' r='46' fill='#111'/><circle cx='480' cy='430' r='46' fill='#111'/><circle cx='690' cy='430' r='46' fill='#111'/><rect x='0' y='60' width='800' height='30' fill='#f6ad55' opacity='.6'/><rect x='300' y='0' width='40' height='250' fill='#a0aec0'/>`) },
+    { id: "ast_machine", type: "photo", cat: "service", name: "加工车间", tags: ["加工", "车间", "现场", "开平"], url: ph(800, 600, "#1a202c", `<rect x='60' y='200' width='680' height='260' rx='16' fill='#4a5568'/><rect x='100' y='240' width='600' height='40' fill='#2d3748'/><circle cx='200' cy='380' r='70' fill='#718096'/><circle cx='200' cy='380' r='30' fill='#2d3748'/><rect x='300' y='330' width='400' height='24' fill='#cbd5e0'/><rect x='300' y='370' width='400' height='8' fill='#f6ad55'/><g fill='#f6e05e' opacity='.9'><circle cx='560' cy='320' r='5'/><circle cx='590' cy='300' r='4'/><circle cx='540' cy='295' r='3'/></g><rect y='460' width='800' height='140' fill='#0d1117'/>`) },
+    { id: "ast_visit", type: "photo", cat: "people", name: "客户接待", tags: ["接待", "客户", "人物", "现场"], url: ph(800, 600, "#3b4557", `<rect y='0' width='800' height='320' fill='#2a3140'/><g fill='#6b7a90'><ellipse cx='150' cy='300' rx='120' ry='120'/><ellipse cx='400' cy='300' rx='110' ry='110'/><ellipse cx='650' cy='300' rx='110' ry='110'/></g><g><circle cx='330' cy='330' r='40' fill='#e2c9a8'/><rect x='285' y='372' width='90' height='200' rx='30' fill='#1a365d'/><circle cx='450' cy='340' r='40' fill='#e2c9a8'/><rect x='405' y='382' width='90' height='190' rx='30' fill='#2b6cb0'/><circle cx='560' cy='335' r='38' fill='#e2c9a8'/><rect x='517' y='375' width='86' height='195' rx='30' fill='#4a5568'/></g><rect y='570' width='800' height='30' fill='#0d1117'/>`) },
+    { id: "ast_site", type: "photo", cat: "site", name: "工程现场", tags: ["工程", "案例", "工地", "现场"], url: ph(800, 600, "#a0aec0", `<rect y='0' width='800' height='300' fill='#bee3f8'/><g fill='#718096'>${Array.from({ length: 5 }, (_, i) => `<rect x='${60 + i * 150}' y='${180 - i * 20}' width='110' height='${420 + i * 20}'/>`).join("")}</g><g stroke='#e53e3e' stroke-width='10'><line x1='100' y1='60' x2='700' y2='60'/><line x1='700' y1='60' x2='700' y2='240'/></g><g fill='#2d3748'>${Array.from({ length: 12 }, (_, i) => `<rect x='${70 + (i % 4) * 80}' y='${360 + Math.floor(i / 4) * 70}' width='40' height='40'/>`).join("")}</g><rect y='560' width='800' height='40' fill='#4a5568'/>`) },
+    { id: "ast_cert", type: "cert", cat: "cert", name: "代理授权书", tags: ["资质", "授权"], url: ph(600, 800, "#f7f1e3", `<rect x='30' y='30' width='540' height='740' fill='none' stroke='#c9a14a' stroke-width='8'/><text x='300' y='180' font-size='44' text-anchor='middle' fill='#8a2b1d' font-weight='900' font-family='Songti SC,serif'>授权证书</text><g fill='#7a7a7a'>${Array.from({ length: 9 }, (_, i) => `<rect x='90' y='${260 + i * 40}' width='${420 - (i % 3) * 60}' height='12' rx='6'/>`).join("")}</g><circle cx='440' cy='680' r='60' fill='none' stroke='#c8102e' stroke-width='6' opacity='.8'/>`) },
+    { id: "ast_team", type: "photo", cat: "people", name: "团队合影", tags: ["人物", "团队"], url: ph(800, 600, "#dfe6f0", `<g fill='#2f3a4f'>${[120, 260, 400, 540, 680].map((x, i) => `<circle cx='${x}' cy='${250 + (i % 2) * 20}' r='48'/><rect x='${x - 90}' y='${300 + (i % 2) * 20}' width='180' height='300' rx='60'/>`).join("")}</g>`) },
   ];
 
   /* ---------- 场景库：6 大类 36 场景 ---------- */
@@ -92,6 +101,16 @@
     paper: { name: "国风纸质", palette: { bg: "#f6efe0", bg2: "#ede2c8", fg: "#2b2118", mute: "#8b7a63", accent: "#b3402b", accent2: "#c9a14a", mode: "light" }, bgfx: "paper", visual: "米色宣纸纹理背景，淡墨山影与朱砂印章暗纹，上方留白，无文字" },
     green: { name: "清新绿", palette: { bg: "#0f3d2e", bg2: "#155f45", fg: "#f2fff8", mute: "#a5d8bf", accent: "#ffd166", accent2: "#7be495", mode: "dark" }, bgfx: "glow", visual: "墨绿渐变背景，柔和黄绿光晕，左侧留白，无文字" },
   };
+  /* ---------- 视觉冲击力（AI 营销海报的基本要求：默认"强"） ----------
+   * 3 强冲击：超大标题（占宽 ≥ 70%）、一个焦点数字、光线 / 斜切 / 大字底纹装饰层、CTA 发光、图像提示词追加"高对比 / 戏剧性光线 / 电影级"
+   * 2 标准：常规层级；1 柔和：节气日签 / 感谢类可用，低饱和无装饰层
+   */
+  AP.IMPACT = {
+    3: { name: "强冲击", short: "强", desc: "超大标题 · 焦点数字 · 光效层 · 高对比视觉", prompt: "强烈视觉冲击力：高对比明暗、戏剧性侧光与纵深、电影级质感、主体大比例占据画面、色彩饱满，为超大标题留出干净的大面积留白", hScale: 1.12, numScale: 1.18 },
+    2: { name: "标准", short: "标准", desc: "常规层级，信息均衡", prompt: "画面有明暗层次与明确视觉焦点，留白供文字排版", hScale: 1, numScale: 1 },
+    1: { name: "柔和", short: "柔和", desc: "低饱和、无装饰层，适合日签 / 感谢", prompt: "整体柔和克制、低饱和、光线均匀、安静的留白", hScale: 0.94, numScale: 0.92 },
+  };
+  AP.visualPrompt = (style, impact) => `${AP.STYLES[style].visual}；${AP.IMPACT[impact || 3].prompt}；无任何文字、无 Logo、无人脸`;
   const COLOR_WORDS = [["红", "festive"], ["喜庆", "festive"], ["蓝", "business"], ["商务", "business"], ["稳重", "business"], ["工业", "industrial"], ["硬朗", "industrial"], ["钢铁", "industrial"], ["橙", "industrial"], ["白", "minimal"], ["简洁", "minimal"], ["极简", "minimal"], ["清爽", "minimal"], ["科技", "tech"], ["青", "tech"], ["黑金", "black"], ["高端", "black"], ["高级", "black"], ["金色", "black"], ["黑", "black"], ["国风", "paper"], ["中式", "paper"], ["古风", "paper"], ["纸", "paper"], ["绿", "green"]];
   const STYLE_ORDER = Object.keys(AP.STYLES);
   const LAYOUTS = ["hero", "split", "list", "card", "photo", "gallery", "table"];
@@ -157,6 +176,7 @@
     return e;
   }
 
+  AP.extract = extract; AP.detectScene = detectScene;
   const T = (arr) => arr.filter(Boolean).join(" · ");
   const COPY = {
     newproduct: (e, b) => ({ eyebrow: `${b.short} · 新品上市`, headline: `${e.mills ? e.mills[0] + " " : ""}${e.prods ? e.prods[0] : "新品"} 到货`, sub: T([e.spec ? `规格 ${e.spec}` : null, /汽配|冲压|机械|钢构|家电/.test(e._t) ? `适用 ${e._t.match(/(汽配|冲压|机械|钢构|家电)/)[1]}` : null, "欢迎试样"]), bullets: [/无氧化皮|表面/.test(e._t) ? "表面无氧化皮 · 无需二次处理" : "一线钢厂 · 质保书齐全", /试样|样品/.test(e._t) ? "支持小批量试样" : "支持定尺加工", "首批到货 · 数量有限"], highlight: null, cta: "扫码看规格与报价" }),
@@ -207,31 +227,46 @@
     const e = extract(text); e._t = text;
     const copy = COPY[scene.id](e, brand);
     if (scene.tag) copy.tag = scene.tag;
+    // 企业资料库：用户勾选（精确引用）或按场景 / 关键词自动检索（RAG 模拟），把企业真实信息融进文案
+    const kbList = ctx.kb || (AP.KB ? AP.KB.load() : []);
+    const kb = AP.KB ? AP.KB.retrieve(scene.id, e, kbList, ctx.kbPick, text) : { mode: "none", items: [] };
+    if (AP.KB) AP.KB.apply(copy, kb.items, scene.id, e);
     const logo = assets.find((a) => a.type === "logo");
     const cand = assets.filter((a) => a.type !== "logo");
     const byPref = (prefs) => { for (const p of prefs || []) { const f = cand.find((a) => (a.tags || []).some((t) => t.includes(p))); if (f) return f; } return null; };
-    let photo = byPref(scene.photos);
-    if (!photo && NEED_PHOTO.includes(scene.layout)) photo = cand[0] || null;
+    // 选图优先级：用户从图片库勾选 > 引用资料关联的图片 > 场景偏好标签 > 兜底
+    const picked = (ctx.photoPick || []).map((id) => cand.find((a) => a.id === id)).filter(Boolean);
+    const kbImgs = kb.items.flatMap((it) => it.images || []).map((id) => cand.find((a) => a.id === id)).filter(Boolean);
+    const byProd = e.prods ? cand.find((a) => (a.tags || []).some((t) => e.prods.includes(t))) : null;
+    let photo = picked[0] || (kbImgs.find((a) => (scene.photos || []).some((p) => (a.tags || []).some((t) => t.includes(p)))) || null) || byProd || byPref(scene.photos);
+    if (!photo && NEED_PHOTO.includes(scene.layout)) photo = cand.find((a) => a.cat === "site") || cand[0] || null;
     let layout = scene.layout;
     if (!photo && NEED_PHOTO.includes(layout)) layout = layout === "gallery" ? "list" : "hero";
+    if (picked.length >= 2) layout = "gallery"; else if (picked.length === 1 && !NEED_PHOTO.includes(layout)) layout = "split";
     const photos = [];
-    if (scene.multi && photo) { photos.push(photo.id); for (const a of cand) { if (photos.length >= scene.multi) break; if (!photos.includes(a.id)) photos.push(a.id); } }
+    if (picked.length >= 2) picked.slice(0, 3).forEach((a) => photos.push(a.id));
+    else if ((scene.multi || layout === "gallery") && photo) { const pref = (a) => (scene.photos || []).some((p) => (a.tags || []).some((t) => t.includes(p))) ? 0 : 1; photos.push(photo.id); for (const a of [...kbImgs, ...cand.slice().sort((x, y) => pref(x) - pref(y))]) { if (photos.length >= (scene.multi || 3)) break; if (!photos.includes(a.id)) photos.push(a.id); } }
     const st = AP.STYLES[style];
+    const impact = ctx.impact || (/柔和|低调|克制|素雅/.test(text) ? 1 : 3); // AI 营销海报默认"强冲击"，用户可在生成前或微调时调低
     const spec = {
-      scene: scene.id, ratio: ctx.ratio || detectRatio(text), layout, style, palette: clone(st.palette), bgfx: st.bgfx, fontScale: 1, density: 2,
+      scene: scene.id, ratio: ctx.ratio || detectRatio(text), layout, style, palette: clone(st.palette), bgfx: st.bgfx, fontScale: 1, density: 2, impact,
       copy, contact: { company: brand.company, person: brand.person, phone: e.phone || brand.phone, addr: brand.addr },
       assets: { logo: logo ? logo.id : null, photo: photo ? photo.id : null, photos },
       flags: { showQR: true, showLogo: !!logo, showPhone: true, showAddr: ["opening", "event", "intro", "recruit", "notice", "expo", "anniversary"].includes(scene.id) },
-      visual: { prompt: st.visual, seed: hash(text) % 10000, imageId: null },
+      visual: { prompt: AP.visualPrompt(style, impact), negative: "文字, 水印, Logo, 人脸, 杂乱, 低对比, 模糊", seed: hash(text) % 10000, imageId: null },
+      kb: { mode: kb.mode, cited: kb.items.map((it) => ({ id: it.id, cat: it.cat, title: it.title })) },
       notes: [],
     };
     if (/不要二维码|去掉二维码|无二维码/.test(text)) spec.flags.showQR = false;
     if (!e.phone) spec.notes.push("未在需求中识别到电话，已使用品牌资料中的联系方式");
     if (["promo", "flash"].includes(scene.id) && !e.price && !e.delta) spec.notes.push("未识别到具体价格，已用占位数字，请在微调中告知真实价格");
     if (scene.id === "recruit" && !e.salary) spec.notes.push("未识别到薪资范围，未展示薪资大字；可说「薪资 8K~15K」补上");
-    if (NEED_PHOTO.includes(scene.layout) && !cand.some((a) => a.uploaded)) spec.notes.push("现场类海报建议上传当天实拍图，效果远好于示例图");
+    if (NEED_PHOTO.includes(spec.layout) && !cand.some((a) => a.uploaded) && !picked.length) spec.notes.push("现场类海报建议上传当天实拍图，效果远好于示例图");
+    if (kb.mode === "none" && AP.KB) spec.notes.push("资料库中没有与本场景匹配的企业资料，要点为通用文案；在素材库补充「产品介绍 / 优势卖点」后会自动引用");
     const g = AP.GROUPS.find((x) => x.id === scene.g);
-    spec._meta = { sceneName: scene.name, groupName: g ? g.name : "", styleName: st.name, detected: e, reason: `识别为「${g ? g.name + " / " : ""}${scene.name}」场景${detectStyle(text) ? `，按你的描述采用「${st.name}」风格` : `，默认采用「${st.name}」风格`}；${photo && NEED_PHOTO.includes(layout) ? `选用素材「${photo.name}」${photos.length > 1 ? `等 ${photos.length} 张` : ""}作为主视觉，` : ""}版式「${AP.LAYOUT_NAMES[layout]}」。` };
+    const kbText = kb.items.length ? `${kb.mode === "manual" ? "按你勾选" : "自动检索"}并引用企业资料${kb.items.map((it) => `「${AP.KB.shortTitle(it)}」`).join("")}，` : "";
+    const picText = picked.length ? `使用你选中的 ${picked.length} 张图片${picked.length >= 2 ? "做多图拼贴" : `「${picked[0].name}」作主视觉`}，` : photo && NEED_PHOTO.includes(layout) ? `选用${kbImgs.includes(photo) ? "资料关联图片" : "素材"}「${photo.name}」${photos.length > 1 ? `等 ${photos.length} 张` : ""}作为主视觉，` : "";
+    spec._meta = { sceneName: scene.name, groupName: g ? g.name : "", styleName: st.name, impactName: AP.IMPACT[impact].name, detected: e, cited: kb.items.map((it) => AP.KB.shortTitle(it)), reason: `识别为「${g ? g.name + " / " : ""}${scene.name}」场景${detectStyle(text) ? `，按你的描述采用「${st.name}」风格` : `，默认采用「${st.name}」风格`}；${kbText}${picText}版式「${AP.LAYOUT_NAMES[layout]}」，按「${AP.IMPACT[impact].name}」原则处理：${AP.IMPACT[impact].desc}。` };
     return spec;
   };
 
@@ -240,9 +275,27 @@
     const spec = clone(spec0); const changes = []; let regen = false; const t = (instr || "").trim();
     const assets = ctx.assets || []; const cand = assets.filter((a) => a.type !== "logo");
     if (!spec.assets.photos) spec.assets.photos = spec.assets.photo ? [spec.assets.photo] : [];
-    const setStyle = (s) => { if (!AP.STYLES[s] || spec.style === s) return; spec.style = s; spec.palette = clone(AP.STYLES[s].palette); spec.bgfx = AP.STYLES[s].bgfx; spec.visual.prompt = AP.STYLES[s].visual; regen = true; changes.push(`风格改为「${AP.STYLES[s].name}」并重绘背景`); };
-    const setLayout = (l) => { if (NEED_PHOTO.includes(l) && !spec.assets.photo) { const p = cand[0]; if (!p) { changes.push("素材库里没有图片，无法使用图片版式"); return; } spec.assets.photo = p.id; } if (l === "gallery" && spec.assets.photos.length < 2) { spec.assets.photos = [spec.assets.photo, ...cand.filter((a) => a.id !== spec.assets.photo).map((a) => a.id)].slice(0, 3); } spec.layout = l; changes.push(`版式改为「${AP.LAYOUT_NAMES[l]}」`); };
+    if (!spec.impact) spec.impact = 2;
     let m;
+    const setStyle = (s) => { if (!AP.STYLES[s] || spec.style === s) return; spec.style = s; spec.palette = clone(AP.STYLES[s].palette); spec.bgfx = AP.STYLES[s].bgfx; spec.visual.prompt = AP.visualPrompt(s, spec.impact); regen = true; changes.push(`风格改为「${AP.STYLES[s].name}」并重绘背景`); };
+    const setImpact = (v) => { v = Math.max(1, Math.min(3, v)); if (v === spec.impact) return false; spec.impact = v; spec.impactFx = undefined; spec.visual.prompt = AP.visualPrompt(spec.style, v); regen = true; changes.push(`视觉冲击力调为「${AP.IMPACT[v].name}」：${AP.IMPACT[v].desc}`); return true; };
+    /* 冲击力 */
+    if (/冲击力|更炸|更醒目|更抓眼|更强烈|更有气势|更震撼|更燃|更有力|更霸气|更吸引|更突出|更大气/.test(t) && !/不要|去掉|太/.test(t)) {
+      if (!setImpact(3)) { spec.fontScale = Math.min(1.4, +(spec.fontScale + 0.1).toFixed(2)); spec.density = Math.max(1, spec.density - 1); spec.impactFx = true; changes.push("已是强冲击：再放大标题、精简信息，让焦点更集中"); }
+    }
+    if (/(?:柔和|低调|克制|收敛|温和|素雅|安静|不要那么(?:冲|炸|夸张|花|强烈)|太(?:冲|炸|夸张|花|强烈)|冲击力(?:小|弱|低)一?点)/.test(t)) setImpact(spec.impact - 1);
+    if (/(?:去掉|不要|隐藏|删掉)[^，,。]*(?:射线|光线|光效|斜条|斜切|底纹|大字底|水印字|装饰层|装饰)/.test(t)) { spec.impactFx = false; changes.push("去掉背景射线 / 斜切 / 大字底纹装饰层（保留大标题层级）"); }
+    else if (/(?:加|要|恢复)[^，,。]*(?:射线|光效|斜切|底纹|装饰层)/.test(t)) { spec.impactFx = true; if (spec.impact < 3) setImpact(3); else changes.push("恢复装饰层"); }
+    /* 企业资料库引用 */
+    if (AP.KB && (m = t.match(/(?:用|加上|加入|引用|结合|带上|放上|补上|加)[^，,。]*?(企业介绍|公司介绍|品牌介绍|产品介绍|服务介绍|优势卖点|优势|卖点|资质荣誉|资质|荣誉|客户案例|案例|团队介绍|团队|服务承诺|承诺)/))) {
+      const catMap = { 企业介绍: "company", 公司介绍: "company", 品牌介绍: "brand", 产品介绍: "product", 服务介绍: "service", 优势卖点: "advantage", 优势: "advantage", 卖点: "advantage", 资质荣誉: "honor", 资质: "honor", 荣誉: "honor", 客户案例: "case", 案例: "case", 团队介绍: "team", 团队: "team", 服务承诺: "promise", 承诺: "promise" };
+      const cat = catMap[m[1]]; const list = (ctx.kb || AP.KB.load()).filter((x) => x.cat === cat); const prods = extract(spec.copy.headline + " " + t).prods || [];
+      const it = list.find((x) => (x.tags || []).some((tg) => prods.includes(tg))) || list[0];
+      if (it) { const s = new Set(); spec.copy.bullets = [...(it.points || []), ...(spec.copy.bullets || [])].filter((x) => x && !s.has(x) && s.add(x)).slice(0, 6); spec.kb = spec.kb || { mode: "manual", cited: [] }; if (!spec.kb.cited.some((c) => c.id === it.id)) spec.kb.cited.push({ id: it.id, cat: it.cat, title: it.title }); spec.kb.mode = "manual"; if (spec.density < 2) spec.density = 2; changes.push(`引用企业资料「${AP.KB.shortTitle(it)}」补充要点`); }
+      else changes.push(`资料库里还没有「${m[1]}」，可在素材库 → 资料库中新增后再引用`);
+    }
+    if (AP.KB && /(?:去掉|不要|删掉|移除)[^，,。]*(?:企业介绍|产品介绍|资料引用|引用的资料|资料)/.test(t) && spec.kb && spec.kb.cited.length) { spec.kb = { mode: "none", cited: [] }; spec.copy.bullets = (spec.copy.bullets || []).slice(0, 3); changes.push("已移除企业资料引用并精简要点"); }
+    const setLayout = (l) => { if (NEED_PHOTO.includes(l) && !spec.assets.photo) { const p = cand[0]; if (!p) { changes.push("素材库里没有图片，无法使用图片版式"); return; } spec.assets.photo = p.id; } if (l === "gallery" && spec.assets.photos.length < 2) { spec.assets.photos = [spec.assets.photo, ...cand.filter((a) => a.id !== spec.assets.photo).map((a) => a.id)].slice(0, 3); } spec.layout = l; changes.push(`版式改为「${AP.LAYOUT_NAMES[l]}」`); };
     if ((m = t.match(/标题(?:改成|改为|换成|叫|写)\s*[「"“『]?([^」"”』]+?)[」"”』]?\s*$/))) { spec.copy.headline = m[1].trim(); changes.push(`标题改为「${spec.copy.headline}」`); }
     if ((m = t.match(/副标题(?:改成|改为|换成)\s*[「"“『]?([^」"”』]+?)[」"”』]?\s*$/))) { spec.copy.sub = m[1].trim(); changes.push(`副标题改为「${spec.copy.sub}」`); }
     if ((m = t.match(/(?:电话|手机|联系方式)(?:改成|改为|换成|是)?\s*(1[3-9]\d[\s-]?\d{4}[\s-]?\d{4})/))) { spec.contact.phone = fmtPhone(m[1]); spec.flags.showPhone = true; changes.push(`电话改为 ${spec.contact.phone}`); }
@@ -254,7 +307,7 @@
     if ((m = t.match(/把\s*[「"“]?(.+?)[」"”]?\s*(?:改成|改为|换成|替换为)\s*[「"“]?(.+?)[」"”]?\s*$/)) && !changes.length) { const [_, a, b] = m; let n = 0; const rep = (s) => (typeof s === "string" && s.includes(a) ? (n++, s.split(a).join(b)) : s); spec.copy.headline = rep(spec.copy.headline); spec.copy.sub = rep(spec.copy.sub); spec.copy.eyebrow = rep(spec.copy.eyebrow); spec.copy.cta = rep(spec.copy.cta); spec.copy.bullets = spec.copy.bullets.map(rep); spec.contact.addr = rep(spec.contact.addr); if (n) changes.push(`将「${a}」替换为「${b}」（${n} 处）`); else changes.push(`未找到「${a}」，已忽略替换`); }
     if (/字(?:体|号)?(?:再)?(?:大|放大|加大)/.test(t)) { spec.fontScale = Math.min(1.4, +(spec.fontScale + 0.12).toFixed(2)); changes.push(`字号放大至 ${Math.round(spec.fontScale * 100)}%`); }
     if (/字(?:体|号)?(?:再)?(?:小|缩小|减小)/.test(t)) { spec.fontScale = Math.max(0.75, +(spec.fontScale - 0.12).toFixed(2)); changes.push(`字号缩小至 ${Math.round(spec.fontScale * 100)}%`); }
-    if (/(?:更|再)?(?:简洁|简单|少一点|精简|清爽)/.test(t) && !/丰富/.test(t)) { spec.density = Math.max(1, spec.density - 1); changes.push(`信息密度降为「${["", "简洁", "标准", "丰富"][spec.density]}」`); }
+    if (/(?:更|再)?(?:简洁|简单|少一点|精简|清爽)/.test(t) && !/丰富|简洁白/.test(t)) { spec.density = Math.max(1, spec.density - 1); changes.push(`信息密度降为「${["", "简洁", "标准", "丰富"][spec.density]}」`); }
     if (/(?:更|再)?(?:丰富|多一点|详细|饱满)/.test(t)) { spec.density = Math.min(3, spec.density + 1); changes.push(`信息密度升为「${["", "简洁", "标准", "丰富"][spec.density]}」`); }
     if (/(?:去掉|不要|隐藏|删掉|删除)[^，,。]*二维码/.test(t)) { spec.flags.showQR = false; changes.push("隐藏二维码"); } else if (/(?:加|放|显示|要|带)[^，,。]*二维码/.test(t)) { spec.flags.showQR = true; changes.push("显示二维码"); }
     if (/(?:去掉|不要|隐藏|删掉|删除)[^，,。]*(?:地址|地点)/.test(t)) { spec.flags.showAddr = false; changes.push("隐藏地址"); } else if (/(?:加|放|显示|要|带)(?:上|个)?[^，,。]*(?:地址|地点)/.test(t) && !changes.some((c) => c.startsWith("地址改为"))) { spec.flags.showAddr = true; changes.push("显示地址"); }
@@ -306,6 +359,17 @@
     const size = spec.bgfx === "grid" ? `background-size:${W * 0.06}px ${W * 0.06}px,${W * 0.06}px ${W * 0.06}px,auto,auto;` : "";
     return `<div style="position:absolute;inset:0;background:${fx};${size}"></div>`;
   }
+  // 冲击力装饰层（impact=3）：放射光线 + 斜切色带 + 超大字底纹，全部低透明度、位于文字层之下
+  function impactLayer(spec, W, H, isPhoto) {
+    const p = spec.palette; const c = spec.copy; const light = p.mode === "light" && !isPhoto;
+    const ghost = String(c.tag || (c.highlight && c.highlight.value) || (c.headline || "").replace(/[\s·，。！]/g, "").slice(0, 2)).slice(0, 4);
+    const a = light ? "12" : "22"; const a2 = light ? "10" : "2a";
+    const rays = `repeating-conic-gradient(from -30deg at 88% 4%,${p.accent}${a} 0 4deg,transparent 4deg 15deg)`;
+    const slash = `linear-gradient(112deg,transparent 0 60%,${p.accent}${a2} 60%,${p.accent}${a2} 63%,transparent 63%,transparent 66%,${p.accent2 || p.accent}${a2} 66%,${p.accent2 || p.accent}${a2} 67%,transparent 67%)`;
+    const tall = spec.ratio === "9:16";
+    return `<div style="position:absolute;inset:0;background:${rays},${slash};mix-blend-mode:${light ? "multiply" : "screen"}"></div>
+      <div style="position:absolute;right:-${Math.round(W * 0.03)}px;top:${Math.round(H * (tall ? 0.36 : 0.3))}px;font-size:${Math.round(W * (ghost.length > 2 ? 0.3 : 0.44))}px;font-weight:900;line-height:1;letter-spacing:-${Math.round(W * 0.015)}px;color:${isPhoto ? "#fff" : p.fg};opacity:${light ? ".05" : ".06"};white-space:nowrap;transform:rotate(-8deg);pointer-events:none;user-select:none">${esc(ghost)}</div>`;
+  }
   AP.renderPoster = function (spec, ctx, W) {
     W = W || 1080; const [w0, h0] = AP.RATIOS[spec.ratio] || AP.RATIOS["3:4"]; const H = Math.round((W * h0) / w0);
     const u = (n) => Math.round(n * (W / 1080) * 10) / 10 + "px"; const fs = spec.fontScale || 1; const f = (n) => u(n * fs);
@@ -318,6 +382,8 @@
     const showSub = spec.density >= 1 && c.sub; const showBullets = spec.density >= 2 || spec.layout === "list";
     const tall = spec.ratio === "9:16"; const square = spec.ratio === "1:1";
     const isPhoto = spec.layout === "photo" && photo;
+    const imp = spec.impact || 2; const IM = AP.IMPACT[imp]; const strong = imp === 3; const useFx = strong && spec.impactFx !== false;
+    const hGlow = strong ? (light && !isPhoto ? `text-shadow:0 ${u(4)} ${u(18)} rgba(0,0,0,.08);` : `text-shadow:0 ${u(6)} ${u(28)} rgba(0,0,0,.45);`) : "";
     const head = `<div style="position:relative;display:flex;justify-content:space-between;align-items:center;padding:${u(56)} ${pad} 0">
       <div style="display:flex;align-items:center;gap:${u(16)}">${logo ? `<img src="${logo.url}" style="width:${u(72)};height:${u(72)};border-radius:${u(16)};object-fit:contain;background:${light && !isPhoto ? "transparent" : "rgba(255,255,255,.9)"};padding:${logo.type === "logo" ? 0 : u(4)}">` : `<div style="width:${u(72)};height:${u(72)};border-radius:${u(16)};background:${p.accent};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:${u(38)}">${esc((spec.contact.company || "钢")[0])}</div>`}
         <div><div style="font-size:${u(30)};font-weight:800">${esc(spec.contact.company)}</div><div style="font-size:${u(20)};color:${isPhoto ? "rgba(255,255,255,.75)" : p.mute};margin-top:${u(4)}">${esc(c.eyebrow || "")}</div></div></div>
@@ -325,16 +391,16 @@
     const qr = spec.flags.showQR ? `<div style="text-align:center;flex:none"><div style="display:inline-block;background:#fff;padding:${u(10)};border-radius:${u(16)};border:${u(4)} solid ${p.accent}">${qrSvg(hash(spec.contact.phone || "x"), Math.round(W * 0.165), "#111", "#fff")}</div><div style="font-size:${u(20)};color:${p.accent};font-weight:700;margin-top:${u(8)}">扫码联系 · 看实时报价</div></div>` : "";
     const contactBlock = `<div style="flex:1;min-width:0"><div style="font-size:${u(34)};font-weight:900">${esc(spec.contact.person || "")}${spec.contact.person ? " · " : ""}<span style="font-weight:600;font-size:${u(26)};color:${p.mute}">${esc(spec.contact.company.replace(/有限公司|股份有限公司/g, ""))}</span></div>${spec.flags.showPhone ? `<div style="font-size:${u(44)};font-weight:900;letter-spacing:${u(1)};margin-top:${u(8)};font-variant-numeric:tabular-nums;color:${p.accent}">${esc(spec.contact.phone)}</div>` : ""}${spec.flags.showAddr && spec.contact.addr ? `<div style="font-size:${u(22)};color:${p.mute};margin-top:${u(8)}">📍 ${esc(spec.contact.addr)}</div>` : ""}</div>`;
     const foot = `<div style="position:absolute;left:0;right:0;bottom:0;padding:${u(36)} ${pad} ${u(44)};display:flex;align-items:center;gap:${u(28)};background:${light && !isPhoto ? p.bg2 : "rgba(0,0,0,.28)"};border-top:1px solid ${light && !isPhoto ? "rgba(0,0,0,.06)" : "rgba(255,255,255,.1)"}">${contactBlock}${qr}</div>`;
-    const cta = c.cta ? `<div style="display:inline-block;align-self:flex-start;margin-top:${u(28)};padding:${u(14)} ${u(30)};border-radius:${u(999)};background:${p.accent};color:${onAcc};font-weight:800;font-size:${f(24)}">${esc(c.cta)}</div>` : "";
-    const hl = c.highlight ? `<div style="margin-top:${u(28)};display:flex;align-items:baseline;gap:${u(12)}"><span style="font-size:${f(26)};color:${p.mute}">${esc(c.highlight.label)}</span><span style="font-size:${f(tall ? 150 : 128)};font-weight:900;line-height:1;letter-spacing:-${u(3)};color:${p.accent};font-variant-numeric:tabular-nums">${esc(c.highlight.value)}</span><span style="font-size:${f(28)};color:${p.mute}">${esc(c.highlight.unit || "")}</span></div>` : "";
-    const tag = c.tag ? `<div style="position:absolute;right:${pad};top:${Math.round(H * 0.165)}px;padding:${u(10)} ${u(22)};border-radius:${u(8)};background:${p.accent};color:${onAcc};font-weight:900;font-size:${u(24)};letter-spacing:${u(2)};transform:rotate(3deg);box-shadow:0 ${u(8)} ${u(24)} rgba(0,0,0,.25)">${esc(c.tag)}</div>` : "";
+    const cta = c.cta ? `<div style="display:inline-block;align-self:flex-start;margin-top:${u(28)};padding:${u(strong ? 16 : 14)} ${u(strong ? 34 : 30)};border-radius:${u(999)};background:${p.accent};color:${onAcc};font-weight:800;font-size:${f(strong ? 26 : 24)}${strong ? `;box-shadow:0 0 0 ${u(6)} ${p.accent}33,0 ${u(10)} ${u(30)} ${p.accent}66` : ""}">${esc(c.cta)}</div>` : "";
+    const hl = c.highlight ? `<div style="margin-top:${u(28)};display:flex;align-items:baseline;gap:${u(12)}"><span style="font-size:${f(26)};color:${p.mute}">${esc(c.highlight.label)}</span><span style="font-size:${f((tall ? 150 : 128) * IM.numScale)};font-weight:900;line-height:1;letter-spacing:-${u(3)};color:${p.accent};font-variant-numeric:tabular-nums${strong ? `;text-shadow:0 0 ${u(40)} ${p.accent}66` : ""}">${esc(c.highlight.value)}</span><span style="font-size:${f(28)};color:${p.mute}">${esc(c.highlight.unit || "")}</span></div>` : "";
+    const tag = c.tag ? `<div style="position:absolute;right:${pad};top:${Math.round(H * 0.165)}px;padding:${u(10)} ${u(22)};border-radius:${u(8)};background:${p.accent};color:${onAcc};font-weight:900;font-size:${u(strong ? 28 : 24)};letter-spacing:${u(2)};transform:rotate(${strong ? -4 : 3}deg);box-shadow:0 ${u(8)} ${u(24)} rgba(0,0,0,.25)">${esc(c.tag)}</div>` : "";
     const bulletList = (style) => showBullets && bullets.length ? `<div style="margin-top:${u(28)};display:grid;gap:${u(12)}">${bullets.map((b, i) => style === "card" ? `<div style="display:flex;align-items:center;gap:${u(16)};padding:${u(20)} ${u(24)};background:${light ? "rgba(0,0,0,.04)" : "rgba(255,255,255,.08)"};border-radius:${u(18)};font-size:${f(28)};font-weight:700"><span style="width:${u(44)};height:${u(44)};border-radius:50%;background:${p.accent};color:${onAcc};display:flex;align-items:center;justify-content:center;font-size:${u(22)};flex:none">${i + 1}</span>${esc(b)}</div>` : `<div style="display:flex;align-items:center;gap:${u(14)};font-size:${f(28)}"><span style="width:${u(12)};height:${u(12)};border-radius:50%;background:${p.accent};flex:none"></span>${esc(b)}</div>`).join("")}</div>` : "";
-    const hSize = (base) => f(c.headline.length > 14 ? base * 0.66 : c.headline.length > 10 ? base * 0.78 : c.headline.length > 7 ? base * 0.9 : base);
+    const hSize = (base) => f((c.headline.length > 14 ? base * 0.66 : c.headline.length > 10 ? base * 0.78 : c.headline.length > 7 ? base * 0.9 : base) * IM.hScale);
     let body = "", bgExtra = "";
     const footH = 0.19; const bodyTop = 0.16;
     if (spec.layout === "hero" || (NEED_PHOTO.includes(spec.layout) && !photo && spec.layout !== "gallery")) {
       body = `<div style="position:absolute;left:${pad};right:${pad};top:${Math.round(H * bodyTop)}px;bottom:${Math.round(H * footH)}px;display:flex;flex-direction:column;justify-content:center">
-        <div style="font-size:${hSize(tall ? 104 : 92)};font-weight:900;line-height:1.12;letter-spacing:-${u(2)}">${esc(c.headline)}</div>
+        <div style="font-size:${hSize(tall ? 104 : 92)};font-weight:900;line-height:1.12;letter-spacing:-${u(strong ? 3 : 2)};${hGlow}">${esc(c.headline)}</div>
         ${showSub ? `<div style="font-size:${f(32)};color:${p.mute};margin-top:${u(18)};line-height:1.5">${esc(c.sub)}</div>` : ""}${hl}${bulletList("dot")}${cta}</div>`;
     } else if (spec.layout === "split") {
       const phh = Math.round(H * (tall ? 0.36 : square ? 0.34 : 0.4));
@@ -342,12 +408,12 @@
       const splitList = showBullets && splitBullets.length ? `<div style="margin-top:${u(24)};display:grid;gap:${u(10)}">${splitBullets.map((b) => `<div style="display:flex;align-items:center;gap:${u(14)};font-size:${f(28)}"><span style="width:${u(12)};height:${u(12)};border-radius:50%;background:${p.accent};flex:none"></span>${esc(b)}</div>`).join("")}</div>` : "";
       body = `<div style="position:absolute;left:0;right:0;top:${Math.round(H * 0.14)}px;height:${phh}px;overflow:hidden"><img src="${photo.url}" style="width:100%;height:100%;object-fit:cover;display:block"><div style="position:absolute;inset:0;background:linear-gradient(180deg,${p.bg}cc,transparent 30%,transparent 65%,${p.bg})"></div></div>
         <div style="position:absolute;left:${pad};right:${pad};top:${Math.round(H * 0.14) + phh - Math.round(H * 0.06)}px;bottom:${Math.round(H * footH)}px;display:flex;flex-direction:column;justify-content:flex-start">
-        <div style="font-size:${hSize(tall ? 88 : 76)};font-weight:900;line-height:1.12;letter-spacing:-${u(2)}">${esc(c.headline)}</div>
+        <div style="font-size:${hSize(tall ? 88 : 76)};font-weight:900;line-height:1.12;letter-spacing:-${u(strong ? 3 : 2)};${hGlow}">${esc(c.headline)}</div>
         ${showSub ? `<div style="font-size:${f(30)};color:${p.mute};margin-top:${u(14)};line-height:1.5">${esc(c.sub)}</div>` : ""}${c.highlight && spec.density >= 2 ? hl : ""}${splitList}${spec.density >= 2 && (tall || !c.highlight) ? cta : ""}</div>`;
     } else if (spec.layout === "photo") {
       bgExtra = `<div style="position:absolute;inset:0"><img src="${photo.url}" style="width:100%;height:100%;object-fit:cover;display:block"><div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.05) 28%,rgba(0,0,0,.1) 45%,rgba(0,0,0,.82) 75%,rgba(0,0,0,.9))"></div></div>`;
       body = `<div style="position:absolute;left:${pad};right:${pad};top:${Math.round(H * 0.3)}px;bottom:${Math.round(H * footH)}px;display:flex;flex-direction:column;justify-content:flex-end;color:#fff">
-        <div style="font-size:${hSize(tall ? 100 : 88)};font-weight:900;line-height:1.12;letter-spacing:-${u(2)};text-shadow:0 ${u(4)} ${u(20)} rgba(0,0,0,.5)">${esc(c.headline)}</div>
+        <div style="font-size:${hSize(tall ? 100 : 88)};font-weight:900;line-height:1.12;letter-spacing:-${u(strong ? 3 : 2)};text-shadow:0 ${u(4)} ${u(strong ? 28 : 20)} rgba(0,0,0,${strong ? ".6" : ".5"})">${esc(c.headline)}</div>
         ${showSub ? `<div style="font-size:${f(32)};color:rgba(255,255,255,.85);margin-top:${u(16)};line-height:1.5">${esc(c.sub)}</div>` : ""}${c.highlight ? hl.split(`color:${p.mute}`).join("color:rgba(255,255,255,.7)") : ""}${showBullets && bullets.length ? `<div style="margin-top:${u(22)};display:flex;flex-wrap:wrap;gap:${u(10)}">${bullets.slice(0, 3).map((b) => `<span style="font-size:${f(24)};padding:${u(8)} ${u(18)};border-radius:${u(999)};background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25)">${esc(b)}</span>`).join("")}</div>` : ""}${cta}</div>`;
     } else if (spec.layout === "gallery") {
       const top = Math.round(H * 0.14); const bigH = Math.round(H * (tall ? 0.3 : square ? 0.26 : 0.3)); const smallH = Math.round(H * (tall ? 0.15 : square ? 0.12 : 0.14)); const gap = Math.round(W * 0.016);
@@ -355,13 +421,13 @@
       body = `<div style="position:absolute;left:${pad};right:${pad};top:${top}px"><div style="height:${bigH}px;border-radius:${u(24)};overflow:hidden;position:relative"><img src="${photos[0].url}" style="width:100%;height:100%;object-fit:cover;display:block">${c.tag ? "" : ""}</div>
         ${others.length ? `<div style="display:flex;gap:${gap}px;margin-top:${gap}px">${others.map((a) => `<div style="flex:1;height:${smallH}px;border-radius:${u(18)};overflow:hidden"><img src="${a.url}" style="width:100%;height:100%;object-fit:cover;display:block"></div>`).join("")}${others.length === 1 ? `<div style="flex:1;height:${smallH}px;border-radius:${u(18)};background:${light ? "rgba(0,0,0,.05)" : "rgba(255,255,255,.08)"};display:flex;align-items:center;justify-content:center;color:${p.mute};font-size:${u(22)}">+ 上传更多现场图</div>` : ""}</div>` : ""}</div>
         <div style="position:absolute;left:${pad};right:${pad};top:${top + bigH + (others.length ? smallH + gap * 2 : gap) + Math.round(H * 0.01)}px;bottom:${Math.round(H * footH)}px;display:flex;flex-direction:column;justify-content:flex-start">
-        <div style="font-size:${hSize(tall ? 80 : 68)};font-weight:900;line-height:1.15;letter-spacing:-${u(2)}">${esc(c.headline)}</div>
+        <div style="font-size:${hSize(tall ? 80 : 68)};font-weight:900;line-height:1.15;letter-spacing:-${u(strong ? 3 : 2)};${hGlow}">${esc(c.headline)}</div>
         ${showSub ? `<div style="font-size:${f(28)};color:${p.mute};margin-top:${u(12)};line-height:1.5">${esc(c.sub)}</div>` : ""}${showBullets && bullets.length ? `<div style="margin-top:${u(16)};display:flex;flex-wrap:wrap;gap:${u(10)}">${bullets.slice(0, 3).map((b) => `<span style="font-size:${f(22)};padding:${u(6)} ${u(16)};border-radius:${u(999)};background:${light ? "rgba(0,0,0,.05)" : "rgba(255,255,255,.1)"};color:${light ? p.fg : "#fff"}">${esc(b)}</span>`).join("")}</div>` : ""}${tall ? cta : ""}</div>`;
     } else if (spec.layout === "table") {
       const rows = (c.rows || []).slice(0, tall ? 8 : 6);
       const cell = (t, w, b, al) => `<div style="flex:${w};font-size:${f(b ? 28 : 26)};font-weight:${b ? 800 : 500};text-align:${al || "left"};font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t)}</div>`;
       body = `<div style="position:absolute;left:${pad};right:${pad};top:${Math.round(H * 0.16)}px;bottom:${Math.round(H * footH)}px;display:flex;flex-direction:column">
-        <div style="font-size:${hSize(tall ? 92 : 80)};font-weight:900;line-height:1.12;letter-spacing:-${u(2)}">${esc(c.headline)}</div>
+        <div style="font-size:${hSize(tall ? 92 : 80)};font-weight:900;line-height:1.12;letter-spacing:-${u(strong ? 3 : 2)};${hGlow}">${esc(c.headline)}</div>
         ${showSub ? `<div style="font-size:${f(26)};color:${p.mute};margin-top:${u(12)}">${esc(c.sub)}</div>` : ""}
         <div style="margin-top:${u(28)};border-radius:${u(20)};overflow:hidden;border:1px solid ${light ? "rgba(0,0,0,.08)" : "rgba(255,255,255,.14)"}">
           <div style="display:flex;gap:${u(12)};padding:${u(16)} ${u(22)};background:${p.accent};color:${onAcc}">${cell("品名", 3, 1)}${cell("规格", 3, 1)}${cell("钢厂", 2, 1)}${cell("价格 元/吨", 3, 1, "right")}</div>
@@ -369,30 +435,31 @@
         </div>${bullets.length ? `<div style="margin-top:${u(18)};font-size:${f(22)};color:${p.mute}">${bullets.map(esc).join(" · ")}</div>` : ""}${tall ? cta : ""}</div>`;
     } else if (spec.layout === "list") {
       body = `<div style="position:absolute;left:${pad};right:${pad};top:${Math.round(H * bodyTop)}px;bottom:${Math.round(H * footH)}px;display:flex;flex-direction:column;justify-content:center">
-        <div style="font-size:${hSize(tall ? 96 : 84)};font-weight:900;line-height:1.12;letter-spacing:-${u(2)}">${esc(c.headline)}</div>
+        <div style="font-size:${hSize(tall ? 96 : 84)};font-weight:900;line-height:1.12;letter-spacing:-${u(strong ? 3 : 2)};${hGlow}">${esc(c.headline)}</div>
         ${showSub ? `<div style="font-size:${f(30)};color:${p.mute};margin-top:${u(14)};line-height:1.5">${esc(c.sub)}</div>` : ""}${hl}${bulletList("card")}${cta}</div>`;
     } else {
       const cardBg = light ? "#fff" : "rgba(255,255,255,.08)";
       body = `<div style="position:absolute;left:${pad};right:${pad};top:${Math.round(H * (tall ? 0.2 : 0.17))}px;bottom:${Math.round(H * (footH + 0.03))}px;display:flex;align-items:center;justify-content:center">
         <div style="width:100%;padding:${u(64)} ${u(56)};border-radius:${u(36)};background:${cardBg};border:1px solid ${light ? "rgba(0,0,0,.06)" : "rgba(255,255,255,.14)"};text-align:center;box-shadow:0 ${u(30)} ${u(80)} rgba(0,0,0,${light ? ".08" : ".35"});backdrop-filter:blur(6px)">
           <div style="display:inline-block;padding:${u(8)} ${u(22)};border-radius:${u(999)};border:1px solid ${p.accent};color:${p.accent};font-size:${f(22)};letter-spacing:${u(2)}">${esc(c.eyebrow)}</div>
-          <div style="font-size:${hSize(tall ? 108 : 96)};font-weight:900;line-height:1.1;margin-top:${u(28)};letter-spacing:-${u(2)}">${esc(c.headline)}</div>
+          <div style="font-size:${hSize(tall ? 108 : 96)};font-weight:900;line-height:1.1;margin-top:${u(28)};letter-spacing:-${u(strong ? 3 : 2)};${hGlow}">${esc(c.headline)}</div>
           ${showSub ? `<div style="font-size:${f(34)};color:${p.accent};margin-top:${u(20)};font-weight:700;letter-spacing:${u(2)}">${esc(c.sub)}</div>` : ""}
           ${showBullets && bullets.length ? `<div style="margin-top:${u(30)};font-size:${f(26)};color:${p.mute};line-height:1.9">${bullets.map(esc).join("<br>")}</div>` : ""}${c.highlight ? hl.replace("display:flex", "display:flex;justify-content:center") : ""}${cta}</div></div>`;
     }
     const decoLine = ["split", "photo", "gallery"].includes(spec.layout) ? "" : `<div style="position:absolute;left:${pad};top:${Math.round(H * 0.135)}px;width:${u(96)};height:${u(8)};border-radius:${u(4)};background:${p.accent}"></div>`;
     const badge = ctx.watermark === false ? "" : `<div style="position:absolute;right:${pad};top:${Math.round(H * 0.128)}px;font-size:${u(18)};color:${isPhoto ? "rgba(255,255,255,.7)" : p.mute};opacity:.8">${esc(ctx.badge || "由货袋子 AI 生成")}</div>`;
-    return `<div class="ap-poster" style="position:relative;width:${W}px;height:${H}px;overflow:hidden;background:${p.bg};color:${isPhoto ? "#fff" : p.fg};font-family:${font};border-radius:inherit">${bgLayer(spec, W, H)}${bgExtra}${head}${decoLine}${badge}${body}${tag}${foot}</div>`;
+    return `<div class="ap-poster" style="position:relative;width:${W}px;height:${H}px;overflow:hidden;background:${p.bg};color:${isPhoto ? "#fff" : p.fg};font-family:${font};border-radius:inherit">${bgLayer(spec, W, H)}${bgExtra}${useFx ? impactLayer(spec, W, H, isPhoto) : ""}${head}${decoLine}${badge}${body}${tag}${foot}</div>`;
   };
 
   AP.STEPS = [
-    { k: "understand", t: "理解需求", d: "多模态大模型读取提示词与素材", model: "Seed 2.0 Pro" },
-    { k: "plan", t: "设计版式", d: "输出设计 JSON：版式 / 配色 / 文案 / 选图", model: "Seed 2.0 Pro" },
-    { k: "visual", t: "生成视觉", d: "图像模型生成无文字背景与氛围", model: "Seedream 5.0" },
-    { k: "render", t: "精确排版", d: "渲染引擎绘制文案 / 电话 / 二维码 / Logo", model: "渲染引擎" },
-    { k: "qa", t: "质检", d: "溢出 / 对比度 / 敏感词 / 内容安全", model: "规则 + 审核 API" },
+    { k: "understand", t: "理解需求", d: "多模态大模型读取提示词与所选图片", model: "Seed 2.0 Pro" },
+    { k: "retrieve", t: "检索企业资料", d: "从资料库匹配企业 / 产品 / 服务介绍、卖点、案例并引用", model: "向量检索 + Seed 2.0" },
+    { k: "plan", t: "设计版式", d: "输出设计 JSON：版式 / 配色 / 文案 / 选图 / 冲击力策略", model: "Seed 2.0 Pro" },
+    { k: "visual", t: "生成视觉", d: "图像模型按「高对比 · 戏剧光线 · 电影级」提示词生成无文字背景", model: "Seedream 5.0" },
+    { k: "render", t: "精确排版", d: "渲染引擎绘制文案 / 电话 / 二维码 / Logo / 光效层", model: "渲染引擎" },
+    { k: "qa", t: "质检", d: "溢出 / 对比度 / 冲击力（标题占比 · 焦点数字）/ 敏感词 / 内容安全", model: "规则 + 审核 API" },
   ];
   AP.encode = (spec) => btoa(unescape(encodeURIComponent(JSON.stringify(spec))));
   AP.decode = (s) => JSON.parse(decodeURIComponent(escape(atob(s))));
-  AP.quickChips = ["字大一点", "更喜庆", "更商务", "更简洁", "换个背景", "换个版式", "全图铺满", "多图拼贴", "加二维码", "去掉地址", "改成竖屏 9:16", "换一种说法"];
+  AP.quickChips = ["更有冲击力", "柔和一点", "字大一点", "用企业介绍", "加上产品介绍", "更喜庆", "更商务", "更简洁", "换个背景", "换个版式", "全图铺满", "多图拼贴", "加二维码", "去掉地址", "改成竖屏 9:16", "换一种说法"];
 })();
