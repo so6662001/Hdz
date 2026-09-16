@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>样板库 · 客户关怀（生日祝福 / 情感维护）· AI 经营海报原型</title><style>body{margin:0;background:#f4f1ec;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#111827}
+.top{padding:22px 20px 0}.top a.back{font-size:13px;color:#1f5eff;text-decoration:none}.top h1{font-size:22px;margin:8px 0 4px}.top p{font-size:13px;color:#6b7280;margin:0 0 6px;line-height:1.7;max-width:1100px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px 0}.tabs a{font-size:13px;padding:6px 12px;border-radius:999px;background:#fff;color:#374151;text-decoration:none;border:1px solid #e5e7eb}.tabs a.on{background:#111827;color:#fff;border-color:#111827}.tabs a i{font-style:normal;color:#9ca3af;margin-left:4px;font-size:11px}.tabs a.on i{color:#d1d5db}
+.sc{padding:20px 20px 4px}.sc .h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.sc .h b{font-size:17px}.sc .h small{color:#6b7280;font-size:12px}.sc .h .n{font-size:11px;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:999px;padding:1px 8px;font-weight:700}
+.row{display:grid;grid-template-columns:repeat(var(--n,5),1fr);gap:14px;padding:12px 20px 8px}
+.it{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.07);display:flex;flex-direction:column}.it .f{position:relative;width:100%;aspect-ratio:3/4;overflow:hidden;background:#eee}.it .f .in{transform-origin:0 0;position:absolute;left:0;top:0}
+.it .c{padding:10px 12px 12px;font-size:12px;display:flex;flex-direction:column;gap:5px;flex:1}.it .c b{font-size:13px;display:flex;justify-content:space-between;gap:6px;align-items:center}.it .c b em{font-style:normal;font-size:10px;color:#1f5eff;font-weight:600;white-space:nowrap}
+.it .c span{color:#6b7280;line-height:1.5;font-size:11px;flex:1}.it .c .op{display:flex;gap:6px;margin-top:4px}.it .c .op a{flex:1;text-align:center;font-size:11px;padding:6px 0;border-radius:8px;text-decoration:none;color:#fff;background:#1f5eff}.it .c .op a.h{background:#111827}
+.note{margin:18px 20px 30px;background:#fff;border-radius:12px;padding:14px 16px;font-size:12.5px;color:#374151;line-height:1.8;max-width:1100px}.note b{color:#111827}
+@media (max-width:900px){.row{grid-template-columns:repeat(2,1fr)}}
+</style></head><body><script src="shared/engine.js"></script><script src="shared/knowledge.js"></script>
+<div class="top"><a class="back" href="index.html">← 返回原型总览</a><h1 id="ttl">样板库</h1><p id="desc"></p></div>
+<div class="tabs" id="tabs"></div>
+<div id="root"></div>
+<div class="note"><b>样板是什么：</b>同一场景下多个可直接套用的成品，每个样板 = 一段写好的需求提示词 + 风格 / 版式建议。用户在 PC / H5 选中场景后，输入框上方会出现该场景的样板，点一下即填入并生成，再用自然语言微调（"换成李总""合作年数改 8 年""再暖一点"）。<br><b>正式版来源：</b>平台运营按行业 / 季节维护官方样板（节气、节日、开工季自动上新）；商家把满意的历史海报"存为我的样板"，下次一键换人名 / 数字复用；后台按商家所在地区、经营品类推荐。<br><b>与 CRM 联动（客户关怀类）：</b>客户档案里维护生日、首次合作日、累计供货吨位、第 N 车里程碑，到期前 3 天推送提醒并预生成样板，销售确认后一键发送。</div>
+<script>
+const qp=new URLSearchParams(location.search);const W=1080;const g=qp.get('g')||'care';
+const ctx={assets:AP.sampleAssets,brand:AP.defaultBrand,date:"2026.09.16"};
+const groups=AP.GROUPS.filter(x=>AP.SCENES.some(s=>s.g===x.id&&AP.samplesOf(s.id).length>1));
+document.getElementById('tabs').innerHTML=groups.map(x=>`<a class="${x.id===g?'on':''}" href="?g=${x.id}">${x.name}<i>${AP.SCENES.filter(s=>s.g===x.id).reduce((n,s)=>n+AP.samplesOf(s.id).length,0)} 样板</i></a>`).join('')+`<a href="scenes.html">全部 44 场景各 1 张 ›</a>`;
+const grp=AP.GROUPS.find(x=>x.id===g)||AP.GROUPS[0];const ORDER=['birthday','coopanniv','vip','care','congrats','gift','hello','festival','solar','thanks'];const scs=AP.SCENES.filter(s=>s.g===grp.id).sort((a,b)=>(ORDER.indexOf(a.id)+1||99)-(ORDER.indexOf(b.id)+1||99));const total=scs.reduce((n,s)=>n+AP.samplesOf(s.id).length,0);
+document.getElementById('ttl').textContent=`样板库 · ${grp.name}：${scs.length} 个场景 ${total} 个样板`;
+document.getElementById('desc').textContent=grp.id==='care'?`覆盖生日祝福（客户老板 / 女性客户 / 老伙伴大寿 / 员工）、合作纪念（周年 / 第 N 车 / 累计吨位）、老客户专享、关怀慰问（高温 / 降温 / 暴雨 / 年底）、客户喜事恭贺（投产 / 中标 / 乔迁 / 荣升）、心意礼品（中秋 / 春节 / 端午 / 台历）、老友问候、节日 / 节气 / 年终致谢。全部由同一渲染引擎按各样板的提示词 + 风格建议实时生成，默认「标准」冲击力，不卖货只走心。点击样板可在 PC / H5 中打开继续微调。`:grp.desc;
+let html='';
+for(const s of scs){const list=AP.samplesOf(s.id);html+=`<div class="sc"><div class="h"><b>${s.icon} ${s.name}</b><span class="n">${list.length} 个样板</span><small>${AP.esc(s.example)}</small></div></div><div class="row" style="--n:${qp.get('n')||Math.max(4,list.length)}">`;
+ list.forEach((x,i)=>{const sp=AP.mockPlan(x.prompt,Object.assign({style:x.style,layout:x.layout},ctx));html+=`<div class="it"><div class="f" id="f_${s.id}_${i}"></div><div class="c"><b>${AP.esc(x.name)}<em>${AP.LAYOUT_NAMES[sp.layout]} · ${AP.STYLES[sp.style].name} · ${sp._meta.impactName}</em></b><span>${AP.esc(x.prompt)}</span><div class="op"><a href="pc.html?demo=${s.id}&sample=${i}">PC 打开</a><a class="h" href="h5.html?demo=${s.id}&sample=${i}&step=gen">H5 打开</a></div></div></div>`;});
+ html+='</div>';}
+document.getElementById('root').innerHTML=html;
+for(const s of scs){AP.samplesOf(s.id).forEach((x,i)=>{const f=document.getElementById(`f_${s.id}_${i}`);if(!f)return;const sp=AP.mockPlan(x.prompt,Object.assign({style:x.style,layout:x.layout},ctx));const w=f.clientWidth;f.innerHTML=`<div class="in" style="transform:scale(${w/W})">${AP.renderPoster(sp,ctx,W)}</div>`;});}
+</script></body></html>

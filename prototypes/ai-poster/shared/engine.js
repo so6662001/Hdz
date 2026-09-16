@@ -73,16 +73,16 @@
     { id: "opening", g: "promo", name: "开业乔迁", icon: "🎊", kw: ["开业", "乔迁", "新店", "盛大", "新仓", "启用"], layout: "hero", style: "festive", example: "宝山新仓库 10 月 18 日启用，开业当天下单每吨立减 30 元，欢迎老客户光临" },
     // 品牌与关系
     { id: "festival", g: "care", name: "节日祝福", icon: "🎉", kw: ["中秋", "国庆", "春节", "新年", "元旦", "端午", "五一", "劳动节", "祝福", "佳节", "元宵", "除夕", "感恩节", "快乐"], layout: "card", style: "festive", example: "中秋节祝福海报，感谢客户一路相伴，喜庆一点" },
-    { id: "solar", g: "care", name: "节气日签", icon: "🍃", kw: ["节气", "日签", "早安", "立春", "雨水", "惊蛰", "春分", "清明", "谷雨", "立夏", "小满", "芒种", "夏至", "小暑", "大暑", "立秋", "处暑", "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至", "小寒", "大寒"], layout: "card", style: "paper", example: "白露节气日签，一句早安，提醒客户早晚温差大注意身体" },
-    { id: "thanks", g: "care", name: "客户感谢", icon: "💐", kw: ["感谢", "致谢", "感恩", "服务承诺", "承诺", "回馈"], layout: "card", style: "business", example: "感谢新老客户 2026 年的支持，承诺当日提货、质保书齐全、磅差包赔" },
+    { id: "solar", g: "care", name: "节气日签", icon: "🍃", kw: ["节气", "日签", "早安", "立春", "雨水", "惊蛰", "春分", "清明", "谷雨", "立夏", "小满", "芒种", "夏至", "小暑", "大暑", "立秋", "处暑", "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至", "小寒", "大寒"], layout: "card", style: "paper", impact: 2, example: "白露节气日签，一句早安，提醒客户早晚温差大注意身体" },
+    { id: "thanks", g: "care", name: "客户感谢", icon: "💐", kw: ["感谢", "致谢", "感恩", "服务承诺", "承诺", "回馈", "感谢信", "每一位客户", "用心对待", "年终致谢"], layout: "card", style: "business", impact: 2, example: "感谢新老客户 2026 年的支持，承诺当日提货、质保书齐全、磅差包赔" },
     // 客户关怀（情感维护：不卖货，只走心；默认「标准」冲击力，柔和版式）
     { id: "birthday", g: "care", name: "生日祝福", icon: "🎂", kw: ["生日", "生辰", "寿辰", "生日快乐", "岁生日", "过生日", "蛋糕"], layout: "card", style: "warm", tag: "生日快乐", impact: 2, example: "明天是苏州华建的张总生日，做一张生日祝福海报，合作 5 年了，暖一点" },
-    { id: "coopanniv", g: "care", name: "合作纪念", icon: "🤝", kw: ["合作满", "合作纪念", "纪念日", "携手", "合作周年", "第 100 车", "累计供货", "累计发货", "一路同行", "合作以来"], layout: "card", style: "black", tag: "合作纪念", impact: 2, example: "与无锡恒力钢构合作满 3 年，累计供货 12000 吨、第 300 车发出，做一张纪念海报感谢信任" },
+    { id: "coopanniv", g: "care", name: "合作纪念", icon: "🤝", kw: ["合作满", "合作纪念", "纪念日", "携手", "合作周年", "第 100 车", "累计供货", "累计发货", "合作以来", "从第一车"], layout: "card", style: "black", tag: "合作纪念", impact: 2, example: "与无锡恒力钢构合作满 3 年，累计供货 12000 吨、第 300 车发出，做一张纪念海报感谢信任" },
     { id: "vip", g: "care", name: "老客户专享", icon: "💎", kw: ["老客户专享", "老客户专属", "专属", "专享", "VIP", "尊享", "会员", "老客专", "老客户优先", "优先排产", "回馈老客户"], layout: "list", style: "black", tag: "老客户专享", impact: 3, example: "老客户专享：本月老客户提货优先装车、加工费 8 折、专属客服一对一，感谢一路支持" },
     { id: "care", g: "care", name: "关怀慰问", icon: "🧣", kw: ["慰问", "辛苦了", "送清凉", "降温了", "保暖", "关怀", "惦记", "高温天", "寒潮", "注意防暑", "工地兄弟", "注意休息", "送温暖", "清凉"], layout: "card", style: "warm", tag: "温暖关怀", impact: 2, example: "连续高温天，给工地上的客户兄弟们送清凉：注意防暑，卸货尽量安排早晚，鑫钢配送可按时段送达" },
     { id: "congrats", g: "care", name: "客户喜事恭贺", icon: "🎊", kw: ["祝贺", "恭贺", "恭喜", "贺", "投产", "新厂", "客户中标", "客户开业", "奠基", "竣工", "乔迁之喜", "开工大吉贺", "荣升", "升职", "封顶"], layout: "card", style: "festive", tag: "恭贺", impact: 3, example: "祝贺常州明达机械新厂正式投产，鑫钢有幸供货全部 H 型钢，恭贺生意兴隆" },
     { id: "gift", g: "care", name: "心意礼品", icon: "🎁", kw: ["礼盒", "礼品", "寄出", "查收", "心意", "已发出", "月饼", "粽子", "年货", "伴手礼", "一点心意", "送到"], layout: "split", style: "paper", tag: "一点心意", impact: 2, photos: ["礼品", "礼盒", "团队"], example: "中秋礼盒已寄出，请老客户们注意查收，一点心意不成敬意，祝阖家团圆" },
-    { id: "hello", g: "care", name: "老友问候", icon: "👋", kw: ["好久不见", "久未", "想念", "回来看看", "老朋友", "许久", "别来无恙", "常联系", "最近怎么样", "惦念", "很久没"], layout: "card", style: "warm", tag: "老友问候", impact: 2, example: "好久不见，最近行情稳了，秋季新到一批沙钢螺纹钢，老朋友有空回来看看，还是老价格老服务" },
+    { id: "hello", g: "care", name: "老友问候", icon: "👋", kw: ["好久不见", "久未", "想念", "回来看看", "老朋友", "许久", "别来无恙", "常联系", "最近怎么样", "惦念", "很久没", "好久没", "没联系", "老价格", "给你留着", "来看看"], layout: "card", style: "warm", tag: "老友问候", impact: 2, example: "好久不见，最近行情稳了，秋季新到一批沙钢螺纹钢，老朋友有空回来看看，还是老价格老服务" },
     { id: "testimonial", g: "brand", name: "客户见证", icon: "💬", kw: ["好评", "见证", "评价", "客户说", "回头客", "感谢信", "复购", "口碑"], layout: "card", style: "minimal", tag: "客户见证", example: "客户见证：合作 3 年的苏州某机械厂说「鑫钢的货从来没让我们停过线」，复购 46 次" },
     { id: "win", g: "brand", name: "中标喜报", icon: "🏆", kw: ["喜报", "中标", "成交", "签下", "突破", "大单", "捷报", "再下一城"], layout: "card", style: "festive", tag: "喜报", example: "喜报：成功中标某市政道路项目钢材供应，供货 3200 吨" },
     { id: "event", g: "brand", name: "活动邀请", icon: "📅", kw: ["邀请", "邀请函", "论坛", "沙龙", "会议", "订货会", "答谢会", "年会"], layout: "card", style: "black", example: "邀请老客户参加 10 月 20 日下午 2 点的秋季订货会，地点宝山钢材市场 3 楼会议室" },
@@ -100,6 +100,67 @@
   ];
 
   /* ---------- 风格与配色 ---------- */
+  /* ---------- 样板库：同一场景的多个可直接套用的样板（名称 + 提示词 + 风格 / 版式 / 冲击力建议） ----------
+   * 客户关怀类每个场景 3~4 个，覆盖不同对象（客户老板 / 女士 / 老伙伴 / 员工）、不同触发（第 N 车 / 累计吨位 / 周年）、不同季节与节日。
+   * 其他场景无样板时回退为该场景的 example。正式版样板为平台运营维护 + 商家"存为模板"沉淀，可按行业 / 地区推荐。 */
+  AP.SAMPLES = {
+    birthday: [
+      { name: "客户老板生日 · 暖心", prompt: "明天是苏州华建的张总生日，做一张生日祝福海报，合作 5 年了，暖一点", style: "warm" },
+      { name: "女性客户生日 · 简洁", prompt: "祝无锡恒达的李女士生日快乐，简洁一点，白底，不要太花，合作 2 年感谢信任", style: "minimal" },
+      { name: "老伙伴大寿 · 黑金", prompt: "陈总 60 岁生日，合作 10 年的老朋友，黑金高级一点，祝福身体健康、生意兴隆", style: "black" },
+      { name: "员工生日 · 团队", prompt: "今天是我们仓管小王的生日，团队一起祝他生日快乐，感谢每一份付出，用团队合影", style: "green", layout: "split" },
+    ],
+    coopanniv: [
+      { name: "携手 3 年 · 黑金", prompt: "与无锡恒力钢构合作满 3 年，累计供货 12000 吨、第 300 车发出，做一张纪念海报感谢信任", style: "black" },
+      { name: "第 100 车 · 现场实拍", prompt: "今天给常州明达机械发出第 100 车货，从第一车到第一百车，感谢信任，用装车发货现场照", style: "industrial", layout: "photo" },
+      { name: "累计供货破万吨 · 商务", prompt: "与南通远大钢构合作以来累计供货突破 10000 吨，做一张纪念海报，商务稳重一点", style: "business" },
+      { name: "合作 1 周年 · 简洁", prompt: "和苏州华建公司合作满 1 年，简洁白底，感谢这一年的每一次信任", style: "minimal" },
+    ],
+    vip: [
+      { name: "老客户专享权益 · 黑金", prompt: "老客户专享：本月老客户提货优先装车、加工费 8 折、专属客服一对一，感谢一路支持", style: "black" },
+      { name: "老客户锁价 · 喜庆", prompt: "老客户专属：本周下单锁价 3 天，行情涨了也按今天价，仅限合作客户，红色喜庆", style: "festive", layout: "hero" },
+      { name: "老客户回馈月 · 商务", prompt: "老客户回馈月：全年提货满 500 吨送定制工装 50 套，VIP 专属客服，优先排产", style: "business" },
+    ],
+    care: [
+      { name: "高温送清凉 · 暖心", prompt: "连续高温天，给工地上的客户兄弟们送清凉：注意防暑，卸货尽量安排早晚，鑫钢配送可按时段送达", style: "warm" },
+      { name: "降温保暖 · 商务", prompt: "明天降温 8 度，工地的兄弟们注意保暖，鑫钢配送照常，有需要提前一天说", style: "business" },
+      { name: "暴雨安全 · 简洁", prompt: "暴雨天路滑，卸货注意安全，工期不急的货可以晚一天送，安全第一", style: "minimal" },
+      { name: "年底慰问 · 国风", prompt: "年底了，感谢工地上每一位辛苦的兄弟，早点回家过年，明年开工货备好等你，国风一点", style: "paper" },
+    ],
+    congrats: [
+      { name: "新厂投产 · 喜庆", prompt: "祝贺常州明达机械新厂正式投产，鑫钢有幸供货全部 H 型钢，恭贺生意兴隆", style: "festive" },
+      { name: "客户中标 · 黑金", prompt: "祝贺无锡恒力钢构中标某产业园项目，钢材供应鑫钢全力保障，黑金", style: "black" },
+      { name: "客户乔迁 · 国风", prompt: "恭贺苏州华建公司乔迁新址，生意兴隆宏图大展，鑫钢送上祝福，国风红", style: "paper" },
+      { name: "荣升致贺 · 商务", prompt: "祝贺李总荣升总经理，多年合作见证成长，商务稳重", style: "business" },
+    ],
+    gift: [
+      { name: "中秋礼盒已寄出 · 国风", prompt: "中秋礼盒已寄出，请老客户们注意查收，一点心意不成敬意，祝阖家团圆", style: "paper" },
+      { name: "新春年货 · 喜庆", prompt: "新春年货礼包已寄出，感谢这一年的信任，新年生意兴隆，红色喜庆", style: "festive" },
+      { name: "端午粽子 · 清新", prompt: "端午粽子礼盒已发出请查收，端午安康，绿色清新", style: "green" },
+      { name: "定制台历 · 简洁", prompt: "2027 年鑫钢定制台历已寄出，一年 365 天陪你看行情，简洁白", style: "minimal" },
+    ],
+    hello: [
+      { name: "好久不见 · 暖心", prompt: "好久不见，最近行情稳了，秋季新到一批沙钢螺纹钢，老朋友有空回来看看，还是老价格老服务", style: "warm" },
+      { name: "久未下单唤醒 · 商务", prompt: "好久没联系了，最近沙钢螺纹钢到了一批新货 2000 吨，老价格给你留着，有空来看看", style: "business" },
+      { name: "节后问候 · 清新", prompt: "节后开工，老朋友们都还好吗，库存已备好随时提货，常联系", style: "green" },
+    ],
+    festival: [
+      { name: "中秋 · 红金", prompt: "中秋节祝福海报，感谢客户一路相伴，喜庆一点", style: "festive" },
+      { name: "春节 · 黑金", prompt: "春节祝福：感谢新老客户一年相伴，新春大吉生意兴隆，黑金高端", style: "black" },
+      { name: "端午 · 清新", prompt: "端午安康，感谢客户一路相伴，绿色清新一点", style: "green" },
+    ],
+    solar: [
+      { name: "白露早安 · 国风", prompt: "白露节气日签，一句早安，提醒客户早晚温差大注意身体", style: "paper" },
+      { name: "冬至 · 暖心", prompt: "冬至日签，天冷了注意保暖，记得吃饺子，暖一点", style: "warm" },
+      { name: "立春 · 清新", prompt: "立春日签，一年之计在于春，愿您今年订单顺利，绿色清新", style: "green" },
+    ],
+    thanks: [
+      { name: "服务承诺 · 商务", prompt: "感谢新老客户 2026 年的支持，承诺当日提货、质保书齐全、磅差包赔", style: "business" },
+      { name: "年终致谢 · 黑金", prompt: "2026 年终致谢：感谢每一位客户的信任，明年继续同行，黑金高端", style: "black" },
+      { name: "感谢信 · 简洁", prompt: "一封感谢信：感谢一路同行的每一位客户，每一份信任我们都用心对待，简洁白", style: "minimal" },
+    ],
+  };
+  AP.samplesOf = (sceneId) => { const sc = AP.SCENES.find((s) => s.id === sceneId); if (!sc) return []; return AP.SAMPLES[sceneId] || [{ name: "示例", prompt: sc.example }]; };
   AP.STYLES = {
     business: { name: "商务稳重", palette: { bg: "#0b1a33", bg2: "#12305e", fg: "#ffffff", mute: "#9fb0cc", accent: "#ff8a2b", accent2: "#3f8cff", mode: "dark" }, bgfx: "glow", visual: "深蓝色商务氛围背景，右上角柔和橙色光晕，左侧留白，无文字无 Logo" },
     festive: { name: "红金喜庆", palette: { bg: "#b3121b", bg2: "#7a0a12", fg: "#fff6e5", mute: "#f3c9a1", accent: "#ffd166", accent2: "#ff8a2b", mode: "dark" }, bgfx: "confetti", visual: "中国红渐变背景，金色光点与祥云暗纹，顶部留白，无文字" },
@@ -143,6 +204,8 @@
     // 节日 + 促销词 → 节假日促销；周年 + 促销词 → 周年庆
     if (/中秋|国庆|春节|新年|元旦|端午|五一|双节|开年|节前/.test(text) && /促销|特惠|钜惠|优惠|立减|活动|让利|备货/.test(text)) return AP.SCENES.find((s) => s.id === "holidaypromo");
     if (/生日|生辰|寿辰/.test(text)) return AP.SCENES.find((s) => s.id === "birthday");
+    if (/节气|日签|立春|雨水|惊蛰|春分|清明|谷雨|立夏|小满|芒种|夏至|小暑|大暑|立秋|处暑|白露|秋分|寒露|霜降|立冬|小雪|大雪|冬至|小寒|大寒/.test(text) && /日签|节气|早安/.test(text)) return AP.SCENES.find((s) => s.id === "solar");
+    if (/辛苦了|慰问|送清凉|送温暖|关怀|惦记|工地(的)?兄弟|注意保暖|早点回家|安全第一|卸货注意安全|工期不急/.test(text) && !/促销|特惠|立减/.test(text)) return AP.SCENES.find((s) => s.id === "care");
     if (/合作(满|纪念|周年|以来)|纪念日|累计(供货|发货)|第\s*\d+\s*车/.test(text) && !/促销|特惠|钜惠|立减/.test(text)) return AP.SCENES.find((s) => s.id === "coopanniv");
     if (/(祝贺|恭贺|恭喜|贺)/.test(text) && /投产|新厂|中标|开业|奠基|竣工|乔迁|荣升|升职|封顶|开工/.test(text)) return AP.SCENES.find((s) => s.id === "congrats");
     if (/周年|店庆/.test(text)) return AP.SCENES.find((s) => s.id === "anniversary");
@@ -246,7 +309,7 @@
     const brand = Object.assign({}, AP.defaultBrand, ctx.brand || {});
     const assets = ctx.assets || [];
     const scene = AP.SCENES.find((s) => s.id === ctx.scene) || detectScene(text) || AP.SCENES.find((s) => s.id === "intro");
-    const style = detectStyle(text) || scene.style;
+    const style = (ctx.style && AP.STYLES[ctx.style] ? ctx.style : null) || detectStyle(text) || scene.style;
     const e = extract(text); e._t = text;
     const copy = COPY[scene.id](e, brand);
     if (scene.tag) copy.tag = scene.tag;
@@ -261,9 +324,10 @@
     const picked = (ctx.photoPick || []).map((id) => cand.find((a) => a.id === id)).filter(Boolean);
     const kbImgs = kb.items.flatMap((it) => it.images || []).map((id) => cand.find((a) => a.id === id)).filter(Boolean);
     const byProd = e.prods ? cand.find((a) => (a.tags || []).some((t) => e.prods.includes(t))) : null;
-    let photo = picked[0] || (kbImgs.find((a) => (scene.photos || []).some((p) => (a.tags || []).some((t) => t.includes(p)))) || null) || byProd || byPref(scene.photos);
+    const byText = cand.find((a) => (a.tags || []).some((t) => t.length >= 2 && text.includes(t))); // 需求里点名的图片（"用团队合影""装车现场照"）
+    let photo = picked[0] || byText || (kbImgs.find((a) => (scene.photos || []).some((p) => (a.tags || []).some((t) => t.includes(p)))) || null) || byProd || byPref(scene.photos);
     if (!photo && NEED_PHOTO.includes(scene.layout)) photo = cand.find((a) => a.cat === "site") || cand[0] || null;
-    let layout = scene.layout;
+    let layout = (ctx.layout && LAYOUTS.includes(ctx.layout) ? ctx.layout : null) || scene.layout;
     if (!photo && NEED_PHOTO.includes(layout)) layout = layout === "gallery" ? "list" : "hero";
     if (picked.length >= 2) layout = "gallery"; else if (picked.length === 1 && !NEED_PHOTO.includes(layout)) layout = "split";
     const photos = [];
@@ -289,7 +353,7 @@
     const g = AP.GROUPS.find((x) => x.id === scene.g);
     const kbText = kb.items.length ? `${kb.mode === "manual" ? "按你勾选" : "自动检索"}并引用企业资料${kb.items.map((it) => `「${AP.KB.shortTitle(it)}」`).join("")}，` : "";
     const picText = picked.length ? `使用你选中的 ${picked.length} 张图片${picked.length >= 2 ? "做多图拼贴" : `「${picked[0].name}」作主视觉`}，` : photo && NEED_PHOTO.includes(layout) ? `选用${kbImgs.includes(photo) ? "资料关联图片" : "素材"}「${photo.name}」${photos.length > 1 ? `等 ${photos.length} 张` : ""}作为主视觉，` : "";
-    spec._meta = { sceneName: scene.name, groupName: g ? g.name : "", styleName: st.name, impactName: AP.IMPACT[impact].name, detected: e, cited: kb.items.map((it) => AP.KB.shortTitle(it)), reason: `识别为「${g ? g.name + " / " : ""}${scene.name}」场景${detectStyle(text) ? `，按你的描述采用「${st.name}」风格` : `，默认采用「${st.name}」风格`}；${kbText}${picText}版式「${AP.LAYOUT_NAMES[layout]}」，按「${AP.IMPACT[impact].name}」原则处理：${AP.IMPACT[impact].desc}。` };
+    spec._meta = { sceneName: scene.name, groupName: g ? g.name : "", styleName: st.name, impactName: AP.IMPACT[impact].name, detected: e, cited: kb.items.map((it) => AP.KB.shortTitle(it)), reason: `识别为「${g ? g.name + " / " : ""}${scene.name}」场景${ctx.style ? `，按所选样板采用「${st.name}」风格` : detectStyle(text) ? `，按你的描述采用「${st.name}」风格` : `，默认采用「${st.name}」风格`}；${kbText}${picText}版式「${AP.LAYOUT_NAMES[layout]}」，按「${AP.IMPACT[impact].name}」原则处理：${AP.IMPACT[impact].desc}。` };
     return spec;
   };
 
