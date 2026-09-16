@@ -84,6 +84,35 @@
   .hc .demo { position: absolute; top: 8px; right: 8px; font-size: 9px; background: rgba(0,0,0,.5); color: #fff; padding: 1px 6px; border-radius: 4px; }
   .hc .ops { position: absolute; left: 0; right: 0; top: 150px; display: flex; gap: 6px; justify-content: center; opacity: 0; transition: .15s; } .hc:hover .ops { opacity: 1; } .hc .ops button { font-size: 11px; padding: 6px 10px; border-radius: 999px; background: rgba(17,24,39,.9); color: #fff; font-weight: 600; } .hc .ops button.pri { background: var(--brand); } .hc .ops button.del { background: rgba(220,38,38,.9); }
   .hempty { text-align: center; color: var(--mute); padding: 60px 0; font-size: 13px; } .hempty .big { font-size: 44px; margin-bottom: 8px; }
+  .hc .mt .ow { display: inline-flex; align-items: center; gap: 4px; } .hc .ft .kp { display: flex; gap: 8px; align-items: center; } .hc .ft .kp b { font-weight: 700; color: var(--ink); } .hc .ft .kp .sk { color: #d97706; } .hc .ft .kp .ld { color: #dc2626; }
+  /* 视图切换 */
+  .hview { display: flex; background: #f1f3f8; border-radius: 8px; padding: 3px; } .hview button { padding: 6px 12px; border-radius: 6px; font-size: 12px; color: var(--mute); font-weight: 600; white-space: nowrap; } .hview button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .hpanel.wide { width: min(1480px, 96vw); }
+  /* 表格视图 */
+  .htbl { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; font-size: 12px; }
+  .htbl th { position: sticky; top: 0; background: #f8fafc; color: var(--mute); font-weight: 600; text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; cursor: pointer; user-select: none; z-index: 1; } .htbl th:hover { color: var(--ink); } .htbl th.on { color: var(--brand); } .htbl th .ar { font-size: 9px; margin-left: 2px; } .htbl th.num, .htbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .htbl td { padding: 8px 8px; border-bottom: 1px solid #eef1f5; vertical-align: middle; white-space: nowrap; } .htbl tr:last-child td { border-bottom: 0; } .htbl tbody tr:hover td { background: #f8fafc; } .htbl tr.open td { background: #f1f5ff; }
+  .htbl .tth { width: 40px; height: 52px; border-radius: 6px; overflow: hidden; background: #e9edf3; display: flex; align-items: center; justify-content: center; cursor: pointer; } .htbl .tth > div { border-radius: 3px; overflow: hidden; }
+  .htbl .tt { font-weight: 700; color: var(--ink); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 210px; } .htbl .tp { color: var(--mute); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 210px; margin-top: 2px; }
+  .htbl .sc { background: #eef3ff; color: var(--brand); padding: 1px 6px; border-radius: 4px; font-weight: 600; white-space: nowrap; } .htbl .ow { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; } .htbl .ow small { color: var(--mute); }
+  .htbl .big { font-size: 15px; font-weight: 800; color: var(--ink); } .htbl .big.sk { color: #d97706; } .htbl .big.ld { color: #dc2626; } .htbl .scn { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+  .htbl .stt { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 11px; font-weight: 600; color: #fff; white-space: nowrap; }
+  .htbl .ops button { font-size: 11px; padding: 4px 7px; border-radius: 6px; background: #f1f3f8; margin-right: 3px; white-space: nowrap; } .htbl .tm { color: var(--mute); font-size: 11px; line-height: 1.5; } .htbl .tm b { color: var(--ink); font-weight: 600; display: block; } .htbl .ops button.pri { background: var(--brand); color: #fff; } .htbl .ops button.del { color: #dc2626; } .htbl .ops button.an { background: #fff7ed; color: #c2410c; }
+  .htbl .star { color: #cbd5e1; cursor: pointer; font-size: 14px; } .htbl .star.on { color: #f59e0b; }
+  /* 扫码明细展开行 */
+  .hdet { display: grid; grid-template-columns: 1.1fr 1fr 1.3fr; gap: 16px; padding: 6px 4px 4px; } .hdet h5 { margin: 0 0 8px; font-size: 12px; color: var(--ink); display: flex; justify-content: space-between; } .hdet h5 small { color: var(--mute); font-weight: 500; }
+  .hdet .src { display: grid; gap: 6px; } .hdet .src div { display: grid; grid-template-columns: 64px 1fr 56px; align-items: center; gap: 8px; font-size: 11px; color: var(--mute); } .hdet .src i { height: 8px; border-radius: 4px; background: #e2e8f0; overflow: hidden; display: block; } .hdet .src i b { display: block; height: 100%; background: #d97706; border-radius: 4px; } .hdet .src span { text-align: right; color: var(--ink); font-weight: 600; }
+  .hdet .meta { font-size: 11px; color: var(--mute); line-height: 1.9; } .hdet .meta b { color: var(--ink); font-weight: 600; } .hdet .meta code { background: #f1f3f8; padding: 1px 5px; border-radius: 4px; color: var(--brand); font-size: 11px; }
+  .hdet .leads { display: grid; gap: 5px; } .hdet .leads div { display: grid; grid-template-columns: 74px 1fr auto; gap: 8px; font-size: 11px; color: var(--mute); align-items: center; } .hdet .leads b { color: var(--ink); font-weight: 600; } .hdet .leads .new { font-size: 10px; background: #fee2e2; color: #dc2626; padding: 0 5px; border-radius: 4px; } .hdet .leads .old { font-size: 10px; background: #f1f3f8; color: var(--mute); padding: 0 5px; border-radius: 4px; }
+  .hdet .sim { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; } .hdet .sim button { font-size: 11px; padding: 4px 8px; border-radius: 6px; background: #fff; border: 1px dashed #c7d0e0; color: var(--mute); }
+  /* 分析视图 */
+  .hkpi { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 14px; } .hkpi div { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; } .hkpi small { display: block; font-size: 11px; color: var(--mute); margin-bottom: 4px; } .hkpi b { font-size: 22px; font-weight: 800; color: var(--ink); letter-spacing: -.5px; } .hkpi b.sk { color: #d97706; } .hkpi b.ld { color: #dc2626; } .hkpi i { font-style: normal; font-size: 11px; color: var(--mute); margin-left: 6px; } .hkpi i.up { color: #059669; } .hkpi i.down { color: #dc2626; }
+  .hana { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; margin-bottom: 14px; } .hbox { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; min-width: 0; } .hbox h5 { margin: 0 0 10px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; } .hbox h5 small { color: var(--mute); font-weight: 500; font-size: 11px; }
+  .hbars { display: flex; align-items: flex-end; gap: 4px; } .hbars .hb { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; } .hbars .hb b { width: 100%; border-radius: 4px 4px 0 0; display: block; } .hbars .hb i { font-style: normal; font-size: 10px; color: var(--mute); height: 14px; line-height: 14px; } .hbars .hb small { font-size: 10px; color: var(--mute); margin-top: 4px; height: 14px; line-height: 14px; white-space: nowrap; }
+  .rank { width: 100%; border-collapse: collapse; font-size: 12px; } .rank th { text-align: left; color: var(--mute); font-weight: 600; padding: 6px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; } .rank td { padding: 7px 6px; border-bottom: 1px solid #eef1f5; white-space: nowrap; } .rank tr:last-child td { border: 0; } .rank th.num, .rank td.num { text-align: right; font-variant-numeric: tabular-nums; } .rank td.num b { font-weight: 700; } .rank .bar { height: 6px; background: #eef1f5; border-radius: 3px; overflow: hidden; min-width: 60px; } .rank .bar b { display: block; height: 100%; background: #d97706; border-radius: 3px; }
+  .srcs { display: grid; gap: 10px; } .srcs div { display: grid; grid-template-columns: 64px 1fr 72px; gap: 10px; align-items: center; font-size: 12px; } .srcs i { height: 10px; border-radius: 5px; background: #eef1f5; overflow: hidden; display: block; } .srcs i b { display: block; height: 100%; border-radius: 5px; } .srcs span { text-align: right; color: var(--mute); } .srcs span b { color: var(--ink); }
+  .topl { display: grid; gap: 8px; } .topl div { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; font-size: 12px; cursor: pointer; } .topl .tth { width: 34px; height: 44px; border-radius: 5px; overflow: hidden; background: #e9edf3; display: flex; align-items: center; justify-content: center; } .topl .tth > div { border-radius: 3px; overflow: hidden; } .topl b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .topl small { color: var(--mute); display: block; } .topl em { font-style: normal; font-weight: 800; color: #d97706; font-size: 15px; } .topl em small { display: inline; font-weight: 500; font-size: 10px; }
+  @media (max-width: 1280px) { .hkpi { grid-template-columns: repeat(3, 1fr); } .hana { grid-template-columns: 1fr; } .hdet { grid-template-columns: 1fr 1fr; } }
   .recent { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; } .recent .rc { background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; cursor: pointer; } .recent .rc .th { height: 96px; background: #e9edf3; display: flex; align-items: center; justify-content: center; overflow: hidden; } .recent .rc .th > div { border-radius: 4px; overflow: hidden; } .recent .rc small { display: block; padding: 6px 8px; font-size: 11px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .recent .rc small i { display: block; font-style: normal; color: var(--mute); font-size: 10px; }
   .proto { position: fixed; right: 12px; bottom: 12px; font-size: 10px; color: #fff; background: rgba(0,0,0,.55); padding: 4px 8px; border-radius: 6px; z-index: 5; }
   /* 企业素材库 */
@@ -178,10 +207,12 @@
 </div>
 <div class="hist" id="hist" onclick="if(event.target===this)closeHist()"><div class="hpanel">
   <div class="hhead"><b>🕘 海报历史记录</b><span class="st" id="hstats"></span>
+    <div class="hview" id="hview"><button data-v="card" class="on" onclick="setHistView('card')">▦ 卡片</button><button data-v="table" onclick="setHistView('table')">☰ 表格</button><button data-v="stats" onclick="setHistView('stats')">📈 扫码分析</button></div>
     <input type="search" id="hq" placeholder="搜索标题 / 需求 / 场景 / 文案…" oninput="renderHist()">
+    <select id="howner" onchange="renderHist()"><option value="">全部发布人</option></select>
     <select id="hrange" onchange="renderHist()"><option value="all">全部时间</option><option value="today">今天</option><option value="week">近 7 天</option><option value="month">近 30 天</option></select>
-    <select id="hstatus" onchange="renderHist()"><option value="">全部状态</option><option value="exported">已导出 / 分享</option><option value="draft">草稿</option></select>
-    <select id="hsort" onchange="renderHist()"><option value="updated">最近修改</option><option value="created">创建时间</option><option value="used">使用最多</option><option value="versions">版本最多</option></select>
+    <select id="hstatus" onchange="renderHist()"><option value="">全部状态</option><option value="exported">已导出 / 分享</option><option value="scanned">有扫码</option><option value="lead">带来咨询</option><option value="draft">草稿</option></select>
+    <select id="hsort" onchange="renderHist()"><option value="updated">最近修改</option><option value="created">创建时间</option><option value="scans">扫码最多</option><option value="leads">咨询最多</option><option value="shares">分享最多</option><option value="used">使用最多</option><option value="versions">版本最多</option></select>
     <label><input type="checkbox" id="hstar" onchange="renderHist()"> 只看收藏</label>
     <button class="x" onclick="closeHist()">✕</button></div>
   <div class="hbody"><div class="hside" id="hside"></div><div class="hmain" id="hmain"></div></div>
@@ -200,8 +231,8 @@
 <script src="shared/history.js"></script>
 <script>
   const $ = (id) => document.getElementById(id);
-  const S = { assets: AP.sampleAssets.map((a) => Object.assign({}, a)), brand: Object.assign({}, AP.defaultBrand), scene: null, ratio: "3:4", impact: 3, versions: [], cur: -1, busy: false, picks: [], kbPick: [], acat: "", libTab: "img", sid: null, prompt: "" };
-  const ctx = () => ({ assets: S.assets, brand: S.brand, scene: S.scene, ratio: S.ratio, impact: S.impact, photoPick: S.picks, kbPick: S.kbPick, kb: AP.KB.load(), date: "2026.09.16" });
+  const S = { assets: AP.sampleAssets.map((a) => Object.assign({}, a)), brand: Object.assign({}, AP.defaultBrand), scene: null, ratio: "3:4", impact: 3, impactUser: false, versions: [], cur: -1, busy: false, picks: [], kbPick: [], acat: "", libTab: "img", sid: null, prompt: "" };
+  const ctx = () => ({ assets: S.assets, brand: S.brand, scene: S.scene, ratio: S.ratio, impact: S.impactUser ? S.impact : undefined, photoPick: S.picks, kbPick: S.kbPick, kb: AP.KB.load(), date: "2026.09.16" });
   const toast = (m) => { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2400); };
   window.toast = toast;
 
@@ -272,7 +303,7 @@
   window.delKB = (id) => { const it = AP.KB.get(id); if (!confirm(`删除资料「${it.title}」？`)) return; AP.KB.remove(id); S.kbPick = S.kbPick.filter((x) => x !== id); KF.edit = null; renderKB(); renderKBList(); };
   window.resetKB = () => { if (!confirm("恢复为示例资料？你新增 / 修改的内容会被覆盖。")) return; AP.KB.reset(); S.kbPick = []; renderKB(); renderKBList(); };
   window.useKB = (id) => { const it = AP.KB.get(id); if (!S.kbPick.includes(id)) S.kbPick.push(id); closeKB(); libTab("kb"); const c = AP.KB.cat(it.cat); const sceneFor = { company: "intro", brand: "thanks", product: "feature", service: "service", advantage: "feature", honor: "honor", case: "case", team: "team", promise: "thanks" }[it.cat]; if (S.cur < 0) { setScene(sceneFor); $("prompt").value = `用「${AP.KB.shortTitle(it)}」资料做一张${c.name.replace("介绍", "")}海报，要有冲击力`; } toast(`已勾选「${AP.KB.shortTitle(it)}」，生成时精确引用`); $("prompt").focus(); };
-  $("impact").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; S.impact = +b.dataset.i; document.querySelectorAll("#impact button").forEach((x) => x.classList.toggle("on", x === b)); renderCtxBar(); if (S.cur >= 0) { const r = AP.mockRefine(cur(), S.impact === 3 ? "更有冲击力" : S.impact === 1 ? "柔和一点" : cur().impact > 2 ? "柔和一点" : "更有冲击力", ctx()); r.spec.impact = S.impact; push(r.spec, `冲击力 ${AP.IMPACT[S.impact].short}`); aiMsg(r.reply, r.changes, r.regen); } else toast(`视觉冲击力：${AP.IMPACT[S.impact].name} — ${AP.IMPACT[S.impact].desc}`); });
+  $("impact").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; S.impact = +b.dataset.i; S.impactUser = true; document.querySelectorAll("#impact button").forEach((x) => x.classList.toggle("on", x === b)); renderCtxBar(); if (S.cur >= 0) { const r = AP.mockRefine(cur(), S.impact === 3 ? "更有冲击力" : S.impact === 1 ? "柔和一点" : cur().impact > 2 ? "柔和一点" : "更有冲击力", ctx()); r.spec.impact = S.impact; push(r.spec, `冲击力 ${AP.IMPACT[S.impact].short}`); aiMsg(r.reply, r.changes, r.regen); } else toast(`视觉冲击力：${AP.IMPACT[S.impact].name} — ${AP.IMPACT[S.impact].desc}`); });
 
   /* 品牌 */
   [["company", "b-company"], ["short", "b-short"], ["person", "b-person"], ["phone", "b-phone"], ["addr", "b-addr"], ["slogan", "b-slogan"]].forEach(([k, id]) => { $(id).value = S.brand[k]; $(id).addEventListener("input", () => { S.brand[k] = $(id).value; if (S.cur >= 0) { const sp = AP.clone(cur()); sp.contact.company = S.brand.company; sp.contact.person = S.brand.person; sp.contact.phone = S.brand.phone; sp.contact.addr = S.brand.addr; S.versions[S.cur].spec = sp; draw(); } }); });
@@ -287,7 +318,7 @@
 
   /* 版本 */
   const cur = () => S.versions[S.cur] && S.versions[S.cur].spec;
-  function push(spec, label) { S.versions.push({ spec, label, t: Date.now() }); S.cur = S.versions.length - 1; draw(); renderVersions(); saveHist(); }
+  function push(spec, label) { S.versions.push({ spec, label, t: Date.now() }); S.cur = S.versions.length - 1; syncImpact(); draw(); renderVersions(); saveHist(); }
   function renderVersions() {
     $("versions").innerHTML = S.versions.length ? S.versions.map((v, i) => { const [w, h] = AP.RATIOS[v.spec.ratio]; const sc = Math.min(54 / w, 60 / h); return `<div class="ver ${i === S.cur ? "on" : ""}" onclick="goVer(${i})"><div class="th"><div class="inner" style="transform:scale(${sc})">${AP.renderPoster(v.spec, Object.assign(ctx(), { watermark: false }), w)}</div></div><small>v${i + 1} ${AP.esc(v.label)}</small></div>`; }).join("") : '<span class="hint">版本记录：每次生成 / 微调都会保留一版，点击切换，可从任一版本继续改</span>';
   }
@@ -347,12 +378,12 @@
   };
 
   /* 导出 / 模板 */
-  window.share = () => { if (S.cur < 0) return toast("先生成一版"); AP.History.bump(S.sid, "shares"); updateHistBadge(); toast("原型：调用微信 JS-SDK 分享海报图到会话 / 朋友圈（历史记录已标记为已分享）"); };
+  window.share = () => { if (S.cur < 0) return toast("先生成一版"); AP.History.bump(S.sid, "shares"); updateHistBadge(); toast("原型：调用微信 JS-SDK 分享海报图到会话 / 朋友圈（历史记录已标记为已分享；二维码绑定追踪码，扫码将计入「扫码分析」）"); };
   window.exportPng = () => { if (S.cur < 0) return toast("先生成一版"); AP.History.bump(S.sid, "exports"); updateHistBadge(); try { localStorage.setItem("ap-assets", JSON.stringify(S.assets.map((a) => ({ id: a.id, type: a.type, name: a.name, tags: a.tags, url: a.url })))); } catch (e) { toast("上传素材过大，导出页将使用示例素材"); } window.open("poster.html?d=" + encodeURIComponent(AP.encode(cur())), "_blank"); };
   window.saveTpl = () => { if (S.cur < 0) return toast("先生成一版"); const list = JSON.parse(localStorage.getItem("ap-templates") || "[]"); list.unshift({ name: cur().copy.headline, spec: cur(), t: Date.now() }); localStorage.setItem("ap-templates", JSON.stringify(list.slice(0, 20))); toast("已保存为企业模板：下次只需替换文字与素材，团队成员可直接套用"); };
 
   /* 历史记录 */
-  const HF = { group: "", scene: "" };
+  const HF = { group: "", scene: "", view: "card", tsort: "updated", tdir: "desc", open: null };
   function saveHist() { if (S.cur < 0) return; if (!S.sid) S.sid = AP.History.newId(); AP.History.upsert({ id: S.sid, versions: S.versions, cur: S.cur, channel: "pc", prompt: S.prompt, assets: S.assets }); updateHistBadge(); }
   function updateHistBadge() { $("histN").textContent = AP.History.load().length; }
   window.openHist = () => { $("hist").classList.add("show"); renderHist(); };
@@ -360,23 +391,102 @@
   window.setHistGroup = (g, sc) => { HF.group = g || ""; HF.scene = sc || ""; renderHist(); };
   window.renderHist = () => {
     const all = AP.History.load(); const st = AP.History.stats(all);
-    $("hstats").innerHTML = `共 <em>${st.total}</em> 张 · 近 7 天 <em>${st.week}</em> 张 · 导出 / 分享 <em>${st.used}</em> 次${st.top.length ? ` · 最常做：${st.top.map(([k, v]) => `${k} ${v}`).join("、")}` : ""}`;
+    $("hstats").innerHTML = `<em>${st.total}</em> 张 · 分享 <em>${st.shares}</em> · 扫码 <em style="color:#d97706">${st.scans}</em> · 咨询 <em style="color:#dc2626">${st.leads}</em>`;
     const cnt = (g) => all.filter((r) => r.group === g).length;
     $("hside").innerHTML = `<button class="${!HF.group ? "on" : ""}" onclick="setHistGroup('')">全部海报<small>${all.length}</small></button>` + AP.GROUPS.map((g) => `<button class="${HF.group === g.id && !HF.scene ? "on" : ""}" onclick="setHistGroup('${g.id}')">${g.name}<small>${cnt(g.id)}</small></button>${HF.group === g.id ? `<div class="sub">${AP.SCENES.filter((s) => s.g === g.id && all.some((r) => r.scene === s.id)).map((s) => `<button class="${HF.scene === s.id ? "on" : ""}" onclick="setHistGroup('${g.id}','${s.id}')">${s.icon} ${s.name}<small>${all.filter((r) => r.scene === s.id).length}</small></button>`).join("")}</div>` : ""}`).join("") + `<div style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px"><button onclick="clearDemo()" style="font-size:11px;color:var(--mute)">清除示例记录</button></div>`;
-    const list = AP.History.filter(all, { group: HF.group, scene: HF.scene, q: $("hq").value, range: $("hrange").value, status: $("hstatus").value, sort: $("hsort").value, starred: $("hstar").checked });
+    const H = AP.History; const ownerSel = $("howner"); if (ownerSel.options.length === 1) H.OWNERS.forEach((o) => { const op = document.createElement("option"); op.value = o.id; op.textContent = `${o.name} · ${o.role}`; ownerSel.appendChild(op); });
+    document.querySelectorAll("#hview button").forEach((b) => b.classList.toggle("on", b.dataset.v === HF.view)); $("hist").querySelector(".hpanel").classList.toggle("wide", HF.view !== "card");
+    const f = { group: HF.group, scene: HF.scene, q: $("hq").value, range: $("hrange").value, status: $("hstatus").value, owner: ownerSel.value, sort: HF.view === "table" ? HF.tsort : $("hsort").value, dir: HF.view === "table" ? HF.tdir : "desc", starred: $("hstar").checked, pinStar: HF.view === "card" };
+    const list = H.filter(all, f);
+    if (HF.view === "stats") { $("hmain").innerHTML = histStats(list, all); return; }
     if (!list.length) { $("hmain").innerHTML = `<div class="hempty"><div class="big">🗂️</div>没有符合条件的海报<br><small>换个筛选条件，或点右上角「新建海报」开始</small></div>`; return; }
-    const days = $("hsort").value === "updated" ? AP.History.groupByDay(list) : [{ key: "", items: list }];
+    if (HF.view === "table") { $("hmain").innerHTML = histTable(list); return; }
+    const days = $("hsort").value === "updated" ? H.groupByDay(list) : [{ key: "", items: list }];
     $("hmain").innerHTML = days.map((d) => `${d.key ? `<div class="hday">${d.key}<small style="font-weight:500">${d.items.length} 张</small></div>` : ""}<div class="hgrid">${d.items.map(histCard).join("")}</div>`).join("");
   };
+  window.setHistView = (v) => { HF.view = v; HF.open = null; renderHist(); };
+  window.setHistSort = (k) => { if (HF.tsort === k) HF.tdir = HF.tdir === "desc" ? "asc" : "desc"; else { HF.tsort = k; HF.tdir = ["title", "scene", "owner"].includes(k) ? "asc" : "desc"; } renderHist(); };
   function histCard(r) {
-    const sc = AP.SCENES.find((s) => s.id === r.scene) || {}; const used = (r.exports || 0) + (r.shares || 0);
+    const H = AP.History; const sc = AP.SCENES.find((s) => s.id === r.scene) || {}; const st = H.statusOf(r); const o = H.owner(r.owner);
     return `<div class="hc" data-id="${r.id}">
-      <div class="th" onclick="openRecord('${r.id}')">${AP.History.thumb(r, ctx(), 150, 200)}</div>
+      <div class="th" onclick="openRecord('${r.id}')">${H.thumb(r, ctx(), 150, 200)}</div>
       <button class="star ${r.starred ? "on" : ""}" title="收藏 / 置顶" onclick="starRecord('${r.id}')">★</button>${r.demo ? '<span class="demo">示例</span>' : ""}
       <div class="ops"><button class="pri" onclick="openRecord('${r.id}')">打开继续改</button><button onclick="redoRecord('${r.id}')">再做类似</button><button onclick="exportRecord('${r.id}')">导出</button><button class="del" onclick="delRecord('${r.id}')">删除</button></div>
       <div class="ti" title="${AP.esc(r.prompt)}" onclick="openRecord('${r.id}')">${AP.esc(r.title)}</div>
-      <div class="mt"><span class="sc">${sc.icon || ""} ${AP.esc(r.sceneName)}</span><span class="ch">${r.channel === "h5" ? "📱 手机" : "🖥 PC"}</span><span>${r.ratio} · ${AP.esc(AP.STYLES[r.style] ? AP.STYLES[r.style].name : r.style)}</span></div>
-      <div class="ft"><span>${AP.History.fmtTime(r.updatedAt)} · ${r.versions.length} 版</span><span class="stt ${used ? "" : "draft"}">${used ? `${r.status || "已使用"} ${used} 次` : "草稿"}</span></div></div>`;
+      <div class="mt"><span class="sc">${sc.icon || ""} ${AP.esc(r.sceneName)}</span><span class="ow" title="发布人 ${o.name} · ${o.role}">${H.avatar(r.owner, 16)}${o.name}</span><span class="ch" title="${r.ratio}">${r.channel === "h5" ? "📱" : "🖥"}</span></div>
+      <div class="ft"><span>${H.fmtTime(r.updatedAt)} · ${r.versions.length} 版</span>${r.shares || r.scans ? `<span class="kp" title="分享 ${r.shares} 次 · 扫码 ${r.scans} 次 · 咨询 ${r.leads} 条"><span>↗ <b>${r.shares}</b></span><span class="sk">▣ <b>${r.scans}</b></span>${r.leads ? `<span class="ld">💬 <b>${r.leads}</b></span>` : ""}</span>` : `<span class="stt draft">${st.name}</span>`}</div></div>`;
+  }
+  /* 表格视图：可点表头排序，「扫码分析」展开明细行 */
+  function histTable(list) {
+    const H = AP.History; const th = (k, name, num) => `<th class="${num ? "num" : ""} ${HF.tsort === k ? "on" : ""}" onclick="setHistSort('${k}')">${name}${HF.tsort === k ? `<span class="ar">${HF.tdir === "desc" ? "▼" : "▲"}</span>` : ""}</th>`;
+    const rows = list.map((r) => {
+      const sc = AP.SCENES.find((s) => s.id === r.scene) || {}; const o = H.owner(r.owner); const st = H.statusOf(r); const open = HF.open === r.id;
+      return `<tr class="${open ? "open" : ""}" data-id="${r.id}">
+        <td><span class="star ${r.starred ? "on" : ""}" onclick="starRecord('${r.id}')">★</span></td>
+        <td><div class="tth" onclick="openRecord('${r.id}')">${H.thumb(r, ctx(), 40, 52)}</div></td>
+        <td><div class="tt" onclick="openRecord('${r.id}')" title="${AP.esc(r.title)}">${AP.esc(r.title)}</div><div class="tp" title="${AP.esc(r.prompt)}">${AP.esc(r.prompt)}</div></td>
+        <td><span class="sc">${sc.icon || ""} ${AP.esc(r.sceneName)}</span></td>
+        <td><span class="ow">${H.avatar(r.owner, 22)}<span>${o.name}<br><small>${o.role} · ${r.channel === "h5" ? "📱 手机" : "🖥 PC"}</small></span></span></td>
+        <td class="num">${r.versions.length}</td>
+        <td><div class="tm" title="创建 ${new Date(r.createdAt).toLocaleString("zh-CN")} · 修改 ${new Date(r.updatedAt).toLocaleString("zh-CN")}"><b>${H.fmtTime(r.createdAt)}</b>${r.updatedAt - r.createdAt > 60e3 ? `改于 ${H.fmtTime(r.updatedAt)}` : "未再修改"}</div></td>
+        <td class="num" title="分享 ${r.shares} 次 · 导出 ${r.exports} 次"><span class="big">${r.shares || "–"}</span>${r.exports ? `<small style="color:var(--mute);font-size:10px"> / ${r.exports}</small>` : ""}</td>
+        <td class="num"><div class="scn">${r.scans ? H.spark(r.scanDays, 64, 18, "#d97706") : ""}<span class="big sk">${r.scans || "–"}</span></div></td>
+        <td class="num"><span class="big ld">${r.leads || "–"}</span></td>
+        <td class="num">${H.rate(r.leads, r.scans)}</td>
+        <td><span class="stt" style="background:${st.color}">${st.name}</span></td>
+        <td class="ops"><button class="an" onclick="toggleScan('${r.id}')">${open ? "收起" : "📈 分析"}</button><button class="pri" onclick="openRecord('${r.id}')">打开</button><button title="再做类似" onclick="redoRecord('${r.id}')">🔁</button><button title="导出原图" onclick="exportRecord('${r.id}')">⤓</button><button class="del" title="删除" onclick="delRecord('${r.id}')">🗑</button></td></tr>${open ? `<tr class="open"><td colspan="13" style="white-space:normal">${scanDetail(r)}</td></tr>` : ""}`;
+    }).join("");
+    const sum = (k) => list.reduce((a, r) => a + (r[k] || 0), 0);
+    return `<table class="htbl"><thead><tr><th></th><th></th>${th("title", "海报 / 需求")}${th("scene", "场景")}${th("owner", "发布人 / 端")}${th("versions", "版本", 1)}${th("created", "创建 / 修改")}${th("shares", "分享 / 导出", 1)}${th("scans", "扫码 · 14 天", 1)}${th("leads", "咨询", 1)}${th("rate", "扫码→咨询", 1)}${th("status", "状态")}<th>操作</th></tr></thead><tbody>${rows}</tbody>
+      <tfoot><tr><td colspan="7" style="color:var(--mute)">合计 ${list.length} 张海报</td><td class="num"><b>${sum("shares")}</b><small style="color:var(--mute);font-size:10px"> / ${sum("exports")}</small></td><td class="num"><b style="color:#d97706">${sum("scans")}</b></td><td class="num"><b style="color:#dc2626">${sum("leads")}</b></td><td class="num">${H.rate(sum("leads"), sum("scans"))}</td><td colspan="2"></td></tr></tfoot></table>`;
+  }
+  window.toggleScan = (id) => { HF.open = HF.open === id ? null : id; renderHist(); };
+  function scanDetail(r) {
+    const H = AP.History; const o = H.owner(r.owner); const mx = Math.max(1, ...Object.values(r.scanFrom)); const labels = H.trendLabels();
+    return `<div class="hdet">
+      <div><h5>扫码来源 <small>共 ${r.scans} 次 · 分享 ${r.shares} 次 · 每次分享带来 ${r.shares ? (r.scans / r.shares).toFixed(1) : "—"} 次扫码</small></h5>
+        <div class="src">${H.SOURCES.map(([k, name]) => `<div><span style="text-align:left;color:var(--mute);font-weight:500">${name}</span><i><b style="width:${Math.round((r.scanFrom[k] / mx) * 100)}%"></b></i><span>${r.scanFrom[k]} <small style="color:var(--mute);font-weight:500">(${r.scans ? Math.round((r.scanFrom[k] / r.scans) * 100) : 0}%)</small></span></div>`).join("")}</div>
+        <h5 style="margin-top:12px">近 14 天扫码趋势</h5>${H.bars(r.scanDays, labels, 56, "#d97706")}
+        <div class="sim"><span style="font-size:11px;color:var(--mute);align-self:center">原型模拟：</span><button onclick="simScan('${r.id}','moments',false)">+1 朋友圈扫码</button><button onclick="simScan('${r.id}','group',false)">+1 群扫码</button><button onclick="simScan('${r.id}','chat',true)">+1 扫码并咨询</button></div></div>
+      <div><h5>发布信息</h5><div class="meta">
+        发布人：<b>${H.avatar(r.owner, 16)} ${o.name}</b> · ${o.role}<br>
+        海报联系人：<b>${AP.esc(r.versions[r.cur].spec.contact.person || "—")}</b> · ${AP.esc(r.versions[r.cur].spec.contact.phone || "")}<br>
+        追踪码：<code>${r.code}</code> → <code>${H.trackUrl(r)}</code><br>
+        落地页：<b>${sceneLanding(r)}</b><br>
+        首次分享：<b>${r.publishedAt ? H.fmtTime(r.publishedAt) : "尚未分享"}</b> · 生成端：${r.channel === "h5" ? "手机" : "PC"} · ${r.versions.length} 版<br>
+        <span style="font-size:10px">二维码由引擎绘制并绑定本条记录的追踪码；换版本不换码，同一海报多次分享累计统计。</span></div></div>
+      <div><h5>扫码带来的咨询 <small>${r.leads} 条 · 转化率 ${H.rate(r.leads, r.scans)}</small></h5>
+        ${r.leadList.length ? `<div class="leads">${r.leadList.slice(0, 6).map((l) => `<div><span>${H.fmtTime(l.t)}</span><span><b>${l.city}</b> · ${l.type} · 来自${H.SRC_NAME[l.src]}</span><span class="${l.isNew ? "new" : "old"}">${l.isNew ? "新客" : "老客"}</span></div>`).join("")}${r.leadList.length > 6 ? `<div style="color:var(--mute);font-size:11px">…还有 ${r.leadList.length - 6} 条，正式版跳转「线索中心」按海报筛选</div>` : ""}</div>` : `<div style="font-size:11px;color:var(--mute)">还没有人通过这张海报发起咨询。${r.scans ? "有扫码但未咨询，可以试试在海报上加「限时」「今日价」等更强的行动号召。" : ""}</div>`}</div>
+    </div>`;
+  }
+  function sceneLanding(r) { const g = r.group; return g === "supply" ? "店铺 · 现货资源列表（带发布人名片）" : g === "promo" ? "活动页 · 促销品种 + 一键咨询" : g === "talent" ? "招聘 / 招商详情 + 发布人名片" : "店铺主页 + 发布人名片"; }
+  window.simScan = (id, src, lead) => { AP.History.scan(id, src, lead); renderHist(); toast(lead ? "模拟：扫码后发起咨询，已计入线索" : "模拟：+1 扫码（正式版由 /q/{code} 落地页上报）"); };
+  /* 扫码分析视图 */
+  function histStats(list, all) {
+    const H = AP.History; const st = H.stats(list); const owners = H.byOwner(list); const scenes = H.byScene(list).slice(0, 8); const groups = H.byScene(list, "group"); const src = H.bySource(list); const top = H.topScanned(list, 5); const labels = H.trendLabels();
+    const delta = st.prevScans ? Math.round(((st.wkScans - st.prevScans) / st.prevScans) * 100) : null; const mxO = Math.max(1, ...owners.map((o) => o.scans)); const mxS = Math.max(1, ...scenes.map((o) => o.scans)); const SRC_C = { moments: "#1f5eff", group: "#059669", chat: "#d97706", other: "#94a3b8" };
+    const scope = list.length === all.length ? "全部海报" : `当前筛选 ${list.length} 张`;
+    return `<div class="hkpi">
+      <div><small>海报 · ${scope}</small><b>${st.total}</b><i>近 7 天新做 ${st.week}</i></div>
+      <div><small>分享次数</small><b>${st.shares}</b><i>导出 ${st.exports}</i></div>
+      <div><small>扫码次数</small><b class="sk">${st.scans}</b><i>每次分享 ${st.scanPerShare} 次</i></div>
+      <div><small>近 7 天扫码</small><b class="sk">${st.wkScans}</b>${delta === null ? "" : `<i class="${delta >= 0 ? "up" : "down"}">${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta)}% vs 前 7 天</i>`}</div>
+      <div><small>扫码带来咨询</small><b class="ld">${st.leads}</b><i>转化率 ${st.rate}</i></div>
+      <div><small>发布人</small><b>${owners.length}</b><i>${owners[0] ? `扫码最多：${H.owner(owners[0].owner).name}` : ""}</i></div></div>
+    <div class="hana">
+      <div class="hbox"><h5>近 14 天扫码趋势 <small>按天 · 所有来源</small></h5>${H.bars(H.trend(list), labels, 110, "#d97706")}</div>
+      <div class="hbox"><h5>扫码来源 <small>微信场景值识别</small></h5><div class="srcs">${src.map((s) => `<div><span style="text-align:left;color:var(--ink)">${s.name}</span><i><b style="width:${s.pct}%;background:${SRC_C[s.key]}"></b></i><span><b>${s.n}</b> · ${s.pct}%</span></div>`).join("")}</div>
+        <div style="font-size:11px;color:var(--mute);margin-top:12px;line-height:1.7">朋友圈占比高说明"广撒网"有效；微信群 / 单聊扫码的咨询转化通常更高——分析视图可用来决定业务员该把海报发到哪里。</div></div></div>
+    <div class="hana">
+      <div class="hbox"><h5>按发布人 <small>谁的海报更能带来扫码与咨询</small></h5><table class="rank"><thead><tr><th>发布人</th><th class="num">海报</th><th class="num">分享</th><th class="num">扫码</th><th></th><th class="num">篇均</th><th class="num">咨询</th><th class="num">转化</th><th>最近发布</th></tr></thead><tbody>
+        ${owners.map((o) => { const p = H.owner(o.owner); return `<tr><td><span class="ow" style="display:inline-flex;align-items:center;gap:6px">${H.avatar(o.owner, 20)}<span>${p.name} <small style="color:var(--mute)">${p.role}</small></span></span></td><td class="num">${o.posters}</td><td class="num">${o.shares}</td><td class="num"><b style="color:#d97706">${o.scans}</b></td><td><div class="bar"><b style="width:${Math.round((o.scans / mxO) * 100)}%"></b></div></td><td class="num">${o.avg}</td><td class="num"><b style="color:#dc2626">${o.leads}</b></td><td class="num">${o.rate}</td><td style="color:var(--mute)">${H.fmtTime(o.last)}</td></tr>`; }).join("")}</tbody></table></div>
+      <div class="hbox"><h5>扫码最多的海报 <small>Top ${top.length}</small></h5><div class="topl">${top.map((r) => `<div onclick="HF.view='table';HF.open='${r.id}';HF.tsort='scans';HF.tdir='desc';renderHist()"><div class="tth">${H.thumb(r, ctx(), 34, 44)}</div><span><b>${AP.esc(r.title)}</b><small>${AP.esc(r.sceneName)} · ${H.owner(r.owner).name} · ${H.fmtTime(r.createdAt)}</small></span><em>${r.scans}<small> 扫码 · ${r.leads} 咨询</small></em></div>`).join("") || `<div style="color:var(--mute);font-size:12px">还没有扫码数据</div>`}</div></div></div>
+    <div class="hana">
+      <div class="hbox"><h5>按场景 <small>哪类海报值得多做</small></h5><table class="rank"><thead><tr><th>场景</th><th class="num">海报</th><th class="num">分享</th><th class="num">扫码</th><th></th><th class="num">篇均扫码</th><th class="num">咨询</th><th class="num">转化</th></tr></thead><tbody>
+        ${scenes.map((s) => `<tr><td>${AP.esc(s.name)}</td><td class="num">${s.posters}</td><td class="num">${s.shares}</td><td class="num"><b style="color:#d97706">${s.scans}</b></td><td><div class="bar"><b style="width:${Math.round((s.scans / mxS) * 100)}%"></b></div></td><td class="num">${s.avg}</td><td class="num"><b style="color:#dc2626">${s.leads}</b></td><td class="num">${s.rate}</td></tr>`).join("")}</tbody></table></div>
+      <div class="hbox"><h5>按大类 <small>7 大类</small></h5><table class="rank"><thead><tr><th>大类</th><th class="num">海报</th><th class="num">扫码</th><th class="num">篇均</th><th class="num">咨询</th><th class="num">转化</th></tr></thead><tbody>
+        ${groups.map((s) => `<tr><td>${AP.esc(s.name)}</td><td class="num">${s.posters}</td><td class="num"><b style="color:#d97706">${s.scans}</b></td><td class="num">${s.avg}</td><td class="num"><b style="color:#dc2626">${s.leads}</b></td><td class="num">${s.rate}</td></tr>`).join("")}</tbody></table>
+        <div style="font-size:11px;color:var(--mute);margin-top:12px;line-height:1.7">扫码 = 客户用微信扫了海报上的二维码（追踪码 /q/{code}，按发布人 + 海报归集）；咨询 = 扫码后在落地页点了「联系 / 询价」或留了电话，进入货袋子线索中心。正式版数据来自 <code>poster_scan</code> 事件表。</div></div></div>`;
   }
   window.starRecord = (id) => { const on = AP.History.star(id); renderHist(); toast(on ? "已收藏并置顶" : "已取消收藏"); };
   window.delRecord = (id) => { const r = AP.History.get(id); if (!r) return; if (!confirm(`删除「${r.title}」及其 ${r.versions.length} 个版本？`)) return; AP.History.remove(id); if (S.sid === id) S.sid = null; renderHist(); updateHistBadge(); toast("已删除（正式版进入回收站，30 天内可恢复）"); };
@@ -403,9 +513,9 @@
   if (qp.get("kb")) { openKB(qp.get("kbcat") || "", qp.get("kb") === "1" ? null : qp.get("kb")); }
   if (qp.get("picks")) { S.picks = qp.get("picks").split(",").filter((id) => S.assets.some((a) => a.id === id)); renderAssets(); }
   if (qp.get("kbpick")) { S.kbPick = qp.get("kbpick").split(",").filter((id) => AP.KB.get(id)); renderKBList(); }
-  if (qp.get("impact")) { S.impact = +qp.get("impact") || 3; document.querySelectorAll("#impact button").forEach((x) => x.classList.toggle("on", +x.dataset.i === S.impact)); renderCtxBar(); }
+  if (qp.get("impact")) { S.impact = +qp.get("impact") || 3; S.impactUser = true; document.querySelectorAll("#impact button").forEach((x) => x.classList.toggle("on", +x.dataset.i === S.impact)); renderCtxBar(); }
   if (qp.get("open")) openRecord(qp.get("open"));
-  if (qp.get("hist")) { openHist(); if (qp.get("hgroup")) setHistGroup(qp.get("hgroup")); }
+  if (qp.get("hist")) { if (qp.get("hview")) HF.view = qp.get("hview"); if (qp.get("hopen")) { HF.open = qp.get("hopen"); HF.tsort = "scans"; } openHist(); if (qp.get("howner")) { $("howner").value = qp.get("howner"); renderHist(); } if (qp.get("hgroup")) setHistGroup(qp.get("hgroup")); }
   if (qp.get("ratio")) { S.ratio = qp.get("ratio"); document.querySelectorAll("#ratio button").forEach((x) => x.classList.toggle("on", x.dataset.r === S.ratio)); }
   if (qp.get("demo")) { const s = AP.SCENES.find((x) => x.id === qp.get("demo")); if (s) { $("prompt").value = qp.get("prompt") || s.example; send(true); (qp.get("refine") || "").split("|").filter(Boolean).forEach((r) => { $("prompt").value = r; send(true); }); } }
 </script>
