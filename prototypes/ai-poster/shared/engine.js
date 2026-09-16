@@ -1,5 +1,5 @@
 /* AI 企业经营海报 · 原型引擎
- * - GROUPS / SCENES / STYLES：场景库（6 大类 37 场景）与风格库
+ * - GROUPS / SCENES / STYLES：场景库（7 大类 44 场景）与风格库
  * - sampleAssets / ASSET_CATS：企业图片库（按 品牌 / 产品 / 现场 / 加工物流 / 人物 / 资质 分类）；资料库见 knowledge.js
  * - IMPACT：视觉冲击力等级（强 / 标准 / 柔和），影响标题比例、焦点数字、光效层与图像模型提示词
  * - mockPlan(prompt, ctx)：模拟"多模态大模型规划"，输出设计 JSON（正式版由 ModelGateway.plan 替换）；会检索并引用企业资料库
@@ -34,12 +34,13 @@
     { id: "ast_team", type: "photo", cat: "people", name: "团队合影", tags: ["人物", "团队"], url: ph(800, 600, "#dfe6f0", `<g fill='#2f3a4f'>${[120, 260, 400, 540, 680].map((x, i) => `<circle cx='${x}' cy='${250 + (i % 2) * 20}' r='48'/><rect x='${x - 90}' y='${300 + (i % 2) * 20}' width='180' height='300' rx='60'/>`).join("")}</g>`) },
   ];
 
-  /* ---------- 场景库：6 大类 36 场景 ---------- */
+  /* ---------- 场景库：7 大类 44 场景 ---------- */
   AP.GROUPS = [
     { id: "supply", name: "产品与货源", desc: "新品 / 到货 / 卖点 / 目录 / 库存表 / 加工 / 配送" },
     { id: "site", name: "现场与实力", desc: "发货 / 加工 / 接待 / 案例 / 实力 / 资质 / 签约 / 团队" },
     { id: "promo", name: "促销活动", desc: "特价 / 节假日 / 周年庆 / 秒杀 / 清仓 / 拼单 / 开业" },
-    { id: "brand", name: "品牌与关系", desc: "节日 / 节气日签 / 感谢 / 见证 / 喜报 / 邀请 / 展会 / 直播" },
+    { id: "brand", name: "品牌与关系", desc: "客户见证 / 喜报 / 邀请 / 展会 / 直播" },
+    { id: "care", name: "客户关怀", desc: "生日 / 合作纪念 / 节日 / 节气 / 感谢 / 慰问 / 恭贺 / 礼品 / 老友问候 / 老客专享" },
     { id: "hr", name: "人才与招商", desc: "招聘 / 招商合作" },
     { id: "notice", name: "通知与提醒", desc: "公告 / 调价 / 天气 / 开工 / 科普" },
   ];
@@ -71,9 +72,17 @@
     { id: "groupbuy", g: "promo", name: "拼单团购", icon: "🧲", kw: ["拼单", "团购", "凑单", "拼车", "凑量", "凑满", "直发", "已拼"], layout: "list", style: "green", tag: "拼单直发", example: "拼单直发：永钢螺纹钢凑满 300 吨钢厂直发，每吨比市场低 40，已拼 180 吨，还差 120 吨" },
     { id: "opening", g: "promo", name: "开业乔迁", icon: "🎊", kw: ["开业", "乔迁", "新店", "盛大", "新仓", "启用"], layout: "hero", style: "festive", example: "宝山新仓库 10 月 18 日启用，开业当天下单每吨立减 30 元，欢迎老客户光临" },
     // 品牌与关系
-    { id: "festival", g: "brand", name: "节日祝福", icon: "🎉", kw: ["中秋", "国庆", "春节", "新年", "元旦", "端午", "五一", "劳动节", "祝福", "佳节", "元宵", "除夕", "感恩节", "快乐"], layout: "card", style: "festive", example: "中秋节祝福海报，感谢客户一路相伴，喜庆一点" },
-    { id: "solar", g: "brand", name: "节气日签", icon: "🍃", kw: ["节气", "日签", "早安", "立春", "雨水", "惊蛰", "春分", "清明", "谷雨", "立夏", "小满", "芒种", "夏至", "小暑", "大暑", "立秋", "处暑", "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至", "小寒", "大寒"], layout: "card", style: "paper", example: "白露节气日签，一句早安，提醒客户早晚温差大注意身体" },
-    { id: "thanks", g: "brand", name: "客户感谢", icon: "💐", kw: ["感谢", "致谢", "感恩", "服务承诺", "承诺", "回馈"], layout: "card", style: "business", example: "感谢新老客户 2026 年的支持，承诺当日提货、质保书齐全、磅差包赔" },
+    { id: "festival", g: "care", name: "节日祝福", icon: "🎉", kw: ["中秋", "国庆", "春节", "新年", "元旦", "端午", "五一", "劳动节", "祝福", "佳节", "元宵", "除夕", "感恩节", "快乐"], layout: "card", style: "festive", example: "中秋节祝福海报，感谢客户一路相伴，喜庆一点" },
+    { id: "solar", g: "care", name: "节气日签", icon: "🍃", kw: ["节气", "日签", "早安", "立春", "雨水", "惊蛰", "春分", "清明", "谷雨", "立夏", "小满", "芒种", "夏至", "小暑", "大暑", "立秋", "处暑", "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至", "小寒", "大寒"], layout: "card", style: "paper", example: "白露节气日签，一句早安，提醒客户早晚温差大注意身体" },
+    { id: "thanks", g: "care", name: "客户感谢", icon: "💐", kw: ["感谢", "致谢", "感恩", "服务承诺", "承诺", "回馈"], layout: "card", style: "business", example: "感谢新老客户 2026 年的支持，承诺当日提货、质保书齐全、磅差包赔" },
+    // 客户关怀（情感维护：不卖货，只走心；默认「标准」冲击力，柔和版式）
+    { id: "birthday", g: "care", name: "生日祝福", icon: "🎂", kw: ["生日", "生辰", "寿辰", "生日快乐", "岁生日", "过生日", "蛋糕"], layout: "card", style: "warm", tag: "生日快乐", impact: 2, example: "明天是苏州华建的张总生日，做一张生日祝福海报，合作 5 年了，暖一点" },
+    { id: "coopanniv", g: "care", name: "合作纪念", icon: "🤝", kw: ["合作满", "合作纪念", "纪念日", "携手", "合作周年", "第 100 车", "累计供货", "累计发货", "一路同行", "合作以来"], layout: "card", style: "black", tag: "合作纪念", impact: 2, example: "与无锡恒力钢构合作满 3 年，累计供货 12000 吨、第 300 车发出，做一张纪念海报感谢信任" },
+    { id: "vip", g: "care", name: "老客户专享", icon: "💎", kw: ["老客户专享", "老客户专属", "专属", "专享", "VIP", "尊享", "会员", "老客专", "老客户优先", "优先排产", "回馈老客户"], layout: "list", style: "black", tag: "老客户专享", impact: 3, example: "老客户专享：本月老客户提货优先装车、加工费 8 折、专属客服一对一，感谢一路支持" },
+    { id: "care", g: "care", name: "关怀慰问", icon: "🧣", kw: ["慰问", "辛苦了", "送清凉", "降温了", "保暖", "关怀", "惦记", "高温天", "寒潮", "注意防暑", "工地兄弟", "注意休息", "送温暖", "清凉"], layout: "card", style: "warm", tag: "温暖关怀", impact: 2, example: "连续高温天，给工地上的客户兄弟们送清凉：注意防暑，卸货尽量安排早晚，鑫钢配送可按时段送达" },
+    { id: "congrats", g: "care", name: "客户喜事恭贺", icon: "🎊", kw: ["祝贺", "恭贺", "恭喜", "贺", "投产", "新厂", "客户中标", "客户开业", "奠基", "竣工", "乔迁之喜", "开工大吉贺", "荣升", "升职", "封顶"], layout: "card", style: "festive", tag: "恭贺", impact: 3, example: "祝贺常州明达机械新厂正式投产，鑫钢有幸供货全部 H 型钢，恭贺生意兴隆" },
+    { id: "gift", g: "care", name: "心意礼品", icon: "🎁", kw: ["礼盒", "礼品", "寄出", "查收", "心意", "已发出", "月饼", "粽子", "年货", "伴手礼", "一点心意", "送到"], layout: "split", style: "paper", tag: "一点心意", impact: 2, photos: ["礼品", "礼盒", "团队"], example: "中秋礼盒已寄出，请老客户们注意查收，一点心意不成敬意，祝阖家团圆" },
+    { id: "hello", g: "care", name: "老友问候", icon: "👋", kw: ["好久不见", "久未", "想念", "回来看看", "老朋友", "许久", "别来无恙", "常联系", "最近怎么样", "惦念", "很久没"], layout: "card", style: "warm", tag: "老友问候", impact: 2, example: "好久不见，最近行情稳了，秋季新到一批沙钢螺纹钢，老朋友有空回来看看，还是老价格老服务" },
     { id: "testimonial", g: "brand", name: "客户见证", icon: "💬", kw: ["好评", "见证", "评价", "客户说", "回头客", "感谢信", "复购", "口碑"], layout: "card", style: "minimal", tag: "客户见证", example: "客户见证：合作 3 年的苏州某机械厂说「鑫钢的货从来没让我们停过线」，复购 46 次" },
     { id: "win", g: "brand", name: "中标喜报", icon: "🏆", kw: ["喜报", "中标", "成交", "签下", "突破", "大单", "捷报", "再下一城"], layout: "card", style: "festive", tag: "喜报", example: "喜报：成功中标某市政道路项目钢材供应，供货 3200 吨" },
     { id: "event", g: "brand", name: "活动邀请", icon: "📅", kw: ["邀请", "邀请函", "论坛", "沙龙", "会议", "订货会", "答谢会", "年会"], layout: "card", style: "black", example: "邀请老客户参加 10 月 20 日下午 2 点的秋季订货会，地点宝山钢材市场 3 楼会议室" },
@@ -99,6 +108,7 @@
     tech: { name: "科技蓝", palette: { bg: "#03101f", bg2: "#062a4a", fg: "#e6f4ff", mute: "#8fb3d9", accent: "#19d3ff", accent2: "#7c5cff", mode: "dark" }, bgfx: "grid", visual: "深蓝科技网格背景，青色光线，中心留白，无文字" },
     black: { name: "黑金高端", palette: { bg: "#0c0c0e", bg2: "#1c1a16", fg: "#f5ecd7", mute: "#a89f8a", accent: "#d4af37", accent2: "#f0d78c", mode: "dark" }, bgfx: "rings", visual: "黑色哑光背景，金色细线圆环与颗粒质感，中部留白，无文字" },
     paper: { name: "国风纸质", palette: { bg: "#f6efe0", bg2: "#ede2c8", fg: "#2b2118", mute: "#8b7a63", accent: "#b3402b", accent2: "#c9a14a", mode: "light" }, bgfx: "paper", visual: "米色宣纸纹理背景，淡墨山影与朱砂印章暗纹，上方留白，无文字" },
+    warm: { name: "暖心橙", palette: { bg: "#fff3e4", bg2: "#ffd9b8", fg: "#3b2414", mute: "#9c7454", accent: "#ff6a2b", accent2: "#f4b64a", mode: "light" }, bgfx: "confetti", visual: "奶油橙暖色渐变背景，柔和的晨光与轻盈的圆点光斑，温馨亲切、有人情味的氛围" },
     green: { name: "清新绿", palette: { bg: "#0f3d2e", bg2: "#155f45", fg: "#f2fff8", mute: "#a5d8bf", accent: "#ffd166", accent2: "#7be495", mode: "dark" }, bgfx: "glow", visual: "墨绿渐变背景，柔和黄绿光晕，左侧留白，无文字" },
   };
   /* ---------- 视觉冲击力（AI 营销海报的基本要求：默认"强"） ----------
@@ -111,7 +121,7 @@
     1: { name: "柔和", short: "柔和", desc: "低饱和、无装饰层，适合日签 / 感谢", prompt: "整体柔和克制、低饱和、光线均匀、安静的留白", hScale: 0.94, numScale: 0.92 },
   };
   AP.visualPrompt = (style, impact) => `${AP.STYLES[style].visual}；${AP.IMPACT[impact || 3].prompt}；无任何文字、无 Logo、无人脸`;
-  const COLOR_WORDS = [["红", "festive"], ["喜庆", "festive"], ["蓝", "business"], ["商务", "business"], ["稳重", "business"], ["工业", "industrial"], ["硬朗", "industrial"], ["钢铁", "industrial"], ["橙", "industrial"], ["白", "minimal"], ["简洁", "minimal"], ["极简", "minimal"], ["清爽", "minimal"], ["科技", "tech"], ["青", "tech"], ["黑金", "black"], ["高端", "black"], ["高级", "black"], ["金色", "black"], ["黑", "black"], ["国风", "paper"], ["中式", "paper"], ["古风", "paper"], ["纸", "paper"], ["绿", "green"]];
+  const COLOR_WORDS = [["红", "festive"], ["喜庆", "festive"], ["蓝", "business"], ["商务", "business"], ["稳重", "business"], ["工业", "industrial"], ["硬朗", "industrial"], ["钢铁", "industrial"], ["橙", "industrial"], ["白", "minimal"], ["简洁", "minimal"], ["极简", "minimal"], ["清爽", "minimal"], ["科技", "tech"], ["青", "tech"], ["黑金", "black"], ["高端", "black"], ["高级", "black"], ["金色", "black"], ["黑", "black"], ["国风", "paper"], ["中式", "paper"], ["古风", "paper"], ["纸", "paper"], ["绿", "green"], ["暖", "warm"], ["温馨", "warm"], ["奶油", "warm"], ["橙色", "warm"]];
   const STYLE_ORDER = Object.keys(AP.STYLES);
   const LAYOUTS = ["hero", "split", "list", "card", "photo", "gallery", "table"];
   AP.LAYOUT_NAMES = { hero: "主视觉大字", split: "上图下文", list: "标题 + 要点卡", card: "居中卡片", photo: "全图实拍", gallery: "多图拼贴", table: "表格清单" };
@@ -132,6 +142,9 @@
   function detectScene(text) {
     // 节日 + 促销词 → 节假日促销；周年 + 促销词 → 周年庆
     if (/中秋|国庆|春节|新年|元旦|端午|五一|双节|开年|节前/.test(text) && /促销|特惠|钜惠|优惠|立减|活动|让利|备货/.test(text)) return AP.SCENES.find((s) => s.id === "holidaypromo");
+    if (/生日|生辰|寿辰/.test(text)) return AP.SCENES.find((s) => s.id === "birthday");
+    if (/合作(满|纪念|周年|以来)|纪念日|累计(供货|发货)|第\s*\d+\s*车/.test(text) && !/促销|特惠|钜惠|立减/.test(text)) return AP.SCENES.find((s) => s.id === "coopanniv");
+    if (/(祝贺|恭贺|恭喜|贺)/.test(text) && /投产|新厂|中标|开业|奠基|竣工|乔迁|荣升|升职|封顶|开工/.test(text)) return AP.SCENES.find((s) => s.id === "congrats");
     if (/周年|店庆/.test(text)) return AP.SCENES.find((s) => s.id === "anniversary");
     if (/招\s*[一二两三四五六七八九十\d]+\s*[名个位]/.test(text)) return AP.SCENES.find((s) => s.id === "recruit");
     let best = null, bestN = 0;
@@ -164,7 +177,7 @@
     if ((m = text.match(/(立春|雨水|惊蛰|春分|清明|谷雨|立夏|小满|芒种|夏至|小暑|大暑|立秋|处暑|白露|秋分|寒露|霜降|立冬|小雪|大雪|冬至|小寒|大寒)/))) e.solar = m[1];
     if ((m = text.match(/(?:地点|地址|在)\s*([^\s，,。;；]{4,24})/))) e.place = m[1];
     if ((m = text.match(/([^\s，,。：:为]{2,12}(?:项目|工程|大桥|大厦|地铁|厂房|产业园|学校|医院|道路))/))) e.project = m[1].replace(/^(成功中标|成功|中标|为|供货)/, "");
-    if ((m = text.match(/([^\s，,。：:的]{2,14}(?:公司|集团|钢构|机械厂|工厂|建设|建筑|钢厂|客户))/))) e.client = m[1].replace(/^(今天|今日|明天|昨天|上午|下午)?(陪同|接待|带|参观|拜访|感谢|与|和|为)?/, "");
+    if ((m = text.match(/([^\s，,。：:的]{2,14}(?:公司|集团|钢构|机械厂|机械|实业|科技|建材|重工|工厂|建设|建筑|钢厂|客户))/))) e.client = m[1].replace(/^(今天|今日|明天|昨天|上午|下午|明天是|今天是)?(陪同|接待|带|参观|拜访|感谢|祝贺|恭贺|恭喜|贺|致|给|与|和|为)?/, "");
     if ((m = text.match(/(开平|纵剪|剪切|折弯|激光切割|切割|喷砂|镀锌|定尺|打孔)/g))) e.process = [...new Set(m)];
     if ((m = text.match(/(\d{1,2})\s*天/))) e.days = m[1];
     if ((m = text.match(/(\d{1,3})\s*次/))) e.times = m[1];
@@ -173,6 +186,9 @@
     if ((m = text.match(/(\d+)\s*号馆\s*([A-Za-z]?\d+)?\s*(?:展位)?/))) e.booth = `${m[1]} 号馆${m[2] ? " " + m[2] : ""}`;
     if ((m = text.match(/(\d{1,3})\s*台/))) e.vehicles = m[1];
     if ((m = text.match(/(?:满|超过|以上)\s*(\d{1,4})\s*吨/))) e.threshold = m[1];
+    if ((m = text.match(/([赵钱孙李周吴郑王冯陈蒋沈韩杨朱秦许何吕施张孔曹严华金魏陶姜谢邹苏潘葛范彭鲁韦马苗凤花方俞任袁柳鲍史唐费廉薛雷贺倪汤滕殷罗毕郝安常乐于时傅齐康伍余元顾孟平黄穆萧尹姚邵汪祁毛狄米贝明臧计伏成戴谈宋茅庞熊纪舒屈项祝董梁杜阮蓝闵席季麻强贾路娄危江童颜郭梅盛林刁钟徐邱骆高夏蔡田樊胡凌霍虞万支柯管卢莫经房干解应宗丁宣邓郁单杭洪包诸左石崔吉钮龚程邢裴陆荣翁荀惠甄曲家封储靳段富巫焦巴牧山谷车侯全班仰秋仲伊宫宁仇甘厉戎祖武符刘景詹龙叶幸司韶黎薄印白怀蒲从索咸籍赖卓屠蒙池乔阴胥能苍闻党翟谭贡劳姬申扶冉宰雍桑桂牛寿通边浦尚农温别庄晏柴瞿阎连茹习艾鱼容向古易慎戈廖庚居衡步都耿满弘匡国文寇广禄阙东欧沃利蔚越隆师巩聂冷辛那简饶曾沙养鞠须丰巢关相查后荆红游竺权盖益桓公])(总|经理|老板|先生|女士|工|董|哥|姐|叔|师傅)/))) e.person = m[1] + m[2];
+    if ((m = text.match(/第\s*(\d{1,5})\s*车/))) e.nth = m[1];
+    if ((m = text.match(/(月饼|粽子|年货|茶叶|水果|伴手礼|礼盒|礼品|日历|台历)/))) e.gift = m[1];
     return e;
   }
 
@@ -204,6 +220,13 @@
     festival: (e, b) => { const f = e.fest || "中秋"; const wish = { 中秋: ["花好月圆 · 人和事顺", "月满中秋 · 情满钢城"], 国庆: ["祝祖国繁荣昌盛", "举国同庆 · 共赴新程"], 春节: ["新春大吉 · 生意兴隆", "金龙纳福 · 钢市长虹"], 新年: ["新年新气象 · 携手再出发", "岁岁常欢愉 · 年年皆胜意"], 元旦: ["元启新岁 · 万事顺遂"], 端午: ["粽情端午 · 安康顺遂"], 五一: ["致敬每一位劳动者"], 劳动节: ["致敬每一位劳动者"], 元宵: ["灯火可亲 · 团圆美满"], 除夕: ["辞旧迎新 · 阖家团圆"], 感恩节: ["感恩相伴 · 一路同行"], 双节: ["双节同庆 · 喜乐安康"] }[f] || ["佳节愉快 · 万事顺遂"]; return { eyebrow: `${b.short} 祝您`, headline: `${f}快乐`, sub: wish[0], bullets: [/客户|相伴|感谢/.test(e._t) ? "感谢新老客户一路相伴" : "愿每一份信任都有回响", `${b.short} 全体同仁 敬祝`], highlight: null, cta: "节后现货照常供应 · 欢迎询价" }; },
     solar: (e, b) => { const s = e.solar || "白露"; const line = { 白露: "露从今夜白 · 早晚添件衣", 秋分: "昼夜均分 · 秋高气爽", 立秋: "一叶知秋 · 暑去凉来", 寒露: "露气寒冷 · 将凝为霜", 霜降: "霜降水返壑 · 风落木归山", 立冬: "冬始于此 · 万物收藏", 冬至: "冬至阳生 · 春又不远", 小雪: "小雪封地 · 大雪封河", 大雪: "瑞雪兆丰年", 立春: "一年之计在于春", 清明: "清明时节 · 万物生长", 夏至: "昼长夜短 · 热在三伏", 大寒: "寒尽春生 · 静待花开" }[s] || "顺时而动 · 不负光阴"; return { eyebrow: `${b.short} · 二十四节气`, headline: s, sub: line, bullets: [/早安/.test(e._t) ? "早安，愿您今日订单顺利" : "愿您今日订单顺利", /温差|注意/.test(e._t) ? "早晚温差大，注意身体" : "钢市如节气，静待时机"], highlight: null, cta: "今日行情已更新 · 扫码查看" }; },
     thanks: (e, b) => ({ eyebrow: `${b.short} · 致新老客户`, headline: "感谢一路同行", sub: e.year ? `${e.year} 年，因您更好` : "每一份信任，我们都用心对待", bullets: [/当日/.test(e._t) ? "当日提货" : "准时交付", /质保/.test(e._t) ? "质保书齐全" : "正品保障", /磅差/.test(e._t) ? "磅差包赔" : "售后无忧"], highlight: null, cta: "服务承诺 · 扫码联系" }),
+    birthday: (e, b) => { const who = e.person || (e.client ? e.client.replace(/(公司|集团|有限)$/, "") : ""); const t = e._t; return { eyebrow: `${b.short} · 祝${who ? " " + who : "您"}`, headline: who ? `${who}，生日快乐` : "生日快乐", sub: e.years ? `合作 ${e.years} 年，感谢一路信任 · 愿岁岁平安` : /员工|同事|伙伴/.test(t) ? "感谢你的每一份付出 · 愿岁岁平安" : "感谢一路信任 · 愿所愿皆成", bullets: ["生意兴隆 · 财源广进", "身体健康 · 阖家幸福", e.years ? `${e.years} 年情谊，长长久久` : "有钢材的事，随时找我"], highlight: e.years ? { label: "携手同行", value: e.years, unit: "年" } : null, cta: /不要二维码|无二维码/.test(t) ? "" : "扫码添加微信 · 常联系" }; },
+    coopanniv: (e, b) => { const who = e.client || "老客户"; const yrs = e.years; const tons = e.tons; return { eyebrow: `${b.short} · 合作纪念`, headline: yrs ? `携手 ${yrs} 年` : e.nth ? `第 ${e.nth} 车，如约而至` : "感谢一路同行", sub: T([`致 ${who}`, yrs ? `合作满 ${yrs} 年` : null]), bullets: [tons ? `累计供货 ${tons}` : "累计供货 稳定交付", e.nth ? `第 ${e.nth} 车如期发出` : "每一车都准时到", "零质量事故 · 零延误", "下一个 " + (yrs ? `${yrs} 年` : "十年") + "，继续同行"], highlight: tons ? { label: "累计供货", value: tons.replace(/\s*吨$/, ""), unit: "吨" } : yrs ? { label: "携手", value: yrs, unit: "年" } : null, cta: "感谢信任 · 扫码联系" }; },
+    vip: (e, b) => { const pts = e._t.split(/[：:，,、；;]/).map((x) => x.trim()).filter((x) => /优先|折|专属|一对一|免费|赠|送|锁价|先|专享|包/.test(x) && x.length <= 16 && !/^老客户/.test(x)).slice(0, 4); return { eyebrow: `${b.short} · 老客户专享`, headline: "老朋友，专属礼遇", sub: T([/本月|本周|本季/.test(e._t) ? (e._t.match(/(本月|本周|本季)/) || [])[0] + "有效" : null, "仅限合作客户"]), bullets: pts.length ? pts : ["提货优先装车", "加工费 8 折", "专属客服一对一", "行情第一时间同步"], highlight: e.discount ? { label: "加工费", value: e.discount, unit: "折" } : null, cta: "扫码领取专属权益" }; },
+    care: (e, b) => { const hot = /高温|防暑|清凉|热/.test(e._t), cold = /降温|保暖|寒潮|冷|雪|冬/.test(e._t), rain = /雨|台风/.test(e._t); const t = e._t; return { eyebrow: `${b.short} · 温暖关怀`, headline: hot ? "高温天，辛苦了" : cold ? "降温了，多穿点" : rain ? "雨天路滑，注意安全" : "工地兄弟，辛苦了", sub: hot ? "送一份清凉，也送一份牵挂" : cold ? "天冷了，心别冷 · 鑫钢惦记着您" : "您在前线拼，我们在后方守", bullets: [hot ? "卸货尽量安排早晚时段" : cold ? "早晚温差大，注意保暖" : "高空作业请系好安全带", /时段|按时|配送/.test(t) ? "配送可按时段送达，提前说一声" : "有需要随时喊我们", hot ? "多喝水 · 注意防暑" : "身体第一 · 工期第二"], highlight: null, cta: "有事随时联系 · 扫码加微信" }; },
+    congrats: (e, b) => { const who = e.client || (e.person ? e.person : "贵司"); const t = e._t; const ev = /投产/.test(t) ? "新厂投产" : /开业/.test(t) ? "开业大吉" : /中标/.test(t) ? "成功中标" : /奠基|开工/.test(t) ? "项目开工" : /竣工|封顶/.test(t) ? (/封顶/.test(t) ? "项目封顶" : "项目竣工") : /乔迁/.test(t) ? "乔迁之喜" : /荣升|升职/.test(t) ? "荣升" : "喜事"; return { eyebrow: `${b.short} · 恭贺`, headline: `贺 ${who}${ev}`, sub: /供货|供应/.test(t) && e.prods ? `鑫钢有幸供应${e.prods[0]}，与您共同见证` : "与您并肩，共同见证这一刻", bullets: ["生意兴隆 · 宏图大展", e.prods ? `${e.prods[0]} 供货，后续继续保障` : "后续用钢，我们全力保障", "再创佳绩 · 步步高升"], highlight: null, cta: "扫码联系 · 继续同行" }; },
+    gift: (e, b) => { const g = e.gift || "礼盒"; const f = e.fest || (/月饼/.test(g) ? "中秋" : /粽子/.test(g) ? "端午" : /年货/.test(g) ? "新春" : ""); return { eyebrow: `${b.short} · 一点心意`, headline: `${f ? f : ""}${g}已寄出`, sub: /查收/.test(e._t) ? "请老客户们注意查收 · 不成敬意" : "一点心意，不成敬意", bullets: [f ? `祝${f === "中秋" ? "阖家团圆" : f === "端午" ? "端午安康" : "新年大吉"}` : "感谢一路相伴", "感谢这一年的每一次信任", "收到后拍照告诉我，别被快递弄丢了"], highlight: null, cta: "扫码联系 · 未收到请告知" }; },
+    hello: (e, b) => { const t = e._t; return { eyebrow: `${b.short} · 老友问候`, headline: /好久不见/.test(t) ? "好久不见" : "老朋友，还好吗", sub: /行情/.test(t) ? "行情稳了，货也齐了 · 有空回来看看" : "有空回来看看 · 还是老价格老服务", bullets: [e.prods ? `新到 ${e.mills ? e.mills[0] + " " : ""}${e.prods[0]}${e.tons ? " " + e.tons : ""}` : "秋季新货陆续到库", /老价格|老服务/.test(t) ? "老价格 · 老服务 · 老朋友" : "价格给到最实在", "不为下单，只为一句问候"], highlight: null, cta: "扫码看看最近的货 · 或直接打电话" }; },
     testimonial: (e, b) => ({ eyebrow: `${b.short} · 客户见证`, headline: e.quote ? `「${e.quote}」` : "客户怎么说", sub: T([e.client ? e.client : "老客户", e.years ? `合作 ${e.years} 年` : null]), bullets: [e.times ? `复购 ${e.times} 次` : "长期复购", "从未停线 · 从未延误", "口碑，是最好的广告"], highlight: e.times ? { label: "复购", value: e.times, unit: "次" } : null, cta: "扫码看更多客户评价" }),
     win: (e, b) => ({ eyebrow: `${b.short} · 喜报`, headline: e.project ? `中标 ${e.project}` : "喜报 · 再下一城", sub: T([e.prods ? `供货 ${e.prods[0]}` : "钢材供应", e.tons ? e.tons : null]), bullets: ["感谢客户信任", "全程供货保障 · 准时交付"], highlight: e.tons ? { label: "供货", value: e.tons.replace(" 吨", ""), unit: "吨" } : null, cta: "工程供货 · 扫码咨询" }),
     event: (e, b) => ({ eyebrow: `${b.short} · 邀请函`, headline: /订货会/.test(e._t) ? "秋季订货会" : /答谢/.test(e._t) ? "客户答谢会" : /年会/.test(e._t) ? "年度答谢晚宴" : "诚邀莅临", sub: T([e.date, e.time]) || "敬请届时光临", bullets: [e.place ? `地点：${e.place}` : `地点：${b.addr}`, "现场签约享专属政策", "凭邀请函到场有礼"], highlight: null, cta: "扫码报名 · 回复确认" }),
@@ -247,7 +270,7 @@
     if (picked.length >= 2) picked.slice(0, 3).forEach((a) => photos.push(a.id));
     else if ((scene.multi || layout === "gallery") && photo) { const pref = (a) => (scene.photos || []).some((p) => (a.tags || []).some((t) => t.includes(p))) ? 0 : 1; photos.push(photo.id); for (const a of [...kbImgs, ...cand.slice().sort((x, y) => pref(x) - pref(y))]) { if (photos.length >= (scene.multi || 3)) break; if (!photos.includes(a.id)) photos.push(a.id); } }
     const st = AP.STYLES[style];
-    const impact = ctx.impact || (/柔和|低调|克制|素雅/.test(text) ? 1 : 3); // AI 营销海报默认"强冲击"，用户可在生成前或微调时调低
+    const impact = ctx.impact || (/柔和|低调|克制|素雅|暖一点|走心/.test(text) ? Math.min(scene.impact || 3, 2) : scene.impact || 3); // AI 营销海报默认"强冲击"；客户关怀类场景默认"标准"，用户可在生成前或微调时调低
     const spec = {
       scene: scene.id, ratio: ctx.ratio || detectRatio(text), layout, style, palette: clone(st.palette), bgfx: st.bgfx, fontScale: 1, density: 2, impact,
       copy, contact: { company: brand.company, person: brand.person, phone: e.phone || brand.phone, addr: brand.addr },

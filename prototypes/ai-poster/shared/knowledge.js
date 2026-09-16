@@ -13,7 +13,7 @@
   // scenes：该类资料默认会被哪些场景自动引用；"*" 表示通用兜底（仅在要点不足时补充）
   K.CATS = [
     { id: "company", name: "企业介绍", icon: "🏭", desc: "成立年限、规模、仓库、库存、定位", scenes: ["intro", "recruit", "franchise", "anniversary", "opening", "event", "expo", "signing", "visit"] },
-    { id: "brand", name: "品牌介绍", icon: "✨", desc: "品牌主张、口号、价值观", scenes: ["festival", "solar", "thanks", "anniversary", "team", "testimonial", "reopen"] },
+    { id: "brand", name: "品牌介绍", icon: "✨", desc: "品牌主张、口号、价值观", scenes: ["festival", "solar", "thanks", "anniversary", "team", "testimonial", "reopen", "birthday", "coopanniv", "care", "gift", "hello", "vip"] },
     { id: "product", name: "产品介绍", icon: "🧱", desc: "每个品种一条：规格、钢厂、卖点、适用", scenes: ["newproduct", "arrival", "feature", "catalog", "stock", "promo", "flash", "groupbuy", "clearance", "holidaypromo", "pricenotice", "knowledge"] },
     { id: "service", name: "服务介绍", icon: "🔧", desc: "加工、配送、售后、结算（每项服务一条）", scenes: ["service", "logistics", "processing", "shipping"] },
     { id: "advantage", name: "优势卖点", icon: "🏆", desc: "与同行的差异，一句一个硬指标", scenes: ["intro", "feature", "catalog", "promo", "holidaypromo", "anniversary", "flash", "groupbuy", "opening", "thanks", "testimonial", "franchise", "*"] },
