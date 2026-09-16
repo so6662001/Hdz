@@ -10,12 +10,14 @@
   body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--ink); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
   button { font: inherit; border: 0; cursor: pointer; background: none; color: inherit; }
   input, textarea, select { font: inherit; }
-  .top { height: 56px; background: #0f1218; color: #fff; display: flex; align-items: center; padding: 0 18px; gap: 14px; flex: none; }
+  .top { height: 56px; background: #0f1218; color: #fff; display: flex; align-items: center; padding: 0 18px; gap: 14px; flex: none; white-space: nowrap; }
+  @media (max-width: 1700px) { .top .tag { display: none; } .top .models span { padding: 4px 8px; } }
+  @media (max-width: 1500px) { .top .models { display: none; } }
   .top .lg { width: 30px; height: 30px; border-radius: 8px; background: var(--brand); display: flex; align-items: center; justify-content: center; font-weight: 900; }
   .top b { font-size: 15px; } .top .tag { font-size: 11px; background: rgba(255,255,255,.12); padding: 3px 8px; border-radius: 999px; color: #cbd5e1; }
   .top .models { margin-left: auto; display: flex; gap: 6px; }
   .top .models span { font-size: 11px; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.08); color: #cbd5e1; } .top .models span b { color: #fff; font-size: 11px; }
-  .top .act { display: flex; gap: 8px; margin-left: 12px; } .top .act button { height: 34px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 600; background: rgba(255,255,255,.1); color: #fff; } .top .act button.pri { background: var(--brand); }
+  .top .act { display: flex; gap: 8px; margin-left: 12px; } .top .act button { height: 34px; padding: 0 12px; border-radius: 8px; font-size: 13px; font-weight: 600; background: rgba(255,255,255,.1); color: #fff; white-space: nowrap; flex: none; } .top .act button.pri { background: var(--brand); }
   .wrap { flex: 1; display: grid; grid-template-columns: 300px 1fr 380px; min-height: 0; }
   .col { background: var(--panel); border-right: 1px solid var(--line); overflow: auto; }
   .col:last-child { border-right: 0; border-left: 1px solid var(--line); display: flex; flex-direction: column; }
@@ -63,6 +65,25 @@
   .composer .row button { height: 36px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 700; background: #f1f3f8; } .composer .row button.pri { background: var(--brand); color: #fff; } .composer .row button:disabled { opacity: .5; cursor: default; }
   .json { border-top: 1px solid var(--line); } .json summary { font-size: 12px; color: var(--mute); padding: 8px 16px; cursor: pointer; } .json pre { font-size: 10px; max-height: 180px; overflow: auto; padding: 0 16px 12px; color: #374151; }
   .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px); background: #111; color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 13px; opacity: 0; transition: .25s; pointer-events: none; z-index: 9; max-width: 80vw; } .toast.show { opacity: 1; transform: translateX(-50%); }
+  .top .act button.hb { position: relative; } .top .act button.hb i { font-style: normal; font-size: 10px; background: var(--accent); color: #fff; border-radius: 999px; padding: 0 5px; margin-left: 4px; }
+  .hist { position: fixed; inset: 0; background: rgba(15,23,42,.45); display: none; z-index: 20; justify-content: flex-end; } .hist.show { display: flex; }
+  .hpanel { width: min(1080px, 92vw); height: 100%; background: #f4f6fa; display: flex; flex-direction: column; box-shadow: -20px 0 60px rgba(0,0,0,.25); animation: slidein .22s ease; } @keyframes slidein { from { transform: translateX(40px); opacity: 0; } }
+  .hhead { display: flex; align-items: center; gap: 10px; padding: 14px 18px; background: #fff; border-bottom: 1px solid var(--line); flex-wrap: wrap; } .hhead b { font-size: 16px; } .hhead .st { font-size: 12px; color: var(--mute); flex: 1; min-width: 200px; } .hhead .st em { font-style: normal; color: var(--ink); font-weight: 700; }
+  .hhead input[type=search] { height: 34px; width: 240px; border: 1px solid var(--line); border-radius: 8px; padding: 0 12px; font-size: 13px; } .hhead select { height: 34px; border: 1px solid var(--line); border-radius: 8px; padding: 0 8px; font-size: 12px; background: #fff; color: var(--ink); }
+  .hhead label { font-size: 12px; color: var(--mute); display: flex; align-items: center; gap: 4px; } .hhead .x { width: 34px; height: 34px; border-radius: 8px; background: #f1f3f8; font-size: 16px; }
+  .hbody { flex: 1; display: grid; grid-template-columns: 172px 1fr; min-height: 0; }
+  .hside { background: #fff; border-right: 1px solid var(--line); overflow: auto; padding: 10px; } .hside button { display: flex; width: 100%; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 8px; font-size: 13px; color: #374151; text-align: left; } .hside button.on { background: var(--ink); color: #fff; } .hside button small { font-size: 11px; opacity: .6; } .hside .sub { padding-left: 10px; } .hside .sub button { font-size: 12px; padding: 6px 10px; } .hside .sub button.on { background: #eef3ff; color: var(--brand); }
+  .hmain { overflow: auto; padding: 16px 18px; } .hday { font-size: 12px; color: var(--mute); font-weight: 700; margin: 6px 0 10px; display: flex; align-items: center; gap: 8px; } .hday::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .hgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(186px, 1fr)); gap: 14px; margin-bottom: 18px; }
+  .hc { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); position: relative; transition: .15s; } .hc:hover { box-shadow: 0 10px 30px rgba(0,0,0,.12); transform: translateY(-2px); }
+  .hc .th { height: 220px; background: #e9edf3; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; } .hc .th > div { border-radius: 6px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+  .hc .ti { padding: 10px 12px 6px; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; } .hc .mt { padding: 0 12px; font-size: 11px; color: var(--mute); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; } .hc .mt .sc { background: #eef3ff; color: var(--brand); padding: 1px 6px; border-radius: 4px; font-weight: 600; } .hc .mt .ch { background: #f1f3f8; padding: 1px 6px; border-radius: 4px; }
+  .hc .ft { padding: 8px 12px 10px; font-size: 11px; color: var(--mute); display: flex; justify-content: space-between; align-items: center; } .hc .ft .stt { color: #059669; font-weight: 600; } .hc .ft .stt.draft { color: var(--mute); }
+  .hc .star { position: absolute; top: 8px; left: 8px; width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,.92); font-size: 13px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.15); color: #cbd5e1; } .hc .star.on { color: #f59e0b; }
+  .hc .demo { position: absolute; top: 8px; right: 8px; font-size: 9px; background: rgba(0,0,0,.5); color: #fff; padding: 1px 6px; border-radius: 4px; }
+  .hc .ops { position: absolute; left: 0; right: 0; top: 150px; display: flex; gap: 6px; justify-content: center; opacity: 0; transition: .15s; } .hc:hover .ops { opacity: 1; } .hc .ops button { font-size: 11px; padding: 6px 10px; border-radius: 999px; background: rgba(17,24,39,.9); color: #fff; font-weight: 600; } .hc .ops button.pri { background: var(--brand); } .hc .ops button.del { background: rgba(220,38,38,.9); }
+  .hempty { text-align: center; color: var(--mute); padding: 60px 0; font-size: 13px; } .hempty .big { font-size: 44px; margin-bottom: 8px; }
+  .recent { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; } .recent .rc { background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; cursor: pointer; } .recent .rc .th { height: 96px; background: #e9edf3; display: flex; align-items: center; justify-content: center; overflow: hidden; } .recent .rc .th > div { border-radius: 4px; overflow: hidden; } .recent .rc small { display: block; padding: 6px 8px; font-size: 11px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .recent .rc small i { display: block; font-style: normal; color: var(--mute); font-size: 10px; }
   .proto { position: fixed; right: 12px; bottom: 12px; font-size: 10px; color: #fff; background: rgba(0,0,0,.55); padding: 4px 8px; border-radius: 6px; z-index: 5; }
 </style>
 </head>
@@ -70,7 +91,7 @@
 <div class="top">
   <div class="lg">货</div><b>货袋子 · AI 经营海报工作台</b><span class="tag">企业经营海报 · 上传素材 → 一句话生成 → 对话微调</span>
   <div class="models"><span>理解/设计 <b>豆包 Seed 2.0 Pro</b></span><span>视觉 <b>Seedream 5.0</b></span><span>微调 <b>Seed 2.0 Lite</b></span><span>排版 <b>渲染引擎</b></span></div>
-  <div class="act"><button onclick="saveTpl()">保存为模板</button><button onclick="exportPng()">导出 PNG 1080</button><button class="pri" onclick="toast('原型：调用微信 JS-SDK 分享海报图到会话 / 朋友圈')">分享到微信</button></div>
+  <div class="act"><button class="hb" onclick="openHist()">🕘 历史记录<i id="histN"></i></button><button onclick="newPoster()">＋ 新建海报</button><button onclick="saveTpl()">保存为模板</button><button onclick="exportPng()">导出 PNG 1080</button><button class="pri" onclick="share()">分享到微信</button></div>
 </div>
 <div class="wrap">
   <!-- 左：素材与品牌 -->
@@ -115,13 +136,24 @@
     <details class="json"><summary>设计 JSON（大模型输出 · 渲染引擎输入）</summary><pre id="json"></pre></details>
   </div>
 </div>
+<div class="hist" id="hist" onclick="if(event.target===this)closeHist()"><div class="hpanel">
+  <div class="hhead"><b>🕘 海报历史记录</b><span class="st" id="hstats"></span>
+    <input type="search" id="hq" placeholder="搜索标题 / 需求 / 场景 / 文案…" oninput="renderHist()">
+    <select id="hrange" onchange="renderHist()"><option value="all">全部时间</option><option value="today">今天</option><option value="week">近 7 天</option><option value="month">近 30 天</option></select>
+    <select id="hstatus" onchange="renderHist()"><option value="">全部状态</option><option value="exported">已导出 / 分享</option><option value="draft">草稿</option></select>
+    <select id="hsort" onchange="renderHist()"><option value="updated">最近修改</option><option value="created">创建时间</option><option value="used">使用最多</option><option value="versions">版本最多</option></select>
+    <label><input type="checkbox" id="hstar" onchange="renderHist()"> 只看收藏</label>
+    <button class="x" onclick="closeHist()">✕</button></div>
+  <div class="hbody"><div class="hside" id="hside"></div><div class="hmain" id="hmain"></div></div>
+</div></div>
 <div class="toast" id="toast"></div>
 <div class="proto">高保真原型 · 大模型为规则模拟</div>
 
 <script src="shared/engine.js"></script>
+<script src="shared/history.js"></script>
 <script>
   const $ = (id) => document.getElementById(id);
-  const S = { assets: AP.sampleAssets.map((a) => Object.assign({}, a)), brand: Object.assign({}, AP.defaultBrand), scene: null, ratio: "3:4", versions: [], cur: -1, busy: false, photoPick: null };
+  const S = { assets: AP.sampleAssets.map((a) => Object.assign({}, a)), brand: Object.assign({}, AP.defaultBrand), scene: null, ratio: "3:4", versions: [], cur: -1, busy: false, photoPick: null, sid: null, prompt: "" };
   const ctx = () => ({ assets: S.assets, brand: S.brand, scene: S.scene, ratio: S.ratio, date: "2026.09.16" });
   const toast = (m) => { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2400); };
   window.toast = toast;
@@ -150,7 +182,7 @@
 
   /* 版本 */
   const cur = () => S.versions[S.cur] && S.versions[S.cur].spec;
-  function push(spec, label) { S.versions.push({ spec, label, t: Date.now() }); S.cur = S.versions.length - 1; draw(); renderVersions(); }
+  function push(spec, label) { S.versions.push({ spec, label, t: Date.now() }); S.cur = S.versions.length - 1; draw(); renderVersions(); saveHist(); }
   function renderVersions() {
     $("versions").innerHTML = S.versions.length ? S.versions.map((v, i) => { const [w, h] = AP.RATIOS[v.spec.ratio]; const sc = Math.min(54 / w, 60 / h); return `<div class="ver ${i === S.cur ? "on" : ""}" onclick="goVer(${i})"><div class="th"><div class="inner" style="transform:scale(${sc})">${AP.renderPoster(v.spec, Object.assign(ctx(), { watermark: false }), w)}</div></div><small>v${i + 1} ${AP.esc(v.label)}</small></div>`; }).join("") : '<span class="hint">版本记录：每次生成 / 微调都会保留一版，点击切换，可从任一版本继续改</span>';
   }
@@ -180,7 +212,7 @@
   }
   function welcome() {
     const d = document.createElement("div"); d.className = "msg ai";
-    d.innerHTML = `<div class="who"><b>AI 设计师</b>· 在线</div>你好，我是货袋子 AI 设计师。左侧上传 Logo / 实拍图，再告诉我要做什么海报，我会根据素材和品牌信息设计版式、写文案、生成背景。试试这些：<div class="ex">${["shipping", "visit", "case", "newproduct", "holidaypromo", "anniversary"].map((id) => { const s = AP.SCENES.find((x) => x.id === id); return `<button onclick="useExample('${id}')">${s.icon} ${AP.esc(s.example)}</button>`; }).join("")}</div>`;
+    d.innerHTML = `<div class="who"><b>AI 设计师</b>· 在线</div>你好，我是货袋子 AI 设计师。左侧上传 Logo / 实拍图，再告诉我要做什么海报，我会根据素材和品牌信息设计版式、写文案、生成背景。试试这些：<div class="ex">${["shipping", "visit", "case", "newproduct", "holidaypromo", "anniversary"].map((id) => { const s = AP.SCENES.find((x) => x.id === id); return `<button onclick="useExample('${id}')">${s.icon} ${AP.esc(s.example)}</button>`; }).join("")}</div>${recentStrip()}`;
     $("chat").appendChild(d);
   }
   window.useExample = (id) => { const s = AP.SCENES.find((x) => x.id === id); $("prompt").value = s.example; send(); };
@@ -200,7 +232,7 @@
   window.send = (fast) => {
     const t = $("prompt").value.trim(); if (!t || S.busy) return; userMsg(t); $("prompt").value = "";
     if (S.cur < 0 || /^(重新生成|再做一张|新海报|重新做)/.test(t)) {
-      const go = () => { const spec = AP.mockPlan(t.replace(/^(重新生成|再做一张|新海报|重新做)[，,：:]?/, ""), ctx()); if (S.photoPick) { spec.assets.photo = S.photoPick; spec.assets.photos = [S.photoPick, ...(spec.assets.photos || []).filter((x) => x !== S.photoPick)].slice(0, 3); if (!["split", "photo", "gallery"].includes(spec.layout)) spec.layout = "split"; } push(spec, "生成"); aiMsg(`${spec._meta.reason} 已生成第 ${S.versions.length} 版。你可以直接说怎么改，比如「字大一点」「换成红色」「电话改成…」。`, [`场景 ${spec._meta.sceneName}`, `风格 ${spec._meta.styleName}`, `版式 ${AP.LAYOUT_NAMES[spec.layout]}`, `画幅 ${spec.ratio}`], true, spec.notes); };
+      const go = () => { if (S.cur >= 0) { S.versions = []; S.cur = -1; renderVersions(); } S.sid = AP.History.newId(); S.prompt = t.replace(/^(重新生成|再做一张|新海报|重新做)[，,：:]?/, ""); const spec = AP.mockPlan(S.prompt, ctx()); if (S.photoPick) { spec.assets.photo = S.photoPick; spec.assets.photos = [S.photoPick, ...(spec.assets.photos || []).filter((x) => x !== S.photoPick)].slice(0, 3); if (!["split", "photo", "gallery"].includes(spec.layout)) spec.layout = "split"; } push(spec, "生成"); aiMsg(`${spec._meta.reason} 已生成第 ${S.versions.length} 版，并已自动存入历史记录。你可以直接说怎么改，比如「字大一点」「换成红色」「电话改成…」。`, [`场景 ${spec._meta.sceneName}`, `风格 ${spec._meta.styleName}`, `版式 ${AP.LAYOUT_NAMES[spec.layout]}`, `画幅 ${spec.ratio}`], true, spec.notes); };
       fast ? go() : runSteps(["understand", "plan", "visual", "render", "qa"], 520, go);
     } else {
       const r = AP.mockRefine(cur(), t, ctx()); const go = () => { push(r.spec, t.slice(0, 8)); if (r.spec.ratio !== S.ratio) { S.ratio = r.spec.ratio; document.querySelectorAll("#ratio button").forEach((x) => x.classList.toggle("on", x.dataset.r === S.ratio)); } aiMsg(r.reply, r.changes, r.regen); };
@@ -209,12 +241,59 @@
   };
 
   /* 导出 / 模板 */
-  window.exportPng = () => { if (S.cur < 0) return toast("先生成一版"); try { localStorage.setItem("ap-assets", JSON.stringify(S.assets.map((a) => ({ id: a.id, type: a.type, name: a.name, tags: a.tags, url: a.url })))); } catch (e) { toast("上传素材过大，导出页将使用示例素材"); } window.open("poster.html?d=" + encodeURIComponent(AP.encode(cur())), "_blank"); };
+  window.share = () => { if (S.cur < 0) return toast("先生成一版"); AP.History.bump(S.sid, "shares"); updateHistBadge(); toast("原型：调用微信 JS-SDK 分享海报图到会话 / 朋友圈（历史记录已标记为已分享）"); };
+  window.exportPng = () => { if (S.cur < 0) return toast("先生成一版"); AP.History.bump(S.sid, "exports"); updateHistBadge(); try { localStorage.setItem("ap-assets", JSON.stringify(S.assets.map((a) => ({ id: a.id, type: a.type, name: a.name, tags: a.tags, url: a.url })))); } catch (e) { toast("上传素材过大，导出页将使用示例素材"); } window.open("poster.html?d=" + encodeURIComponent(AP.encode(cur())), "_blank"); };
   window.saveTpl = () => { if (S.cur < 0) return toast("先生成一版"); const list = JSON.parse(localStorage.getItem("ap-templates") || "[]"); list.unshift({ name: cur().copy.headline, spec: cur(), t: Date.now() }); localStorage.setItem("ap-templates", JSON.stringify(list.slice(0, 20))); toast("已保存为企业模板：下次只需替换文字与素材，团队成员可直接套用"); };
 
+  /* 历史记录 */
+  const HF = { group: "", scene: "" };
+  function saveHist() { if (S.cur < 0) return; if (!S.sid) S.sid = AP.History.newId(); AP.History.upsert({ id: S.sid, versions: S.versions, cur: S.cur, channel: "pc", prompt: S.prompt, assets: S.assets }); updateHistBadge(); }
+  function updateHistBadge() { $("histN").textContent = AP.History.load().length; }
+  window.openHist = () => { $("hist").classList.add("show"); renderHist(); };
+  window.closeHist = () => $("hist").classList.remove("show");
+  window.setHistGroup = (g, sc) => { HF.group = g || ""; HF.scene = sc || ""; renderHist(); };
+  window.renderHist = () => {
+    const all = AP.History.load(); const st = AP.History.stats(all);
+    $("hstats").innerHTML = `共 <em>${st.total}</em> 张 · 近 7 天 <em>${st.week}</em> 张 · 导出 / 分享 <em>${st.used}</em> 次${st.top.length ? ` · 最常做：${st.top.map(([k, v]) => `${k} ${v}`).join("、")}` : ""}`;
+    const cnt = (g) => all.filter((r) => r.group === g).length;
+    $("hside").innerHTML = `<button class="${!HF.group ? "on" : ""}" onclick="setHistGroup('')">全部海报<small>${all.length}</small></button>` + AP.GROUPS.map((g) => `<button class="${HF.group === g.id && !HF.scene ? "on" : ""}" onclick="setHistGroup('${g.id}')">${g.name}<small>${cnt(g.id)}</small></button>${HF.group === g.id ? `<div class="sub">${AP.SCENES.filter((s) => s.g === g.id && all.some((r) => r.scene === s.id)).map((s) => `<button class="${HF.scene === s.id ? "on" : ""}" onclick="setHistGroup('${g.id}','${s.id}')">${s.icon} ${s.name}<small>${all.filter((r) => r.scene === s.id).length}</small></button>`).join("")}</div>` : ""}`).join("") + `<div style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px"><button onclick="clearDemo()" style="font-size:11px;color:var(--mute)">清除示例记录</button></div>`;
+    const list = AP.History.filter(all, { group: HF.group, scene: HF.scene, q: $("hq").value, range: $("hrange").value, status: $("hstatus").value, sort: $("hsort").value, starred: $("hstar").checked });
+    if (!list.length) { $("hmain").innerHTML = `<div class="hempty"><div class="big">🗂️</div>没有符合条件的海报<br><small>换个筛选条件，或点右上角「新建海报」开始</small></div>`; return; }
+    const days = $("hsort").value === "updated" ? AP.History.groupByDay(list) : [{ key: "", items: list }];
+    $("hmain").innerHTML = days.map((d) => `${d.key ? `<div class="hday">${d.key}<small style="font-weight:500">${d.items.length} 张</small></div>` : ""}<div class="hgrid">${d.items.map(histCard).join("")}</div>`).join("");
+  };
+  function histCard(r) {
+    const sc = AP.SCENES.find((s) => s.id === r.scene) || {}; const used = (r.exports || 0) + (r.shares || 0);
+    return `<div class="hc" data-id="${r.id}">
+      <div class="th" onclick="openRecord('${r.id}')">${AP.History.thumb(r, ctx(), 150, 200)}</div>
+      <button class="star ${r.starred ? "on" : ""}" title="收藏 / 置顶" onclick="starRecord('${r.id}')">★</button>${r.demo ? '<span class="demo">示例</span>' : ""}
+      <div class="ops"><button class="pri" onclick="openRecord('${r.id}')">打开继续改</button><button onclick="redoRecord('${r.id}')">再做类似</button><button onclick="exportRecord('${r.id}')">导出</button><button class="del" onclick="delRecord('${r.id}')">删除</button></div>
+      <div class="ti" title="${AP.esc(r.prompt)}" onclick="openRecord('${r.id}')">${AP.esc(r.title)}</div>
+      <div class="mt"><span class="sc">${sc.icon || ""} ${AP.esc(r.sceneName)}</span><span class="ch">${r.channel === "h5" ? "📱 手机" : "🖥 PC"}</span><span>${r.ratio} · ${AP.esc(AP.STYLES[r.style] ? AP.STYLES[r.style].name : r.style)}</span></div>
+      <div class="ft"><span>${AP.History.fmtTime(r.updatedAt)} · ${r.versions.length} 版</span><span class="stt ${used ? "" : "draft"}">${used ? `${r.status || "已使用"} ${used} 次` : "草稿"}</span></div></div>`;
+  }
+  window.starRecord = (id) => { const on = AP.History.star(id); renderHist(); toast(on ? "已收藏并置顶" : "已取消收藏"); };
+  window.delRecord = (id) => { const r = AP.History.get(id); if (!r) return; if (!confirm(`删除「${r.title}」及其 ${r.versions.length} 个版本？`)) return; AP.History.remove(id); if (S.sid === id) S.sid = null; renderHist(); updateHistBadge(); toast("已删除（正式版进入回收站，30 天内可恢复）"); };
+  window.clearDemo = () => { if (!confirm("清除全部示例记录？你自己生成的海报会保留。")) return; AP.History.clearDemo(); renderHist(); updateHistBadge(); };
+  window.exportRecord = (id) => { const r = AP.History.get(id); if (!r) return; AP.History.bump(id, "exports"); try { localStorage.setItem("ap-assets", JSON.stringify([...S.assets, ...(r.assets || [])].map((a) => ({ id: a.id, type: a.type, name: a.name, tags: a.tags, url: a.url })))); } catch (e) {} window.open("poster.html?d=" + encodeURIComponent(AP.encode(r.versions[r.cur].spec)), "_blank"); renderHist(); };
+  window.openRecord = (id) => {
+    const r = AP.History.get(id); if (!r) return; closeHist();
+    (r.assets || []).forEach((a) => { if (!S.assets.some((x) => x.id === a.id)) S.assets.push(Object.assign({}, a)); }); renderAssets();
+    S.sid = r.id; S.prompt = r.prompt; S.versions = r.versions.map((v) => ({ spec: AP.clone(v.spec), label: v.label, t: v.t })); S.cur = r.cur; S.ratio = cur().ratio; S.scene = null;
+    document.querySelectorAll("#ratio button").forEach((x) => x.classList.toggle("on", x.dataset.r === S.ratio)); document.querySelectorAll("#scenes button").forEach((b) => b.classList.remove("on"));
+    draw(); renderVersions(); $("chat").innerHTML = ""; if (r.prompt) userMsg(r.prompt);
+    aiMsg(`已打开历史海报「${r.title}」：${r.groupName} / ${r.sceneName}，${AP.History.fmtTime(r.createdAt)} 在${r.channel === "h5" ? "手机端" : "PC 端"}生成，共 ${r.versions.length} 版${(r.exports || 0) + (r.shares || 0) ? `，已导出 / 分享 ${(r.exports || 0) + (r.shares || 0)} 次` : ""}。当前在 v${r.cur + 1}，可以直接继续微调，也可以点下方版本条切回任一版。`, [`${r.sceneName}`, `${AP.STYLES[cur().style].name}`, AP.LAYOUT_NAMES[cur().layout], `${r.versions.length} 版`], false);
+    toast("已载入历史海报，继续微调会保存到同一条记录");
+  };
+  window.redoRecord = (id) => { const r = AP.History.get(id); if (!r) return; closeHist(); newPoster(true); S.scene = r.scene; document.querySelectorAll("#scenes button").forEach((b) => b.classList.toggle("on", b.dataset.id === r.scene)); $("prompt").value = r.prompt || r.title; toast("已带入原需求与场景，可修改文字后点「生成海报」"); $("prompt").focus(); };
+  window.newPoster = (silent) => { if (S.cur >= 0) saveHist(); S.versions = []; S.cur = -1; S.sid = null; S.prompt = ""; S.photoPick = null; renderAssets(); $("frame").style.display = "none"; $("empty").style.display = ""; $("info").textContent = "尚未生成"; $("json").textContent = ""; $("send").textContent = "生成海报"; $("prompt").placeholder = "描述你要的海报：做什么（招聘/促销/节日…）、关键信息（价格/日期/电话）、风格（喜庆/商务/简洁）…"; renderVersions(); $("chat").innerHTML = ""; welcome(); if (!silent) toast("已新建，上一张已保存在历史记录中"); };
+  function recentStrip() { const all = AP.History.load(); const list = AP.History.filter(all, { pinStar: false }).slice(0, 3); if (!list.length) return ""; return `<div style="margin-top:12px;font-size:12px;color:var(--mute);display:flex;justify-content:space-between"><span>最近做过的海报（点击打开继续改）</span><a style="color:var(--brand);cursor:pointer" onclick="openHist()">查看全部 ${all.length} 张 →</a></div><div class="recent">${list.map((r) => `<div class="rc" onclick="openRecord('${r.id}')"><div class="th">${AP.History.thumb(r, ctx(), 80, 92)}</div><small>${AP.esc(r.title)}<i>${AP.esc(r.sceneName)} · ${AP.History.fmtTime(r.updatedAt)}</i></small></div>`).join("")}</div>`; }
+
   /* 初始化 */
-  renderAssets(); welcome();
+  renderAssets(); updateHistBadge(); welcome();
   const qp = new URLSearchParams(location.search);
+  if (qp.get("open")) openRecord(qp.get("open"));
+  if (qp.get("hist")) { openHist(); if (qp.get("hgroup")) setHistGroup(qp.get("hgroup")); }
   if (qp.get("ratio")) { S.ratio = qp.get("ratio"); document.querySelectorAll("#ratio button").forEach((x) => x.classList.toggle("on", x.dataset.r === S.ratio)); }
   if (qp.get("demo")) { const s = AP.SCENES.find((x) => x.id === qp.get("demo")); if (s) { $("prompt").value = qp.get("prompt") || s.example; send(true); (qp.get("refine") || "").split("|").filter(Boolean).forEach((r) => { $("prompt").value = r; send(true); }); } }
 </script>

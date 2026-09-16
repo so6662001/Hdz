@@ -114,6 +114,7 @@
     // 节日 + 促销词 → 节假日促销；周年 + 促销词 → 周年庆
     if (/中秋|国庆|春节|新年|元旦|端午|五一|双节|开年|节前/.test(text) && /促销|特惠|钜惠|优惠|立减|活动|让利|备货/.test(text)) return AP.SCENES.find((s) => s.id === "holidaypromo");
     if (/周年|店庆/.test(text)) return AP.SCENES.find((s) => s.id === "anniversary");
+    if (/招\s*[一二两三四五六七八九十\d]+\s*[名个位]/.test(text)) return AP.SCENES.find((s) => s.id === "recruit");
     let best = null, bestN = 0;
     for (const s of AP.SCENES) { const n = s.kw.reduce((a, k) => a + (text.includes(k) ? (k.length >= 4 ? 3 : k.length >= 3 ? 2 : 1) : 0), 0); if (n > bestN) { bestN = n; best = s; } }
     return best;

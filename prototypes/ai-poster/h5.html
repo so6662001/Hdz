@@ -47,15 +47,30 @@
   .toast { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%); background: rgba(17,17,17,.92); color: #fff; padding: 9px 14px; border-radius: 10px; font-size: 12px; opacity: 0; transition: .25s; pointer-events: none; z-index: 9; max-width: 86vw; text-align: center; } .toast.show { opacity: 1; }
   .sheet { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: flex-end; justify-content: center; z-index: 8; } .sheet.show { display: flex; } .sheet .card { width: 100%; max-width: 480px; background: #fff; border-radius: 18px 18px 0 0; padding: 16px 16px calc(20px + env(safe-area-inset-bottom)); } .sheet h4 { font-size: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; } .sheet h4 a { font-size: 13px; color: var(--mute); font-weight: 500; }
   .sheet .g { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; text-align: center; font-size: 11px; color: #374151; } .sheet .g button { display: flex; flex-direction: column; align-items: center; gap: 6px; } .sheet .g span { width: 50px; height: 50px; border-radius: 14px; background: #f1f3f8; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  /* 历史记录 */
+  .recent { display: flex; flex: none; gap: 10px; overflow-x: auto; padding: 0 16px 4px; -webkit-overflow-scrolling: touch; } .recent::-webkit-scrollbar { display: none; } .recent .rc { flex: none; width: 92px; } .recent .rc .th { width: 92px; height: 110px; border-radius: 10px; background: #e9edf3; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,.08); } .recent .rc .th > div { border-radius: 6px; overflow: hidden; } .recent .rc small { display: block; font-size: 11px; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); } .recent .rc small i { display: block; font-style: normal; color: var(--mute); font-size: 10px; }
+  .recent .rc.more .th { background: #fff; border: 1.5px dashed #c7d0e0; color: var(--mute); font-size: 12px; flex-direction: column; gap: 4px; box-shadow: none; } .recent .rc.more .th b { font-size: 20px; color: var(--brand); }
+  .hs { padding: 10px 16px 0; display: flex; gap: 8px; align-items: center; } .hs input { flex: 1; height: 38px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; padding: 0 12px 0 34px; font-size: 14px; outline: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>"); background-repeat: no-repeat; background-size: 16px; background-position: 11px center; } .hs select { height: 38px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; font-size: 12px; padding: 0 8px; color: var(--ink); }
+  .hstat { padding: 10px 16px 0; display: flex; gap: 8px; } .hstat div { flex: 1; background: #fff; border-radius: 12px; padding: 10px 12px; font-size: 11px; color: var(--mute); } .hstat div b { display: block; font-size: 18px; color: var(--ink); margin-bottom: 2px; }
+  .hday { padding: 14px 16px 8px; font-size: 12px; color: var(--mute); font-weight: 700; display: flex; align-items: center; gap: 8px; } .hday::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .hgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; }
+  .hc { background: #fff; border-radius: 14px; overflow: hidden; position: relative; border: 1px solid var(--line); } .hc .th { height: 200px; background: #e9edf3; display: flex; align-items: center; justify-content: center; overflow: hidden; } .hc .th > div { border-radius: 6px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,.16); }
+  .hc .ti { padding: 8px 10px 2px; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .hc .mt { padding: 0 10px 3px; font-size: 10px; color: var(--mute); display: flex; justify-content: space-between; align-items: center; gap: 4px; } .hc .mt .sc { color: var(--brand); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .hc .mt .stt { color: #059669; white-space: nowrap; } .hc .mt .stt.draft { color: var(--mute); }
+  .hc .star { position: absolute; top: 6px; left: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,.92); font-size: 12px; display: flex; align-items: center; justify-content: center; color: #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,.15); } .hc .star.on { color: #f59e0b; }
+  .hc .more { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,.92); font-size: 14px; display: flex; align-items: center; justify-content: center; color: var(--ink); box-shadow: 0 2px 6px rgba(0,0,0,.15); line-height: 1; } .hc .tm { padding: 0 10px 9px; font-size: 10px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .hc .demo { position: absolute; top: 34px; right: 6px; font-size: 9px; background: rgba(0,0,0,.5); color: #fff; padding: 1px 5px; border-radius: 4px; }
+  .hempty { text-align: center; color: var(--mute); padding: 60px 20px; font-size: 13px; } .hempty .big { font-size: 44px; margin-bottom: 8px; }
+  .sheet .list button { display: flex; width: 100%; align-items: center; gap: 10px; padding: 13px 4px; font-size: 15px; border-bottom: 1px solid var(--line); } .sheet .list button:last-child { border: 0; } .sheet .list button.del { color: #dc2626; } .sheet .list button span { width: 28px; text-align: center; }
+  .sheet .rh { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; } .sheet .rh .th { width: 54px; height: 66px; border-radius: 8px; overflow: hidden; background: #e9edf3; display: flex; align-items: center; justify-content: center; flex: none; } .sheet .rh .th > div { border-radius: 4px; overflow: hidden; } .sheet .rh b { font-size: 14px; display: block; } .sheet .rh small { font-size: 11px; color: var(--mute); }
   .proto { position: fixed; left: 8px; bottom: 8px; font-size: 9px; color: #fff; background: rgba(0,0,0,.45); padding: 2px 6px; border-radius: 4px; z-index: 5; }
 </style>
 </head>
 <body>
-<div class="nav"><button onclick="back()">‹</button><b id="title">AI 经营海报</b><button class="r" id="navR" onclick="restart()">重新开始</button></div>
+<div class="nav"><button onclick="back()">‹</button><b id="title">AI 经营海报</b><button class="r" id="navR" onclick="navRight()">重新开始</button></div>
 <div class="proto">H5 原型 · 大模型为规则模拟</div>
 
 <!-- 第一步：需求 -->
 <div class="page on" id="p-input">
+  <div class="sec" id="recentSec" style="padding-bottom:0"><h3>最近做的海报 · 点击继续改<a onclick="show('history')">全部 <span id="recentN"></span> ›</a></h3></div><div class="recent" id="recent"></div>
   <div class="sec"><h3>想做什么海报？<a onclick="setScene(null)">不选，让 AI 识别</a></h3><div class="gtabs" id="gtabs"></div><div class="scenes" id="scenes"></div></div>
   <div class="sec"><h3>用一句话描述需求</h3>
     <div class="ta"><textarea id="prompt" placeholder="例如：招 5 名钢材销售，底薪 6000 加高提成，五险包住，电话 138 0000 8888。可以说风格：喜庆 / 商务 / 简洁 / 黑金…"></textarea>
@@ -77,7 +92,7 @@
 <div class="page" id="p-result"><div class="result">
   <div class="view" id="view"><button class="arrow l" id="prev" onclick="goVer(S.cur-1)">‹</button><div class="frame" id="frame"><div class="inner" id="inner"></div></div><button class="arrow r" id="next" onclick="goVer(S.cur+1)">›</button></div>
   <div class="meta"><span id="minfo"></span><span class="dots" id="dots"></span></div>
-  <div class="acts"><button onclick="openSheet()">⚙ 画幅 / 版式</button><button onclick="regen()">🎲 再来一版</button><button onclick="exportPng()">⤓ 保存原图</button><button class="pri" onclick="toast('原型：调用微信 JS-SDK，海报图分享到会话 / 朋友圈')">分享微信</button></div>
+  <div class="acts"><button onclick="openSheet()">⚙ 画幅 / 版式</button><button onclick="regen()">🎲 再来一版</button><button onclick="exportPng()">⤓ 保存原图</button><button class="pri" onclick="AP.History.bump(S.sid,'shares');toast('原型：调用微信 JS-SDK，海报图分享到会话 / 朋友圈（已记入历史）')">分享微信</button></div>
   <div class="chatbox">
     <div class="msgs" id="msgs"></div>
     <div class="quick" id="quick"></div>
@@ -85,6 +100,14 @@
   </div>
 </div></div>
 
+<!-- 历史记录 -->
+<div class="page" id="p-history">
+  <div class="hstat" id="hstat"></div>
+  <div class="hs"><input type="search" id="hq" placeholder="搜索标题 / 需求 / 文案" oninput="renderHist()"><select id="hrange" onchange="renderHist()"><option value="all">全部时间</option><option value="today">今天</option><option value="week">近 7 天</option><option value="month">近 30 天</option></select></div>
+  <div class="sec" style="padding-top:10px"><div class="gtabs" id="htabs"></div></div>
+  <div id="hlist" style="padding-bottom:20px"></div>
+</div>
+<div class="sheet" id="rsheet" onclick="if(event.target===this)this.classList.remove('show')"><div class="card"><div class="rh" id="rsheetHead"></div><div class="list" id="rsheetList"></div></div></div>
 <div class="sheet" id="sheet" onclick="if(event.target===this)this.classList.remove('show')"><div class="card"><h4>画幅与版式 <a onclick="$('sheet').classList.remove('show')">关闭</a></h4>
   <div class="g"><button onclick="quick('改成 3:4 朋友圈')"><span>▯</span>3:4 朋友圈</button><button onclick="quick('改成竖屏 9:16')"><span>▮</span>9:16 竖屏</button><button onclick="quick('改成 1:1 方图')"><span>▢</span>1:1 方图</button><button onclick="quick('换个版式')"><span>⇄</span>换个版式</button><button onclick="quick('全图铺满')"><span>🖼</span>全图实拍</button><button onclick="quick('多图拼贴')"><span>▦</span>多图拼贴</button><button onclick="quick('版式改成要点')"><span>☰</span>要点卡</button><button onclick="quick('版式改成卡片')"><span>▣</span>居中卡片</button></div>
   <h4 style="margin-top:16px">风格</h4>
@@ -93,16 +116,20 @@
 <div class="toast" id="toast"></div>
 
 <script src="shared/engine.js"></script>
+<script src="shared/history.js"></script>
 <script>
   const $ = (id) => document.getElementById(id);
-  const S = { assets: AP.sampleAssets.map((a) => Object.assign({}, a)), brand: Object.assign({}, AP.defaultBrand), scene: null, photoPick: null, versions: [], cur: -1, page: "input", busy: false };
+  const S = { assets: AP.sampleAssets.map((a) => Object.assign({}, a)), brand: Object.assign({}, AP.defaultBrand), scene: null, photoPick: null, versions: [], cur: -1, page: "input", busy: false, sid: null, prompt: "", hgroup: "" };
   const ctx = () => ({ assets: S.assets, brand: S.brand, scene: S.scene, ratio: "3:4", date: "2026.09.16" });
   const toast = (m) => { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2200); }; window.toast = toast;
   const cur = () => S.versions[S.cur] && S.versions[S.cur].spec;
 
-  function show(p) { S.page = p; ["input", "gen", "result"].forEach((k) => $("p-" + k).classList.toggle("on", k === p)); $("f-input").style.display = p === "input" ? "" : "none"; $("title").textContent = { input: "AI 经营海报", gen: "生成中", result: "海报预览" }[p]; $("navR").style.display = p === "result" ? "" : "none"; }
-  window.back = () => { if (S.page === "result") show("input"); else toast("返回营销工具首页（原型）"); };
-  window.restart = () => { show("input"); };
+  function show(p) { S.page = p; ["input", "gen", "result", "history"].forEach((k) => $("p-" + k).classList.toggle("on", k === p)); $("f-input").style.display = p === "input" ? "" : "none"; $("title").textContent = { input: "AI 经营海报", gen: "生成中", result: "海报预览", history: "历史记录" }[p]; $("navR").style.display = p === "gen" ? "none" : ""; $("navR").textContent = { input: "🕘 历史", result: "重新开始", history: "＋ 新建" }[p] || ""; if (p === "history") renderHist(); if (p === "input") renderRecent(); }
+  window.show = show;
+  window.back = () => { if (S.page === "result" || S.page === "history") show("input"); else toast("返回营销工具首页（原型）"); };
+  window.navRight = () => { if (S.page === "input") show("history"); else if (S.page === "history") { newPoster(); } else restart(); };
+  window.restart = () => { newPoster(); };
+  window.newPoster = () => { S.versions = []; S.cur = -1; S.sid = null; S.prompt = ""; S.photoPick = null; $("prompt").value = ""; renderAssets(); show("input"); };
 
   /* 场景 */
   S.group = AP.GROUPS[0].id;
@@ -126,10 +153,10 @@
   }
   window.generate = (fast) => {
     const t = $("prompt").value.trim(); if (!t) return toast("先用一句话描述你要的海报");
-    const go = () => { const spec = AP.mockPlan(t, ctx()); if (S.photoPick) { spec.assets.photo = S.photoPick; spec.assets.photos = [S.photoPick, ...(spec.assets.photos || []).filter((x) => x !== S.photoPick)].slice(0, 3); if (!["split", "photo", "gallery"].includes(spec.layout)) spec.layout = "split"; } S.versions = [{ spec, label: "生成" }]; S.cur = 0; $("msgs").innerHTML = ""; aiMsg(`${spec._meta.reason} 直接告诉我怎么改就行。`, [`${spec._meta.sceneName}`, `${spec._meta.styleName}`, AP.LAYOUT_NAMES[spec.layout]], true, spec.notes); show("result"); draw(); };
+    const go = () => { S.sid = AP.History.newId(); S.prompt = t; const spec = AP.mockPlan(t, ctx()); if (S.photoPick) { spec.assets.photo = S.photoPick; spec.assets.photos = [S.photoPick, ...(spec.assets.photos || []).filter((x) => x !== S.photoPick)].slice(0, 3); if (!["split", "photo", "gallery"].includes(spec.layout)) spec.layout = "split"; } S.versions = [{ spec, label: "生成", t: Date.now() }]; S.cur = 0; saveHist(); $("msgs").innerHTML = ""; aiMsg(`${spec._meta.reason} 已自动存入历史记录。直接告诉我怎么改就行。`, [`${spec._meta.sceneName}`, `${spec._meta.styleName}`, AP.LAYOUT_NAMES[spec.layout]], true, spec.notes); show("result"); draw(); };
     fast ? go() : runSteps(["understand", "plan", "visual", "render", "qa"], 560, go, "AI 正在设计你的海报", "理解需求 → 设计版式 → 生成视觉 → 精确排版 → 质检");
   };
-  function push(spec, label) { S.versions = S.versions.slice(0, S.cur + 1); S.versions.push({ spec, label }); S.cur = S.versions.length - 1; draw(); }
+  function push(spec, label) { S.versions = S.versions.slice(0, S.cur + 1); S.versions.push({ spec, label, t: Date.now() }); S.cur = S.versions.length - 1; draw(); saveHist(); }
   window.goVer = (i) => { if (i < 0 || i >= S.versions.length) return; S.cur = i; draw(); };
   window.regen = () => { const sp = AP.clone(cur()); const keys = Object.keys(AP.STYLES); const ns = keys[(keys.indexOf(sp.style) + 3) % keys.length]; sp.style = ns; sp.palette = AP.clone(AP.STYLES[ns].palette); sp.bgfx = AP.STYLES[ns].bgfx; const L = sp.assets.photo ? ["hero", "split", "list", "photo", "card", "gallery"] : ["hero", "list", "card"]; sp.layout = L[(L.indexOf(sp.layout) + 1) % L.length]; if (sp.layout === "gallery" && (sp.assets.photos || []).length < 2) sp.assets.photos = [sp.assets.photo, ...S.assets.filter((a) => a.type !== "logo" && a.id !== sp.assets.photo).map((a) => a.id)].slice(0, 3); runSteps(["plan", "visual", "render"], 420, () => { push(sp, "再来一版"); show("result"); aiMsg(`换了一种思路：「${AP.STYLES[ns].name}」+「${AP.LAYOUT_NAMES[sp.layout]}」。左右滑动可对比各版。`, [AP.STYLES[ns].name, AP.LAYOUT_NAMES[sp.layout]], true); }, "换一种思路", "重新设计版式与视觉"); };
 
@@ -152,11 +179,30 @@
   $("styles").innerHTML = Object.entries(AP.STYLES).map(([k, v]) => `<button onclick="quick('换成${v.name}风格')"><span style="background:linear-gradient(135deg,${v.palette.bg2},${v.palette.accent})"></span>${v.name}</button>`).join("");
   $("refine").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendRefine(); } });
   window.openSheet = () => $("sheet").classList.add("show");
-  window.exportPng = () => { try { localStorage.setItem("ap-assets", JSON.stringify(S.assets.map((a) => ({ id: a.id, type: a.type, name: a.name, tags: a.tags, url: a.url })))); } catch (e) {} window.open("poster.html?d=" + encodeURIComponent(AP.encode(cur())), "_blank"); toast("原型：正式版在微信内长按保存到相册"); };
+  window.exportPng = () => { AP.History.bump(S.sid, "exports"); try { localStorage.setItem("ap-assets", JSON.stringify(S.assets.map((a) => ({ id: a.id, type: a.type, name: a.name, tags: a.tags, url: a.url })))); } catch (e) {} window.open("poster.html?d=" + encodeURIComponent(AP.encode(cur())), "_blank"); toast("原型：正式版在微信内长按保存到相册"); };
+
+  /* 历史记录 */
+  function saveHist() { if (S.cur < 0) return; if (!S.sid) S.sid = AP.History.newId(); AP.History.upsert({ id: S.sid, versions: S.versions, cur: S.cur, channel: "h5", prompt: S.prompt, assets: S.assets }); }
+  function renderRecent() { const all = AP.History.load(); const list = AP.History.filter(all, { pinStar: false }).slice(0, 6); $("recentN").textContent = all.length; $("recentSec").style.display = $("recent").style.display = list.length ? "" : "none"; $("recent").innerHTML = list.map((r) => `<div class="rc" onclick="openRecord('${r.id}')"><div class="th">${AP.History.thumb(r, ctx(), 84, 104)}</div><small>${AP.esc(r.title)}<i>${AP.esc(r.sceneName)} · ${AP.History.fmtTime(r.updatedAt)}</i></small></div>`).join("") + `<div class="rc more" onclick="show('history')"><div class="th"><b>${all.length}</b>全部记录</div></div>`; }
+  window.setHGroup = (g) => { S.hgroup = g; renderHist(); };
+  window.renderHist = () => {
+    const all = AP.History.load(); const st = AP.History.stats(all);
+    $("hstat").innerHTML = `<div><b>${st.total}</b>全部海报</div><div><b>${st.week}</b>近 7 天</div><div><b>${st.used}</b>导出 / 分享</div><div><b>${all.filter((r) => r.starred).length}</b>收藏</div>`;
+    $("htabs").innerHTML = `<button class="${!S.hgroup ? "on" : ""}" onclick="setHGroup('')">全部<i>${all.length}</i></button>` + AP.GROUPS.map((g) => `<button class="${S.hgroup === g.id ? "on" : ""}" onclick="setHGroup('${g.id}')">${g.name}<i>${all.filter((r) => r.group === g.id).length}</i></button>`).join("") + `<button class="${S.hgroup === "star" ? "on" : ""}" onclick="setHGroup('star')">★ 收藏</button>`;
+    const list = AP.History.filter(all, { group: S.hgroup === "star" ? "" : S.hgroup, starred: S.hgroup === "star", q: $("hq").value, range: $("hrange").value });
+    if (!list.length) { $("hlist").innerHTML = `<div class="hempty"><div class="big">🗂️</div>还没有海报<br><small>回到首页写一句需求，生成后会自动保存在这里</small></div>`; return; }
+    $("hlist").innerHTML = AP.History.groupByDay(list).map((d) => `<div class="hday">${d.key}<small style="font-weight:500">${d.items.length} 张</small></div><div class="hgrid">${d.items.map((r) => { const used = (r.exports || 0) + (r.shares || 0); const sc = AP.SCENES.find((x) => x.id === r.scene) || {}; return `<div class="hc"><div class="th" onclick="openRecord('${r.id}')">${AP.History.thumb(r, ctx(), 140, 186)}</div><button class="star ${r.starred ? "on" : ""}" onclick="AP.History.star('${r.id}');renderHist()">★</button><button class="more" onclick="recSheet('${r.id}')">⋯</button>${r.demo ? '<span class="demo">示例</span>' : ""}<div class="ti" onclick="openRecord('${r.id}')">${AP.esc(r.title)}</div><div class="mt"><span class="sc">${sc.icon || ""} ${AP.esc(r.sceneName)}</span><span class="stt ${used ? "" : "draft"}">${used ? `已用 ${used} 次` : "草稿"}</span></div><div class="tm">${AP.History.fmtTime(r.updatedAt)} · ${r.channel === "h5" ? "手机" : "PC"} · ${r.versions.length} 版</div></div>`; }).join("")}</div>`).join("");
+  };
+  window.openRecord = (id) => { const r = AP.History.get(id); if (!r) return; (r.assets || []).forEach((a) => { if (!S.assets.some((x) => x.id === a.id)) S.assets.push(Object.assign({}, a)); }); renderAssets(); S.sid = r.id; S.prompt = r.prompt; S.versions = r.versions.map((v) => ({ spec: AP.clone(v.spec), label: v.label, t: v.t })); S.cur = r.cur; $("msgs").innerHTML = ""; $("rsheet").classList.remove("show"); show("result"); draw(); aiMsg(`已打开「${r.title}」（${r.sceneName} · ${AP.History.fmtTime(r.createdAt)} · ${r.versions.length} 版）。继续说怎么改，会保存到同一条记录；左右滑动可看历史版本。`, [r.sceneName, AP.STYLES[cur().style].name, `${r.versions.length} 版`], false); };
+  window.recSheet = (id) => { const r = AP.History.get(id); if (!r) return; $("rsheetHead").innerHTML = `<div class="th">${AP.History.thumb(r, ctx(), 50, 62)}</div><div><b>${AP.esc(r.title)}</b><small>${AP.esc(r.sceneName)} · ${AP.History.fmtTime(r.createdAt)} 创建 · ${r.versions.length} 版 · ${r.channel === "h5" ? "手机" : "PC"}</small><br><small style="display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px">需求：${AP.esc(r.prompt)}</small></div>`; $("rsheetList").innerHTML = `<button onclick="openRecord('${r.id}')"><span>✏️</span>打开继续微调</button><button onclick="redoRecord('${r.id}')"><span>🔁</span>再做一张类似的（带入原需求）</button><button onclick="AP.History.bump('${r.id}','exports');window.open('poster.html?d='+encodeURIComponent(AP.encode(AP.History.get('${r.id}').versions[${r.cur}].spec)),'_blank');$('rsheet').classList.remove('show');renderHist()"><span>⤓</span>保存原图</button><button onclick="AP.History.star('${r.id}');renderHist();$('rsheet').classList.remove('show')"><span>★</span>${r.starred ? "取消收藏" : "收藏（置顶）"}</button><button class="del" onclick="if(confirm('删除这张海报及其 ${r.versions.length} 个版本？')){AP.History.remove('${r.id}');renderHist();$('rsheet').classList.remove('show');toast('已删除，正式版 30 天内可从回收站恢复')}"><span>🗑</span>删除</button>`; $("rsheet").classList.add("show"); };
+  window.redoRecord = (id) => { const r = AP.History.get(id); if (!r) return; $("rsheet").classList.remove("show"); newPoster(); S.scene = null; setScene(r.scene); $("prompt").value = r.prompt || r.title; toast("已带入原需求，可修改后重新生成"); };
 
   /* 初始化 */
   renderAssets(); setScene(null); show("input");
   const qp = new URLSearchParams(location.search);
+  if (qp.get("step") === "history") { show("history"); if (qp.get("hgroup")) setHGroup(qp.get("hgroup")); }
+  if (qp.get("open")) openRecord(qp.get("open"));
+  if (qp.get("rsheet")) recSheet(qp.get("rsheet"));
   if (qp.get("demo")) { const s = AP.SCENES.find((x) => x.id === qp.get("demo")); if (s) { setScene(s.id); $("prompt").value = qp.get("prompt") || s.example; if (qp.get("step") === "gen") { runSteps(["understand", "plan", "visual", "render", "qa"], 1e6, () => {}, "AI 正在设计你的海报", "理解需求 → 设计版式 → 生成视觉 → 精确排版 → 质检"); setTimeout(() => { document.querySelectorAll(".step")[0].className = "step done"; document.querySelectorAll(".step")[0].querySelector("i").textContent = "✓"; document.querySelectorAll(".step")[1].className = "step done"; document.querySelectorAll(".step")[1].querySelector("i").textContent = "✓"; document.querySelectorAll(".step")[2].className = "step on"; }, 50); } else if (qp.get("step") !== "input") { generate(true); (qp.get("refine") || "").split("|").filter(Boolean).forEach((r) => { $("refine").value = r; sendRefine(true); }); } } }
 </script>
 </body>
