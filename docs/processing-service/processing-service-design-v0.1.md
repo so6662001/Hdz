@@ -6,7 +6,7 @@
 | 适用平台 | 货袋子现货资源平台（已完成冷启动，注册用户 2 万+） |
 | 板块定位 | 现货资源之外的第二增长曲线：**加工服务撮合**（含拼单加工），平台收取撮合技术服务费 |
 | 本稿不含 | 高保真 HTML 原型、接口定义、详细库表 DDL（待方案确认后输出） |
-| 配套文档 | [AI 接入方案与市场价值评估 v0.1](./processing-service-ai-and-market-analysis-v0.1.md) |
+| 配套文档 | [AI 接入方案与市场价值评估 v0.1](./processing-service-ai-and-market-analysis-v0.1.md) · [权益保障、平台责任与风险、找钢网对标 v0.1](./processing-service-rights-risk-and-benchmark-v0.1.md) |
 
 ---
 
