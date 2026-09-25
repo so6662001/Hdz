@@ -1,6 +1,6 @@
 # 04 · API 接口设计
 
-> 所属：AI 货袋子获客系统 v0.1  
+> 所属：AI 货袋子获客系统 v1.0  
 > 约定：RESTful，前缀 `/api/acquisition`；统一响应 `{code, message, data}`；分页参数 `pageNum/pageSize`，返回 `{list, total}`；时间 ISO-8601；鉴权复用平台 Token，`merchant_id` 从登录态取，不由前端传；权限编码见 07 分册。  
 > 运营端接口前缀 `/api/admin/acquisition`。执行端走 WebSocket `/ws/executor`。
 
@@ -209,6 +209,10 @@
 | GET | `/dashboard/by-script` | 话术效果排行（同 `/scripts/ranking`） |
 | POST | `/dashboard/refresh` | 手动触发当日聚合（对应"17:00 更新看板"任务的手动版） |
 | GET | `/dashboard/export` | 导出 Excel（按当前筛选） |
+| GET | `/dashboard/time-allocation` | **人工填报卡片**（Q8）：参数 `range, ownerUserId?`；返回各销售/汇总的谈单·找客·跟进·其他占比均值、填报率；商家未开启填报时返回 `enabled=false` |
+| GET | `/daily-reports/mine?date=` | 当前销售某日填报（无则空） |
+| PUT | `/daily-reports/mine` | 提交/修改当日填报 `{reportDate, pctNegotiation, pctProspecting, pctFollowUp, pctOther, manualDeals?, note?}`；四项合计须为 100；仅允许改近 7 天 |
+| GET | `/daily-reports` | 管理员查看团队填报列表（筛选 `ownerUserId, dateFrom/To, missingOnly`） |
 
 ---
 
@@ -242,7 +246,8 @@
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET / PUT | `/settings` | 商家配置（阈值、静默期、活跃时段、分配策略、AI 润色确认、测试白名单、同步线索中心） |
+| GET / PUT | `/settings` | 商家配置（阈值、静默期、活跃时段、分配策略、AI 润色确认、测试白名单、同步线索中心、每日填报开关与提醒时间） |
+| PUT | `/settings/public-comment-capture` | 开启/关闭抖音·小红书他人评论区抓取 `{enabled, acceptRiskNotice: true}`；开启时必须同时提交风险告知接受，记录 `risk_notice_accepted_at` 与操作人；未开启时创建 `scope=PUBLIC_COMMENTS` 的抓取规则返回 `ACQ-3005` |
 | GET / PUT | `/settings/custom-fields` | 线索自定义字段定义 |
 | GET | `/settings/subscription` | 订阅套餐、席位、设备数、到期 |
 
@@ -256,7 +261,7 @@
 | PUT | `/merchants/{id}/subscription` | 开通/变更套餐 |
 | GET / POST / PUT | `/industry-packs[/{code}]` | 行业话术包维护 |
 | GET / PUT | `/risk/default-policies` | 平台默认风控策略（各平台 × 档位） |
-| PUT | `/risk/global-switch` | **总闸**：`{rpaEnabled, platform?}` 一键暂停全部/某平台 RPA 指令 |
+| PUT | `/risk/global-switch` | **总闸**：`{rpaEnabled, platform?, capability?}` 一键暂停全部 / 某平台 / 某能力（如 `CAPTURE_PUBLIC_COMMENTS`）的 RPA 指令 |
 | GET | `/risk/incidents` | 全平台风控事件 |
 | GET | `/executors/nodes` | 执行端网关节点与连接数 |
 | GET | `/ai/usage` | 模型用量与成本（按商家/用途） |
@@ -317,6 +322,7 @@
 | ACQ-3002 | 渠道账号离线/熔断/需验证 |
 | ACQ-3003 | 执行端未绑定或离线 |
 | ACQ-3004 | 平台 RPA 总闸已关闭 |
+| ACQ-3005 | 他人评论区抓取未开启或未接受风险告知 |
 | ACQ-4001 | 自然语言无法解析为任务（返回 ambiguities） |
 | ACQ-4002 | JobSpec 校验失败（cron/渠道/话术不存在） |
 | ACQ-5001 | 海报系统出码失败 |
