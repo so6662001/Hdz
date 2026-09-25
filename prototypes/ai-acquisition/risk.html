@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>风控与设置</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  .pol td input { width: 64px; } .sm-in { width: 64px; }
+  .setsec { max-width: 860px; } .setsec .card { margin-bottom: 14px; }
+  .fsm { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 12px; } .fsm span { background: #fff; border: 1px solid var(--border-2); border-radius: 6px; padding: 2px 8px; } .fsm i { color: var(--text-4); font-style: normal; }
+</style>
+</head>
+<body>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/app.js"></script>
+<script>
+const me = App.me(); let tab = qs('tab', 'policies'); const root = App.mount({ active: tab === 'settings' ? 'settings' : 'risk', title: tab === 'settings' ? '设置' : '风控' });
+const noPerm = me.role !== 'admin'; if (noPerm) root.innerHTML = '<div class="empty">仅管理员可访问风控与设置（请切换为管理员视角）</div>';
+function render() {
+  root.innerHTML = App.pageHead(tab === 'settings' ? '设置' : '风控', '限速策略、账号状态机、异常事件、黑名单；以及商家级开关与合规设置。') +
+  `<div class="card"><div class="tabs">${[['policies', '限速策略'], ['incidents', `异常事件 <span class="n">${ACQ.incidents.filter(i => !i.handled).length}</span>`], ['blacklist', `黑名单 <span class="n">${ACQ.blacklist.length}</span>`], ['settings', '商家设置']].map(x => `<button class="${tab === x[0] ? 'on' : ''}" onclick="tab='${x[0]}';history.replaceState(null,'','?tab='+tab);render()">${x[1]}</button>`).join('')}</div><div class="card-b" id="tb"></div></div>`;
+  ({ policies, incidents, blacklist, settings })[tab]();
+}
+function policies() {
+  $('#tb').innerHTML = `<div class="alert info small mb12">平台默认策略由货袋子运营维护，商家只能在默认基础上<b>更保守</b>（数值只能调小 / 时段只能调窄）。养号曲线：新账号前 3 天 20% 额度、第 4~7 天 50%、之后 100%；连续 2 次异常信号进入熔断。</div>
+  <table class="table pol"><thead><tr><th>策略</th><th>每小时</th><th>每天</th><th>新联系人/天</th><th>最小间隔 s</th><th>拟人延迟 s</th><th>发送时段</th><th>单线索上限</th><th>熔断阈值</th><th></th></tr></thead><tbody>${ACQ.riskPolicies.map(p => `<tr ${p.platformDefault ? '' : 'style="background:#fffdf5"'}><td>${UI.platform(p.platform)}<b>${esc(p.name)}</b><span class="sub">${p.platformDefault ? '平台默认' : '商家自定义（更保守）'}${p.publicCapture ? ' · 含公开抓取护栏' : ''}</span></td><td>${p.hourly}</td><td>${p.daily}</td><td>${p.newContacts}</td><td>${p.minInterval}</td><td>${p.delayMin}~${p.delayMax}</td><td>${p.hours}</td><td>${p.maxPerLead}</td><td>${p.circuitThreshold} 次 / ${p.circuitMinutes} 分</td><td class="ops">${p.platformDefault ? `<a onclick="derive('${p.id}')">派生更保守版</a>` : `<a onclick="editPolicy('${p.id}')">编辑</a><a style="color:var(--danger)" onclick="ACQ.riskPolicies=ACQ.riskPolicies.filter(x=>x.id!=='${p.id}');ACQ.save();render()">删除</a>`}</td></tr>`).join('')}</tbody></table>
+  <h5 class="small b mt16 mb8">账号状态机</h5><div class="fsm"><span>ONLINE</span><i>→ 验证码 / 频繁提示 →</i><span style="border-color:#f59e0b">RESTRICTED（熔断 N 分钟）</span><i>→ 到期或人工确认 →</i><span>ONLINE（50% 额度 24h）</span><i>｜ 需滑块 →</i><span style="border-color:#f59e0b">NEED_VERIFY</span><i>｜ 退出登录 →</i><span>OFFLINE</span><i>｜ 平台封禁 →</i><span style="border-color:#dc2626">BANNED</span></div>
+  <h5 class="small b mt16 mb8">公开评论抓取护栏（抖音 / 小红书 RPA 小号）</h5><div class="small muted">每账号每日 ≤15 条内容 · 每条 ≤3 页评论 · 每页随机停留 30~120s · 每日 ≤2 个会话、每会话 ≤40 分钟 · 仅在 09:00~22:00 · 触发验证码立即结束会话并熔断 4 小时。</div>`;
+}
+function derive(id) { const p = JSON.parse(JSON.stringify(ACQ.riskPolicies.find(x => x.id === id))); p.id = 'RP' + Date.now(); p.name = p.name.replace('（平台默认）', '') + ' · 商家自定义'; p.platformDefault = false; p.hourly = Math.max(1, Math.floor(p.hourly * .75)); p.daily = Math.max(1, Math.floor(p.daily * .75)); ACQ.riskPolicies.push(p); ACQ.save(); render(); editPolicy(p.id); }
+function editPolicy(id) { const p = ACQ.riskPolicies.find(x => x.id === id); const base = ACQ.riskPolicies.find(x => x.platform === p.platform && x.tier === p.tier && x.platformDefault); const f = (k, label) => `<div class="field inline"><label>${label}</label><input class="input sm sm-in" type="number" value="${p[k]}" max="${base[k]}" onchange="if(+this.value>${base[k]}){this.value=${base[k]};toast('不能高于平台默认 ${base[k]}','warn')};window.__p['${k}']=+this.value"><span class="xs muted">平台默认 ${base[k]}</span></div>`; window.__p = {}; Modal.open({ title: `编辑 · ${esc(p.name)}`, body: f('hourly', '每小时') + f('daily', '每天') + f('newContacts', '新联系人/天') + f('maxPerLead', '单线索上限') + `<div class="field inline"><label>最小间隔 s</label><input class="input sm sm-in" type="number" value="${p.minInterval}" min="${base.minInterval}" onchange="window.__p.minInterval=Math.max(${base.minInterval},+this.value)"><span class="xs muted">≥ ${base.minInterval}</span></div><div class="field inline"><label>发送时段</label><input class="input sm" style="width:130px" value="${p.hours}" onchange="window.__p.hours=this.value"><span class="xs muted">须在 ${base.hours} 内</span></div>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">保存</button>', onMount(m, close) { $('#ok', m).onclick = () => { Object.assign(p, window.__p); ACQ.save(); close(); render(); toast('已保存', 'ok'); }; } }); }
+function incidents() {
+  $('#tb').innerHTML = UI.table([
+    { label: '时间', render: i => `<span class="small">${fmt.time(i.t)}</span>` }, { label: '账号', render: i => { const a = ACQ.account(i.account); return `${UI.platform(a.platform)}<span class="small">${esc(a.name)}</span><span class="sub">${UI.status(a.status)}</span>`; } },
+    { label: '信号', render: i => `<span class="tag ${i.level} xs">${i.signal}</span>` }, { label: '说明', render: i => `<span class="small">${esc(i.text)}</span>` },
+    { label: '存证', render: i => i.evidence ? `<a onclick="toast('设备截图（含平台提示弹窗），保留 30 天')">📷</a>` : '—' },
+    { label: '处理', render: i => i.handled ? `<span class="tag success">已处理</span><span class="sub">${esc(i.handledBy || '系统')}</span>` : `<button class="btn xs" onclick="handle('${i.id}')">标记处理</button>` },
+  ], ACQ.incidents.slice().sort((a, b) => b.t - a.t)) + `<div class="small muted mt12">信号来源：设备 UI 检测（验证码 / 频繁提示 / 控件缺失 / 退出登录）、API 错误码、发送失败率突增。连续 2 次同类信号 → 熔断；1 天内 3 次熔断 → 停用并通知管理员。</div>`;
+}
+function handle(id) { const i = ACQ.incidents.find(x => x.id === id); i.handled = true; i.handledBy = me.name; ACQ.save(); render(); }
+function blacklist() {
+  $('#tb').innerHTML = `<div class="row mb12"><span class="small muted">命中拒绝词（${ACQ.refusals.join(' / ')}）自动加入；也可手工添加。黑名单跨渠道生效：同一线索的其他平台身份一并停止触达。</span><span class="sp"></span><button class="btn sm" onclick="addBl()">＋ 手工添加</button></div>` + UI.table([
+    { label: '对象', render: b => `${UI.platform(b.platform)}<b>${esc(b.peer)}</b>${b.leadId ? `<span class="sub"><a href="leads.html?open=${b.leadId}">${b.leadId}</a></span>` : ''}` }, { label: '原因', render: b => UI.tag({ REFUSED: '客户拒绝', COMPLAINT: '投诉', COMPETITOR: '同行', MANUAL: '人工' }[b.reason] || b.reason, b.reason === 'REFUSED' || b.reason === 'COMPLAINT' ? 'danger' : '') }, { label: '依据', render: b => `<span class="small">${esc(b.evidence)}</span>` }, { label: '时间', render: b => `<span class="small">${fmt.time(b.t)}</span>` }, { label: '', cls: 'ops', render: b => `<a onclick="Modal.confirm('移出黑名单','移出后可再次触达，请确认客户已同意。',()=>{ACQ.blacklist=ACQ.blacklist.filter(x=>x.id!=='${b.id}');ACQ.save();render()})">移出</a>` },
+  ], ACQ.blacklist);
+}
+function addBl() { Modal.open({ title: '手工添加黑名单', body: `<div class="field"><label>平台</label><select class="select" id="p">${['WECHAT_PERSONAL', 'WECOM', 'DOUYIN', 'XIAOHONGSHU', 'FORUM'].map(x => `<option value="${x}">${UI.platformName(x)}</option>`).join('')}</select></div><div class="field"><label>昵称 / ID</label><input class="input" id="n"></div><div class="field"><label>原因</label><input class="input" id="r" placeholder="例如：同行 / 客户口头要求"></div>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">添加</button>', onMount(m, close) { $('#ok', m).onclick = () => { ACQ.blacklist.unshift({ id: 'BL' + Date.now(), platform: $('#p', m).value, peer: $('#n', m).value, reason: 'MANUAL', evidence: $('#r', m).value, t: Date.now() }); ACQ.save(); close(); render(); }; } }); }
+function settings() {
+  const M = ACQ.merchant; const sw = (k, extra) => `<span class="switch ${M[k] ? 'on' : ''}" onclick="${extra || `ACQ.merchant.${k}=!ACQ.merchant.${k};ACQ.save();render()`}"></span>`;
+  $('#tb').innerHTML = `<div class="setsec">
+    <div class="card"><div class="card-h"><h3>总开关</h3></div><div class="card-b">
+      <div class="field inline"><label>自动触达</label>${sw('autoOutreach', "ACQ.merchant.autoOutreach=ACQ.merchant.autoOutreach===false?true:false;ACQ.save();render()")}<span class="small muted">${M.autoOutreach === false ? '已暂停：所有定时触达任务不执行，会话自动回复仍生效' : '开启'}</span></div>
+      <div class="field inline"><label>RPA 工作手机</label><span class="switch ${ACQ.globalSwitch.rpaEnabled ? 'on' : ''}" onclick="ACQ.globalSwitch.rpaEnabled=!ACQ.globalSwitch.rpaEnabled;ACQ.save();render()"></span><span class="small muted">${ACQ.globalSwitch.rpaEnabled ? '开启' : '已暂停全部设备执行'}</span></div>
+      <div class="field inline"><label>抓取他人公开评论</label>${sw('publicCommentCaptureEnabled', "togglePublic()")}<span class="small muted">${M.publicCommentCaptureEnabled ? `已开启 · ${M.riskNoticeBy} 于 ${fmt.date(M.riskNoticeAcceptedAt)} 确认风险告知` : '关闭（仅自家内容 / 站内 / 企微 / 论坛 / 微信群）'}</span></div>
+    </div></div>
+    <div class="card"><div class="card-h"><h3>意图与分配</h3></div><div class="card-b">
+      <div class="grid g3"><div class="field"><label>成线索阈值</label><input class="input" type="number" value="${M.intentThreshold}" onchange="ACQ.merchant.intentThreshold=+this.value;ACQ.save()"><div class="hint">低于此分数的互动只记录不成线索</div></div><div class="field"><label>高意向阈值</label><input class="input" type="number" value="${M.hotThreshold}" onchange="ACQ.merchant.hotThreshold=+this.value;ACQ.save()"><div class="hint">≥ 即置 HOT 并通知负责人</div></div><div class="field"><label>分配策略</label><select class="select" onchange="ACQ.merchant.assignStrategy=this.value;ACQ.save()">${[['ROUND_ROBIN', '轮询'], ['BY_CHANNEL', '按渠道'], ['BY_REGION', '按地区'], ['MANUAL', '手动']].map(x => `<option value="${x[0]}" ${M.assignStrategy === x[0] ? 'selected' : ''}>${x[1]}</option>`).join('')}</select></div></div>
+      <div class="grid g3"><div class="field"><label>最多自动跟进</label><input class="input" type="number" value="${M.maxAutoFollowUps}"><div class="hint">简易链上限；SOP 由流程护栏控制</div></div><div class="field"><label>静默天数</label><input class="input" type="number" value="${M.silentDays}"></div><div class="field"><label>发送时段</label><input class="input" value="${M.activeHours}"></div></div>
+    </div></div>
+    <div class="card"><div class="card-h"><h3>内容与 AI</h3></div><div class="card-b">
+      <div class="field inline"><label>个性化变量下限</label><input class="input sm sm-in" type="number" value="${M.personalizationMin}" min="1" onchange="ACQ.merchant.personalizationMin=+this.value;ACQ.save()"><span class="small muted">首触话术至少含 N 个昵称 / 来源 / 互动变量，否则拦截（ACQ-2001）</span></div>
+      <div class="field inline"><label>AI 润色需确认</label>${sw('aiPolishNeedsConfirm')}<span class="small muted">开启后 AI 微调的措辞先进审核再发送</span></div>
+      <div class="field inline"><label>商家禁词</label><input class="input" style="flex:1" value="${esc(M.forbiddenWords.join('，'))}" onchange="ACQ.merchant.forbiddenWords=this.value.split(/[，,]/).filter(Boolean);ACQ.save()"><span class="small muted">叠加平台广告法词库</span></div>
+      <div class="field inline"><label>模型</label><span class="small">意图 / 分类：Qwen3.5-Plus（规则优先，LLM 兜底） · 润色 / 建议：Seed 2.0 Lite · 均为国内备案模型，单商家日预算 ¥20</span></div>
+    </div></div>
+    <div class="card"><div class="card-h"><h3>销售日报（人工填报）</h3></div><div class="card-b">
+      <div class="field inline"><label>开启填报</label>${sw('dailyReportEnabled')}<span class="small muted">每日企微提醒销售填写时间分配（谈单 / 找客 / 跟进 / 其他）与线下成交</span></div>
+      <div class="field inline"><label>提醒时间</label><input class="input sm" style="width:100px" value="${M.dailyReportRemindAt}" onchange="ACQ.merchant.dailyReportRemindAt=this.value;ACQ.save()"></div>
+    </div></div>
+    <div class="card"><div class="card-h"><h3>数据与合规</h3></div><div class="card-b">
+      <div class="field inline"><label>成交同步客户中心</label>${sw('syncToLeadCenter')}<span class="small muted">单向：线索标记成交 → 写入货袋子客户中心，不回写</span></div>
+      <div class="field inline"><label>测试号</label><div class="chips">${M.testPeers.map(p => `<span class="chip on">${p}</span>`).join('')}<span class="chip" onclick="toast('添加测试号（演示）')">＋</span></div></div>
+      <div class="field inline"><label>数据保留</label><span class="small">原始抓取 90 天 · 消息 1 年 · 手机号加密（AES）脱敏展示，查看留痕 · 客户要求删除时一键清除并停止触达</span></div>
+      <div class="field inline"><label>套餐</label><span class="small">${M.plan} · 席位 ${ACQ.users.filter(u => u.role === 'sales').length}/${M.seatLimit} · 设备 ${ACQ.devices.length}/${M.deviceLimit} · 到期 ${fmt.date(M.expireAt)}</span></div>
+    </div></div></div>`;
+}
+function togglePublic() { const M = ACQ.merchant; if (M.publicCommentCaptureEnabled) { Modal.confirm('关闭公开评论抓取', '关闭后相关抓取规则停用，RPA 小号仅保留私信 / 群能力。', () => { M.publicCommentCaptureEnabled = false; ACQ.captureRules.filter(r => r.scope === 'PUBLIC_COMMENTS').forEach(r => r.enabled = false); ACQ.save(); render(); }); return; } Modal.open({ title: '开启前请确认风险告知', body: `<div class="alert warn small mb12">通过工作手机模拟人工浏览抖音 / 小红书公开内容并抓取评论，<b>不属于平台官方接口</b>，可能导致小号限流或封禁；抓取内容涉及他人个人信息，需按 PIPL 最小必要处理，仅用于本商家获客并 90 天清理。</div><label class="checkbox"><input type="checkbox" id="ack"> 我已阅读并接受，由我（${me.name}）负责</label>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">开启</button>', onMount(m, close) { $('#ok', m).onclick = () => { if (!$('#ack', m).checked) return toast('请勾选确认', 'warn'); M.publicCommentCaptureEnabled = true; M.riskNoticeAcceptedAt = Date.now(); M.riskNoticeBy = me.name; ACQ.save(); close(); render(); }; } }); }
+if (!noPerm) render();
+</script>
+</body>
+</html>

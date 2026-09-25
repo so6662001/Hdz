@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>会话工作台</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  .content { padding: 0 !important; }
+  .wb { display: grid; grid-template-columns: 300px 1fr 340px; height: calc(100vh - 56px); }
+  .wb > div { min-width: 0; }
+  .list { border-right: 1px solid var(--border); background: #fff; display: flex; flex-direction: column; }
+  .list .tabs { padding: 0 8px; } .list .tabs button { padding: 10px 8px; font-size: 12.5px; }
+  .list .search { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .cv { display: flex; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: pointer; } .cv:hover { background: #f8faff; } .cv.on { background: var(--primary-weak); }
+  .cv .av { width: 38px; height: 38px; border-radius: 50%; background: #e5e7eb; display: grid; place-items: center; font-weight: 700; color: var(--text-2); flex-shrink: 0; position: relative; } .cv .av .pf { position: absolute; right: -4px; bottom: -4px; margin: 0; width: 16px; height: 16px; font-size: 9px; border-radius: 4px; border: 2px solid #fff; }
+  .cv .m { flex: 1; min-width: 0; } .cv .m .n { display: flex; align-items: center; gap: 6px; } .cv .m .n b { font-size: 13px; } .cv .m .n .t { margin-left: auto; font-size: 11px; color: var(--text-4); }
+  .cv .m .p { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; } .cv .m .p span.txt { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .cv .unread { background: var(--danger); color: #fff; font-size: 10px; border-radius: 999px; padding: 0 5px; line-height: 16px; }
+  .chatcol { display: flex; flex-direction: column; background: #f7f8fb; }
+  .chat-h { background: #fff; border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .chat-h b { font-size: 15px; } .chat-h .sub { font-size: 12px; color: var(--text-3); }
+  .chat-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .composer { background: #fff; border-top: 1px solid var(--border); padding: 10px 14px 12px; }
+  .sugg { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; } .sugg .s { border: 1px solid #ddd0ff; background: var(--ai-weak); color: #3b0764; border-radius: 10px; padding: 6px 10px; font-size: 12.5px; cursor: pointer; max-width: 100%; line-height: 1.5; } .sugg .s:hover { background: #e9ddff; } .sugg .s .lb { display: block; font-size: 11px; color: var(--ai); margin-bottom: 2px; font-weight: 600; }
+  .composer textarea { width: 100%; border: 1px solid var(--border-2); border-radius: 8px; padding: 8px 10px; font-size: 13px; resize: none; height: 68px; font-family: inherit; } .composer textarea:focus { outline: none; border-color: var(--primary); }
+  .composer .bar { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12px; color: var(--text-3); }
+  .side { border-left: 1px solid var(--border); background: #fff; overflow-y: auto; padding: 14px; }
+  .side h4 { font-size: 12.5px; color: var(--text-3); margin: 14px 0 8px; text-transform: uppercase; letter-spacing: .04em; } .side h4:first-child { margin-top: 0; }
+  .side .box { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; } .side .box.hot { border-color: #fed7aa; background: var(--hot-weak); } .side .box.ai { border-color: #ddd0ff; background: var(--ai-weak); }
+  .demo-bar { background: #fffbeb; border-top: 1px dashed #f59e0b; padding: 6px 14px; display: flex; gap: 8px; align-items: center; font-size: 12px; color: #92400e; } .demo-bar input { flex: 1; }
+  .queued { opacity: .7 } .queued .bubble { border-style: dashed; }
+</style>
+</head>
+<body>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/app.js"></script>
+<script>
+const me = App.me(); const root = App.mount({ active: 'workbench', title: '会话工作台' });
+let tab = qs('tab', 'NEED_HUMAN'), curId = qs('c', null), search = '';
+const myConvs = () => ACQ.conversations.filter(c => me.role === 'admin' || ACQ.lead(c.leadId).owner === me.id);
+
+function listRows() {
+  let rows = myConvs();
+  if (tab === 'NEED_HUMAN') rows = rows.filter(c => c.status === 'NEED_HUMAN'); else if (tab === 'AUTO') rows = rows.filter(c => c.status === 'AUTO'); else if (tab === 'HUMAN') rows = rows.filter(c => c.status === 'HUMAN');
+  if (search) rows = rows.filter(c => (ACQ.lead(c.leadId).nickname || '').includes(search) || c.messages.some(m => m.text.includes(search)));
+  return rows.sort((a, b) => (a.status === 'NEED_HUMAN' ? 0 : 1) - (b.status === 'NEED_HUMAN' ? 0 : 1) || b.lastAt - a.lastAt);
+}
+function render() {
+  const rows = listRows(); if (!curId || !ACQ.conversations.find(c => c.id === curId)) curId = rows[0] ? rows[0].id : (myConvs()[0] || {}).id;
+  const cnt = k => myConvs().filter(c => k === 'ALL' || c.status === k).length;
+  root.innerHTML = `<div class="wb">
+    <div class="list">
+      <div class="tabs">${[['NEED_HUMAN', '待人工'], ['AUTO', '机器处理'], ['HUMAN', '我接管'], ['ALL', '全部']].map(x => `<button class="${tab === x[0] ? 'on' : ''}" onclick="tab='${x[0]}';render()">${x[1]}<span class="n">${cnt(x[0])}</span></button>`).join('')}</div>
+      <div class="search"><input class="input sm" style="width:100%" placeholder="搜索昵称 / 消息" value="${esc(search)}" oninput="search=this.value;renderList()"></div>
+      <div id="cvlist" style="flex:1;overflow-y:auto"></div>
+    </div>
+    <div class="chatcol" id="chatcol"></div>
+    <div class="side" id="side"></div>
+  </div>`;
+  renderList(); renderChat();
+}
+function renderList() {
+  $('#cvlist').innerHTML = listRows().map(c => { const l = ACQ.lead(c.leadId); const last = c.messages[c.messages.length - 1]; return `<div class="cv ${c.id === curId ? 'on' : ''}" onclick="openConv('${c.id}')"><div class="av">${esc((l.nickname || '?')[0])}${UI.platform(l.platform)}</div><div class="m"><div class="n"><b>${esc(l.nickname || '（无昵称）')}</b>${UI.score(l.score)}<span class="t">${fmt.ago(last.t)}</span></div><div class="p"><span class="txt">${last.dir === 'OUT' ? (last.from === 'AI' ? '🤖 ' : '我：') : ''}${esc(last.text)}</span>${c.unread ? `<span class="unread">${c.unread}</span>` : ''}</div><div class="p" style="margin-top:3px">${UI.status(c.status)}${c.needHumanReason ? `<span class="xs muted">${({ APPROVAL: '待审核报价', HOT: '高意向', NO_MATCH: '无话术命中' })[c.needHumanReason] || ''}</span>` : ''}</div></div></div>`; }).join('') || '<div class="empty">无会话</div>';
+}
+function openConv(id) { curId = id; const c = ACQ.conversations.find(x => x.id === id); c.messages.forEach(m => m.read = true); c.unread = 0; renderList(); renderChat(); }
+function conv() { return ACQ.conversations.find(c => c.id === curId); }
+
+function renderChat() {
+  const c = conv(); if (!c) { $('#chatcol').innerHTML = '<div class="empty">请选择会话</div>'; $('#side').innerHTML = ''; return; }
+  const l = ACQ.lead(c.leadId), acc = ACQ.account(c.account), inst = ACQ.instanceOf(l.id), flowDef = inst ? ACQ.flow(inst.flowId) : null;
+  const pendingAp = ACQ.approvals.find(a => a.convId === c.id && a.status === 'PENDING');
+  const lastIn = c.messages.filter(m => m.dir === 'IN').slice(-1)[0];
+  const sugg = suggestions(c, l, lastIn);
+  $('#chatcol').innerHTML = `
+    <div class="chat-h">${UI.platform(l.platform)}<b>${esc(l.nickname || '（无昵称）')}</b>${UI.stage(l.stage)}${UI.score(l.score)}<span class="sub">经「${esc(acc.name)}」${acc.exec === 'RPA' ? '（RPA 设备 ' + (ACQ.devices.find(d => d.id === acc.device) || {}).name + '）' : ''}</span><span class="sp"></span>
+      ${UI.status(c.status)}
+      ${c.status === 'HUMAN' ? `<button class="btn sm" onclick="release()">交还机器</button>` : `<button class="btn sm primary" onclick="takeover()">接管</button>`}
+      <button class="btn sm" onclick="markStage('WON')">标记成交</button><button class="btn sm" onclick="markStage('LOST')">流失</button><button class="btn sm danger" onclick="blacklist()">拉黑</button>
+    </div>
+    <div class="chat-body" id="chatbody"><div class="chat">
+      <div class="sysline"><span>${fmt.time(l.createdAt)} 从「${esc(l.sourceChannel)}」抓取：${esc(l.sourceExcerpt)} · 意图 ${UI.intent(l.intent)} ${l.score} 分</span></div>
+      ${c.messages.map(m => msgHtml(m, l)).join('')}
+      ${c.status === 'NEED_HUMAN' ? `<div class="sysline"><span>⏸ 机器已暂停自动回复，等待人工处理${c.needHumanReason === 'APPROVAL' ? '（报价需人工审核）' : c.needHumanReason === 'NO_MATCH' ? '（无话术命中，LLM 置信度不足）' : c.needHumanReason === 'HOT' ? '（高意向 → 交人工）' : ''}</span></div>` : ''}
+      ${c.status === 'CLOSED' ? `<div class="sysline"><span>🚫 客户拒绝，已加入黑名单，流程终止，不再自动触达</span></div>` : ''}
+    </div></div>
+    <div class="composer">
+      ${c.status === 'CLOSED' ? '<div class="alert error small">该客户已拉黑，禁止发送。</div>' : `
+      <div class="sugg">${sugg.map((s, i) => `<div class="s" onclick="useSugg(${i})"><span class="lb">${s.label}</span>${esc(s.text)}</div>`).join('')}</div>
+      <textarea id="draft" placeholder="输入回复… 支持变量 {nickname}；发送前自动做内容安全检查${acc.exec === 'RPA' ? '，经工作手机排队按拟人节奏发送' : ''}"></textarea>
+      <div class="bar"><button class="btn sm" onclick="pickScript()">📝 插入话术</button><button class="btn sm ai" onclick="polish()">✨ AI 润色</button><span class="sp"></span><span id="quota">${quotaText(acc)}</span><button class="btn primary sm" onclick="send()">发送</button></div>`}
+    </div>
+    <div class="demo-bar">🧪 演示：模拟客户来一条消息 → <input class="input sm" id="simIn" placeholder="例：多少钱一吨 / 发我资料 / 再考虑一下 / 要 100 吨到南京 / 别发了"><button class="btn sm" onclick="simulate()">发送</button><button class="btn sm ghost" onclick="simTimeout()">模拟超时</button></div>`;
+  window.__sugg = sugg;
+  const body = $('#chatbody'); body.scrollTop = body.scrollHeight;
+
+  $('#side').innerHTML = `
+    <h4>线索</h4>
+    <div class="box"><dl class="kv"><dt>来源</dt><dd>${UI.platform(l.platform, true)} · ${esc(l.sourceChannel)}</dd><dt>原文</dt><dd>${esc(l.sourceExcerpt)}${l.sourceUrl ? ` <a href="${l.sourceUrl}" target="_blank">↗</a>` : ''}</dd><dt>意图</dt><dd>${UI.intent(l.intent)} · ${UI.score(l.score)}</dd><dt>负责人</dt><dd>${ACQ.user(l.owner).name}</dd><dt>产品</dt><dd>${esc(l.product || '—')}</dd><dt>地区</dt><dd>${esc(l.region || '—')}</dd>${l.phone ? `<dt>手机</dt><dd>${l.phone} <a onclick="toast('已记录查看手机号审计','ok')">查看</a></dd>` : ''}</dl>
+      ${l.entities && Object.keys(l.entities).length ? `<div class="mt8 small"><span class="muted">实体：</span>${Object.entries(l.entities).filter(x => x[0] !== 'count').map(x => `<span class="tag primary">${({ spec: '规格', quantity: '数量', address: '地点', delivery: '交期' })[x[0]]} ${esc(x[1])}</span>`).join(' ')}</div>` : ''}
+      <div class="mt8"><a href="leads.html?open=${l.id}" class="small">查看完整时间线 →</a></div></div>
+    ${pendingAp ? `<h4>待审核 · ${pendingAp.type === 'QUOTE' ? '报价' : pendingAp.type === 'CONTRACT' ? '合同/账期' : 'AI 润色'}</h4><div class="box hot"><div class="small muted">触发：「${esc(pendingAp.triggerText)}」 · ${fmt.left(pendingAp.dueAt)}升级主管</div><div class="mt8 small"><span class="ai-badge">✨ AI 草拟</span></div><div class="small mt8" style="line-height:1.6">${esc(pendingAp.aiSuggestion)}</div><div class="row mt8"><button class="btn primary sm" onclick="approve('${pendingAp.id}',true)">采纳并发送</button><button class="btn sm" onclick="editApproval('${pendingAp.id}')">编辑</button><button class="btn sm danger" onclick="reject('${pendingAp.id}')">驳回</button></div></div>` : ''}
+    <h4>跟进流程</h4>
+    ${inst ? `<div class="box"><div class="row"><b>${esc(flowDef.name)}</b><span class="tag">v${inst.version}</span>${UI.status(inst.status)}</div><div class="small mt8">当前节点：<b>${Engine.flow.label(flowDef, inst.currentNode)}</b></div>${inst.waitingUntil && inst.status === 'WAITING' ? `<div class="small muted">${inst.waitingType === 'HUMAN_TASK' ? '未处理将升级：' : inst.waitingType === 'TIMER' ? '定时唤醒：' : '超时分支（未回复）：'}${fmt.left(inst.waitingUntil)}</div>` : ''}${inst.pausedReason ? `<div class="small muted">暂停原因：${inst.pausedReason}</div>` : ''}<div class="small muted">已自动发送 ${inst.autoSends}/${flowDef.guardrails.maxAutoSends} · 步骤 ${inst.stepSeq}</div><div class="row mt8"><a href="flows.html?id=${flowDef.id}&inst=${inst.id}" class="small">在流程图中查看 →</a><span class="sp"></span><button class="btn xs" onclick="pauseFlow()">${inst.status === 'PAUSED' ? '恢复' : '暂停'}</button><button class="btn xs danger" onclick="stopFlow()">终止</button></div></div>` : `<div class="box small muted">无进行中的流程${c.flowNote ? '。' + c.flowNote : ''} <a onclick="startFlow()">手动加入 SOP →</a></div>`}
+    <h4>机器处理记录</h4>
+    <div class="timeline">${c.messages.filter(m => m.match || m.scriptId).slice(-4).reverse().map(m => `<div class="tl ${m.from === 'AI' ? 'ai' : 'cust'}"><div class="t">${fmt.time(m.t)}</div><div class="s">${m.dir === 'IN' ? (m.match ? (m.match.refusal ? '拒绝词命中 → 拉黑' : `匹配 ${m.match.source === 'RULE' ? '规则' : 'LLM'}：${esc(m.match.rule || m.match.category)}`) : '客户消息') : `${m.from === 'AI' ? '自动回复' : '人工回复'}：${esc((ACQ.script(m.scriptId) || {}).name || '自由文本')}`}</div>${m.match && m.match.confidence != null && m.match.source === 'LLM' ? `<div class="d">置信度 ${m.match.confidence}</div>` : ''}</div>`).join('') || '<div class="muted small">—</div>'}</div>
+    <h4>操作</h4>
+    <div class="row"><button class="btn sm" onclick="setFollow()">⏰ 设置跟进</button><button class="btn sm" onclick="transfer()">↪ 转交</button><button class="btn sm" onclick="toast('已复制线索链接','ok')">🔗 分享</button></div>`;
+}
+function msgHtml(m, l) {
+  const cls = m.dir === 'OUT' ? 'out' + (m.from === 'AI' ? ' ai' : '') : ''; const who = m.dir === 'IN' ? (l.nickname || '?')[0] : (m.from === 'AI' ? 'AI' : ACQ.user(m.by || 2).short);
+  const meta = m.dir === 'IN' ? (m.match ? (m.match.refusal ? '🚫 ' + m.match.rule : `${m.match.source === 'RULE' ? '⚡ 规则' : '🧠 LLM'} ${esc(m.match.rule || '')}${m.match.scriptId ? ' → ' + esc((ACQ.script(m.match.scriptId) || {}).name) : ''}${m.match.confidence != null && m.match.source === 'LLM' ? ' · 置信 ' + m.match.confidence : ''}`) : '') : (m.status === 'QUEUED' ? `⏳ 排队中 · 经「${esc(ACQ.account(conv().account).name)}」拟人延迟 ${m.pacing.preDelaySec}s（演示加速）` : (m.from === 'AI' ? `🤖 自动回复 · ${esc((ACQ.script(m.scriptId) || {}).name || '')}${m.hits ? ' · 变量 ' + m.hits.map(h => '{' + h + '}').join(' ') : ''}${m.transition ? ' · 过渡语，已转人工' : ''}` : `👤 ${ACQ.user(m.by || 2).name}${m.approvalId ? ' · 审核单 ' + m.approvalId : ''}`));
+  return `<div class="msg ${cls} ${m.status === 'QUEUED' ? 'queued' : ''}"><div class="av">${who}</div><div><div class="bubble">${esc(m.text)}${(m.attachments || []).map(a => `<div class="small" style="margin-top:4px;opacity:.85">📎 ${esc(a.name)}</div>`).join('')}${m.entities ? `<div class="small" style="margin-top:4px">${Object.entries(m.entities).filter(x => x[0] !== 'count').map(x => `<span class="tag primary xs">${esc(x[1])}</span>`).join(' ')}</div>` : ''}</div><div class="meta">${fmt.time(m.t)} ${meta}</div></div></div>`;
+}
+function quotaText(acc) { const q = Engine.quota(acc); if (q.circuit) return `<span class="tag danger">账号熔断中 · ${fmt.left(acc.circuitUntil)}恢复</span>`; if (q.offline) return `<span class="tag warning">设备离线 · 消息将排队</span>`; return `今日额度 ${acc.todaySent}/${q.effectiveDaily}${q.warm < 1 ? ' · 养号期' : ''} · 队列 ${ACQ.outreach.filter(o => o.status === 'QUEUED' && o.account === acc.id).length}`; }
+function suggestions(c, l, lastIn) {
+  const out = []; if (!lastIn) return out;
+  const m = Engine.matchScript(lastIn.text, 'REPLY');
+  if (m.script) { const r = Engine.render(m.script, l); out.push({ label: `话术库 · ${m.script.name}${m.script.requiresHuman ? '（需人工补充报价）' : ''}`, text: r.text, scriptId: m.script.id }); }
+  const ap = ACQ.approvals.find(a => a.convId === c.id && a.status === 'PENDING'); if (ap) out.push({ label: '✨ AI 依据企业资料草拟（需核实）', text: ap.aiSuggestion, approvalId: ap.id });
+  if (/加工|切割/.test(lastIn.text)) out.push({ label: '✨ AI 建议（无话术命中，LLM 生成）', text: `${l.nickname}，可以的，我们苏州仓有定尺切割服务，6 米定尺不加价，切割损耗按实结算。您大概要多少吨？` });
+  if (!out.length) out.push({ label: '✨ AI 建议', text: `${l.nickname || '您好'}，收到，我这边给您安排一下，稍后回您。` });
+  return out.slice(0, 3);
+}
+function useSugg(i) { const s = window.__sugg[i]; $('#draft').value = s.text; $('#draft').dataset.scriptId = s.scriptId || ''; $('#draft').dataset.approvalId = s.approvalId || ''; }
+function pickScript() { const l = ACQ.lead(conv().leadId); Drawer.open({ title: '选择话术', narrow: true, body: ACQ.scripts.filter(s => s.enabled).map(s => { const r = Engine.render(s, l); return `<div class="box" style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer" onclick="$('#draft').value=${JSON.stringify(r.text)};$('#draft').dataset.scriptId='${s.id}';this.closest('.drawer-mask').remove()"><div class="row"><b>${esc(s.name)}</b><span class="tag">${s.category}</span>${s.requiresHuman ? '<span class="tag warning">转人工</span>' : ''}<span class="sp"></span><span class="xs muted">回复率 ${fmt.pct(s.reply7, s.sent7)}</span></div><div class="small muted mt8">${UI.vars(s.content)}</div></div>`; }).join('') }); }
+function polish() { const t = $('#draft').value.trim(); if (!t) return toast('先输入或选择一条内容', 'warn'); const l = ACQ.lead(conv().leadId); $('#draft').value = t.replace(/。$/, '') + `～另外${l.product && l.product !== '—' ? l.product : '这批货'}今天苏州仓刚到，需要的话我给您留一部分。`; toast('✨ AI 已润色（模拟）；按商家设置，润色内容需人工确认后发送', 'ok'); }
+function send() {
+  const c = conv(), l = ACQ.lead(c.leadId), acc = ACQ.account(c.account); const text = $('#draft').value.trim(); if (!text) return;
+  const mod = Engine.moderate(text, l.platform); if (!mod.pass) return Modal.open({ title: '内容安全检查未通过', body: `<div class="alert error">${mod.reasons.join('<br>')}</div><p class="small muted mt8">请修改后再发送。禁词列表可在「设置 → 内容安全」维护。</p>` });
+  if (c.status !== 'HUMAN') { c.status = 'HUMAN'; c.takenBy = me.id; c.takenAt = Date.now(); c.needHumanReason = null; const inst = ACQ.instanceOf(l.id); if (inst && inst.status === 'WAITING' && inst.waitingType !== 'HUMAN_TASK') { inst.status = 'PAUSED'; inst.pausedReason = '人工接管'; } toast('已自动接管：机器暂停自动回复与流程推进', 'ok'); }
+  const pacing = Engine.pacing(acc); const m = { id: c.id + '-' + (c.messages.length + 1), dir: 'OUT', from: 'USER', by: me.id, text, t: Date.now(), status: acc.exec === 'RPA' ? 'QUEUED' : 'SENT', pacing, scriptId: +$('#draft').dataset.scriptId || null };
+  c.messages.push(m); c.lastAt = m.t; acc.todaySent++;
+  ACQ.outreach.unshift({ id: 'OT' + Date.now().toString().slice(-6), leadId: l.id, account: acc.id, trigger: 'MANUAL', round: 0, scriptId: m.scriptId, content: text, hits: [], status: m.status, sentAt: m.status === 'SENT' ? m.t : null, scheduledAt: m.t + pacing.preDelaySec * 1000 });
+  if (!l.lastContactedAt || l.lastContactedAt < m.t) l.lastContactedAt = m.t; if (l.stage === 'NEW') l.stage = 'CONTACTED';
+  ACQ.addEvent(l, { type: 'HUMAN_REPLY', text: `人工回复：${text.slice(0, 30)}…`, cls: 'user' });
+  ACQ.save(); renderChat(); renderList();
+  if (m.status === 'QUEUED') setTimeout(() => { m.status = 'SENT'; const o = ACQ.outreach.find(x => x.content === text); if (o) { o.status = 'SENT'; o.sentAt = Date.now(); } ACQ.save(); if (conv() === c) renderChat(); toast(`已通过「${acc.name}」发出（拟人延迟 ${pacing.preDelaySec}s，演示加速）`, 'ok'); }, 2500);
+}
+function takeover() { const c = conv(); c.status = 'HUMAN'; c.takenBy = me.id; c.takenAt = Date.now(); c.needHumanReason = null; const inst = ACQ.instanceOf(c.leadId); if (inst && inst.status === 'WAITING' && inst.waitingType !== 'HUMAN_TASK') { inst.status = 'PAUSED'; inst.pausedReason = '人工接管'; } ACQ.addEvent(ACQ.lead(c.leadId), { type: 'TAKEOVER', text: `${me.name} 接管会话`, cls: 'user' }); ACQ.save(); render(); toast('已接管，机器不再自动回复', 'ok'); }
+function release() { const c = conv(); c.status = 'AUTO'; c.takenBy = null; const inst = ACQ.instanceOf(c.leadId); if (inst && inst.status === 'PAUSED') { inst.status = 'WAITING'; inst.pausedReason = null; } ACQ.save(); render(); toast('已交还机器：话术库自动回复与流程恢复', 'ok'); }
+function markStage(st) { const c = conv(), l = ACQ.lead(c.leadId); if (st === 'WON') { Modal.open({ title: '标记成交', body: `<div class="field"><label>成交金额（元）</label><input class="input" id="amt" type="number" value="150000"></div><div class="field"><label>备注</label><input class="input" id="nt" placeholder="首批吨位 / 合同号"></div><label class="checkbox"><input type="checkbox" checked> 同步到货袋子客户中心（单向）</label>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">确认</button>', onMount(m, close) { $('#ok', m).onclick = () => { l.stage = 'WON'; l.wonAmount = +$('#amt', m).value; l.wonAt = Date.now(); const inst = ACQ.instanceOf(l.id); if (inst) { inst.status = 'TERMINATED'; inst.endReason = 'STAGE_WON'; } ACQ.addEvent(l, { type: 'WON', text: `标记成交 ${fmt.money(l.wonAmount)}`, cls: 'user' }); ACQ.save(); close(); render(); toast('已标记成交并同步客户中心', 'ok'); }; } }); }
+  else { Modal.open({ title: '标记流失', body: `<div class="field"><label>原因</label><select class="select" id="rs"><option value="NOT_TARGET">非目标客户</option><option value="NO_REPLY">多次无回复</option><option value="REFUSED">客户拒绝</option><option value="COMPETITOR">已选同行</option></select></div>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">确认</button>', onMount(m, close) { $('#ok', m).onclick = () => { l.stage = 'LOST'; l.lostReason = $('#rs', m).value; const inst = ACQ.instanceOf(l.id); if (inst) { inst.status = 'TERMINATED'; inst.endReason = 'STAGE_LOST'; } ACQ.addEvent(l, { type: 'LOST', text: '标记流失：' + $('#rs', m).selectedOptions[0].text, cls: 'user' }); ACQ.save(); close(); render(); toast('已标记流失，流程终止', 'ok'); }; } }); }
+}
+function blacklist() { const c = conv(), l = ACQ.lead(c.leadId); Modal.confirm('加入黑名单', `将 <b>${esc(l.nickname)}</b>（${UI.platformName(l.platform)}）加入黑名单：立即终止流程与排队消息，之后所有渠道不再自动触达。`, () => { c.status = 'CLOSED'; l.stage = 'LOST'; l.lostReason = 'REFUSED'; const inst = ACQ.instanceOf(l.id); if (inst) { inst.status = 'TERMINATED'; inst.endReason = 'BLACKLISTED'; } ACQ.outreach.filter(o => o.leadId === l.id && o.status === 'QUEUED').forEach(o => o.status = 'CANCELLED'); ACQ.blacklist.unshift({ id: 'BL' + Date.now(), platform: l.platform, peer: l.nickname, leadId: l.id, reason: 'MANUAL', evidence: '人工拉黑', t: Date.now() }); ACQ.addEvent(l, { type: 'BLACKLIST', text: '加入黑名单', cls: 'user' }); ACQ.save(); render(); toast('已拉黑', 'ok'); }, { danger: true, okText: '拉黑' }); }
+function approve(id, direct) { const ap = ACQ.approvals.find(a => a.id === id); const c = conv(); ap.status = 'APPROVED_SENT'; ap.decidedAt = Date.now(); ap.finalContent = ap.aiSuggestion; ap.decidedBy = me.id; $('#draft').value = ap.aiSuggestion; $('#draft').dataset.approvalId = id; send(); const m = c.messages[c.messages.length - 1]; m.approvalId = id; advanceFlow(c, { type: 'HUMAN_DONE' }); ACQ.save(); renderChat(); }
+function editApproval(id) { const ap = ACQ.approvals.find(a => a.id === id); $('#draft').value = ap.aiSuggestion; $('#draft').dataset.approvalId = id; $('#draft').focus(); toast('已填入草稿，修改后发送即完成审核', 'ok'); }
+function reject(id) { const ap = ACQ.approvals.find(a => a.id === id); ap.status = 'REJECTED'; ap.decidedAt = Date.now(); ACQ.save(); renderChat(); toast('已驳回，请手工回复客户', 'warn'); }
+function advanceFlow(c, ev) { const inst = ACQ.instanceOf(c.leadId); if (!inst || inst.status === 'PAUSED') return null; const def = ACQ.flow(inst.flowId); const trace = Engine.flow.advance(inst, def, ev); inst.log = inst.log || []; trace.forEach(t => inst.log.push(Object.assign({ t: Date.now() }, t))); trace.forEach(t => { if (t.setStage) { ACQ.lead(c.leadId).stage = t.setStage; } }); return trace; }
+function simulate() {
+  const text = $('#simIn').value.trim(); if (!text) return; const c = conv(), l = ACQ.lead(c.leadId); if (c.status === 'CLOSED') return toast('已拉黑客户不会再进入会话', 'warn');
+  const m = Engine.matchScript(text, 'REPLY'); const ents = Engine.extractEntities(text);
+  const inMsg = { id: c.id + '-' + (c.messages.length + 1), dir: 'IN', from: 'CUSTOMER', text, t: Date.now(), read: true, match: m.refusal ? { source: 'RULE', rule: m.rule, refusal: true } : { source: m.source, rule: m.rule, scriptId: m.script ? m.script.id : null, category: m.category, confidence: m.confidence }, entities: ents.count ? ents : undefined };
+  c.messages.push(inMsg); c.lastAt = inMsg.t; l.replyCount++; l.lastActiveAt = inMsg.t; if (l.stage === 'CONTACTED' || l.stage === 'NEW') l.stage = 'REPLIED';
+  if (ents.count) { l.entities = Object.assign({}, l.entities || {}, ents); delete l.entities.count; l.score = Math.min(98, l.score + 6); }
+  ACQ.addEvent(l, { type: 'REPLY', text: `客户回复：${text}`, cls: 'cust' });
+  const flowTrace = advanceFlow(c, { type: 'REPLY', category: m.category, refusal: !!m.refusal, entities: ents });
+  if (m.refusal) { c.status = 'CLOSED'; l.stage = 'LOST'; l.lostReason = 'REFUSED'; ACQ.blacklist.unshift({ id: 'BL' + Date.now(), platform: l.platform, peer: l.nickname, leadId: l.id, reason: 'REFUSED', evidence: text, t: Date.now() }); ACQ.outreach.filter(o => o.leadId === l.id && o.status === 'QUEUED').forEach(o => o.status = 'CANCELLED'); ACQ.save(); renderChat(); renderList(); return toast('命中拒绝词：已拉黑、终止流程、取消排队消息', 'err'); }
+  if (c.status === 'HUMAN') { ACQ.save(); renderChat(); renderList(); return toast('会话已被人工接管，机器不自动回复', 'warn'); }
+  if (m.noReply) { ACQ.save(); renderChat(); return toast('客户确认语，无需回复', 'ok'); }
+  if (m.script) {
+    const r = Engine.render(m.script, l); const acc = ACQ.account(c.account); const pacing = Engine.pacing(acc);
+    const out = { id: c.id + '-' + (c.messages.length + 1), dir: 'OUT', from: 'AI', text: r.text, t: Date.now() + 1, scriptId: m.script.id, hits: r.hits, transition: !!m.script.requiresHuman, attachments: m.script.attachments, read: true, status: acc.exec === 'RPA' ? 'QUEUED' : 'SENT', pacing };
+    c.messages.push(out); c.lastAt = out.t; acc.todaySent++; ACQ.outreach.unshift({ id: 'OT' + Date.now().toString().slice(-6), leadId: l.id, account: acc.id, trigger: 'AUTO_REPLY', round: 0, scriptId: m.script.id, content: r.text, hits: r.hits, status: out.status, sentAt: Date.now() });
+    if (m.script.requiresHuman) { c.status = 'NEED_HUMAN'; c.needHumanReason = 'APPROVAL'; const ap = { id: 'AP' + String(ACQ.approvals.length + 1).padStart(3, '0'), leadId: l.id, convId: c.id, type: m.script.approvalType || 'QUOTE', assignee: l.owner, status: 'PENDING', createdAt: Date.now(), dueAt: Date.now() + 2 * ACQ.H, triggerText: text, aiSuggestion: m.script.approvalType === 'CONTRACT' ? `${l.nickname}，合同模板与付款条款（预付 30%、发货前付清）我发您邮箱，账期需负责人确认。（AI 草拟）` : `${l.nickname}，今日沙钢 ${l.entities && l.entities.spec ? l.entities.spec : 'HRB400 Φ16-25'} 苏州仓出厂价 3,850 元/吨（含税）${ents.quantity ? '，' + ents.quantity + '可按 3,830 谈' : ''}${ents.address ? '，送到' + ents.address + '约 +30/吨' : ''}。（AI 依据企业资料库「今日价格表 0925」草拟，请核实后发送）` }; ACQ.approvals.unshift(ap); ACQ.notices.unshift({ t: Date.now(), cls: 'flow', text: `【待审核】${l.nickname} 询价 → 审核单 ${ap.id}`, link: 'approvals.html' }); toast('命中「转人工」话术：已发过渡语，创建审核单并企微通知负责人', 'warn'); }
+    else toast(`规则命中「${m.script.name}」→ 自动回复（${r.hits.length} 个个性化变量）`, 'ok');
+    if (out.status === 'QUEUED') setTimeout(() => { out.status = 'SENT'; ACQ.save(); if (conv() === c) renderChat(); }, 2500);
+  } else { c.status = 'NEED_HUMAN'; c.needHumanReason = 'NO_MATCH'; ACQ.notices.unshift({ t: Date.now(), cls: 'user', text: `【待人工】${l.nickname} 消息无话术命中`, link: 'workbench.html?c=' + c.id }); toast('无话术命中且 LLM 置信度不足 → 转人工并通知负责人', 'warn'); }
+  if (flowTrace && flowTrace.length) toast('流程推进：' + flowTrace.map(t => t.label + ' → ' + t.outcome).join('；'));
+  if (l.score >= ACQ.merchant.hotThreshold && l.stage === 'REPLIED') { l.stage = 'HOT'; ACQ.notices.unshift({ t: Date.now(), cls: 'flow', text: `【高意向】${l.nickname} 意图分 ${l.score}`, link: 'leads.html?open=' + l.id }); }
+  ACQ.save(); renderChat(); renderList();
+}
+function simTimeout() { const c = conv(); const inst = ACQ.instanceOf(c.leadId); if (!inst) return toast('该线索没有进行中的流程', 'warn'); const trace = advanceFlow(c, { type: 'TIMEOUT' }); if (trace) { trace.filter(t => t.send).forEach(t => { const s = ACQ.script(t.send); const l = ACQ.lead(c.leadId); const r = Engine.render(s, l); c.messages.push({ id: c.id + '-' + (c.messages.length + 1), dir: 'OUT', from: 'AI', text: r.text, t: Date.now(), scriptId: s.id, hits: r.hits, read: true }); c.lastAt = Date.now(); }); toast('模拟超时：' + trace.map(t => t.label + ' → ' + t.outcome).join('；')); } ACQ.save(); renderChat(); }
+function pauseFlow() { const inst = ACQ.instanceOf(conv().leadId); if (inst.status === 'PAUSED') { inst.status = 'WAITING'; inst.pausedReason = null; } else { inst.status = 'PAUSED'; inst.pausedReason = '人工暂停'; } ACQ.save(); renderChat(); }
+function stopFlow() { const inst = ACQ.instanceOf(conv().leadId); Modal.confirm('终止流程', '终止后该线索不再由 SOP 自动推进，可稍后手动重新加入。', () => { inst.status = 'TERMINATED'; inst.endReason = 'MANUAL'; ACQ.save(); renderChat(); toast('流程已终止'); }, { danger: true }); }
+function startFlow() { const c = conv(); const f = ACQ.flows.filter(x => x.status === 'PUBLISHED'); Modal.open({ title: '加入跟进流程', body: `<div class="field"><label>选择流程</label><select class="select" id="fl">${f.map(x => `<option value="${x.id}">${x.name} v${x.publishedVersion}</option>`).join('')}</select></div><div class="alert info small">从首节点开始；若首节点为发送，将立即排队发送。</div>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">加入</button>', onMount(m, close) { $('#ok', m).onclick = () => { const def = ACQ.flow($('#fl', m).value); const inst = { id: 'FI' + Date.now(), flowId: def.id, version: def.publishedVersion, leadId: c.leadId, status: 'ACTIVE', currentNode: def.first, stepSeq: 0, loops: {}, autoSends: 0, startedAt: Date.now(), log: [] }; ACQ.flowInstances.push(inst); const trace = Engine.flow.advance(inst, def, null); trace.forEach(t => inst.log.push(Object.assign({ t: Date.now() }, t))); trace.filter(t => t.send).forEach(t => { const r = Engine.render(ACQ.script(t.send), ACQ.lead(c.leadId)); c.messages.push({ id: c.id + '-' + (c.messages.length + 1), dir: 'OUT', from: 'AI', text: r.text, t: Date.now(), scriptId: t.send, hits: r.hits, read: true }); }); ACQ.save(); close(); renderChat(); toast('已加入流程：' + trace.map(t => t.label).join(' → '), 'ok'); }; } }); }
+function setFollow() { const l = ACQ.lead(conv().leadId); Modal.open({ title: '设置跟进', body: `<div class="field"><label>时间</label><select class="select" id="when"><option value="3">3 小时后</option><option value="24">明天此时</option><option value="72" selected>3 天后</option><option value="168">一周后</option></select></div><div class="field"><label>备注</label><input class="input" id="nt" placeholder="例如：确认到货后报价"></div>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">保存</button>', onMount(m, close) { $('#ok', m).onclick = () => { ACQ.followUps.unshift({ id: 'FU' + Date.now(), leadId: l.id, owner: me.id, type: 'MANUAL', reason: 'HUMAN_SET', dueAt: Date.now() + (+$('#when', m).value) * ACQ.H, status: 'PENDING', note: $('#nt', m).value }); ACQ.save(); close(); toast('已加入跟进待办', 'ok'); }; } }); }
+function transfer() { const l = ACQ.lead(conv().leadId); Modal.open({ title: '转交线索', body: `<div class="field"><label>转交给</label><select class="select" id="to">${ACQ.users.filter(u => u.role === 'sales' && u.id !== l.owner).map(u => `<option value="${u.id}">${u.name}</option>`).join('')}</select></div>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">转交</button>', onMount(m, close) { $('#ok', m).onclick = () => { l.owner = +$('#to', m).value; ACQ.addEvent(l, { type: 'TRANSFER', text: '转交给 ' + ACQ.user(l.owner).name, cls: 'user' }); ACQ.save(); close(); render(); toast('已转交并企微通知', 'ok'); }; } }); }
+render();
+App.note(`<b>演示提示</b>：底部黄色栏可模拟客户来消息，试试「多少钱一吨」「发我资料」「再考虑一下」「要 100 吨到南京」「别发了」；右栏可采纳 AI 草拟报价并发送。`);
+</script>
+</body>
+</html>

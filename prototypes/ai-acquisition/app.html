@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>获客助手 App（执行端）</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  body { background: #0b1020; color: #e5e7eb; min-height: 100vh; }
+  .apphead { display: flex; align-items: center; gap: 14px; padding: 12px 22px; border-bottom: 1px solid #1f2a44; background: #0e1530; position: sticky; top: 0; z-index: 5; }
+  .apphead b { font-size: 15px; }
+  .apphead .muted { color: #8b95b0; }
+  .apphead a { color: #9db4ff; text-decoration: none; }
+  .apphead .sp { flex: 1; }
+  .stage { display: grid; grid-template-columns: 300px 400px minmax(420px, 1fr); gap: 22px; padding: 22px; align-items: start; }
+  .panel { background: #111936; border: 1px solid #22305a; border-radius: 14px; padding: 14px; }
+  .panel h4 { margin: 0 0 8px; font-size: 13px; color: #c7d2fe; letter-spacing: .04em; }
+  .panel .desc { font-size: 12px; color: #8b95b0; line-height: 1.6; margin-bottom: 10px; }
+  .scn { display: flex; flex-direction: column; gap: 8px; }
+  .scn button { text-align: left; background: #182248; border: 1px solid #2b3a6b; color: #e5e7eb; border-radius: 10px; padding: 9px 11px; cursor: pointer; font-size: 12.5px; line-height: 1.5; transition: .12s; }
+  .scn button:hover { background: #1f2c5c; border-color: #4c63b6; }
+  .scn button b { display: block; font-size: 13px; }
+  .scn button span { color: #8b95b0; font-size: 11.5px; }
+  .scn button.dg { border-color: #7f1d1d; } .scn button.dg:hover { background: #3b1111; }
+  .scn select { background: #182248; color: #e5e7eb; border: 1px solid #2b3a6b; border-radius: 8px; padding: 6px; font-size: 12px; width: 100%; }
+  .kvd { display: grid; grid-template-columns: 90px 1fr; gap: 4px 8px; font-size: 12px; color: #c7d2fe; }
+  .kvd span:nth-child(odd) { color: #8b95b0; }
+
+  /* 手机 */
+  .phone { width: 400px; }
+  .frame { width: 390px; height: 844px; background: #000; border-radius: 48px; padding: 12px; box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 0 0 2px #333; position: relative; margin: 0 auto; }
+  .screen { width: 100%; height: 100%; background: #f4f6fb; border-radius: 38px; overflow: hidden; position: relative; display: flex; flex-direction: column; color: #111827; }
+  .notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 120px; height: 30px; background: #000; border-radius: 0 0 20px 20px; z-index: 3; }
+  .sbar { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 8px 26px 0; font-size: 13px; font-weight: 600; }
+  .sbar .r { display: flex; gap: 6px; align-items: center; font-size: 12px; }
+  .batt { width: 24px; height: 11px; border: 1.5px solid #111; border-radius: 3px; position: relative; }
+  .batt i { position: absolute; left: 1px; top: 1px; bottom: 1px; background: #16a34a; border-radius: 1px; }
+  .batt.low i { background: #dc2626; }
+  .abar { display: flex; align-items: center; gap: 8px; padding: 8px 18px 10px; }
+  .abar h2 { font-size: 20px; margin: 0; }
+  .abar .conn { margin-left: auto; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #15803d; font-weight: 600; }
+  .abar .conn.off { background: #fee2e2; color: #b91c1c; } .abar .conn.pause { background: #fef3c7; color: #b45309; }
+  .body { flex: 1; overflow-y: auto; padding: 4px 14px 14px; }
+  .body::-webkit-scrollbar { width: 0; }
+  .tabbar { height: 74px; border-top: 1px solid #e5e7eb; background: #fff; display: flex; padding-bottom: 14px; }
+  .tabbar button { flex: 1; border: 0; background: none; font-size: 10.5px; color: #6b7280; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; position: relative; }
+  .tabbar button .i { font-size: 20px; }
+  .tabbar button.on { color: var(--primary); font-weight: 600; }
+  .tabbar button .dot { position: absolute; top: 8px; right: 22px; min-width: 16px; height: 16px; border-radius: 8px; background: #ef4444; color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+  .mc { background: #fff; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .mc h5 { margin: 0 0 8px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .mc h5 .r { margin-left: auto; font-weight: 400; font-size: 11px; color: #6b7280; }
+  .mc.warn { background: #fffbeb; border: 1px solid #fde68a; } .mc.dg { background: #fef2f2; border: 1px solid #fecaca; } .mc.ok { background: #f0fdf4; border: 1px solid #bbf7d0; } .mc.ai { background: linear-gradient(135deg, #eef2ff, #faf5ff); border: 1px solid #ddd6fe; }
+  .stat4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; }
+  .stat4 b { display: block; font-size: 20px; } .stat4 span { font-size: 10.5px; color: #6b7280; }
+  .acc { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid #f1f5f9; }
+  .acc:first-of-type { border-top: 0; }
+  .acc .nm { font-size: 13px; font-weight: 600; } .acc .sub { font-size: 11px; color: #6b7280; }
+  .acc .q { margin-left: auto; text-align: right; font-size: 11px; color: #6b7280; min-width: 90px; }
+  .acc .q .bar { height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 4px; overflow: hidden; } .acc .q .bar i { display: block; height: 100%; background: var(--primary); }
+  .chk { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid #f1f5f9; font-size: 13px; }
+  .chk:first-of-type { border-top: 0; }
+  .chk .d { font-size: 11px; color: #6b7280; }
+  .chk .st { margin-left: auto; font-size: 12px; font-weight: 600; color: #16a34a; } .chk .st.no { color: #dc2626; }
+  .chk .mini { margin-left: auto; }
+  .bigbtn { display: block; width: 100%; padding: 13px; border: 0; border-radius: 12px; background: var(--primary); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .bigbtn:disabled { background: #cbd5e1; }
+  .bigbtn.ghost { background: #fff; color: var(--primary); border: 1px solid #c7d6ff; }
+  .bigbtn.dg { background: #dc2626; }
+  .mini { padding: 5px 10px; border-radius: 8px; border: 1px solid #c7d6ff; background: #fff; color: var(--primary); font-size: 12px; cursor: pointer; }
+  .mini.dg { border-color: #fecaca; color: #b91c1c; } .mini.ok { border-color: #bbf7d0; color: #15803d; }
+  .code6 { font-family: Menlo, monospace; font-size: 30px; letter-spacing: .28em; text-align: center; padding: 12px; border: 2px dashed #c7d6ff; border-radius: 12px; background: #f8faff; }
+  .code6 input { width: 100%; border: 0; text-align: center; font: inherit; letter-spacing: inherit; background: none; outline: none; text-transform: uppercase; }
+  .steps4 { display: flex; gap: 4px; margin: 2px 0 14px; } .steps4 i { flex: 1; height: 4px; border-radius: 2px; background: #e5e7eb; } .steps4 i.on { background: var(--primary); }
+  .welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; gap: 12px; }
+  .welcome .logo { width: 84px; height: 84px; border-radius: 24px; background: linear-gradient(135deg, #1f5eff, #7c3aed); color: #fff; font-size: 40px; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(31,94,255,.35); }
+  .welcome p { color: #6b7280; font-size: 13px; line-height: 1.7; }
+  /* 执行 */
+  .exec .step { display: flex; gap: 10px; padding: 6px 0; font-size: 12.5px; align-items: flex-start; }
+  .exec .step .ic { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #d1d5db; flex: none; margin-top: 2px; }
+  .exec .step.done .ic { background: #16a34a; border-color: #16a34a; position: relative; } .exec .step.done .ic::after { content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .exec .step.run .ic { border-color: var(--primary); border-top-color: transparent; animation: spin 1s linear infinite; }
+  .exec .step.fail .ic { background: #dc2626; border-color: #dc2626; }
+  .exec .step.todo { color: #9ca3af; }
+  .exec .step .d { font-size: 11px; color: #6b7280; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .fake { border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-top: 8px; background: #ededed; font-size: 12px; }
+  .fake .h { background: #ededed; padding: 8px 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd; }
+  .fake .b { padding: 10px 12px; min-height: 80px; }
+  .fake .bub { background: #95ec69; border-radius: 8px; padding: 6px 10px; display: inline-block; max-width: 85%; float: right; line-height: 1.5; white-space: pre-wrap; }
+  .fake .bub.in { background: #fff; float: left; }
+  .fake .cur { display: inline-block; width: 2px; height: 14px; background: #111; vertical-align: -2px; animation: blink 1s steps(2) infinite; }
+  @keyframes blink { to { opacity: 0; } }
+  .fake .inp { background: #f7f7f7; border-top: 1px solid #ddd; padding: 8px 12px; color: #444; min-height: 34px; white-space: pre-wrap; }
+  .fake.dy { background: #111; color: #eee; } .fake.dy .h { background: #111; color: #fff; border-color: #333; } .fake.dy .cm { padding: 6px 0; border-bottom: 1px solid #222; } .fake.dy .cm b { color: #ffd700; } .fake.dy .cm.hit { background: rgba(255,215,0,.08); }
+  .banner { position: absolute; left: 14px; right: 14px; top: 92px; background: rgba(17,24,39,.92); color: #fff; border-radius: 12px; padding: 8px 12px; font-size: 12px; z-index: 4; display: flex; align-items: center; gap: 8px; }
+  .banner i { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: blink 1s steps(2) infinite; }
+  .qi { padding: 9px 0; border-top: 1px solid #f1f5f9; font-size: 12.5px; }
+  .qi:first-of-type { border-top: 0; }
+  .qi .t { display: flex; align-items: center; gap: 6px; } .qi .t b { font-size: 13px; }
+  .qi .cmd { margin-left: auto; font-family: Menlo, monospace; font-size: 10.5px; color: #9ca3af; }
+  .qi .d { color: #6b7280; font-size: 11.5px; margin-top: 2px; }
+  .qi .txt { color: #374151; font-size: 12px; margin-top: 3px; background: #f8fafc; border-radius: 8px; padding: 5px 8px; }
+  .ty { font-size: 10px; padding: 1px 6px; border-radius: 4px; font-family: Menlo, monospace; font-weight: 600; }
+  .ty.SEND_DM { background: #dbeafe; color: #1d4ed8; } .ty.REPLY_GROUP { background: #dbeafe; color: #1d4ed8; } .ty.POST_MOMENT { background: #ede9fe; color: #6d28d9; } .ty.CAPTURE_GROUP, .ty.CAPTURE_COMMENTS, .ty.CAPTURE_MOMENTS { background: #fef3c7; color: #b45309; } .ty.PULL_INBOX { background: #e5e7eb; color: #374151; }
+  .msgl { padding: 9px 0; border-top: 1px solid #f1f5f9; font-size: 12.5px; } .msgl:first-of-type { border-top: 0; }
+  .msgl .chain { margin-top: 6px; padding-left: 10px; border-left: 2px solid #ddd6fe; font-size: 11.5px; color: #4b5563; line-height: 1.7; }
+  .tog { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid #f1f5f9; font-size: 13px; } .tog:first-of-type { border-top: 0; } .tog .d { font-size: 11px; color: #6b7280; }
+  .sw { width: 44px; height: 26px; border-radius: 13px; background: #d1d5db; position: relative; cursor: pointer; flex: none; transition: .15s; } .sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: .15s; box-shadow: 0 1px 3px rgba(0,0,0,.2); } .sw.on { background: #16a34a; } .sw.on::after { left: 21px; }
+  .sk { display: grid; grid-template-columns: 1fr auto auto; gap: 4px 8px; font-size: 12px; align-items: center; padding: 6px 0; border-top: 1px solid #f1f5f9; } .sk:first-of-type { border-top: 0; } .sk .v { font-family: Menlo, monospace; font-size: 11px; color: #6b7280; } .sk .ok { color: #16a34a; font-size: 11px; } .sk .up { color: #b45309; font-size: 11px; }
+
+  /* WS 面板 */
+  .wsh { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12px; color: #8b95b0; }
+  .wsh .st { font-weight: 700; color: #22c55e; } .wsh .st.off { color: #ef4444; }
+  .wslog { max-height: 700px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+  .we { border-radius: 10px; padding: 8px 10px; border: 1px solid #22305a; background: #0e1530; }
+  .we.down { border-left: 3px solid #60a5fa; } .we.up { border-left: 3px solid #34d399; } .we.sys { border-left: 3px solid #a78bfa; background: #14103a; } .we.err { border-left: 3px solid #f87171; }
+  .we .h { display: flex; gap: 8px; align-items: center; color: #c7d2fe; } .we .h .dir { font-weight: 700; font-size: 11px; } .we.down .dir { color: #60a5fa; } .we.up .dir { color: #34d399; } .we.sys .dir { color: #a78bfa; } .we.err .dir { color: #f87171; }
+  .we .h .t { margin-left: auto; color: #6b7280; font-family: Menlo, monospace; font-size: 11px; }
+  .we pre { margin: 6px 0 0; font-size: 11px; color: #a5b4fc; white-space: pre-wrap; word-break: break-all; font-family: Menlo, monospace; line-height: 1.5; max-height: 220px; overflow: auto; }
+  .we details summary { cursor: pointer; color: #6b7280; font-size: 11px; margin-top: 4px; }
+  .legend { display: flex; gap: 12px; font-size: 11px; color: #8b95b0; margin-bottom: 8px; } .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  .toasts { position: fixed; right: 20px; bottom: 20px; }
+</style>
+</head>
+<body>
+<div class="apphead"><b>货袋子获客助手 · Android 执行端原型</b><span class="muted small">对应 02 分册 §4 执行端设计 · 05 分册 §2.2 App 关键设计 / §2.3 设备治理 · 决策 Q2 = 自研 App</span><span class="sp"></span><a href="channels.html?tab=devices">后台「渠道与设备」→</a><a href="index.html">原型总览 →</a></div>
+<div class="stage">
+  <aside class="panel"><h4>场景控制（模拟服务端 / 环境）</h4><div class="desc">左侧按钮模拟服务端下发指令或手机环境变化；手机里的操作与后台原型共用同一份演示数据（同源 localStorage），执行结果可在「触达记录 / 渠道与设备 / 风控」页看到。</div><div class="scn" id="scn"></div><div class="panel" style="margin-top:12px;padding:10px"><h4>设备</h4><div class="kvd" id="devkv"></div></div></aside>
+  <div class="phone"><div class="frame"><div class="notch"></div><div class="screen" id="screen"></div></div></div>
+  <aside class="panel"><h4>服务端视角 · WebSocket 报文（JSON over WSS）</h4><div class="wsh"><span>连接：</span><span class="st" id="wsst">CONNECTED</span><span id="hb">心跳 #0</span><span class="sp" style="flex:1"></span><span>演示加速 ×<b id="spd">10</b></span><button class="mini" onclick="A.log=[];save();renderWs()">清空</button></div><div class="legend"><span><i style="background:#60a5fa"></i>服务端 → 执行端（指令）</span><span><i style="background:#34d399"></i>执行端 → 服务端（回执 / 事件）</span><span><i style="background:#a78bfa"></i>服务端处理</span></div><div class="wslog" id="wslog"></div></aside>
+</div>
+<div class="toasts" id="toasts"></div>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/app.js"></script>
+<script>
+/* ---------- App 本地状态（模拟 App 内 SQLite） ---------- */
+const KEY = 'acq:app:v1', SPEED = 10;
+const DEV = ACQ.devices.find(d => d.id === 'd1');
+const DEVACC = () => ACQ.accounts.filter(a => a.device === DEV.id);
+const SKILLS0 = [
+  { id: 'WxSendDm', v: '1.4.2', fit: '微信 8.0.40–8.0.56', ok: true }, { id: 'WxReadGroup', v: '1.4.0', fit: '微信 8.0.40–8.0.56', ok: true }, { id: 'WxReadMoments', v: '1.3.1', fit: '微信 8.0.40–8.0.56', ok: true }, { id: 'WxPostMoment', v: '1.3.1', fit: '微信 8.0.40–8.0.56', ok: true }, { id: 'WxReplyGroup', v: '1.2.0', fit: '微信 8.0.40–8.0.56', ok: true },
+  { id: 'DyReadComments', v: '2.1.0', fit: '抖音 31.x–32.x', ok: true }, { id: 'DySendDm', v: '2.0.3', fit: '抖音 31.x–32.x', ok: true }, { id: 'XhsReadComments', v: '1.2.0', fit: '小红书 8.5–8.6', ok: true }, { id: 'XhsSendDm', v: '1.1.4', fit: '小红书 8.5–8.6', ok: true },
+];
+function fresh() { return { stage: 'welcome', perms: { acc: false, batt: false, notif: false, overlay: false, auto: false }, tab: 'home', ws: 'CONNECTED', hb: 0, paused: false, auto: true, log: [], inbox: [], done: [], seen: [], buf: [], battery: DEV.battery, net: DEV.net, skills: SKILLS0, skillBlock: null, verify: null, quotaFactor: 1, extra: [], sinceReset: Date.now() }; }
+let A; try { A = JSON.parse(localStorage.getItem(KEY)); } catch (e) { A = null; } if (!A) A = fresh();
+if (A.cur) { A.log.unshift({ dir: 'err', title: `App 重启：指令 ${A.cur.cmd.cmdId} 执行中断，未回执 → 服务端超时后重发（幂等）`, t: Date.now() }); A.cur = null; }
+function save() { A.log = A.log.slice(0, 80); localStorage.setItem(KEY, JSON.stringify(A)); }
+const sleep = ms => new Promise(r => setTimeout(r, ms / SPEED)); const real = ms => new Promise(r => setTimeout(r, ms));
+const now = () => Date.now();
+const rid = p => p + '_' + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+/* ---------- WS 报文日志 ---------- */
+function ws(dir, title, obj) { A.log.unshift({ dir, title, obj, t: now() }); if (A.log.length > 80) A.log.pop(); save(); renderWs(); }
+function renderWs() {
+  $('#wsst').textContent = A.ws; $('#wsst').className = 'st ' + (A.ws === 'CONNECTED' ? '' : 'off'); $('#hb').textContent = `心跳 #${A.hb}`;
+  $('#wslog').innerHTML = A.log.map(e => `<div class="we ${e.dir}"><div class="h"><span class="dir">${{ down: '⬇ 服务端→执行端', up: '⬆ 执行端→服务端', sys: '⚙ 服务端处理', err: '⚠ 异常' }[e.dir]}</span><span>${esc(e.title)}</span><span class="t">${fmt.hm(e.t)}:${String(new Date(e.t).getSeconds()).padStart(2, '0')}</span></div>${e.obj ? `<details ${A.log.indexOf(e) < 2 ? 'open' : ''}><summary>报文</summary><pre>${esc(JSON.stringify(e.obj, null, 2))}</pre></details>` : ''}</div>`).join('') || '<div class="desc">暂无报文。手机绑定后开始心跳与指令交互。</div>';
+}
+
+/* ---------- 指令队列（服务端视角 → 本机待执行） ---------- */
+const CAPT = { PUBLIC_COMMENTS: 'CAPTURE_COMMENTS', OWN_CONTENT: 'CAPTURE_COMMENTS', GROUP: 'CAPTURE_GROUP', MOMENTS: 'CAPTURE_MOMENTS' };
+function queue() {
+  const ids = DEVACC().map(a => a.id), items = [];
+  ACQ.outreach.filter(o => ids.includes(o.account) && o.status === 'QUEUED').forEach(o => { const l = ACQ.lead(o.leadId), a = ACQ.account(o.account); items.push({ cmdId: 'c_' + o.id, type: 'SEND_DM', platform: a.platform, accountId: a.id, peer: l.nickname || '（无昵称）', text: o.content, at: o.scheduledAt || now(), ref: { kind: 'outreach', id: o.id }, trigger: o.trigger }); });
+  ACQ.posterDispatches.forEach(d => d.items.filter(i => ids.includes(i.account) && i.status === 'QUEUED').forEach(i => { const p = ACQ.posters.find(x => x.id === d.posterId); items.push({ cmdId: 'c_' + i.id, type: i.shareChannel === 'moments' ? 'POST_MOMENT' : 'REPLY_GROUP', platform: i.platform, accountId: i.account, peer: i.targetName, text: d.caption, image: `poster-${i.trackCode}.png（${p.title}）`, at: d.scheduledAt, ref: { kind: 'pd', d: d.id, i: i.id } }); }));
+  ACQ.captureRules.filter(r => r.enabled && r.accounts.some(x => ids.includes(x))).forEach(r => { const a = ACQ.account(r.accounts.find(x => ids.includes(x))); const day = new Date().toDateString(); const cmdId = 'c_' + r.id + '_' + day.replace(/\s/g, ''); if (r.lastRun < now() - 2 * ACQ.H && !A.seen.includes(cmdId)) items.push({ cmdId, type: CAPT[r.scope] || 'CAPTURE_COMMENTS', platform: a.platform, accountId: a.id, peer: r.targets ? r.targets.join(' / ') : r.keywords.join(' / '), text: `规则「${r.name}」· 回看 ${r.lookback}h · 上限 ${r.max} 条`, at: now() - 1, ref: { kind: 'rule', id: r.id }, rule: r }); });
+  A.extra.filter(x => !A.seen.includes(x.cmdId)).forEach(x => items.push(x));
+  return items.sort((x, y) => x.at - y.at);
+}
+function blocker(cmd) {
+  const a = ACQ.account(cmd.accountId);
+  if (A.ws !== 'CONNECTED') return '离线：等待重连';
+  if (!ACQ.globalSwitch.rpaEnabled) return '服务端总闸已暂停 RPA';
+  if (A.paused) return '本机已暂停取新指令';
+  if (A.verify && A.verify.accountId === a.id) return '需人工验证后恢复';
+  if (A.skillBlock && A.skillBlock.platform === cmd.platform) return `等待技能包更新（${A.skillBlock.skill}）`;
+  if (a.status === 'RESTRICTED') return '账号熔断至 ' + fmt.hm(a.circuitUntil || now() + ACQ.H);
+  if (a.status !== 'ONLINE') return '账号 ' + UI.status(a.status).replace(/<[^>]+>/g, '');
+  const q = Engine.quota(a); if (q.remainDay <= 0 && /SEND|POST|REPLY/.test(cmd.type)) return '今日额度已用完';
+  if (cmd.at > now() + ACQ.H) return '计划 ' + fmt.hm(cmd.at);
+  return null;
+}
+
+/* ---------- 拟人化执行器 ---------- */
+let running = false;
+async function execute(cmd) {
+  if (running) return; running = true;
+  const a = ACQ.account(cmd.accountId); const pc = Engine.pacing(a);
+  if (A.seen.includes(cmd.cmdId)) { ws('sys', `幂等：cmdId ${cmd.cmdId} 已执行过，忽略重复下发`); running = false; return; }
+  const payload = cmd.type === 'SEND_DM' ? { peer: { nickname: cmd.peer, remark: '', wxidHint: null }, text: cmd.text } : cmd.type === 'POST_MOMENT' ? { text: cmd.text, attachments: [{ type: 'IMAGE', url: 'https://oss/.../' + cmd.image.split('（')[0] }] } : cmd.type === 'REPLY_GROUP' ? { group: cmd.peer, text: cmd.text, attachments: [{ type: 'IMAGE', url: 'https://oss/.../' + (cmd.image || '').split('（')[0] }] } : { targets: cmd.peer.split(' / '), keywords: cmd.rule ? cmd.rule.keywords : [], lookbackHours: cmd.rule ? cmd.rule.lookback : 24, maxItems: cmd.rule ? cmd.rule.max : 50, humanize: cmd.rule && cmd.rule.scope === 'PUBLIC_COMMENTS' ? { dwellSec: [30, 120], idleScrollEvery: 5 } : undefined };
+  ws('down', `${cmd.type} · ${cmd.peer}`, { cmdId: cmd.cmdId, type: cmd.type, platform: cmd.platform, accountId: cmd.accountId, payload, pacing: { preDelayMs: pc.preDelaySec * 1000, typingSpeedCps: pc.typingCps, postDelayMs: pc.postDelaySec * 1000 }, deadlineAt: now() + 30 * 60e3, evidence: /SEND|POST|REPLY/.test(cmd.type) ? 'SCREENSHOT_ON_FINISH' : 'SCREENSHOT_ON_ERROR' });
+  const isCapture = /CAPTURE/.test(cmd.type);
+  const appName = { WECHAT_PERSONAL: '微信', DOUYIN: '抖音', XIAOHONGSHU: '小红书' }[cmd.platform];
+  const steps = isCapture ? [
+    ['校验幂等 · 写入本地 SQLite', `cmdId ${cmd.cmdId}`], ['拟人等待', `${pc.preDelaySec}s（截断正态采样）`], [`唤起${appName}到前台`, '看门狗确认前台包名'], [`打开${cmd.type === 'CAPTURE_GROUP' ? '群聊' : cmd.type === 'CAPTURE_MOMENTS' ? '朋友圈' : '搜索结果'}`, cmd.peer.slice(0, 40)], ['滚动读取界面树', `AccessibilityNodeInfo · 每屏停留 ${cmd.rule && cmd.rule.scope === 'PUBLIC_COMMENTS' ? '30~120s' : '2~6s'}`], ['关键词初筛', `${(cmd.rule || { keywords: [] }).keywords.join(' / ') || '全部'}`], ['夹杂无关浏览 1 屏', '每 5 条内容一次'], ['回执 · 上报命中记录', '服务端 AI 判定意图 → 成线索'],
+  ] : [
+    ['校验幂等 · 写入本地 SQLite', `cmdId ${cmd.cmdId}`], ['拟人等待', `${pc.preDelaySec}s（截断正态采样）`], [`唤起${appName}到前台`, '看门狗确认前台包名'], [cmd.type === 'POST_MOMENT' ? '进入朋友圈 · 选择图片' : `搜索并打开「${cmd.peer}」`, cmd.type === 'POST_MOMENT' ? cmd.image : '按昵称 / 备注匹配，未找到则回执 NOT_FOUND'], ['逐字输入', `${pc.typingCps} 字/秒 · 含 1 次删改`], ['点击发送', '校验消息气泡出现'], ['截图存证 · 上传 OSS', '保留 90 天'], ['回执 OK', `发后等待 ${pc.postDelaySec}s`],
+  ];
+  A.cur = { cmd, steps: steps.map(s => ({ label: s[0], d: s[1], st: 'todo' })), typed: '', items: [], acc: a }; render();
+  const st = (i, s) => { A.cur.steps[i].st = s; render(); };
+  const hits = []; let failed = null;
+  for (let i = 0; i < steps.length; i++) {
+    st(i, 'run');
+    if (i === 1) await sleep(Math.min(pc.preDelaySec, 15) * 1000); else await real(700);
+    if (i === 3 && A.pendingUiChanged && cmd.platform === 'WECHAT_PERSONAL') { A.pendingUiChanged = false; failed = { status: 'FAILED', code: 'UI_CHANGED', message: `技能 ${cmd.type === 'SEND_DM' ? 'WxSendDm' : 'WxPostMoment'} 未找到「搜索」控件（微信 ${DEV.apps.wechat} 界面变化）` }; st(i, 'fail'); break; }
+    if (i === 4 && A.pendingCaptcha && cmd.platform === 'WECHAT_PERSONAL') { A.pendingCaptcha = false; failed = { status: 'NEED_VERIFY', code: 'WX_CAPTCHA', message: '出现滑块验证，已停止取新指令' }; st(i, 'fail'); break; }
+    if (i === 4 && !isCapture) { const t = cmd.text; for (let k = 1; k <= t.length; k += 3) { A.cur.typed = t.slice(0, k); if (k > 8 && k < 14 && !A.cur.fixed) { A.cur.fixed = true; A.cur.typed = t.slice(0, k - 2); render(); await real(350); } render(); await real(Math.round(3000 / pc.typingCps)); } A.cur.typed = t; render(); }
+    if (i === 4 && isCapture) { const r = cmd.rule; const src = ACQ.leads.filter(l => l.platform === cmd.platform).slice(0, 4); const pool = r && r.scope === 'GROUP' ? ['谁有盘螺 8 个的，急要 50 吨', '有做线材的吗，报个价', '今天什么行情，跌了吗', '求购 HRB400 Φ20 现货 100 吨，苏州', '哈哈哈', '找货：Q235B 中板 12mm'] : ['求推荐一家能开票的钢贸公司', '有没有货，螺纹钢 HRB400 20 的', '这个价格还行', '多少钱一吨？苏州', '第一', '哪里有钢厂直发的']; for (let k = 0; k < pool.length; k++) { const hit = (r ? r.keywords.concat(r.intents) : []).some(kw => pool[k].includes(kw.replace(/\s.*/, ''))); A.cur.items.push({ text: pool[k], hit, nick: (src[k % src.length] || {}).nickname || '用户' + (1000 + k) }); if (hit) hits.push(A.cur.items[A.cur.items.length - 1]); render(); await real(650); } }
+    st(i, 'done');
+  }
+  if (!failed) { A.seen.unshift(cmd.cmdId); A.seen = A.seen.slice(0, 200); }
+  const devState = { battery: A.battery, net: A.net, foregroundApp: { WECHAT_PERSONAL: 'com.tencent.mm', DOUYIN: 'com.ss.android.ugc.aweme', XIAOHONGSHU: 'com.xingin.xhs' }[cmd.platform], appVersion: cmd.platform === 'WECHAT_PERSONAL' ? DEV.apps.wechat : cmd.platform === 'DOUYIN' ? DEV.apps.douyin : DEV.apps.xhs };
+  if (failed) {
+    ws('up', `回执 ${failed.status} · ${failed.code}`, { cmdId: cmd.cmdId, status: failed.status, code: failed.code, message: failed.message, screenshotUrl: `https://oss/.../${cmd.cmdId}-error.png`, deviceState: devState });
+    if (failed.code === 'UI_CHANGED') { A.skillBlock = { platform: cmd.platform, skill: failed.message.match(/技能 (\w+)/)[1] }; ACQ.incidents.unshift({ id: rid('RI'), t: now(), account: a.id, signal: 'UI_CHANGED', level: 'warning', text: failed.message + ' → 该平台 RPA 指令暂停，等待技能包更新', handled: false, evidence: true }); ws('sys', '收到 UI_CHANGED → 暂停该平台全部 RPA 指令，运营告警，等待技能包发布'); }
+    if (failed.code === 'WX_CAPTCHA') { A.verify = { accountId: a.id, t: now(), signal: 'CAPTCHA_SHOWN' }; a.status = 'NEED_VERIFY'; ACQ.incidents.unshift({ id: rid('RI'), t: now(), account: a.id, signal: 'CAPTCHA_SHOWN', level: 'danger', text: '微信出现滑块验证 → 账号 NEED_VERIFY，需人工在设备上处理后点击「恢复」', handled: false, evidence: true }); ws('up', 'RISK_SIGNAL · CAPTCHA_SHOWN', { event: 'RISK_SIGNAL', deviceId: DEV.id, accountId: a.id, signal: 'CAPTCHA_SHOWN', screenshotUrl: `https://oss/.../${cmd.cmdId}-captcha.png` }); ws('sys', '账号熔断 + 状态 NEED_VERIFY；企微告警商家管理员；该账号队列暂停'); ACQ.notices.unshift({ t: now(), cls: 'sys', text: `【账号异常】${a.name} 出现滑块验证，需在工作手机上人工处理后恢复`, link: 'channels.html' }); }
+    A.done.unshift({ cmdId: cmd.cmdId, type: cmd.type, peer: cmd.peer, status: failed.status, code: failed.code, t: now() }); ws('sys', `指令 ${cmd.cmdId} 未完成，保留在队列；账号 / 技能恢复后由服务端重新下发（同 cmdId，执行端未标记已执行）`);
+  } else if (isCapture) {
+    const items = hits.map((h, k) => ({ peer: { nickname: h.nick }, text: h.text, source: cmd.peer.split(' / ')[k % Math.max(1, cmd.peer.split(' / ').length)], postedAt: now() - k * 600e3 }));
+    ws('up', `回执 OK · 抓取 ${items.length} 条`, { cmdId: cmd.cmdId, status: 'OK', data: { scanned: A.cur.items.length, items }, deviceState: devState });
+    const leads = items.filter(x => /求购|谁有|找货|推荐|有没有货|多少钱|哪里有/.test(x.text)); ws('sys', `IntentClassifier：${items.length} 条 → ${leads.length} 条有效意图（规则命中直接给分，未命中走 LLM）→ 去重后写入线索表并分配`);
+    if (cmd.rule) { cmd.rule.lastRun = now(); cmd.rule.lastStats = { raw: A.cur.items.length, leads: leads.length, dedup: items.length - leads.length }; }
+    A.done.unshift({ cmdId: cmd.cmdId, type: cmd.type, peer: cmd.peer, status: 'OK', t: now(), n: items.length });
+  } else {
+    ws('up', '回执 OK', { cmdId: cmd.cmdId, status: 'OK', data: { sentAt: now() }, screenshotUrl: `https://oss/.../${cmd.cmdId}.png`, deviceState: devState });
+    a.todaySent++;
+    if (cmd.ref.kind === 'outreach') { const o = ACQ.outreach.find(x => x.id === cmd.ref.id); o.status = 'SENT'; o.sentAt = now(); o.evidence = true; o.pacing = { pre: pc.preDelaySec, typing: Math.round(cmd.text.length / pc.typingCps) }; delete o.queuePos; const l = ACQ.lead(o.leadId); l.outreachCount = (l.outreachCount || 0) + 1; if (l.stage === 'NEW') l.stage = 'CONTACTED'; ACQ.addEvent(l, { type: 'OUTREACH_SENT', text: `工作手机 ${DEV.name} 经「${a.name}」发送（RPA，截图存证）`, cls: 'sys' }); ws('sys', `触达 ${o.id} → SENT；线索 ${l.id} 阶段 ${l.stage}；写入 lead_event OUTREACH_SENT`); }
+    if (cmd.ref.kind === 'pd') { const d = ACQ.posterDispatches.find(x => x.id === cmd.ref.d); const it = d.items.find(x => x.id === cmd.ref.i); it.status = 'SENT'; it.sentAt = now(); it.scans = 0; it.leads = 0; it.evidence = true; if (d.items.every(x => x.status !== 'QUEUED')) d.status = d.items.some(x => x.status === 'FAILED') ? 'PARTIAL' : 'DONE'; ws('sys', `海报分发 ${d.id} 目标「${it.targetName}」→ SENT，追踪码 ${it.trackCode}`); }
+    if (cmd.ref.kind === 'reply') { const c = ACQ.convOf(cmd.ref.leadId); if (c) { c.messages.push({ id: c.id + '-' + (c.messages.length + 1), dir: 'OUT', from: 'AI', text: cmd.text, t: now(), read: true, scriptId: cmd.ref.scriptId }); c.lastAt = now(); } }
+    A.done.unshift({ cmdId: cmd.cmdId, type: cmd.type, peer: cmd.peer, status: 'OK', t: now() });
+  }
+  ACQ.save(); A.cur = null; save(); render(); running = false;
+}
+
+/* ---------- 自动取指令 / 心跳 ---------- */
+function tick() {
+  if (A.stage === 'main' && A.ws === 'CONNECTED') { A.hb++; if (A.hb % 10 === 1) ws('up', 'HEARTBEAT（每 30s，面板只记录每 10 次）', { event: 'HEARTBEAT', deviceId: DEV.id, health: A.paused ? 'PAUSED' : 'ONLINE', battery: A.battery, net: A.net, accounts: DEVACC().map(a => ({ accountId: a.id, platform: a.platform, loggedIn: true, appVersion: a.platform === 'WECHAT_PERSONAL' ? DEV.apps.wechat : a.platform === 'DOUYIN' ? DEV.apps.douyin : DEV.apps.xhs })), skills: A.skills.map(s => s.id + '@' + s.v) }); else { save(); renderWs(); } DEV.lastHeartbeat = now(); DEV.status = 'ONLINE'; DEV.battery = A.battery; ACQ.save(); }
+  if (A.stage === 'main' && A.auto && !running) { const next = queue().find(c => !blocker(c)); if (next) execute(next); }
+  if (A.stage === 'main') render();
+}
+setInterval(tick, 30000 / SPEED);
+
+/* ---------- 场景（模拟服务端 / 环境） ---------- */
+const INBOUND = [['多少钱一吨？苏州能送吗', '问价 → 命中「报价」需人工'], ['不需要，别再发了', '拒绝词 → 黑名单 + 终止流程'], ['好的，先发份资料我看看', '命中「资料」→ 自动回复'], ['你们做哪些规格？', '未命中规则 → LLM 兜底 / 转人工']];
+const SCN = [
+  { id: 'newcmd', t: '服务端下发一条 SEND_DM', d: '为一条待首触的微信线索渲染话术 101 并入队（服务端先过变量校验）', run() { const l = ACQ.leads.find(x => x.platform === 'WECHAT_PERSONAL' && x.stage === 'NEW' && !ACQ.outreach.some(o => o.leadId === x.id)); if (!l) return toast('没有可首触的微信线索了', 'warn'); const r = Engine.render(ACQ.script(101), l); if (!r.ok) { ws('sys', `服务端 PersonalizationValidator 拦截：${r.problems.map(p => p.code + ' ' + p.text).join('；')}，不下发`); return toast('服务端拦截：' + r.problems[0].text, 'err'); } ACQ.outreach.unshift({ id: 'OT' + String(now()).slice(-6), leadId: l.id, account: 'a2', trigger: 'MANUAL', round: 1, scriptId: 101, content: r.text, hits: r.hits, status: 'QUEUED', scheduledAt: now(), queuePos: 1 }); ACQ.save(); ws('sys', `RiskGuard.acquire(a2) 通过 → 下发 SEND_DM 给 ${DEV.name}`); toast('已入队', 'ok'); render(); } },
+  { id: 'inbound', t: '客户回了一条微信（INBOUND_MESSAGE）', d: 'App 监听到新消息 → 上报 → 服务端匹配话术 → 是否下发自动回复', sel: INBOUND, run(i) { inbound(INBOUND[i || 0][0]); } },
+  { id: 'captcha', t: '下一次微信操作弹出滑块验证', d: 'RISK_SIGNAL CAPTCHA_SHOWN → 停止取新指令 → 需人工在手机上处理后恢复', run() { A.pendingCaptcha = true; save(); toast('下一条微信指令执行时将触发验证码', 'warn'); } },
+  { id: 'ui', t: '微信升级导致控件变化（UI_CHANGED）', d: '技能脚本找不到控件 → 回执 FAILED/UI_CHANGED → 该平台 RPA 暂停 → 技能包更新', run() { A.pendingUiChanged = true; save(); toast('下一条微信指令将因界面变化失败', 'warn'); } },
+  { id: 'net', t: '断网 5 秒后重连（幂等演示）', d: '心跳中断 → 离线暂存事件 → 重连后补传；服务端重发上一条指令被幂等忽略', run() { if (A.ws !== 'CONNECTED') return; A.ws = 'DISCONNECTED'; ws('err', 'WebSocket 断开：网络不可达，进入离线模式（本地队列 / 事件暂存）'); A.buf.push({ event: 'DEVICE_STATE', battery: A.battery, t: now() }); save(); render(); setTimeout(() => { A.ws = 'CONNECTED'; ws('up', `重连成功 · 补传离线事件 ${A.buf.length} 条`, { event: 'RESYNC', deviceId: DEV.id, lastSeenCmdId: A.seen[0] || null, buffered: A.buf }); A.buf = []; if (A.seen[0]) { ws('down', `服务端重发上一条指令 ${A.seen[0]}（未收到 ACK）`, { cmdId: A.seen[0], type: 'RESEND' }); ws('sys', `执行端：cmdId ${A.seen[0]} 已在本地 SQLite 标记执行，回 ACK 不重复发送`); } save(); render(); }, 5000); } },
+  { id: 'batt', t: '电量降到 15% / 切到 4G', d: '心跳上报设备状态 → 服务端降配：该设备账号配额 ×0.5', run() { A.battery = 15; A.net = '4G'; A.quotaFactor = .5; DEV.battery = 15; DEV.net = '4G'; ACQ.save(); ws('up', 'HEARTBEAT · battery 15 · net 4G', { event: 'HEARTBEAT', deviceId: DEV.id, battery: 15, net: '4G' }); ws('sys', '设备电量 <20% 且非 Wi-Fi → 该设备所有账号配额 ×0.5，直到恢复'); save(); render(); } },
+  { id: 'gate', t: '服务端「总闸」暂停 / 恢复全部 RPA', d: '运营一键暂停：所有执行端停止取新指令，正在执行的完成后不再继续', run() { ACQ.globalSwitch.rpaEnabled = !ACQ.globalSwitch.rpaEnabled; ACQ.save(); ws('down', ACQ.globalSwitch.rpaEnabled ? 'CONTROL · RESUME_ALL' : 'CONTROL · PAUSE_ALL', { type: 'CONTROL', action: ACQ.globalSwitch.rpaEnabled ? 'RESUME_ALL' : 'PAUSE_ALL', reason: '运营总闸' }); render(); } },
+  { id: 'reset', t: '重置 App 演示（回到未绑定）', d: '清空 App 本地状态，不影响后台演示数据', dg: true, run() { localStorage.removeItem(KEY); location.reload(); } },
+];
+function renderScn() { $('#scn').innerHTML = SCN.map((s, i) => `${s.sel ? `<select id="sel_${s.id}">${s.sel.map((o, k) => `<option value="${k}">${o[0]} — ${o[1]}</option>`).join('')}</select>` : ''}<button class="${s.dg ? 'dg' : ''}" onclick="SCN[${i}].run(${s.sel ? `+document.getElementById('sel_${s.id}').value` : ''})"><b>${s.t}</b><span>${s.d}</span></button>`).join(''); $('#devkv').innerHTML = `<span>设备</span><span>${DEV.name}</span><span>deviceId</span><span class="mono">${DEV.id} · ${DEV.os}</span><span>App</span><span>获客助手 v${DEV.app}</span><span>已装应用</span><span>微信 ${DEV.apps.wechat} · 抖音 ${DEV.apps.douyin} · 小红书 ${DEV.apps.xhs}</span><span>绑定账号</span><span>${DEVACC().map(a => a.name).join('、')}</span>`; }
+
+function inbound(text) {
+  const sent = ACQ.outreach.filter(o => o.account === 'a2' && o.status === 'SENT').sort((x, y) => y.sentAt - x.sentAt)[0]; const l = sent ? ACQ.lead(sent.leadId) : ACQ.lead('L010'); const a = ACQ.account('a2');
+  ws('up', `INBOUND_MESSAGE · ${l.nickname}`, { event: 'INBOUND_MESSAGE', deviceId: DEV.id, accountId: a.id, platform: a.platform, peer: { nickname: l.nickname, remark: '' }, text, receivedAt: now(), context: { lastOutboundCmdId: sent ? 'c_' + sent.id : null } });
+  const m = Engine.matchScript(text, 'REPLY'); const chain = []; let cmd = null;
+  const c = ACQ.convOf(l.id); if (c) { c.messages.push({ id: c.id + '-' + (c.messages.length + 1), dir: 'IN', from: 'CUSTOMER', text, t: now(), read: false }); c.lastAt = now(); }
+  if (m.refusal) { chain.push('命中拒绝词 → 拉黑 + 终止流程，不再下发任何触达'); ACQ.blacklist.unshift({ id: rid('BL'), platform: a.platform, peer: `${l.nickname}（${l.sourceChannel || '微信'}）`, leadId: l.id, reason: 'REFUSED', evidence: text, t: now() }); l.stage = 'LOST'; ACQ.addEvent(l, { type: 'BLACKLISTED', text: `客户回复「${text}」→ 自动加入黑名单`, cls: 'sys' }); ws('sys', `ReplyClassifier：REFUSED（${m.rule || '拒绝词'}）→ 黑名单 BL、线索 LOST、FlowInstance 终止；执行端无需动作`); }
+  else if (!m.script) { chain.push(`未命中规则 → LLM 兜底置信度 ${(m.confidence || 0.55).toFixed(2)} < 0.7 → 转人工，企微通知 ${ACQ.user(l.owner).name}`); ws('sys', 'ReplyClassifier：NO_MATCH / LOW_CONFIDENCE → 会话置 NEED_HUMAN，企微通知销售；执行端无需动作'); ACQ.notices.unshift({ t: now(), cls: 'flow', text: `【待人工】${l.nickname}（微信）回复「${text}」未命中话术`, link: 'workbench.html' }); if (c) { c.status = 'NEED_HUMAN'; c.needHumanReason = 'NO_MATCH'; } }
+  else if (m.script.requiresHuman) { chain.push(`命中「${m.script.name}」（${m.source === 'RULE' ? '规则 ' + m.rule : 'LLM'}）→ 需人工：生成审核单 + 下发过渡话术`); const tr = `${l.nickname}您好，收到～我这边马上给您核一下今天的价格，稍后回复您。`; cmd = { cmdId: rid('c'), type: 'SEND_DM', platform: a.platform, accountId: a.id, peer: l.nickname, text: tr, at: now(), ref: { kind: 'reply', leadId: l.id, scriptId: m.script.id }, trigger: 'AUTO_REPLY' }; ACQ.approvals.unshift({ id: rid('AP'), leadId: l.id, convId: c ? c.id : null, type: m.script.approvalType || 'QUOTE', assignee: l.owner, status: 'PENDING', createdAt: now(), dueAt: now() + 2 * ACQ.H, triggerText: text, aiSuggestion: `${l.nickname}，今日苏州仓 HRB400 Φ20 出厂价 3,850 元/吨（含税），量大可谈；园区内送到约 +30/吨。（AI 依据企业资料库「今日价格表」，请核实后发送）` }); ws('sys', `ReplyClassifier：${m.category}（${m.source}）→ 话术 ${m.script.id} requiresHuman → 审核单 PENDING，企微通知；同时下发过渡话术 SEND_DM`); if (c) { c.status = 'NEED_HUMAN'; c.needHumanReason = 'APPROVAL'; } }
+  else { const r = Engine.render(m.script, l); if (r.ok) { chain.push(`命中「${m.script.name}」（${m.source === 'RULE' ? '规则 ' + m.rule : 'LLM'}）→ 渲染通过（变量 ${r.hits.join(' / ')}）→ 下发自动回复`); cmd = { cmdId: rid('c'), type: 'SEND_DM', platform: a.platform, accountId: a.id, peer: l.nickname, text: r.text, at: now(), ref: { kind: 'reply', leadId: l.id, scriptId: m.script.id }, trigger: 'AUTO_REPLY' }; ws('sys', `ReplyClassifier：${m.category}（${m.source}）→ 话术 ${m.script.id} → PersonalizationValidator 通过 → RiskGuard 通过 → 下发 SEND_DM`); } else { chain.push(`命中「${m.script.name}」但渲染失败：${r.problems.map(p => p.code).join('/')} → 转人工`); ws('sys', `渲染失败 ${r.problems.map(p => p.code + ' ' + p.text).join('；')} → 转人工`); } }
+  if (cmd) A.extra.unshift(cmd);
+  A.inbox.unshift({ t: now(), peer: l.nickname, text, chain, cmdId: cmd ? cmd.cmdId : null }); ACQ.save(); save(); render();
+}
+
+/* ---------- 手机 UI ---------- */
+function render() {
+  const s = $('#screen'); const sbar = `<div class="sbar"><span>${fmt.hm(now())}</span><span class="r">${A.net === 'Wi-Fi' ? '📶' : '4G'} <span class="batt ${A.battery < 20 ? 'low' : ''}"><i style="width:${A.battery}%"></i></span>${A.battery}%</span></div>`;
+  if (A.stage === 'welcome') { s.innerHTML = sbar + `<div class="welcome"><div class="logo">货</div><h2 style="margin:0">货袋子获客助手</h2><p>安装在工作手机上的执行端。只做三件事：接收后台下发的指令、像真人一样在微信 / 抖音 / 小红书里操作、把结果和截图传回去。<br><br>不需要 root，不读取微信数据库，只使用系统无障碍服务。</p><div class="mc warn" style="text-align:left;width:100%"><b>请先确认</b><div class="small">· 这是一台专用工作手机，登录的是小号<br>· 手机将长期亮屏 / 后台运行，建议插电<br>· 账号风险由商家自行承担（见后台风险告知）</div></div><button class="bigbtn" onclick="A.stage='perms';save();render()">开始配置</button><span class="small muted">v${DEV.app} · Android 无障碍服务 · 企业签名分发</span></div>`; return; }
+  if (A.stage === 'perms') { const P = [['acc', '无障碍服务', '读取界面、模拟点击与输入的唯一依赖'], ['batt', '忽略电池优化', '防止后台被系统杀死'], ['notif', '通知权限', '前台服务常驻通知 · 风控提醒'], ['overlay', '悬浮窗 / 后台弹出界面', '执行时显示「请勿操作」浮层并拉回微信'], ['auto', '自启动（厂商设置）', '重启后自动恢复运行']]; const all = P.every(p => A.perms[p[0]]); s.innerHTML = sbar + `<div class="abar"><h2>权限自检</h2></div><div class="body"><div class="steps4"><i class="on"></i><i></i><i></i><i></i></div><div class="mc">${P.map(p => `<div class="chk"><div><div>${p[1]}</div><div class="d">${p[2]}</div></div>${A.perms[p[0]] ? '<span class="st">已开启</span>' : `<button class="mini" onclick="A.perms.${p[0]}=true;save();render()">去开启</button>`}</div>`).join('')}</div><div class="mc ai small">系统将跳转到对应设置页；返回 App 后自动复检。任一权限被系统收回时，App 会停止取新指令并在后台「渠道与设备」标红。</div><button class="bigbtn" ${all ? '' : 'disabled'} onclick="A.stage='bind';save();render()">下一步：绑定商家</button></div>`; return; }
+  if (A.stage === 'bind') { s.innerHTML = sbar + `<div class="abar"><h2>绑定到商家</h2></div><div class="body"><div class="steps4"><i class="on"></i><i class="on"></i><i></i><i></i></div><div class="mc"><h5>方式一 · 扫码</h5><div class="small muted mb8">在后台「渠道与设备 → 绑定账号 → 个人微信」页面出示二维码，用本 App 扫描。</div><button class="bigbtn ghost" onclick="bindOk('QR')">📷 扫描后台二维码</button></div><div class="mc"><h5>方式二 · 输入配对码</h5><div class="code6"><input id="pcode" maxlength="6" placeholder="6 位配对码" oninput="this.value=this.value.toUpperCase()"></div><div class="hint mt8" style="font-size:11px">10 分钟内有效 · 服务端校验后签发设备 JWT（含 merchantId / deviceId / 能力范围），凭证只存本机 Keystore</div><button class="bigbtn mt8" onclick="const v=document.getElementById('pcode').value;if(v.length<6)return toast('请输入 6 位配对码','warn');bindOk(v)">绑定</button></div></div>`; return; }
+  if (A.stage === 'accounts') { const apps = [['WECHAT_PERSONAL', '微信 ' + DEV.apps.wechat, '钢贸小助手A', 'a2'], ['DOUYIN', '抖音 ' + DEV.apps.douyin, '抖音小号（采集）', 'a8'], ['XIAOHONGSHU', '小红书 ' + DEV.apps.xhs, '小红书小号（采集）', 'a9']]; s.innerHTML = sbar + `<div class="abar"><h2>本机账号</h2></div><div class="body"><div class="steps4"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div><div class="mc ok small">已绑定商家 <b>华东钢贸</b> · 设备 ${DEV.name}</div><div class="mc"><h5>检测到已登录的应用</h5>${apps.map(x => `<div class="acc">${UI.platform(x[0])}<div><div class="nm">${x[2]}</div><div class="sub">${x[1]} · 已登录</div></div><span class="q"><span class="tag success xs">纳入托管</span></span></div>`).join('')}<div class="hint" style="font-size:11px">一台设备只托管一个微信号；抖音 / 小红书可与微信同机。账号档位（小号 / 主号）在后台设置，决定额度与养号曲线。</div></div><div class="mc"><h5>模拟一次操作以校验技能包</h5><div class="small muted">打开微信 → 进入「文件传输助手」→ 输入并删除一个字符 → 返回。用于确认无障碍控件路径与当前微信版本匹配。</div><button class="bigbtn ghost mt8" id="selftest" onclick="selfTest()">开始自检</button></div><button class="bigbtn" onclick="A.stage='main';A.tab='home';save();ws('up','DEVICE_READY',{event:'DEVICE_READY',deviceId:DEV.id,accounts:DEVACC().map(a=>a.id),skills:A.skills.map(k=>k.id+'@'+k.v)});render()">完成，开始待命</button></div>`; return; }
+  /* 主界面 */
+  const conn = A.ws !== 'CONNECTED' ? ['离线 · 重连中', 'off'] : !ACQ.globalSwitch.rpaEnabled ? ['服务端已暂停', 'pause'] : A.paused ? ['本机暂停', 'pause'] : A.verify ? ['需人工处理', 'off'] : ['在线 · 待命', ''];
+  const title = { home: '获客助手', tasks: '任务', inbox: '消息', risk: '风控', me: '设备' }[A.tab];
+  const q = queue(); const badgeRisk = (A.verify ? 1 : 0) + (A.skillBlock ? 1 : 0);
+  let body = '';
+  if (A.tab === 'home') {
+    const today = A.done.filter(d => d.t > new Date().setHours(0, 0, 0, 0));
+    body += `<div class="mc ${conn[1] === 'off' ? 'dg' : conn[1] === 'pause' ? 'warn' : 'ok'}"><h5>连接与健康<span class="r">心跳 30s · 上次 ${Math.max(0, Math.round((now() - (DEV.lastHeartbeat || now())) / 1000))}s 前</span></h5><div class="stat4"><div><b>${A.ws === 'CONNECTED' ? '✓' : '✕'}</b><span>WebSocket</span></div><div><b>${A.battery}%</b><span>${A.net}${A.battery < 20 ? ' · 降配' : ''}</span></div><div><b>✓</b><span>无障碍</span></div><div><b>✓</b><span>前台服务</span></div></div>${A.quotaFactor < 1 ? '<div class="small mt8" style="color:#b45309">电量低 / 非 Wi-Fi：服务端已将本机账号配额 ×0.5</div>' : ''}</div>`;
+    if (A.cur) body += `<div class="mc ai" onclick="A.tab='tasks';save();render()"><h5>正在执行<span class="r">点击查看 →</span></h5><div class="small"><span class="ty ${A.cur.cmd.type}">${A.cur.cmd.type}</span> ${esc(A.cur.cmd.peer)} · ${esc(A.cur.steps.find(x => x.st === 'run') ? A.cur.steps.find(x => x.st === 'run').label : '')}</div></div>`;
+    body += `<div class="mc"><h5>今日<span class="r">${fmt.date(now())}</span></h5><div class="stat4"><div><b>${today.filter(d => d.status === 'OK' && /SEND|POST|REPLY/.test(d.type)).length}</b><span>已发送</span></div><div><b>${today.filter(d => /CAPTURE/.test(d.type)).reduce((s, d) => s + (d.n || 0), 0)}</b><span>抓取命中</span></div><div><b>${A.inbox.length}</b><span>上报消息</span></div><div><b>${q.length}</b><span>待执行</span></div></div></div>`;
+    body += `<div class="mc"><h5>托管账号</h5>${DEVACC().map(a => { const qt = Engine.quota(a); const eff = Math.round(qt.effectiveDaily * A.quotaFactor); const stt = A.verify && A.verify.accountId === a.id ? ['需验证', '#b45309'] : a.status === 'RESTRICTED' ? ['熔断至 ' + fmt.hm(a.circuitUntil || now()), '#b91c1c'] : a.status === 'ONLINE' ? ['正常', '#16a34a'] : [UI.status(a.status).replace(/<[^>]+>/g, ''), '#6b7280']; return `<div class="acc">${UI.platform(a.platform)}<div><div class="nm">${esc(a.name)}</div><div class="sub">${a.tier === 'MINOR' ? '小号' : '主号'} · 养号第 ${a.warmupDay || '—'} 天 · <span style="color:${stt[1]}">${stt[0]}</span></div></div><div class="q">今日 ${a.todaySent}/${eff}<div class="bar"><i style="width:${Math.min(100, a.todaySent / Math.max(1, eff) * 100)}%"></i></div></div></div>`; }).join('')}</div>`;
+    body += `<div class="mc"><h5>本机规则（由服务端下发，只读）</h5><div class="small muted" style="line-height:1.8">· 发送前等待 60~240s（截断正态），逐字输入 6 字/秒<br>· 同账号最小间隔 90s · 08:30–21:30 之外不执行<br>· 每 5 条指令夹杂 1~2 屏无关浏览<br>· 检测到验证码 / 频繁提示 / 登录失效立即停止并上报</div></div>`;
+  }
+  if (A.tab === 'tasks') {
+    body += `<div class="tog" style="background:#fff;border-radius:14px;padding:10px 14px;margin-bottom:10px"><div><div>自动执行队列</div><div class="d">关闭后只接收不执行（排障用）</div></div><div class="sw ${A.auto ? 'on' : ''}" onclick="A.auto=!A.auto;save();render()"></div></div>`;
+    if (A.cur) {
+      const c = A.cur; const isCap = /CAPTURE/.test(c.cmd.type); const fakeApp = c.cmd.platform === 'WECHAT_PERSONAL' ? '' : 'dy';
+      body += `<div class="mc ai exec"><h5><span class="ty ${c.cmd.type}">${c.cmd.type}</span> ${esc(c.cmd.peer)}<span class="r mono">${c.cmd.cmdId}</span></h5>${c.steps.map(st => `<div class="step ${st.st}"><span class="ic"></span><div><div>${esc(st.label)}</div><div class="d">${esc(st.d)}</div></div></div>`).join('')}
+        <div class="fake ${fakeApp}"><div class="h">${isCap ? esc(c.cmd.peer.split(' / ')[0]) : esc(c.cmd.peer)}</div>${isCap ? `<div class="b">${c.items.map(it => `<div class="cm ${it.hit ? 'hit' : ''}"><b>${esc(it.nick)}</b>：${esc(it.text)} ${it.hit ? '<span class="tag warning xs">命中</span>' : ''}</div>`).join('') || '<span class="muted small">滚动读取中…</span>'}</div>` : `<div class="b">${c.steps[5] && c.steps[5].st === 'done' ? `<div class="bub">${esc(c.typed)}</div>` : ''}</div><div class="inp">${c.steps[5] && c.steps[5].st === 'done' ? '' : esc(c.typed) + (c.steps[4].st === 'run' ? '<span class="cur"></span>' : '')}</div>`}</div></div>`;
+    }
+    body += `<div class="mc"><h5>待执行<span class="r">${q.length} 条 · 按计划时间</span></h5>${q.length ? q.map(c => { const bl = blocker(c); return `<div class="qi"><div class="t"><span class="ty ${c.type}">${c.type}</span><b>${esc(c.peer.slice(0, 22))}</b><span class="cmd">${c.cmdId}</span></div><div class="d">${UI.platform(c.platform)}${esc(ACQ.account(c.accountId).name)} · ${c.trigger ? { JOB: '定时任务', MANUAL: '手动', FOLLOW_UP: '自动跟进', AUTO_REPLY: '自动回复' }[c.trigger] : c.ref.kind === 'pd' ? '海报分发' : '抓取规则'} · ${bl ? `<span style="color:#b45309">${esc(bl)}</span>` : '<span style="color:#16a34a">可执行</span>'}</div><div class="txt">${esc(c.text.slice(0, 90))}${c.text.length > 90 ? '…' : ''}</div>${!bl && !running ? `<button class="mini mt8" onclick="execute(queue().find(x=>x.cmdId==='${c.cmdId}'))">立即执行</button>` : ''}</div>`; }).join('') : '<div class="small muted">队列为空，等待服务端下发。</div>'}</div>`;
+    body += `<div class="mc"><h5>已完成<span class="r">本机最近 ${Math.min(20, A.done.length)} 条</span></h5>${A.done.slice(0, 20).map(d => `<div class="qi"><div class="t"><span class="ty ${d.type}">${d.type}</span><b>${esc(d.peer.slice(0, 22))}</b><span class="cmd">${fmt.hm(d.t)}</span></div><div class="d">${d.status === 'OK' ? `<span style="color:#16a34a">OK</span>${d.n != null ? ` · 命中 ${d.n} 条` : ' · 已截图存证'}` : `<span style="color:#b91c1c">${d.status} · ${d.code}</span>`}</div></div>`).join('') || '<div class="small muted">暂无</div>'}</div>`;
+  }
+  if (A.tab === 'inbox') {
+    body += `<div class="mc ai small"><b>消息监听</b>：App 只读取托管账号会话列表中的<b>新增消息</b>并上报文本（PULL_INBOX / 通知栏监听），不读取历史记录，不上传图片；是否回复、回什么由服务端决定后再下发指令。</div>`;
+    body += `<div class="mc"><h5>已上报<span class="r">${A.inbox.length} 条</span></h5>${A.inbox.map(m => `<div class="msgl"><div><b>${esc(m.peer)}</b> <span class="muted small">${fmt.hm(m.t)}</span></div><div>${esc(m.text)}</div><div class="chain">${m.chain.map(c => '↳ ' + esc(c)).join('<br>')}${m.cmdId ? `<br>↳ 收到指令 <span class="mono">${m.cmdId}</span>${A.seen.includes(m.cmdId) ? ' · 已执行' : ' · 排队中'}` : ''}</div></div>`).join('') || '<div class="small muted">暂无。用左侧「客户回了一条微信」模拟。</div>'}</div>`;
+  }
+  if (A.tab === 'risk') {
+    if (A.verify) { const a = ACQ.account(A.verify.accountId); body += `<div class="mc dg"><h5>⚠ 需要人工处理</h5><div class="small">「${esc(a.name)}」在 ${fmt.hm(A.verify.t)} 出现<b>滑块验证</b>。App 已停止该账号的全部指令并上报服务端；请在本机微信里手动完成验证，确认可正常收发消息后点击恢复。</div><button class="bigbtn mt8" onclick="resumeVerify()">我已在手机上处理完成，恢复</button><div class="hint" style="font-size:11px">恢复后 24 小时内该账号额度 50%；1 小时内再次触发将熔断 4 小时并通知管理员。</div></div>`; }
+    if (A.skillBlock) { body += `<div class="mc warn"><h5>⏸ ${UI.platformName(A.skillBlock.platform)} 指令已暂停</h5><div class="small">技能 <span class="mono">${A.skillBlock.skill}</span> 与当前微信 ${DEV.apps.wechat} 界面不匹配（UI_CHANGED）。等待运营发布新技能包；服务端已暂停该平台所有设备的 RPA 指令。</div><button class="bigbtn ghost mt8" onclick="checkSkill()">检查技能包更新</button></div>`; }
+    body += `<div class="mc"><h5>本机状态</h5><div class="tog"><div><div>暂停取新指令</div><div class="d">手机需要人工使用时打开；进行中的指令会完成</div></div><div class="sw ${A.paused ? 'on' : ''}" onclick="A.paused=!A.paused;save();ws('up','DEVICE_STATE · '+(A.paused?'PAUSED':'ONLINE'),{event:'DEVICE_STATE',deviceId:DEV.id,health:A.paused?'PAUSED':'ONLINE'});render()"></div></div><div class="tog"><div><div>服务端总闸</div><div class="d">运营侧控制，本机只读</div></div><span class="tag ${ACQ.globalSwitch.rpaEnabled ? 'success' : 'danger'} xs">${ACQ.globalSwitch.rpaEnabled ? '运行中' : '已暂停全部 RPA'}</span></div></div>`;
+    body += `<div class="mc"><h5>账号风控</h5>${DEVACC().map(a => { const p = ACQ.riskPolicies.find(r => r.platform === a.platform && r.tier === a.tier && r.platformDefault) || {}; return `<div class="acc">${UI.platform(a.platform)}<div><div class="nm">${esc(a.name)}</div><div class="sub">${p.hourly}/h · ${p.daily}/天 · 间隔 ≥${p.minInterval}s · ${p.hours}</div></div><span class="q">${a.status === 'RESTRICTED' ? `<span class="tag danger xs">熔断至 ${fmt.hm(a.circuitUntil || now())}</span>` : a.status === 'NEED_VERIFY' ? '<span class="tag warning xs">需验证</span>' : '<span class="tag success xs">正常</span>'}</span></div>`; }).join('')}</div>`;
+    const inc = ACQ.incidents.filter(i => DEVACC().some(a => a.id === i.account)).slice(0, 8);
+    body += `<div class="mc"><h5>本机风险信号<span class="r">已上报服务端</span></h5>${inc.map(i => `<div class="qi"><div class="t"><span class="tag ${i.level === 'danger' ? 'danger' : 'warning'} xs">${i.signal}</span><b>${esc(ACQ.account(i.account).name)}</b><span class="cmd">${fmt.time(i.t)}</span></div><div class="d">${esc(i.text)}${i.handled ? ' · <span style="color:#16a34a">已处理</span>' : ''}</div></div>`).join('') || '<div class="small muted">暂无</div>'}</div>`;
+  }
+  if (A.tab === 'me') {
+    body += `<div class="mc"><h5>设备</h5><dl class="kv small"><dt>名称</dt><dd>${esc(DEV.name)}</dd><dt>deviceId</dt><dd class="mono">${DEV.id}</dd><dt>商家</dt><dd>华东钢贸 · 绑定于 ${fmt.date(DEV.boundAt)}</dd><dt>系统</dt><dd>${DEV.os} · 获客助手 v${DEV.app}</dd><dt>凭证</dt><dd>设备 JWT · Android Keystore · 到期自动续签</dd></dl></div>`;
+    body += `<div class="mc"><h5>技能包<span class="r"><a onclick="checkSkill()">检查更新</a></span></h5>${A.skills.map(k => `<div class="sk"><div><div>${k.id}</div><div class="v">${k.fit}</div></div><span class="v">v${k.v}</span><span class="${A.skillBlock && A.skillBlock.skill === k.id ? 'up' : 'ok'}">${A.skillBlock && A.skillBlock.skill === k.id ? '待更新' : '✓'}</span></div>`).join('')}<div class="hint" style="font-size:11px">每类操作是一个带版本号的技能脚本，标注适配的 App 版本范围；服务端可静默下发更新。微信 / 抖音升级后若控件变化，对应技能自动失效并告警。</div></div>`;
+    body += `<div class="mc"><h5>权限自检</h5>${[['无障碍服务', true], ['忽略电池优化', true], ['通知', true], ['悬浮窗 / 后台弹出', true], ['自启动', A.perms.auto]].map(p => `<div class="chk"><div>${p[0]}</div><span class="st ${p[1] ? '' : 'no'}">${p[1] ? '正常' : '未开启'}</span></div>`).join('')}<button class="mini mt8" onclick="toast('复检通过','ok')">重新检测</button></div>`;
+    body += `<div class="mc"><h5>诊断</h5><div class="tog"><div><div>上传诊断日志</div><div class="d">最近 24h 执行日志与截图索引（不含聊天内容）</div></div><button class="mini" onclick="toast('日志已上传，工单号 DX-' + Date.now().toString().slice(-5),'ok')">上传</button></div><div class="tog"><div><div>看门狗</div><div class="d">微信崩溃 / 退到后台自动拉回</div></div><div class="sw on"></div></div><div class="tog"><div><div>本地数据</div><div class="d">已执行 cmdId ${A.seen.length} 条 · 离线事件 ${A.buf.length} 条</div></div></div></div>`;
+    body += `<button class="bigbtn dg" onclick="unbind()">解绑设备并清空本地数据</button>`;
+  }
+  s.innerHTML = sbar + `<div class="abar"><h2>${title}</h2><span class="conn ${conn[1]}">${conn[0]}</span></div>${A.cur && A.tab !== 'tasks' ? `<div class="banner"><i></i>执行中 · 请勿操作手机 · ${esc(A.cur.cmd.type)} ${esc(A.cur.cmd.peer)}</div>` : ''}<div class="body">${body}</div><div class="tabbar">${[['home', '🏠', '首页'], ['tasks', '📋', '任务', q.length + (A.cur ? 1 : 0)], ['inbox', '💬', '消息'], ['risk', '🛡️', '风控', badgeRisk], ['me', '📱', '设备']].map(t => `<button class="${A.tab === t[0] ? 'on' : ''}" onclick="A.tab='${t[0]}';save();render()"><span class="i">${t[1]}</span>${t[2]}${t[3] ? `<span class="dot">${t[3]}</span>` : ''}</button>`).join('')}</div>`;
+}
+
+/* ---------- 动作 ---------- */
+function bindOk(code) { ws('up', 'BIND · 配对码 ' + code, { event: 'BIND', pairCode: code, device: { model: DEV.name, os: DEV.os, appVersion: DEV.app, installedApps: DEV.apps } }); ws('down', 'BIND_OK · 签发设备 JWT', { type: 'BIND_OK', deviceId: DEV.id, merchantId: 'M-华东钢贸', token: 'eyJhbGciOi…（设备 JWT，含 merchantId / deviceId / caps）', caps: ['CAPTURE_GROUP', 'CAPTURE_MOMENTS', 'SEND_DM', 'REPLY_GROUP', 'POST_MOMENT', 'PULL_INBOX', 'CAPTURE_COMMENTS'], policies: { heartbeatSec: 30, offlineAfterSec: 90 } }); DEV.status = 'ONLINE'; DEV.boundAt = now(); DEV.lastHeartbeat = now(); ACQ.save(); A.stage = 'accounts'; save(); toast('绑定成功', 'ok'); render(); }
+async function selfTest() { const b = $('#selftest'); if (!b) return; b.disabled = true; const st = ['唤起微信…', '打开文件传输助手…', '输入「a」并删除…', '返回桌面…', '自检通过 ✓']; for (const x of st) { b.textContent = x; await sleep(1500); } b.disabled = false; ws('up', 'SELF_TEST OK', { event: 'SELF_TEST', deviceId: DEV.id, result: 'OK', skills: ['WxSendDm@1.4.2'] }); toast('技能包与微信 ' + DEV.apps.wechat + ' 匹配', 'ok'); }
+function resumeVerify() { const a = ACQ.account(A.verify.accountId); Modal.confirm('确认恢复', '请确认已在微信里完成滑块验证，且能正常收发消息。恢复后 24 小时内额度 50%。', () => { ws('up', 'RESUME · 人工已处理', { event: 'RESUME', deviceId: DEV.id, accountId: a.id, by: 'device_operator', note: '已完成滑块验证' }); a.status = 'ONLINE'; a.circuitUntil = null; a.lastError = null; ACQ.incidents.filter(i => i.account === a.id && i.signal === 'CAPTCHA_SHOWN' && !i.handled).forEach(i => { i.handled = true; i.handledBy = '设备操作员'; }); ws('sys', `账号 ${a.id} → ONLINE，额度系数 0.5（24h）；恢复下发该账号队列`); A.verify = null; ACQ.save(); save(); render(); toast('已恢复', 'ok'); }); }
+async function checkSkill() { if (!A.skillBlock) { ws('down', 'SKILL_CHECK · 无更新', { type: 'SKILL_MANIFEST', skills: A.skills.map(k => k.id + '@' + k.v) }); return toast('技能包已是最新', 'ok'); } const k = A.skills.find(x => x.id === A.skillBlock.skill); const nv = k.v.replace(/(\d+)$/, m => +m + 1); ws('down', `SKILL_UPDATE · ${k.id} v${nv}`, { type: 'SKILL_UPDATE', skill: k.id, version: nv, fits: '微信 8.0.40–' + DEV.apps.wechat, url: `https://oss/.../skills/${k.id}-${nv}.pkg`, sha256: '9f1c…' }); toast(`正在下载 ${k.id} v${nv}…`); await sleep(2500); k.v = nv; k.fit = '微信 8.0.40–' + DEV.apps.wechat; ws('up', `SKILL_INSTALLED · ${k.id}@${nv}`, { event: 'SKILL_INSTALLED', deviceId: DEV.id, skill: k.id, version: nv, selfTest: 'OK' }); ws('sys', '技能包就绪 → 恢复该平台 RPA 指令下发'); ACQ.incidents.filter(i => i.signal === 'UI_CHANGED' && !i.handled).forEach(i => { i.handled = true; i.handledBy = '运营（技能包更新）'; }); A.skillBlock = null; ACQ.save(); save(); render(); toast('技能包已更新并自检通过', 'ok'); }
+function unbind() { Modal.confirm('解绑设备', '将吊销设备令牌、清空本机已执行记录与离线事件；后台该设备显示为「已解绑」，托管账号变为离线。', () => { ws('up', 'UNBIND', { event: 'UNBIND', deviceId: DEV.id }); DEV.status = 'OFFLINE'; DEVACC().forEach(a => a.status = 'OFFLINE'); ACQ.save(); localStorage.removeItem(KEY); location.reload(); }, { danger: true }); }
+
+renderScn(); renderWs(); render();
+if (A.stage === 'main') { setTimeout(tick, 800); }
+</script>
+</body>
+</html>
