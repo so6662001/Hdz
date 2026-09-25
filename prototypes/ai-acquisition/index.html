@@ -29,6 +29,7 @@
   .story .who { font-size: 11px; padding: 1px 6px; border-radius: 4px; margin-right: 4px; }
   .story .who.a { background: #fff1e6; color: var(--hot); }
   .story .who.s { background: #e9f8ee; color: #1a7f3c; }
+  .story .who.d { background: #ede9fe; color: #6d28d9; }
   .kvtab td { font-size: 12.5px; vertical-align: top; }
   .kvtab td:first-child { white-space: nowrap; font-weight: 600; width: 160px; }
   .kvtab code { background: #f3f5fa; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
@@ -71,6 +72,9 @@ const PAGES = [
   { id: 'risk', ic: '🛡️', name: '风控 / 设置', pri: 9, href: 'risk.html', admin: true,
     desc: '频率策略（商家自定义只能比平台默认更严）、账号状态机、风险事件、黑名单；设置页含<b>总开关</b>（含公开评论抓取风险告知）、意图阈值与分配、内容 / AI 策略、销售日报、数据保留与合规。',
     links: [['risk.html?tab=incidents', '风险事件'], ['risk.html?tab=blacklist', '黑名单'], ['risk.html?tab=settings', '设置']] },
+  { id: 'app', ic: '📱', name: '获客助手 App（执行端）', pri: 9, href: 'app.html', admin: true,
+    desc: '装在工作手机上的 Android 执行端：权限自检 → 配对码绑定 → 托管账号；任务队列与<b>拟人化执行器</b>可视化（等待 / 唤起微信 / 逐字输入 / 截图存证 / 回执）；消息监听上报；风控信号（验证码 / UI_CHANGED）与人工恢复；技能包版本。右侧为服务端视角的 WebSocket 报文。',
+    links: [['app.html', '从未绑定开始']] },
   { id: 'outreach', ic: '📨', name: '触达记录', pri: 10, href: 'outreach.html', admin: false,
     desc: '每一条发出去的消息：触发来源、轮次、话术、命中变量、账号与拟人参数、结果与失败码（MISSING_VAR / 被拒 / 熔断），支持重试改账号。',
     links: [['outreach.html?replied=1', '只看已回复']] },
@@ -101,6 +105,7 @@ root.innerHTML = `
       <li><span class="who a">管理员</span><b>跟进流程</b>：打开标准 SOP，在「72h 未回复」分支后插入一个节点、加一条分支，校验 → 发布新版本；切到「模拟」页签逐事件推进；实例页把老实例迁移到新版本。<a href="flows.html?id=F1">去体验 →</a></li>
       <li><span class="who a">管理员</span><b>海报分发</b>：选「9 月新客锁价」海报，勾 2 个微信群 + 朋友圈 + 小红书，看每渠道独立追踪码与发送计划，确认后观察逐条发送（小红书含促销词进审核）。<a href="poster-dispatch.html?new=PS2">去体验 →</a></li>
       <li><span class="who a">管理员</span><b>渠道与风控</b>：抖音小号已熔断 → 人工恢复（额度 50% 起步）；设置页开启「抓取他人公开评论」需勾选风险告知；商家自定义频率不能高于平台默认。<a href="channels.html">去体验 →</a></li>
+      <li><span class="who d">工作手机</span><b>获客助手 App</b>：走完权限自检与配对码绑定，看队列里的 SEND_DM 如何被拟人化执行并回执；用左侧场景触发滑块验证 / 微信升级 / 断网重连，观察 RISK_SIGNAL、技能包更新与 cmdId 幂等。<a href="app.html">去体验 →</a></li>
     </ol>
   </div></div>
   <div>
@@ -137,6 +142,7 @@ root.innerHTML = `
     <tr><td><code>channels.html</code></td><td><code>?tab=accounts|devices|rules|raw</code></td></tr>
     <tr><td><code>risk.html</code></td><td><code>?tab=policies|incidents|blacklist|settings</code></td></tr>
     <tr><td><code>outreach.html</code></td><td><code>?replied=1</code> 只看已回复</td></tr>
+    <tr><td><code>app.html</code></td><td>无参数；App 状态存于 <code>localStorage acq:app:v1</code>，左侧「重置 App 演示」可回到未绑定</td></tr>
   </tbody></table>
   <div class="hint mt8">设计文档见 <code>docs/ai-acquisition/</code>（01 需求 → 07 实施路线），本原型对应 06 分册《前端页面设计》。</div>
 </div></div>`;
