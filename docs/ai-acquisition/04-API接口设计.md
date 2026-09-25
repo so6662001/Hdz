@@ -108,7 +108,37 @@
 | POST | `/follow-ups` | 人工创建 `{leadId, dueAt, note, plannedScriptId?}` |
 | PUT | `/follow-ups/{id}/done` | 完成 `{result, note, outreachId?}` |
 | PUT | `/follow-ups/{id}/reschedule` | 改期 |
-| PUT | `/follow-ups/{id}/cancel` | 取消 |
+| PUT | `/follow-ups/{id}/cancel` | 取消（若为流程定时器则同时终止/跳过对应流程步骤，需二次确认） |
+
+---
+
+## 7A. 跟进流程 Flow（分支编排）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/flows` | 列表（状态、发布版本、优先级、在途实例数、近 30 日完成/终止数） |
+| POST | `/flows` | 创建草稿 `{name, description, trigger, guardrails, definition}` |
+| GET | `/flows/{id}` | 详情（草稿 + 已发布版本） |
+| PUT | `/flows/{id}` | 保存草稿（不影响在途实例） |
+| POST | `/flows/{id}/validate` | 静态校验：孤立节点、不可达 End、GoTo 目标、脚本/账号存在、分支键合法、护栏不超风控上限；返回 `errors[] / warnings[]` |
+| POST | `/flows/{id}/publish` | 发布草稿为新版本（先校验）；`{migrateActive: false}` 可选把在途实例迁移到新版本（仅当前节点 id 仍存在者） |
+| PUT | `/flows/{id}/enable` `/disable` | 启停 Trigger（禁用后在途实例可选 `{terminateActive}`） |
+| DELETE | `/flows/{id}` | 删除（需无非终态实例） |
+| GET | `/flows/{id}/versions` | 版本历史 |
+| POST | `/flows/parse` | **自然语言 → DAG**：`{text}` → `{definition, trigger, ambiguities[], confidence}`，不落库 |
+| POST | `/flows/{id}/simulate` | 模拟：`{leadId?, events:[{type:"REPLY", category:"ASK_PRICE"}, {type:"TIMEOUT"}, ...]}` → 返回逐步路径与每步将发送的渲染文本（不真正发送） |
+| GET | `/flows/templates` | 平台预置模板（如"标准跟进 SOP"） |
+| POST | `/flows/templates/{code}/import` | 导入为商家草稿 |
+| GET | `/flows/{id}/stats` | 节点级漏斗：每个节点进入数、各出口占比、平均停留时长（用于优化 SOP） |
+| GET | `/flow-instances` | 实例列表；筛选 `flowId, status, leadId, ownerUserId, currentNodeId, waitingType, waitingBefore` |
+| GET | `/flow-instances/{id}` | 实例详情（当前节点、等待类型与到期、上下文、步骤日志） |
+| POST | `/flow-instances` | 手动把线索加入流程 `{leadId, flowId}`（若已有非终态实例需 `{preempt: true}`） |
+| PUT | `/flow-instances/{id}/pause` `/resume` | 暂停 / 恢复 |
+| PUT | `/flow-instances/{id}/skip-wait` | 跳过当前等待（立即按 TIMEOUT 推进） |
+| PUT | `/flow-instances/{id}/jump` | 管理员跳转到指定节点 `{nodeId, reason}` |
+| PUT | `/flow-instances/{id}/terminate` | 终止 `{reason}` |
+| POST | `/flow-instances/{id}/retry-step` | 重试 FAILED 的当前步 |
+| GET | `/leads/{id}/flow` | 线索当前流程实例摘要（线索详情/会话工作台右栏用：在哪个流程第几步、下一步何时、可用操作） |
 
 ---
 
@@ -269,6 +299,7 @@
 | 货袋子站内 | 内部事件 `circle.comment.created` / `inquiry.created` | 经 `HdzInternalAdapter.capture()` 进入意图识别 |
 | 论坛 Worker | `POST /internal/capture/forum/results` | 浏览器自动化进程回传抓取结果（内网鉴权） |
 | 平台线索中心 | 本模块出站：`LeadCenterClient.push(lead)` | stage 进入 HOT/WON 时单向同步 |
+| 模块内部事件总线 | `LeadStageEntered` / `ReplyClassified(category, entities)` / `PosterScanned` / `ApprovalDone` / `FollowUpDone` / `ConversationTakenOver` / `ConversationReleased` / `LeadBlacklisted` | `FlowEventListener` 消费，驱动流程实例创建、推进、暂停、终止 |
 
 ---
 
@@ -290,3 +321,8 @@
 | ACQ-4002 | JobSpec 校验失败（cron/渠道/话术不存在） |
 | ACQ-5001 | 海报系统出码失败 |
 | ACQ-6001 | 状态迁移不允许 |
+| ACQ-7001 | 流程定义校验失败（`data.errors`：孤立节点/不可达 End/GoTo 目标不存在/分支键非法/护栏超限） |
+| ACQ-7002 | 线索已有非终态流程实例（需 `preempt`） |
+| ACQ-7003 | 流程有在途实例，不可删除 |
+| ACQ-7004 | 实例状态不允许该操作（如对 COMPLETED 实例 resume） |
+| ACQ-7005 | 跳转目标节点在当前版本不存在 |
