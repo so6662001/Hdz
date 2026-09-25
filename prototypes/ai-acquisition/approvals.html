@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>审核</title>
+<link rel="stylesheet" href="shared/base.css">
+<style> .ap { padding: 14px 16px; } .ap .q { background: #f7f8fb; border-radius: 8px; padding: 8px 10px; font-size: 13px; } .ap .ai { background: var(--ai-weak); border: 1px solid #e4d8ff; border-radius: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.6; } .ap textarea { width: 100%; height: 80px; margin-top: 8px; } </style>
+</head>
+<body>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/app.js"></script>
+<script>
+const me = App.me(); const root = App.mount({ active: 'approvals', title: '审核' });
+let tab = 'PENDING';
+const TYPE = { QUOTE: ['报价', 'hot'], CONTRACT: ['合同 / 账期', 'danger'], AI_POLISH: ['AI 润色确认', 'ai'], CUSTOM: ['其他', ''] };
+function render() {
+  const mine = ACQ.approvals.filter(a => me.role === 'admin' || a.assignee === me.id);
+  const list = mine.filter(a => tab === 'PENDING' ? a.status === 'PENDING' : a.status !== 'PENDING').sort((a, b) => (a.dueAt || 0) - (b.dueAt || 0));
+  root.innerHTML = App.pageHead('审核', '机器不报价、不谈合同：命中报价 / 合同话术时先发过渡语，再由销售在这里确认或修改 AI 草拟内容后发送；2 小时未处理升级主管。') +
+  `<div class="card"><div class="tabs">${[['PENDING', `待处理 <span class="n">${mine.filter(a => a.status === 'PENDING').length}</span>`], ['DONE', '已处理']].map(x => `<button class="${tab === x[0] ? 'on' : ''}" onclick="tab='${x[0]}';render()">${x[1]}</button>`).join('')}</div>
+  ${list.map(a => { const l = ACQ.lead(a.leadId); const over = a.dueAt && a.dueAt < Date.now() && a.status === 'PENDING'; return `<div class="ap" style="border-bottom:1px solid var(--border)"><div class="row mb8">${UI.platform(l.platform)}<a href="leads.html?open=${l.id}"><b>${esc(l.nickname)}</b></a>${UI.stage(l.stage)}${UI.score(l.score)}${UI.tag(TYPE[a.type][0], TYPE[a.type][1])}<span class="small muted">${a.id} · 负责人 ${ACQ.user(a.assignee).name} · ${fmt.ago(a.createdAt)}</span><span class="sp"></span>${a.status === 'PENDING' ? `<span class="tag ${over ? 'danger' : 'warning'}">${over ? '已逾期 · 已通知主管' : fmt.left(a.dueAt) + '升级'}</span>` : UI.status(a.status)}</div>
+    <div class="split"><div><div class="small muted mb8">客户说：</div><div class="q">“${esc(a.triggerText)}”</div>${l.entities ? `<div class="mt8 small">${Object.entries(l.entities).filter(x => x[0] !== 'count').map(x => `<span class="tag primary xs">${({ spec: '规格', quantity: '数量', address: '地点', delivery: '交期' })[x[0]]} ${esc(x[1])}</span>`).join(' ')}</div>` : ''}${a.convId ? `<div class="mt8"><a class="small" href="workbench.html?c=${a.convId}">查看完整会话 →</a></div>` : ''}</div>
+    <div><div class="small muted mb8"><span class="ai-badge">✨ AI 草拟</span> 依据企业资料库「今日价格表 0925」「付款条款」，仅供参考</div>${a.status === 'PENDING' ? `<textarea class="input" id="t_${a.id}">${esc(a.aiSuggestion)}</textarea><div class="row mt8"><button class="btn primary sm" onclick="approve('${a.id}')">确认并发送</button><button class="btn sm ai" onclick="regen('${a.id}')">✨ 换个说法</button><span class="sp"></span><button class="btn sm danger" onclick="reject('${a.id}')">驳回（我自己回）</button></div>` : `<div class="ai">${esc(a.finalContent || a.aiSuggestion)}</div><div class="xs muted mt8">${a.decidedAt ? fmt.time(a.decidedAt) + ' · ' + ACQ.user(a.decidedBy || a.assignee).name : ''}</div>`}</div></div></div>`; }).join('') || '<div class="empty">没有待处理的审核</div>'}</div>`;
+}
+function approve(id) { const a = ACQ.approvals.find(x => x.id === id); const text = $('#t_' + id).value.trim(); const l = ACQ.lead(a.leadId); const mod = Engine.moderate(text, l.platform); if (!mod.pass) return toast(mod.reasons.join('；'), 'err'); a.status = 'APPROVED_SENT'; a.decidedAt = Date.now(); a.decidedBy = me.id; a.finalContent = text; const c = ACQ.conversations.find(x => x.id === a.convId); if (c) { c.messages.push({ id: c.id + '-' + (c.messages.length + 1), dir: 'OUT', from: 'USER', by: me.id, text, t: Date.now(), approvalId: id, read: true }); c.lastAt = Date.now(); c.status = 'HUMAN'; c.takenBy = me.id; c.needHumanReason = null; } const inst = ACQ.instanceOf(a.leadId); if (inst && inst.waitingType === 'HUMAN_TASK') { const def = ACQ.flow(inst.flowId); const tr = Engine.flow.advance(inst, def, { type: 'HUMAN_DONE' }); tr.forEach(t => inst.log.push(Object.assign({ t: Date.now() }, t))); } ACQ.addEvent(l, { type: 'APPROVAL', text: `审核单 ${id} 已确认发送`, cls: 'user' }); ACQ.save(); render(); toast('已发送给客户，流程继续', 'ok'); }
+function reject(id) { const a = ACQ.approvals.find(x => x.id === id); a.status = 'REJECTED'; a.decidedAt = Date.now(); a.decidedBy = me.id; ACQ.save(); render(); toast('已驳回，请在会话工作台手工回复', 'warn'); }
+function regen(id) { const a = ACQ.approvals.find(x => x.id === id); const t = $('#t_' + id); t.value = t.value.replace(/^(\S+?)，/, '$1您好，').replace(/（AI[^）]*）/, '').trim() + ' 今天下单还能锁今天的价，您看方便的话我把合同模板一起发您。（AI 改写 · 请核实）'; toast('✨ 已生成新版本（模拟）', 'ok'); }
+render();
+</script>
+</body>
+</html>

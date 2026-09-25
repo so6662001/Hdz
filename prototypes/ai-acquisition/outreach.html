@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>触达记录</title>
+<link rel="stylesheet" href="shared/base.css">
+</head>
+<body>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/app.js"></script>
+<script>
+const me = App.me(); const root = App.mount({ active: 'outreach', title: '触达记录' });
+let F = { status: qs('replied') ? 'REPLIED' : '', trigger: '', account: '', q: '' };
+const TRIG = { JOB: '定时任务', MANUAL: '手动', FOLLOW_UP: '自动跟进', AUTO_REPLY: '自动回复' };
+function rows() { let r = ACQ.outreach.filter(o => { const l = ACQ.lead(o.leadId); return l && (me.role === 'admin' || l.owner === me.id); }); if (F.status === 'REPLIED') r = r.filter(o => o.replied); else if (F.status) r = r.filter(o => o.status === F.status); if (F.trigger) r = r.filter(o => o.trigger === F.trigger); if (F.account) r = r.filter(o => o.account === F.account); if (F.q) r = r.filter(o => (ACQ.lead(o.leadId).nickname || '').includes(F.q) || (o.content || '').includes(F.q)); return r.sort((a, b) => (b.sentAt || b.scheduledAt || 0) - (a.sentAt || a.scheduledAt || 0)); }
+function render() {
+  const all = ACQ.outreach; const t = all.filter(o => o.sentAt && o.sentAt > Date.now() - ACQ.D);
+  root.innerHTML = App.pageHead('触达记录', '每一条发出去的消息：谁、经哪个账号、用哪条话术、带了哪些变量、结果如何；失败原因可追溯。', `<button class="btn" onclick="toast('已导出（脱敏）','ok')">导出</button>`) +
+  `<div class="grid g6 mb16">${UI.kpi('今日发送', t.filter(o => o.status === 'SENT').length, null, '')}${UI.kpi('排队中', all.filter(o => o.status === 'QUEUED').length, null, '')}${UI.kpi('失败 / 被拒', all.filter(o => o.status === 'FAILED' || o.status === 'BLOCKED').length, null, '')}${UI.kpi('已回复', all.filter(o => o.replied).length, null, '')}${UI.kpi('回复率', fmt.pct(all.filter(o => o.replied).length, all.filter(o => o.status === 'SENT').length).replace('%', ''), null, '%')}${UI.kpi('缺变量拦截', all.filter(o => o.failCode === 'MISSING_VAR').length, null, '')}</div>
+  <div class="card"><div class="filters"><input class="input sm" style="width:180px" placeholder="搜索昵称 / 内容" oninput="F.q=this.value;draw()"><select class="select sm" onchange="F.status=this.value;draw()"><option value="">全部状态</option>${['SENT', 'QUEUED', 'FAILED', 'BLOCKED', 'CANCELLED'].map(s => `<option value="${s}" ${F.status === s ? 'selected' : ''}>${UI.status(s).replace(/<[^>]+>/g, '')}</option>`).join('')}<option value="REPLIED" ${F.status === 'REPLIED' ? 'selected' : ''}>已回复</option></select><select class="select sm" onchange="F.trigger=this.value;draw()"><option value="">全部触发</option>${Object.entries(TRIG).map(x => `<option value="${x[0]}">${x[1]}</option>`).join('')}</select><select class="select sm" onchange="F.account=this.value;draw()"><option value="">全部账号</option>${ACQ.accounts.map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select><span class="sp"></span><span class="small muted" id="cnt"></span></div><div id="tb"></div></div>`;
+  draw();
+}
+function draw() {
+  const r = rows(); $('#cnt').textContent = r.length + ' 条';
+  $('#tb').innerHTML = UI.table([
+    { label: '时间', render: o => `<span class="small">${o.sentAt ? fmt.time(o.sentAt) : o.scheduledAt ? '计划 ' + fmt.time(o.scheduledAt) : '—'}</span>${o.queuePos ? `<span class="sub">队列第 ${o.queuePos} 位</span>` : ''}` },
+    { label: '线索', render: o => { const l = ACQ.lead(o.leadId); return `${UI.platform(l.platform)}<a href="leads.html?open=${l.id}"><b>${esc(l.nickname || '（无昵称）')}</b></a><span class="sub">${UI.stage(l.stage)}</span>`; } },
+    { label: '触发 / 轮次', render: o => `<span class="small">${TRIG[o.trigger] || o.trigger}</span><span class="sub">第 ${o.round} 轮${o.jobRunId ? ' · ' + o.jobRunId : ''}</span>` },
+    { label: '话术与内容', render: o => `<span class="small b">${esc((ACQ.script(o.scriptId) || {}).name || '自由文本')}</span><div class="small muted" style="max-width:360px">${esc(o.content || '—')}</div>${o.hits && o.hits.length ? `<div class="xs">${o.hits.map(h => `<span class="var">{${h}}</span>`).join(' ')}</div>` : ''}` },
+    { label: '账号', render: o => { const a = ACQ.account(o.account); return a ? `${UI.platform(a.platform)}<span class="small">${esc(a.name)}</span>${o.pacing ? `<span class="sub">拟人延迟 ${o.pacing.pre}s · 打字 ${o.pacing.typing}s</span>` : ''}` : '—'; } },
+    { label: '结果', render: o => `${UI.status(o.status)}${o.replied ? ` <span class="tag success xs">已回复${o.repliedAt ? ' · ' + fmt.ago(o.repliedAt) : ''}</span>` : ''}${o.failMessage ? `<div class="xs" style="color:var(--danger)"><code>${o.failCode}</code> ${esc(o.failMessage)}</div>` : ''}${o.evidence ? `<div class="xs"><a onclick="toast('发送后截图存证（工作手机自动截取）')">📷 截图</a></div>` : ''}` },
+    { label: '', cls: 'ops', render: o => `${o.status === 'QUEUED' ? `<a style="color:var(--danger)" onclick="cancel('${o.id}')">取消</a>` : ''}${o.status === 'FAILED' && o.failCode === 'MISSING_VAR' ? `<a href="leads.html?open=${o.leadId}">补充昵称</a>` : ''}${o.status === 'BLOCKED' ? `<a onclick="retry('${o.id}')">改期重发</a>` : ''}${ACQ.convOf(o.leadId) ? `<a href="workbench.html?c=${ACQ.convOf(o.leadId).id}">会话</a>` : ''}` },
+  ], r, { empty: '没有记录' });
+}
+function cancel(id) { const o = ACQ.outreach.find(x => x.id === id); o.status = 'CANCELLED'; ACQ.save(); draw(); toast('已取消'); }
+function retry(id) { const o = ACQ.outreach.find(x => x.id === id); const alt = ACQ.accounts.find(a => a.platform === ACQ.lead(o.leadId).platform && a.status === 'ONLINE' && a.caps.includes('SEND_DM')); if (alt) { o.account = alt.id; o.status = 'QUEUED'; o.scheduledAt = Date.now() + 5 * 60e3; toast(`已改用「${alt.name}」重新排队`, 'ok'); } else { o.status = 'QUEUED'; o.scheduledAt = ACQ.account(o.account).circuitUntil || Date.now() + ACQ.H; toast('同平台无可用账号，已排到熔断结束后', 'warn'); } o.failMessage = null; ACQ.save(); draw(); }
+render();
+</script>
+</body>
+</html>
