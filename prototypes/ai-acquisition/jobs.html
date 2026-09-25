@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>自动化任务</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  .nl { display: flex; gap: 10px; align-items: stretch; } .nl textarea { flex: 1; height: 56px; font-size: 14px; }
+  .parse { border: 1px solid #ddd0ff; background: linear-gradient(180deg, #faf7ff, #fff); border-radius: 12px; padding: 14px 16px; margin-top: 12px; }
+  .parse .kv { grid-template-columns: 110px 1fr; }
+  .pre { background: #0f1b33; color: #c7d0e3; border-radius: 8px; padding: 10px 12px; font-size: 11.5px; line-height: 1.6; overflow: auto; max-height: 260px; white-space: pre; }
+  .dry td { vertical-align: top; } .dry .txt { font-size: 12.5px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/app.js"></script>
+<script>
+const me = App.me(); const root = App.mount({ active: 'jobs', title: '自动化任务' });
+const noPerm = me.role !== 'admin'; if (noPerm) root.innerHTML = '<div class="empty">仅管理员可配置自动化任务（请切换为管理员视角）</div>';
+let spec = null, nlText = '';
+const ACTION = { CAPTURE: ['抓取线索', 'primary'], OUTREACH: ['发送触达', 'ai'], FOLLOW_UP: ['跟进', 'warning'], REFRESH_DASHBOARD: ['更新看板', ''], POSTER_DISPATCH: ['海报分发', 'success'], CUSTOM: ['自定义', ''] };
+const EXAMPLES = ['每天早上 9 点抓取线索', '每天 10 点给意图分 60 以上的新线索发送首触话术', '下午 2 点跟进未回复客户', '下午 5 点更新看板', '每周一早上八点半给三天没回复的人再发一次案例', '每天晚上八点把今日行情海报发到微信群和朋友圈'];
+
+function render() {
+  root.innerHTML = App.pageHead('自动化任务', '用一句话描述任务，AI 解析为可执行任务；保存前可试运行 5 条样本，缺变量会在此拦截而不是发到客户那里。', `<button class="btn" onclick="location.href='wizard.html?step=2'">开通向导中配置 →</button>`) +
+  `<div class="card mb16"><div class="card-b">
+    <div class="nl"><textarea class="input" id="nl" placeholder="例如：每天早上 9 点抓取线索；每天 10 点给意图分 60 以上的新线索发送首触话术…">${esc(nlText)}</textarea><button class="btn ai" style="padding:0 18px;font-size:14px" onclick="parse()">✨ 解析为任务</button></div>
+    <div class="chips mt8">${EXAMPLES.map(e => `<span class="chip" onclick="$('#nl').value='${e}';parse()">${e}</span>`).join('')}</div>
+    <div id="parse"></div>
+  </div></div>
+  <div class="card"><div class="card-h"><h3>任务列表 <span class="sub">${ACQ.jobs.length} 个 · 时区 Asia/Shanghai</span></h3><div class="row"><button class="btn sm" onclick="showRuns()">全部运行记录</button></div></div>
+  ${UI.table([
+    { label: '任务', render: j => `<b>${esc(j.name)}</b><span class="sub">“${esc(j.nl)}”</span>` },
+    { label: '类型', render: j => UI.tag(ACTION[j.action][0], ACTION[j.action][1]) },
+    { label: '调度', render: j => `${j.scheduleText}<span class="sub mono">${j.cron}</span>` },
+    { label: '参数', render: j => paramsBrief(j) },
+    { label: '启用', render: j => `<span class="switch ${j.enabled ? 'on' : ''}" onclick="toggle('${j.id}')"></span>` },
+    { label: '上次运行', render: j => j.lastRun ? `${UI.status(j.lastStatus)}<span class="sub">${fmt.ago(j.lastRun)} · 共 ${j.runs} 次</span>` : '<span class="muted">未运行</span>' },
+    { label: '下次', render: j => j.enabled && j.nextRun ? fmt.left(j.nextRun) : '—' },
+    { label: '操作', cls: 'ops', render: j => `<a onclick="runNow('${j.id}')">立即运行</a>${j.action === 'OUTREACH' || j.action === 'FOLLOW_UP' ? `<a onclick="dryRun('${j.id}')">试运行</a>` : ''}<a onclick="showRuns('${j.id}')">记录</a><a onclick="editJob('${j.id}')">编辑</a><a class="danger" style="color:var(--danger)" onclick="delJob('${j.id}')">删除</a>` },
+  ], ACQ.jobs)}</div>`;
+  if (spec) renderParse();
+}
+function paramsBrief(j) { const p = j.spec || {}; const parts = []; if (p.platforms) parts.push(p.platforms.map(x => UI.platform(x)).join('')); if (p.filter) { if (p.filter.minScore) parts.push(`意图分 ≥${p.filter.minScore}`); if (p.filter.stage) parts.push(`阶段 ${p.filter.stage.join('/')}`); if (p.filter.noReplyDays) parts.push(`${p.filter.noReplyDays} 天未回复`); } if (p.scriptId) parts.push(`话术「${(ACQ.script(p.scriptId) || {}).name || p.scriptId}」`); if (p.maxCount) parts.push(`上限 ${p.maxCount}`); return `<span class="small">${parts.join(' · ') || '—'}</span>`; }
+function parse() { nlText = $('#nl').value.trim(); if (!nlText) return toast('请输入一句话描述', 'warn'); const el = $('#parse'); el.innerHTML = '<div class="alert ai mt12">✨ Qwen3.5-Plus 正在解析（JSON Schema 约束输出）…</div>'; setTimeout(() => { spec = Engine.parseJob(nlText); renderParse(); }, 600); }
+function renderParse() {
+  const s = spec; const el = $('#parse'); const p = s.params;
+  el.innerHTML = `<div class="parse">
+    <div class="row mb8"><span class="ai-badge">✨ 解析结果</span><b style="font-size:14px">${esc(s.name)}</b>${UI.tag(ACTION[s.action][0], ACTION[s.action][1])}<span class="sp"></span><span class="small muted">置信度 ${s.confidence} · ${s.model}</span></div>
+    ${s.ambiguities.length ? `<div class="alert warn small mb8">⚠ 需要确认（AI 已按默认值填充，请检查）：<ul style="margin:4px 0 0 16px">${s.ambiguities.map(a => `<li>${a}</li>`).join('')}</ul></div>` : '<div class="alert ok small mb8">✓ 描述完整，无歧义</div>'}
+    <div class="split">
+      <div>
+        <div class="field"><label>任务名称</label><input class="input" value="${esc(s.name)}" oninput="spec.name=this.value"></div>
+        <div class="field"><label>执行时间</label><div class="row"><input class="input" style="width:150px" value="${esc(s.scheduleText)}" oninput="spec.scheduleText=this.value"><code class="mono muted">${s.cron}</code></div><div class="hint">发送类任务会自动避开 ${ACQ.merchant.activeHours} 之外的时段</div></div>
+        ${s.action === 'CAPTURE' ? `<div class="field"><label>渠道</label><div class="chips">${['DOUYIN', 'XIAOHONGSHU', 'FORUM', 'WECHAT_PERSONAL', 'WECOM', 'HDZ_INTERNAL'].map(x => `<span class="chip ${p.platforms.includes(x) ? 'on' : ''}" onclick="togglePlat('${x}')">${UI.platformName(x)}</span>`).join('')}</div><div class="hint">使用 ${p.captureRuleIds.length} 条已启用抓取规则</div></div>` : ''}
+        ${s.action === 'OUTREACH' ? `<div class="field"><label>筛选</label><div class="row">阶段 ${p.filter.stage.map(x => UI.stage(x)).join('')} · 意图分 ≥ <input class="input sm" type="number" style="width:60px" value="${p.filter.minScore}" oninput="spec.params.filter.minScore=+this.value"> · 近 ${p.filter.createdWithinDays} 天新增</div></div>
+          <div class="field"><label>话术</label><select class="select" onchange="spec.params.scriptId=+this.value">${ACQ.scripts.filter(x => x.scene === 'OUTREACH' && x.enabled).map(x => `<option value="${x.id}" ${x.id === p.scriptId ? 'selected' : ''}>${esc(x.name)}（回复率 ${fmt.pct(x.reply7, x.sent7)}）</option>`).join('')}</select></div>
+          <div class="field"><label>发送账号</label><div class="chips">${ACQ.accounts.filter(a => a.caps.includes('SEND_DM')).map(a => `<span class="chip ${p.channelAccountIds.includes(a.id) ? 'on' : ''}" onclick="toggleAcc('${a.id}')">${UI.platform(a.platform)}${esc(a.name)}${a.status !== 'ONLINE' ? ' ⚠' : ''}</span>`).join('')}</div><div class="hint">按线索平台自动选账号；小号受养号曲线与每日额度约束</div></div>` : ''}
+        ${s.action === 'FOLLOW_UP' ? `<div class="field"><label>对象</label><div class="row">${p.filter.noReplyDays ? `${p.filter.noReplyDays} 天未回复` : '到期的跟进待办 / 流程定时器'} · 阶段 ${p.filter.stage.map(x => UI.stage(x)).join('')}</div></div><div class="field"><label>话术</label><select class="select" onchange="spec.params.scriptId=+this.value">${ACQ.scripts.filter(x => x.enabled && ['FOLLOW_UP', 'REPLY'].includes(x.scene)).map(x => `<option value="${x.id}" ${x.id === p.scriptId ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>` : ''}
+        ${s.action === 'POSTER_DISPATCH' ? `<div class="field"><label>海报</label><select class="select">${ACQ.posters.map(x => `<option ${x.id === p.posterId ? 'selected' : ''}>${x.title}</option>`).join('')}</select></div><div class="field"><label>投放目标</label><div class="chips">${p.targets.map(t => `<span class="chip on">${t}</span>`).join('')}</div></div>` : ''}
+        <div class="field"><label>上限</label><div class="row">单次最多处理 <input class="input sm" type="number" style="width:80px" value="${p.maxCount}" oninput="spec.params.maxCount=+this.value"> 条</div></div>
+        <div class="row"><label class="checkbox"><input type="checkbox" ${s.guardrails.requireApproval ? 'checked' : ''} onchange="spec.guardrails.requireApproval=this.checked"> 发送前需人工审核</label><label class="checkbox"><input type="checkbox" checked> 完成后企微通知负责人</label></div>
+      </div>
+      <div><div class="small b mb8">JobSpec（正式实现由大模型按 JSON Schema 输出，存入 hdz_acq_automation_job.spec_json）</div><div class="pre">${esc(JSON.stringify({ name: s.name, action: s.action, cron: s.cron, timezone: s.timezone, params: s.params, guardrails: s.guardrails }, null, 2))}</div></div>
+    </div>
+    <div class="row mt12"><span class="sp"></span>${s.action === 'OUTREACH' || s.action === 'FOLLOW_UP' ? `<button class="btn" onclick="dryRun(null)">🧪 试运行 5 条样本</button>` : ''}<button class="btn" onclick="saveJob(false)">仅保存</button><button class="btn primary" onclick="saveJob(true)">保存并启用</button></div>
+  </div>`;
+}
+function togglePlat(x) { const a = spec.params.platforms; const i = a.indexOf(x); i >= 0 ? a.splice(i, 1) : a.push(x); spec.params.captureRuleIds = ACQ.captureRules.filter(r => r.enabled && a.includes(r.platform)).map(r => r.id); renderParse(); }
+function toggleAcc(x) { const a = spec.params.channelAccountIds; const i = a.indexOf(x); i >= 0 ? a.splice(i, 1) : a.push(x); renderParse(); }
+function saveJob(enable) { if (!spec) return; const j = { id: 'J' + (ACQ.jobs.length + 1), name: spec.name, nl: nlText, action: spec.action, cron: spec.cron, scheduleText: spec.scheduleText, spec: spec.params, enabled: enable, lastRun: null, lastStatus: null, nextRun: enable ? Date.now() + 5 * ACQ.H : null, runs: 0 }; ACQ.jobs.push(j); ACQ.save(); spec = null; nlText = ''; render(); toast(enable ? '任务已保存并启用' : '任务已保存（未启用）', 'ok'); }
+function toggle(id) { const j = ACQ.jobs.find(x => x.id === id); j.enabled = !j.enabled; j.nextRun = j.enabled ? Date.now() + 3 * ACQ.H : null; ACQ.save(); render(); }
+function delJob(id) { Modal.confirm('删除任务', '删除后不再调度，历史运行记录保留。', () => { ACQ.jobs = ACQ.jobs.filter(x => x.id !== id); ACQ.save(); render(); }, { danger: true }); }
+function editJob(id) { const j = ACQ.jobs.find(x => x.id === id); nlText = j.nl; spec = Object.assign(Engine.parseJob(j.nl), { name: j.name, cron: j.cron, scheduleText: j.scheduleText, params: JSON.parse(JSON.stringify(j.spec)) }); render(); $('#nl').value = nlText; $('#parse').scrollIntoView({ behavior: 'smooth' }); toast('已载入任务，修改后保存将新建版本'); }
+function runNow(id) { const j = ACQ.jobs.find(x => x.id === id); const run = { id: 'JR' + Date.now().toString().slice(-5), jobId: j.id, action: j.action, trigger: 'MANUAL', status: 'RUNNING', startedAt: Date.now(), total: 0, success: 0, failed: 0, skipped: 0, summary: {} }; ACQ.jobRuns.unshift(run); j.lastRun = run.startedAt; j.lastStatus = 'RUNNING'; j.runs++; ACQ.save(); render(); toast('任务已触发，运行中…');
+  setTimeout(() => { run.status = 'SUCCESS'; run.finishedAt = Date.now(); if (j.action === 'CAPTURE') { run.total = 47; run.success = 47; run.summary = { raw: 47, dedup: 9, classified: 38, leadsCreated: 4, reactivated: 0, ignored: 34 }; } else if (j.action === 'OUTREACH') { const cand = ACQ.leads.filter(l => l.stage === 'NEW' && !l.isTest && l.score >= (j.spec.filter.minScore || 60)); run.total = cand.length; const bad = cand.filter(l => !Engine.render(ACQ.script(j.spec.scriptId), l).ok); run.failed = bad.length; run.success = cand.length - bad.length; run.status = bad.length ? 'PARTIAL' : 'SUCCESS'; run.errors = bad.map(l => `${l.id}：缺少变量 nickname`); run.summary = { sent: run.success, failed: run.failed, missingVars: bad.length }; } else { run.total = 12; run.success = 12; run.summary = { processed: 12 }; } j.lastStatus = run.status; ACQ.save(); render(); toast(`任务完成：${run.success} 成功 / ${run.failed} 失败`, run.failed ? 'warn' : 'ok'); }, 1800); }
+function showRuns(jobId) { const runs = ACQ.jobRuns.filter(r => !jobId || r.jobId === jobId); Drawer.open({ title: jobId ? `运行记录 · ${ACQ.jobs.find(j => j.id === jobId).name}` : '全部运行记录', wide: true, body: UI.table([
+  { label: '运行', render: r => `<b class="mono">${r.id}</b><span class="sub">${(ACQ.jobs.find(j => j.id === r.jobId) || {}).name || ''}</span>` }, { label: '触发', render: r => UI.tag({ CRON: '定时', MANUAL: '手动', DRY_RUN: '试运行' }[r.trigger] || r.trigger) }, { label: '状态', render: r => UI.status(r.status) }, { label: '时间', render: r => `${fmt.time(r.startedAt)}<span class="sub">耗时 ${r.finishedAt ? Math.round((r.finishedAt - r.startedAt) / 1000) + 's' : '—'}</span>` }, { label: '结果', render: r => `${r.success} 成功 / ${r.failed} 失败 / ${r.skipped} 跳过<span class="sub">${Object.entries(r.summary || {}).map(x => x[0] + ' ' + x[1]).join(' · ')}</span>` }, { label: '错误', render: r => (r.errors || []).map(e => `<div class="small" style="color:var(--danger)">${esc(e)}${/L\d{3}/.test(e) ? ` <a href="leads.html?open=${e.match(/L\d{3}/)[0]}">线索 →</a>` : ''}</div>`).join('') || '<span class="muted">—</span>' },
+], runs) }); }
+
+/* 试运行：取 5 条样本线索，逐条渲染，缺变量即拦截 */
+function dryRun(jobId) {
+  const j = jobId ? ACQ.jobs.find(x => x.id === jobId) : { name: spec.name, spec: spec.params, action: spec.action };
+  const scriptId = j.spec.scriptId || 101; const script = ACQ.script(scriptId);
+  let sample = ACQ.leads.filter(l => !l.isTest && (j.action === 'FOLLOW_UP' ? ['CONTACTED', 'REPLIED'].includes(l.stage) : l.stage === 'NEW')).slice(0, 5);
+  if (j.action !== 'FOLLOW_UP' && !sample.find(l => !l.nickname)) { const anon = ACQ.leads.find(l => !l.nickname); if (anon) sample[sample.length - 1] = anon; }
+  const fixes = {};
+  const d = Drawer.open({ title: `🧪 试运行 · ${esc(j.name)}`, sub: `话术「${esc(script.name)}」 · 样本 ${sample.length} 条 · 不会真实发送`, wide: true, body: '<div id="dry"></div>', footer: `<span class="small muted sp" id="drysum"></span><button class="btn" data-close>关闭</button><button class="btn ai" id="sendTest">发到测试号（${ACQ.merchant.testPeers.join(' / ')}）</button><button class="btn primary" id="go" disabled>确认，按计划执行</button>`, onMount(m) {
+    const draw = () => {
+      const rows = sample.map(l => { const lead = fixes[l.id] ? Object.assign({}, l, { nickname: fixes[l.id] }) : l; const r = Engine.render(script, lead); const acc = ACQ.accounts.find(a => a.platform === l.platform && a.caps.includes('SEND_DM') && (j.spec.channelAccountIds || [a.id]).includes(a.id)) || ACQ.accounts.find(a => a.platform === l.platform); return { l, lead, r, acc }; });
+      const bad = rows.filter(x => !x.r.ok).length;
+      $('#dry', m).innerHTML = (bad ? `<div class="alert error mb12">✖ ${bad} 条样本未通过校验，任务保存后这些线索会被<b>跳过并记录失败原因</b>，不会把「{nickname}」原样发给客户。请修复或确认跳过。</div>` : `<div class="alert ok mb12">✓ 5 条样本全部通过：每条含 ≥${ACQ.merchant.personalizationMin} 个个性化变量，内容安全检查通过。</div>`) +
+        `<table class="table dry"><thead><tr><th style="width:150px">线索</th><th>渲染结果</th><th style="width:170px">变量</th><th style="width:170px">校验</th><th style="width:150px">发送账号</th></tr></thead><tbody>${rows.map(x => `<tr><td>${UI.platform(x.l.platform)}<b>${esc(x.lead.nickname || '（空）')}</b><span class="sub">${esc(x.l.sourceChannel)}</span><span class="sub">${UI.stage(x.l.stage)} ${x.l.score} 分</span></td><td><div class="txt">${x.r.ok ? esc(x.r.text) : `<span class="muted">${UI.vars(script.content, x.r.missing)}</span>`}</div></td><td class="small">${x.r.used.map(k => `<span class="var ${x.r.vars[k] ? '' : 'miss'}" title="${esc(x.r.vars[k] || '缺失')}">{${k}}</span>`).join(' ')}<div class="xs muted mt8">个性化 ${x.r.hits.length} 个</div></td><td class="small">${x.r.problems.length ? x.r.problems.map(p => `<div style="color:${p.level === 'error' ? 'var(--danger)' : 'var(--warning)'}">${p.code ? `<code>${p.code}</code> ` : ''}${p.text}</div>`).join('') : '<span class="tag success">通过</span>'}${!x.r.ok && x.r.missing.includes('nickname') ? `<div class="row mt8" style="gap:4px"><input class="input sm" placeholder="补充昵称" style="width:90px" id="fix_${x.l.id}"><button class="btn xs" onclick="window.__fix('${x.l.id}')">修复</button></div><div class="xs muted mt8">或：<a onclick="window.__skip('${x.l.id}')">跳过该线索</a> · <a href="scripts.html?open=${script.id}">改为不依赖昵称的变体</a></div>` : ''}</td><td class="small">${x.acc ? `${UI.platform(x.acc.platform)}${esc(x.acc.name)}<span class="sub">${Engine.quota(x.acc).circuit ? '<span class="tag danger">熔断中 · 改期</span>' : '额度 ' + x.acc.todaySent + '/' + Engine.quota(x.acc).effectiveDaily + ' · 拟人延迟 ' + Engine.pacing(x.acc).preDelaySec + 's'}</span>` : '<span class="tag warning">无可用账号</span>'}</td></tr>`).join('')}</tbody></table>`;
+      $('#drysum', m).textContent = `${rows.length - bad}/${rows.length} 通过 · 预计发送耗时约 ${Math.round(rows.reduce((a, x) => a + (x.acc ? Engine.pacing(x.acc).preDelaySec : 0), 0) / 60)} 分钟（拟人节奏）`;
+      $('#go', m).disabled = bad > 0;
+    };
+    window.__fix = (id) => { const v = $('#fix_' + id, m).value.trim(); if (!v) return toast('请输入昵称', 'warn'); fixes[id] = v; const l = ACQ.lead(id); l.nickname = v; ACQ.addEvent(l, { type: 'EDIT', text: `试运行时补充昵称「${v}」`, cls: 'user' }); ACQ.save(); draw(); toast('已补充昵称并重新渲染', 'ok'); };
+    window.__skip = (id) => { sample = sample.filter(l => l.id !== id); draw(); toast('已从样本移除；正式运行时该线索会被记为「缺少变量，跳过」'); };
+    $('#sendTest', m).onclick = () => { toast(`已将 ${sample.length} 条渲染结果发送到测试号（微信/企微），请在手机上核对格式与变量`, 'ok'); ACQ.jobRuns.unshift({ id: 'JR' + Date.now().toString().slice(-5), jobId: j.id || '—', action: j.action, trigger: 'DRY_RUN', status: 'SUCCESS', startedAt: Date.now(), finishedAt: Date.now() + 1200, total: sample.length, success: sample.length, failed: 0, skipped: 0, summary: { preview: sample.length, toTestPeers: ACQ.merchant.testPeers.length } }); ACQ.save(); };
+    $('#go', m).onclick = () => { d.close(); if (!jobId) saveJob(true); else toast('已确认，任务将按计划执行', 'ok'); };
+    draw();
+  } });
+}
+if (!noPerm) { render(); if (qs('run')) showRuns(); if (qs('nl')) { $('#nl').value = qs('nl'); parse(); } }
+App.note(`<b>演示提示</b>：点示例「每天 10 点给意图分 60 以上…」→ 解析 → 「试运行 5 条样本」，第 5 条论坛匿名线索会因缺少 {nickname} 被拦截，可就地补昵称或跳过。`);
+</script>
+</body>
+</html>

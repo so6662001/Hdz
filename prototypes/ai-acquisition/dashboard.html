@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>看板</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  .who { display: flex; flex-direction: column; gap: 8px; } .who .it { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: #fafbfd; cursor: pointer; } .who .it:hover { background: var(--primary-weak); }
+  .who .it .n { font-weight: 600; } .who .it .r { font-size: 11.5px; color: var(--text-3); flex: 1; min-width: 0; } .who .it .due { font-size: 11.5px; white-space: nowrap; }
+  .due.over { color: var(--danger); font-weight: 600; } .due.soon { color: var(--warning); font-weight: 600; }
+  .alloc { display: flex; height: 14px; border-radius: 999px; overflow: hidden; } .alloc i { display: block; height: 100%; } .legend { display: flex; gap: 12px; font-size: 11.5px; color: var(--text-3); margin-top: 6px; } .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+  .slider { display: grid; grid-template-columns: 120px 1fr 48px; gap: 10px; align-items: center; margin-bottom: 10px; } .slider input[type=range] { width: 100%; accent-color: var(--primary); }
+  .rep-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--border); } .rep-row:last-child { border: 0; }
+</style>
+</head>
+<body>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/app.js"></script>
+<script>
+const me = App.me(); const root = App.mount({ active: 'dashboard', title: '看板' });
+const C = { neg: '#1f5eff', pros: '#7c3aed', fu: '#16a34a', other: '#d1d5db' };
+let range = qs('range', 'today');
+const todayStr = fmt.date(Date.now());
+const leads = ACQ.myLeads(me);
+const isAdmin = me.role === 'admin';
+
+function render() {
+  const d = ACQ.days, t = d[13], y = d[12];
+  const sum = (k, n) => d.slice(14 - n).reduce((a, x) => a + x[k], 0);
+  const K = range === 'today' ? { cap: t.captured, neu: t.leadsNew, sent: t.outreachSent, rep: t.replied, hot: t.hot, won: t.won, pc: y.captured, pn: y.leadsNew, ps: y.outreachSent, pr: y.replied, ph: y.hot, pw: y.won }
+    : range === '7d' ? { cap: sum('captured', 7), neu: sum('leadsNew', 7), sent: sum('outreachSent', 7), rep: sum('replied', 7), hot: sum('hot', 7), won: sum('won', 7), pc: d.slice(0, 7).reduce((a, x) => a + x.captured, 0), pn: d.slice(0, 7).reduce((a, x) => a + x.leadsNew, 0), ps: d.slice(0, 7).reduce((a, x) => a + x.outreachSent, 0), pr: d.slice(0, 7).reduce((a, x) => a + x.replied, 0), ph: d.slice(0, 7).reduce((a, x) => a + x.hot, 0), pw: d.slice(0, 7).reduce((a, x) => a + x.won, 0) }
+    : { cap: sum('captured', 14), neu: sum('leadsNew', 14), sent: sum('outreachSent', 14), rep: sum('replied', 14), hot: sum('hot', 14), won: sum('won', 14), pc: 0, pn: 0, ps: 0, pr: 0, ph: 0, pw: 0 };
+  const dl = (a, b) => b ? a - b : null;
+  const rr = K.sent ? (K.rep / K.sent * 100) : 0, prr = K.ps ? (K.pr / K.ps * 100) : 0;
+  const todo = ACQ.followUps.filter(f => f.status === 'PENDING' && f.type !== 'FLOW_TIMER' && (isAdmin || f.owner === me.id)).concat(ACQ.conversations.filter(c => c.status === 'NEED_HUMAN').map(c => ({ conv: c, leadId: c.leadId, dueAt: c.lastAt + 2 * ACQ.H, reason: c.needHumanReason }))).filter(x => isAdmin || ACQ.lead(x.leadId).owner === me.id).sort((a, b) => a.dueAt - b.dueAt).filter((x, i, a) => a.findIndex(y => y.leadId === x.leadId) === i).slice(0, 6);
+  const hot = leads.filter(l => l.stage === 'HOT').sort((a, b) => b.score - a.score).slice(0, 5);
+  const lost = leads.filter(l => l.stage === 'LOST' || l.stage === 'SILENT').sort((a, b) => b.lastActiveAt - a.lastActiveAt).slice(0, 5);
+  const reasonText = r => ({ FLOW_HUMAN_TASK: '流程人工任务', FLOW_WAIT_REPLY: '等待回复到期', NO_REPLY: '72h 未回复 · 自动二跟', CONSIDERING: '再考虑 · 到期发活动', HUMAN_SET: '人工设置', APPROVAL: '待审核报价', HOT: '高意向交人工', NO_MATCH: '无话术命中' })[r] || r;
+
+  root.innerHTML = App.pageHead('获客看板', `${isAdmin ? '全部销售' : '我的线索'} · 数据每 5 分钟刷新，17:00 定时快照 · 昨日 AI 成本 ¥${t.aiCost}`,
+    `<div class="btn-group">${[['today', '今日'], ['7d', '近 7 天'], ['14d', '近 14 天']].map(x => `<button class="btn sm ${range === x[0] ? 'on' : ''}" onclick="range='${x[0]}';render()">${x[1]}</button>`).join('')}</div><button class="btn sm" onclick="toast('已导出 dashboard-${todayStr}.xlsx','ok')">导出</button>`) +
+  `<div class="grid g6 mb16">
+    ${UI.kpi('抓取原始互动', K.cap, dl(K.cap, K.pc), '条', 'channels.html?tab=raw')}
+    ${UI.kpi('新线索', K.neu, dl(K.neu, K.pn), '', 'leads.html?stage=NEW')}
+    ${UI.kpi('触达发送', K.sent, dl(K.sent, K.ps), '', 'outreach.html')}
+    ${UI.kpi('回复率', rr.toFixed(1), K.ps ? +(rr - prr).toFixed(1) : null, '%', 'outreach.html?replied=1')}
+    ${UI.kpi('高意向', K.hot, dl(K.hot, K.ph), '', 'leads.html?stage=HOT')}
+    ${UI.kpi('成交', K.won, dl(K.won, K.pw), '', 'leads.html?stage=WON')}
+  </div>
+  <div class="grid g3 mb16">
+    <div class="card"><div class="card-h"><h3>谁该跟进 <span class="sub">今日待办 ${todo.length}</span></h3><a href="follow-ups.html" class="small">全部 →</a></div><div class="card-b who">
+      ${todo.map(x => { const l = ACQ.lead(x.leadId); const over = x.dueAt < Date.now(); return `<div class="it" onclick="location.href='${x.conv ? 'workbench.html?c=' + x.conv.id : 'leads.html?open=' + l.id}'">${UI.platform(l.platform)}<span class="n">${esc(l.nickname || '（无昵称）')}</span><span class="r ell">${reasonText(x.reason)}${x.note ? ' · ' + esc(x.note) : ''}</span>${UI.score(l.score)}<span class="due ${over ? 'over' : (x.dueAt - Date.now() < 3 * ACQ.H ? 'soon' : '')}">${over ? '逾期 ' + fmt.ago(x.dueAt).replace('前', '') : fmt.left(x.dueAt)}</span></div>`; }).join('') || '<div class="empty">今日无待办</div>'}
+    </div></div>
+    <div class="card"><div class="card-h"><h3>谁快成交 <span class="sub">高意向 ${leads.filter(l => l.stage === 'HOT').length}</span></h3><a href="leads.html?stage=HOT" class="small">全部 →</a></div><div class="card-b who">
+      ${hot.map(l => `<div class="it" onclick="location.href='leads.html?open=${l.id}'">${UI.platform(l.platform)}<span class="n">${esc(l.nickname)}</span><span class="r ell">${esc(l.product || '')} ${l.entities && l.entities.quantity ? '· ' + l.entities.quantity : ''} · ${ACQ.user(l.owner).name}</span>${UI.score(l.score)}<span class="due">${fmt.ago(l.lastActiveAt)}</span></div>`).join('') || '<div class="empty">暂无</div>'}
+    </div></div>
+    <div class="card"><div class="card-h"><h3>谁已流失 / 静默 <span class="sub">近 ${lost.length}</span></h3><a href="leads.html?stage=LOST" class="small">全部 →</a></div><div class="card-b who">
+      ${lost.map(l => `<div class="it" onclick="location.href='leads.html?open=${l.id}'">${UI.platform(l.platform)}<span class="n">${esc(l.nickname)}</span><span class="r ell">${l.stage === 'SILENT' ? '3 次无回复 → 静默 30 天' : ({ REFUSED: '客户拒绝 → 已拉黑', NO_REPLY: '多次无回复', NOT_TARGET: '非目标客户' })[l.lostReason] || '流失'}</span>${UI.stage(l.stage)}<span class="due">${fmt.ago(l.lastActiveAt)}</span></div>`).join('') || '<div class="empty">暂无</div>'}
+    </div></div>
+  </div>
+  <div class="grid mb16" style="grid-template-columns: 1fr 1.6fr">
+    <div class="card"><div class="card-h"><h3>转化漏斗 <span class="sub">近 14 天</span></h3></div><div class="card-b" id="funnel"></div></div>
+    <div class="card"><div class="card-h"><h3>14 天趋势</h3><div class="row small muted">触达 / 回复 / 新线索</div></div><div class="card-b"><canvas id="trend" style="width:100%;height:230px"></canvas></div></div>
+  </div>
+  <div class="grid g2 mb16">
+    <div class="card"><div class="card-h"><h3>渠道健康 <span class="sub">今日</span></h3><a href="channels.html" class="small">渠道与设备 →</a></div>
+      ${UI.table([{ label: '渠道', render: r => UI.platform(r.platform, true) }, { label: '抓取', key: 'captured', cls: 'right' }, { label: '成线索', key: 'leads', cls: 'right' }, { label: '触达', key: 'sent', cls: 'right' }, { label: '回复率', render: r => `<div class="row" style="gap:6px"><div style="width:70px">${UI.bar(r.replyRate * 100, r.replyRate > .35 ? 'ok' : '')}</div>${(r.replyRate * 100).toFixed(0)}%</div>` }, { label: '状态', render: r => UI.status(r.health) }], ACQ.byChannel)}
+    </div>
+    <div class="card"><div class="card-h"><h3>话术效果排行 <span class="sub">近 7 天回复率</span></h3><a href="scripts.html" class="small">话术库 →</a></div><div class="card-b"><canvas id="scriptBars" style="width:100%;height:230px"></canvas><div class="alert warn small mt8">⚠ 「首触 · 通用模板」无个性化变量，回复率 4.6%，已自动停用；带来源变量的首触回复率 32.8%。</div></div></div>
+  </div>
+  <div class="grid mb16" style="grid-template-columns: 1.3fr 1fr">
+    <div class="card"><div class="card-h"><h3>销售效率 <span class="sub">近 7 天 · 自动化数据 + 人工填报</span></h3>${isAdmin ? '<span class="small muted">填报率 2/3</span>' : ''}</div>
+      ${UI.table([{ label: '销售', render: r => `<b>${ACQ.user(r.owner).name}</b>` }, { label: 'AI 触达', key: 'sent', cls: 'right' }, { label: '回复', render: r => `${r.replied} <span class="muted xs">(${fmt.pct(r.replied, r.sent)})</span>`, cls: 'right' }, { label: '高意向', key: 'hot', cls: 'right' }, { label: '成交', render: r => `${r.won} <span class="muted xs">${fmt.money(r.wonAmount)}</span>`, cls: 'right' }, { label: '时间分配（昨日填报）', render: r => { const rp = ACQ.dailyReports.find(x => x.owner === r.owner && x.date === fmt.date(Date.now() - ACQ.D)); return rp ? alloc(rp) : '<span class="tag warning">未填报</span>'; } }], isAdmin ? ACQ.byOwner : ACQ.byOwner.filter(x => x.owner === me.id))}
+      <div class="card-b small muted">AI 触达 / 回复 / 高意向 / 成交 由系统自动统计；时间分配（谈单 / 找客 / 跟进 / 其他）为销售每日 18:00 前手工填报，用于对照「引入 AI 获客后销售是否把更多时间花在谈单上」。</div>
+    </div>
+    <div class="card"><div class="card-h"><h3>销售时间分配填报 <span class="sub">人工 · 每日</span></h3><span class="tag ${ACQ.merchant.dailyReportEnabled ? 'success' : ''}">${ACQ.merchant.dailyReportEnabled ? '已开启 · 18:00 企微提醒' : '已关闭'}</span></div><div class="card-b" id="reportCard"></div></div>
+  </div>
+  <div class="grid g3">
+    <div class="card"><div class="card-h"><h3>自动化任务 <span class="sub">今日</span></h3><a href="jobs.html" class="small">任务 →</a></div><div class="card-b col">
+      ${ACQ.jobs.filter(j => j.enabled).map(j => `<div class="row"><span class="b" style="width:120px">${j.name}</span><span class="muted small">${j.scheduleText}</span><span class="sp"></span>${j.lastStatus ? UI.status(j.lastStatus) : '<span class="tag">未运行</span>'}<span class="muted xs">${j.lastRun ? fmt.ago(j.lastRun) : '下次 ' + fmt.left(j.nextRun)}</span></div>`).join('')}
+      <div class="alert warn small">每日发送触达：35 成功 / 3 失败 — 1 条缺少昵称变量（L012 论坛匿名用户），2 条因抖音小号熔断改期。<a href="jobs.html?run=JR102">查看 →</a></div>
+    </div></div>
+    <div class="card"><div class="card-h"><h3>账号与发送队列</h3><a href="risk.html" class="small">风控 →</a></div><div class="card-b col">
+      ${ACQ.accounts.filter(a => a.caps.includes('SEND_DM') || a.caps.includes('REPLY_COMMENT')).map(a => { const q = Engine.quota(a); return `<div class="row"><span class="dot ${a.status === 'ONLINE' ? 'on' : a.status === 'RESTRICTED' ? 'bad' : 'off'}"></span>${UI.platform(a.platform)}<span class="ell" style="width:150px">${esc(a.name)}</span><span class="sp"></span><div style="width:80px">${UI.bar(a.todaySent / q.effectiveDaily * 100, a.todaySent / q.effectiveDaily > .8 ? 'hot' : '')}</div><span class="muted xs nowrap">${a.todaySent}/${q.effectiveDaily}${a.warmupDay && q.warm < 1 ? ' 养号' : ''}</span></div>`; }).join('')}
+      <div class="small muted">待发送队列 ${ACQ.outreach.filter(o => o.status === 'QUEUED').length} 条 · 抖音小号熔断至 ${fmt.hm(ACQ.account('a8').circuitUntil)}</div>
+    </div></div>
+    <div class="card"><div class="card-h"><h3>AI 与人工分工 <span class="sub">今日</span></h3><a href="workbench.html" class="small">工作台 →</a></div><div class="card-b">
+      <div class="stat-mini"><div><b>${t.autoReplies}</b><span>机器自动回复</span></div><div><b>${t.humanReplies}</b><span>人工回复</span></div><div><b>${t.escalated}</b><span>转人工</span></div><div><b>${ACQ.approvals.filter(a => a.status === 'PENDING').length}</b><span>待审核</span></div></div>
+      <div class="mt12">${UI.bar(t.autoReplies / (t.autoReplies + t.humanReplies) * 100)}<div class="small muted mt8">机器承担 ${(t.autoReplies / (t.autoReplies + t.humanReplies) * 100).toFixed(0)}% 的回复，人工只处理报价 / 合同 / 无话术命中；平均转人工响应 23 分钟。</div></div>
+    </div></div>
+  </div>`;
+  Chart.funnel($('#funnel'), [{ label: '抓取', value: sum('captured', 14), color: '#93c5fd' }, { label: '成线索', value: sum('leadsNew', 14), color: '#60a5fa' }, { label: '已触达', value: Math.round(sum('leadsNew', 14) * .84), color: '#3b82f6' }, { label: '已回复', value: Math.round(sum('leadsNew', 14) * .84 * .38), color: '#7c3aed' }, { label: '高意向', value: sum('hot', 14), color: '#ea580c' }, { label: '成交', value: sum('won', 14), color: '#111827' }]);
+  Chart.line($('#trend'), [{ name: '触达', data: d.map(x => x.outreachSent), color: '#1f5eff', fill: true }, { name: '回复', data: d.map(x => x.replied), color: '#7c3aed' }, { name: '新线索', data: d.map(x => x.leadsNew), color: '#16a34a' }], { labels: d.map(x => fmt.md(x.date)) });
+  const sc = ACQ.scripts.filter(s => s.sent7 > 10).map(s => ({ label: s.name.split(' · ')[0] + ' · ' + s.name.split(' · ')[1].slice(0, 6), value: s.reply7 / s.sent7 * 100, text: (s.reply7 / s.sent7 * 100).toFixed(1) + '% (' + s.sent7 + ')', color: s.enabled ? (s.reply7 / s.sent7 > .3 ? '#16a34a' : '#1f5eff') : '#d1d5db' })).sort((a, b) => b.value - a.value).slice(0, 7);
+  Chart.bars($('#scriptBars'), sc);
+  renderReport();
+}
+function alloc(r) { return `<div style="min-width:160px"><div class="alloc"><i style="width:${r.negotiation}%;background:${C.neg}"></i><i style="width:${r.prospecting}%;background:${C.pros}"></i><i style="width:${r.followUp}%;background:${C.fu}"></i><i style="width:${r.other}%;background:${C.other}"></i></div><div class="xs muted">谈单 ${r.negotiation}% · 找客 ${r.prospecting}% · 跟进 ${r.followUp}%${r.manualDeals ? ' · 线下成交 ' + r.manualDeals : ''}</div></div>`; }
+function renderReport() {
+  const el = $('#reportCard'); const sales = ACQ.users.filter(u => u.role === 'sales' && (isAdmin || u.id === me.id));
+  const yesterday = fmt.date(Date.now() - ACQ.D);
+  const rows = sales.map(u => { const today = ACQ.dailyReports.find(r => r.owner === u.id && r.date === todayStr); const yd = ACQ.dailyReports.find(r => r.owner === u.id && r.date === yesterday); return `<div class="rep-row"><div class="avatar" style="width:26px;height:26px;font-size:11px">${u.short}</div><div style="width:50px"><b>${u.name}</b></div><div class="sp">${today ? alloc(today) : `<span class="muted small">今日未填报${yd ? '' : ' · 昨日也未填报'}</span>`}</div>${today ? `<span class="tag success">已填</span>` : (isAdmin && u.id !== me.id ? `<button class="btn xs" onclick="toast('已通过企微提醒 ${u.name} 填报','ok')">提醒</button>` : `<button class="btn primary xs" onclick="openReport(${u.id})">填报</button>`)}</div>`; }).join('');
+  const team = ACQ.dailyReports.filter(r => r.date >= fmt.date(Date.now() - 7 * ACQ.D)); const avg = k => team.length ? Math.round(team.reduce((a, r) => a + r[k], 0) / team.length) : 0;
+  el.innerHTML = rows + (isAdmin ? `<div class="mt12"><div class="small b mb8">团队近 7 天平均</div>${alloc({ negotiation: avg('negotiation'), prospecting: avg('prospecting'), followUp: avg('followUp'), other: avg('other'), manualDeals: 0 })}<div class="legend"><span><i style="background:${C.neg}"></i>谈单</span><span><i style="background:${C.pros}"></i>找客</span><span><i style="background:${C.fu}"></i>跟进</span><span><i style="background:${C.other}"></i>其他</span></div><div class="alert ok small mt8">对照基线（开通前访谈）：找客 35% → 现 ${avg('prospecting')}%，谈单 40% → 现 ${avg('negotiation')}%。</div></div>` : `<div class="alert info small mt12">每天 18:00 企微提醒填报，≤30 秒：拖动 4 个滑块到 100%，可填线下成交数与备注。</div>`);
+}
+function openReport(uid) {
+  let v = { negotiation: 55, prospecting: 10, followUp: 25, other: 10, manualDeals: 0, note: '' };
+  const body = `<div class="alert info small mb12">今天的时间大致怎么分配？拖到合计 100% 即可（不要求精确）。</div>
+    ${[['negotiation', '谈单 / 报价 / 签约', C.neg], ['prospecting', '找客 / 加人 / 发广告', C.pros], ['followUp', '跟进老客户', C.fu], ['other', '其他（内勤 / 物流）', C.other]].map(x => `<div class="slider"><label><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${x[2]};margin-right:6px"></i>${x[1]}</label><input type="range" min="0" max="100" value="${v[x[0]]}" data-k="${x[0]}"><b id="v_${x[0]}">${v[x[0]]}%</b></div>`).join('')}
+    <div class="row mb12"><span class="small muted">合计</span><b id="sumv">100%</b><span class="sp"></span><span class="small muted">线下成交（AI 未覆盖）</span><input class="input sm" id="deals" type="number" min="0" value="0" style="width:70px"></div>
+    <div class="field"><label>备注（可选）</label><input class="input" id="note" placeholder="例如：下午去了周总工地"></div>`;
+  Modal.open({ title: `销售时间分配填报 · ${ACQ.user(uid).name} · ${todayStr}`, body, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">提交</button>', onMount(m, close) {
+    const upd = () => { let s = 0; $$('input[type=range]', m).forEach(i => { v[i.dataset.k] = +i.value; $('#v_' + i.dataset.k, m).textContent = i.value + '%'; s += +i.value; }); $('#sumv', m).textContent = s + '%'; $('#sumv', m).style.color = s === 100 ? 'var(--success)' : 'var(--danger)'; $('#ok', m).disabled = s !== 100; };
+    $$('input[type=range]', m).forEach(i => i.oninput = upd); upd();
+    $('#ok', m).onclick = () => { ACQ.dailyReports.push(Object.assign({ owner: uid, date: todayStr, manualDeals: +$('#deals', m).value, note: $('#note', m).value }, v)); ACQ.save(); close(); toast('已提交，看板「销售效率」已更新', 'ok'); render(); };
+  } });
+}
+render();
+App.note(`<b>演示提示</b>：右上角可切换「管理员 / 销售」视角；「谁该跟进」点击直达工作台或线索详情；「填报」体验 30 秒手工填报。`);
+</script>
+</body>
+</html>
