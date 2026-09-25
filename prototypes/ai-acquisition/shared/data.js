@@ -2,7 +2,7 @@
 (function (w) {
   const NOW = Date.now(), H = 3600e3, D = 24 * H;
   const ago = (h) => NOW - h * H, later = (h) => NOW + h * H;
-  const VERSION = 'acq:state:v6';
+  const VERSION = 'acq:state:v7';
   const rnd = (() => { let s = 20260925; return () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648; })();
   const pick = (a) => a[Math.floor(rnd() * a.length)];
   const ri = (a, b) => a + Math.floor(rnd() * (b - a + 1));
@@ -314,7 +314,6 @@
   ACQ.instanceOf = (leadId) => S.flowInstances.find(i => i.leadId === leadId && ['ACTIVE', 'WAITING', 'PAUSED'].includes(i.status));
   ACQ.convOf = (leadId) => S.conversations.find(c => c.leadId === leadId);
   ACQ.badges = () => ({ needHuman: S.conversations.filter(c => c.status === 'NEED_HUMAN').length, dueToday: S.followUps.filter(f => f.status === 'PENDING' && f.dueAt <= NOW + D && f.type !== 'FLOW_TIMER').length, approvals: S.approvals.filter(a => a.status === 'PENDING').length });
-  ACQ.notices = () => S.notices;
   ACQ.myLeads = (me) => me.role === 'admin' ? S.leads : S.leads.filter(l => l.owner === me.id);
   ACQ.addEvent = (lead, ev) => { lead.events = lead.events || []; lead.events.unshift(Object.assign({ t: Date.now() }, ev)); };
   ACQ.NOW = NOW; ACQ.H = H; ACQ.D = D;

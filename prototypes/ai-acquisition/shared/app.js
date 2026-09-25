@@ -80,7 +80,7 @@
     },
     resetData() { Object.keys(localStorage).filter(k => k.startsWith('acq:') && k !== 'acq:role').forEach(k => localStorage.removeItem(k)); location.reload(); },
     notices() {
-      const list = (w.ACQ && ACQ.notices) ? ACQ.notices() : [];
+      const list = (w.ACQ && Array.isArray(ACQ.notices)) ? ACQ.notices : [];
       Drawer.open({ title: '企业微信通知（模拟）', narrow: true, body: `<div class="timeline">${list.map(n => `<div class="tl ${n.cls || 'sys'}"><div class="t">${fmt.time(n.t)}</div><div class="s">${n.text}</div>${n.link ? `<div class="d"><a href="${n.link}">打开 →</a></div>` : ''}</div>`).join('') || '<div class="empty">暂无通知</div>'}</div>` });
     },
     pageHead(title, desc, actions) { return `<div class="page-head"><div><h1>${title}</h1>${desc ? `<p>${desc}</p>` : ''}</div><div class="actions">${actions || ''}</div></div>`; },
