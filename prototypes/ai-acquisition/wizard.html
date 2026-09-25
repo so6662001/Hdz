@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>开通向导</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  .wz { max-width: 1040px; margin: 0 auto; }
+  .wz .steps { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px 24px; margin-bottom: 16px; }
+  .schema { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; } .schema div { background: #fafbfd; border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; font-size: 12px; } .schema div b { display: block; font-family: Menlo, monospace; font-size: 11px; color: var(--text-2); }
+  .chn { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; } .chn .card { padding: 14px; position: relative; } .chn .card .st { position: absolute; top: 12px; right: 12px; }
+  .chn h4 { font-size: 14px; margin: 8px 0 4px; } .chn p { font-size: 12px; color: var(--text-3); line-height: 1.6; min-height: 54px; }
+  .qr { width: 160px; height: 160px; margin: 10px auto; background: repeating-linear-gradient(90deg, #111 0 6px, #fff 6px 12px), repeating-linear-gradient(#111 0 6px, #fff 6px 12px); background-blend-mode: difference; border: 6px solid #fff; box-shadow: 0 0 0 1px var(--border); }
+  .prog { display: flex; flex-direction: column; gap: 6px; } .prog div { display: flex; gap: 8px; align-items: center; font-size: 13px; } .prog .ok { color: var(--success) } .prog .run { color: var(--primary) } .prog .pend { color: var(--text-4) }
+  .jobline { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; background: #fff; }
+</style>
+</head>
+<body>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/app.js"></script>
+<script>
+const me = App.me(); const root = App.mount({ active: 'wizard', title: '开通向导' });
+let step = +qs('step', Math.min(4, ACQ.merchant.wizardStep || 1)); const W = ACQ.merchant.wizard = ACQ.merchant.wizard || { jobs: null, sopId: 'F1', bound: {}, testLeads: null, lastRun: null };
+if (!W.bound.HDZ_INTERNAL) W.bound.HDZ_INTERNAL = 'ok';
+const STEPS = ['建表与基础信息', '自然语言配置自动化', '绑定渠道', '试运行 5 条线索'];
+function render() {
+  root.innerHTML = `<div class="wz">${App.pageHead('开通 AI 获客', '目标：当天下午跑通「抓取 → 触达 → 跟进 → 记录」全流程；每一步都可稍后在对应页面修改。')}
+    <div class="steps"><div class="steps">${STEPS.map((s, i) => `<div class="step ${step === i + 1 ? 'on' : step > i + 1 ? 'done' : ''}"><i>${step > i + 1 ? '✓' : i + 1}</i>${s}</div>${i < 3 ? '<div class="ln"></div>' : ''}`).join('')}</div></div>
+    <div id="body"></div></div>`;
+  [s1, s2, s3, s4][step - 1]();
+}
+const nav = (canNext, nextText) => `<div class="row mt16">${step > 1 ? `<button class="btn" onclick="go(${step - 1})">上一步</button>` : ''}<span class="sp"></span><a class="small muted" href="dashboard.html">稍后继续</a><button class="btn primary" ${canNext ? '' : 'disabled'} onclick="go(${step + 1})">${nextText || '下一步'}</button></div>`;
+function go(n) { if (n > 4) return finish(); step = n; ACQ.merchant.wizardStep = Math.max(ACQ.merchant.wizardStep || 1, n); ACQ.save(); history.replaceState(null, '', '?step=' + n); render(); window.scrollTo(0, 0); }
+
+/* Step 1 */
+function s1() {
+  const M = ACQ.merchant;
+  $('#body').innerHTML = `<div class="grid" style="grid-template-columns:1.2fr 1fr">
+    <div class="card"><div class="card-h"><h3>商家信息 <span class="sub">已从货袋子商家资料与企业资料库带入</span></h3></div><div class="card-b">
+      <div class="grid g2"><div class="field"><label>商家名称</label><input class="input" value="${esc(M.name)}" onchange="ACQ.merchant.name=this.value;ACQ.save()"></div><div class="field"><label>默认签名（销售）</label><input class="input" value="${esc(M.defaultVars.sales_name)}" onchange="ACQ.merchant.defaultVars.sales_name=this.value;ACQ.save()"></div></div>
+      <div class="field"><label>主营产品（用于 {product} 变量与意图识别词典）</label><div class="chips">${M.products.map(p => `<span class="chip on">${p} ✕</span>`).join('')}<span class="chip">＋ 添加</span></div></div>
+      <div class="field"><label>企业介绍 {company_intro}</label><textarea class="input" style="height:60px" onchange="ACQ.merchant.intro=this.value;ACQ.save()">${esc(M.intro)}</textarea><div class="hint">来自企业资料库「企业介绍」，可在海报模块的资料库统一维护</div></div>
+      <div class="field"><label>销售人员与线索分配</label>${UI.table([{ label: '销售', render: u => `<b>${u.name}</b>` }, { label: '企微', render: u => '<span class="tag success">已绑定</span>' }, { label: '接收通知', render: u => '<span class="switch on"></span>' }], ACQ.users.filter(u => u.role === 'sales'))}<div class="row mt8">分配策略 <select class="select sm"><option>轮询</option><option>按渠道</option><option>按地区</option><option>手动</option></select> <span class="small muted">高意向线索额外企微通知管理员</span></div></div>
+      <div class="grid g3"><div class="field"><label>意图分阈值（成线索）</label><input class="input" type="number" value="${M.intentThreshold}" onchange="ACQ.merchant.intentThreshold=+this.value;ACQ.save()"></div><div class="field"><label>高意向阈值</label><input class="input" type="number" value="${M.hotThreshold}"></div><div class="field"><label>发送时段</label><input class="input" value="${M.activeHours}"></div></div>
+    </div></div>
+    <div>
+      <div class="card mb12"><div class="card-h"><h3>线索表已自动创建 <span class="sub">hdz_acq_lead</span></h3><span class="tag success">✓ 完成</span></div><div class="card-b"><div class="schema">${[['昵称', 'nickname'], ['来源渠道', 'platform / source_channel'], ['来源原文', 'source_excerpt'], ['意图 / 分数', 'intent / intent_score'], ['阶段', 'stage'], ['负责人', 'owner_user_id'], ['产品 / 地区', 'product / region'], ['触达 / 回复次数', 'outreach_count / reply_count'], ['最近活跃', 'last_active_at'], ['流程实例', 'flow_instance_id'], ['标签', 'tags'], ['手机（加密）', 'phone_enc']].map(x => `<div>${x[0]}<b>${x[1]}</b></div>`).join('')}</div><div class="small muted mt8">配套表：触达记录、会话与消息、跟进待办、流程实例与步骤日志、审核单、每日统计。字段沿用货袋子客户中心命名，成交后单向同步。</div></div></div>
+      <div class="card"><div class="card-h"><h3>行业话术包 <span class="sub">钢材贸易 · 基础包</span></h3><span class="tag success">✓ 已导入 ${ACQ.scripts.filter(s => s.source === 'INDUSTRY_PACK').length} 条</span></div><div class="card-b small">${ACQ.scripts.filter(s => s.source === 'INDUSTRY_PACK').slice(0, 5).map(s => `<div class="row mb8" style="gap:6px"><span class="tag">${s.category}</span><span class="ell">${esc(s.name)}</span><span class="sp"></span><span class="muted xs">${[...s.content.matchAll(/\{(\w+)\}/g)].length} 变量</span></div>`).join('')}<div class="muted">每条已替换为商家信息，并检查含 ≥1 个个性化变量。<a href="scripts.html">去话术库调整 →</a></div></div></div>
+    </div></div>${nav(true)}`;
+}
+
+/* Step 2 */
+function s2() {
+  if (!W.jobs) W.jobs = ['每天早上 9 点抓取线索', '每天 10 点给意图分 60 以上的新线索发送首触话术', '下午 2 点跟进未回复客户', '下午 5 点更新看板'].map(t => ({ nl: t, spec: Engine.parseJob(t), on: true }));
+  const sop = ACQ.flow(W.sopId);
+  $('#body').innerHTML = `<div class="grid" style="grid-template-columns:1.3fr 1fr">
+    <div class="card"><div class="card-h"><h3>用一句话配置每天要做的事</h3><span class="ai-badge">✨ AI 解析为任务</span></div><div class="card-b">
+      ${W.jobs.map((j, i) => `<div class="jobline"><span class="switch ${j.on ? 'on' : ''}" onclick="W.jobs[${i}].on=!W.jobs[${i}].on;ACQ.save();render()"></span><div style="flex:1"><div><b>“${esc(j.nl)}”</b></div><div class="small muted">→ ${UI.tag({ CAPTURE: '抓取', OUTREACH: '触达', FOLLOW_UP: '跟进', REFRESH_DASHBOARD: '看板', POSTER_DISPATCH: '海报' }[j.spec.action] || j.spec.action, 'primary')} ${j.spec.scheduleText} <code class="xs">${j.spec.cron}</code>${j.spec.params.filter && j.spec.params.filter.minScore ? ` · 意图分 ≥${j.spec.params.filter.minScore}` : ''}${j.spec.params.scriptId ? ` · ${esc((ACQ.script(j.spec.params.scriptId) || {}).name || '')}` : ''}${j.spec.ambiguities.length ? ` <span class="tag warning xs">${j.spec.ambiguities.length} 项默认值</span>` : ''}</div></div><button class="btn xs" onclick="editNl(${i})">改</button><button class="btn xs ghost" onclick="W.jobs.splice(${i},1);ACQ.save();render()">✕</button></div>`).join('')}
+      <div class="row mt12"><input class="input" id="nl" style="flex:1" placeholder="再加一句，例如：每周一早上八点半给三天没回复的人再发一次案例"><button class="btn ai" onclick="addNl()">✨ 解析</button></div>
+      <div class="alert info small mt12">这 4 句就是「当天下午跑通」的最小配置。保存后可在「自动化任务」页看到 JobSpec 并做试运行。</div>
+    </div></div>
+    <div class="card"><div class="card-h"><h3>跟进流程（SOP）</h3><a href="flows.html?id=${sop.id}" class="small">编辑 →</a></div><div class="card-b">
+      <div class="field"><label>新线索进入哪条 SOP</label><select class="select" onchange="W.sopId=this.value;ACQ.save();render()">${ACQ.flows.filter(f => f.status === 'PUBLISHED').map(f => `<option value="${f.id}" ${f.id === W.sopId ? 'selected' : ''}>${f.name} v${f.publishedVersion}</option>`).join('')}</select></div>
+      <div class="flow-tree small">${miniTree(sop)}</div>
+      <div class="small muted mt8">护栏：客户拒绝立即终止 · 最多自动发送 ${sop.guardrails.maxAutoSends} 条 · 问价 / 合同一律转人工。</div>
+    </div></div></div>${nav(W.jobs.some(j => j.on), '保存并下一步')}`;
+}
+function miniTree(f) { const seen = new Set(); const walk = (id) => { if (!id || seen.has(id)) return id ? `<div class="fref">↺ ${Engine.flow.label(f, id)}</div>` : ''; seen.add(id); const n = f.nodes[id]; const M = Engine.flow.NODE_META[n.type]; let h = `<div class="fnode" style="padding:6px 10px;margin:4px 0;cursor:default"><div class="ic ${M[1]}" style="width:22px;height:22px">${M[2]}</div><div class="body"><b style="font-size:12px">${Engine.flow.label(f, id)}</b></div></div>`; if (n.type === 'End') return h; if (n.branches) return h + `<div class="fbranches">${Object.entries(n.branches).map(([k, t]) => `<div class="fbranch"><span class="bl">${k === '*' ? '其他' : Engine.flow.BRANCH_LABEL[k]}</span>${walk(t)}</div>`).join('')}</div>`; if (n.type === 'GoTo') return h; return h + walk(n.next); }; return walk(f.first); }
+function addNl() { const t = $('#nl').value.trim(); if (!t) return; W.jobs.push({ nl: t, spec: Engine.parseJob(t), on: true }); ACQ.save(); render(); toast('已解析并加入', 'ok'); }
+function editNl(i) { Modal.open({ title: '修改描述', body: `<input class="input" id="e" value="${esc(W.jobs[i].nl)}" style="width:100%">${W.jobs[i].spec.ambiguities.length ? `<div class="alert warn small mt8">${W.jobs[i].spec.ambiguities.join('<br>')}</div>` : ''}`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">重新解析</button>', onMount(m, close) { $('#ok', m).onclick = () => { const t = $('#e', m).value.trim(); W.jobs[i] = { nl: t, spec: Engine.parseJob(t), on: true }; ACQ.save(); close(); render(); }; } }); }
+
+/* Step 3 */
+function s3() {
+  const CH = [
+    { k: 'HDZ_INTERNAL', ic: '🟣', name: '货袋子站内', d: '圈子 / 询价 / 海报扫码事件自动进入线索池，无需绑定。', risk: 'ok', action: null },
+    { k: 'WECOM', ic: '🟦', name: '企业微信（官方 API）', d: '客户联系 / 客户朋友圈 / 客户群 / 微信客服。合规、稳定、可发朋友圈；只能触达已添加的客户。', risk: 'ok', action: 'wecom' },
+    { k: 'WECHAT_PERSONAL', ic: '🟢', name: '个人微信（工作手机 + 获客助手 App）', d: '读群消息 / 朋友圈互动，向群友或新好友发消息。需专用工作手机与小号，按养号曲线限速。', risk: 'warn', action: 'rpa' },
+    { k: 'DOUYIN', ic: '⬛', name: '抖音企业号（开放平台）', d: '自家视频评论回复与私信。抓取他人视频评论需 RPA 小号（高风险，需单独开启）。', risk: 'ok', action: 'oauth' },
+    { k: 'XIAOHONGSHU', ic: '🟥', name: '小红书专业号（网页版）', d: '发布笔记、回复自家笔记评论。禁止在内容中放联系方式，系统会自动检查。', risk: 'ok', action: 'web' },
+    { k: 'FORUM', ic: '🟧', name: '行业论坛', d: '抓取供求版块、发私信 / 回帖。填入账号即可。', risk: 'ok', action: 'form' },
+  ];
+  const st = k => W.bound[k];
+  $('#body').innerHTML = `<div class="chn">${CH.map(c => `<div class="card"><span class="st">${st(c.k) === 'ok' ? '<span class="tag success">✓ 已绑定</span>' : st(c.k) === 'pending' ? '<span class="tag warning">待设备上线</span>' : '<span class="tag">未绑定</span>'}</span><div style="font-size:26px">${c.ic}</div><h4>${c.name}</h4><p>${c.d}</p>${c.risk === 'warn' ? '<div class="alert warn xs mb8">⚠ 非官方接口，账号有被限制风险；建议小号 + 保守频率</div>' : ''}${c.action ? `<button class="btn sm ${st(c.k) === 'ok' ? '' : 'primary'}" onclick="bind('${c.k}','${c.action}')">${st(c.k) === 'ok' ? '管理' : '绑定'}</button>` : '<span class="small muted">自动接入</span>'}</div>`).join('')}</div>
+  <div class="card mt16"><div class="card-h"><h3>抓取他人公开评论（抖音 / 小红书 RPA 小号）</h3><span class="switch ${ACQ.merchant.publicCommentCaptureEnabled ? 'on' : ''}" onclick="togglePublic(this)"></span></div><div class="card-b small">${ACQ.merchant.publicCommentCaptureEnabled ? `<span class="tag success">已开启</span> ${ACQ.merchant.riskNoticeBy} 于 ${fmt.date(ACQ.merchant.riskNoticeAcceptedAt)} 确认风险告知 · 每账号每日 ≤15 条内容、每条 ≤3 页、会话 ≤40 分钟；触发验证码 / 频繁提示自动熔断。` : '<span class="muted">关闭时仅抓取自家内容评论与站内 / 企微 / 论坛 / 微信群，风险最低。</span>'}</div></div>
+  <div class="alert info small mt12">已绑定 ${Object.values(W.bound).filter(x => x === 'ok').length} 个渠道。最少绑定 1 个可发送渠道（企微 / 个人微信 / 论坛）即可进入试运行。</div>
+  ${nav(['WECOM', 'WECHAT_PERSONAL', 'FORUM'].some(k => st(k) === 'ok'))}`;
+}
+function togglePublic(el) { if (ACQ.merchant.publicCommentCaptureEnabled) { ACQ.merchant.publicCommentCaptureEnabled = false; ACQ.save(); return render(); } Modal.open({ title: '开启前请确认风险告知', body: `<div class="alert warn small mb12">该功能通过工作手机上的获客助手 App 模拟人工浏览抖音 / 小红书公开内容并抓取评论，<b>不属于平台官方接口</b>。可能导致：小号被限流、封禁；平台规则变化导致脚本失效；抓取内容涉及他人个人信息需按 PIPL 最小必要处理。</div><ul class="small" style="margin-left:16px;line-height:1.9"><li>仅使用专用小号与专用设备，不用主号</li><li>系统强制：每账号每日 ≤15 条内容、每条 ≤3 页、随机停留 30~120s、每日 ≤2 个会话</li><li>触发验证码 / 「操作频繁」自动熔断 4 小时，并企微通知</li><li>抓取的昵称与评论仅用于本商家获客，保留 90 天后清理</li></ul><label class="checkbox mt12"><input type="checkbox" id="ack"> 我已阅读并接受以上风险，由我（${me.name}）负责</label>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">开启</button>', onMount(m, close) { $('#ok', m).onclick = () => { if (!$('#ack', m).checked) return toast('请勾选确认', 'warn'); ACQ.merchant.publicCommentCaptureEnabled = true; ACQ.merchant.riskNoticeAcceptedAt = Date.now(); ACQ.merchant.riskNoticeBy = me.name; ACQ.save(); close(); render(); toast('已开启，确认记录已存档', 'ok'); }; } }); }
+function bind(k, action) {
+  const done = () => { W.bound[k] = 'ok'; ACQ.save(); render(); toast(`${UI.platformName(k)} 已绑定`, 'ok'); };
+  if (action === 'wecom') Modal.open({ title: '绑定企业微信', body: `<div class="center"><div class="qr"></div><div class="small">请企微管理员扫码授权「客户联系」「客户朋友圈」「客户群」「微信客服」权限</div><div class="small muted mt8">授权后系统自动创建「联系我」二维码用于海报，并同步现有客户为潜在线索（可选）</div></div>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">模拟扫码成功</button>', onMount(m, close) { $('#ok', m).onclick = () => { close(); done(); }; } });
+  else if (action === 'rpa') Modal.open({ title: '绑定个人微信（工作手机）', width: 640, body: `<div class="steps mb12"><div class="step on"><i>1</i>安装 App</div><div class="ln"></div><div class="step"><i>2</i>配对设备</div><div class="ln"></div><div class="step"><i>3</i>选择账号</div></div><div class="split"><div><div class="center"><div class="qr"></div><div class="small">用工作手机扫码下载「货袋子获客助手」（Android），安装后开启无障碍权限</div></div></div><div><div class="field"><label>配对码（App 内输入）</label><div style="font-size:28px;font-weight:800;letter-spacing:.2em;font-family:Menlo,monospace">${Math.random().toString(36).slice(2, 8).toUpperCase()}</div><div class="hint">10 分钟内有效 · 设备将出现在「渠道与设备」</div></div><div class="field"><label>该手机上的微信是</label><label class="checkbox"><input type="radio" name="tier" checked> 小号（可主动触达，养号曲线：前 3 天 20% 额度 → 7 天 50% → 全额）</label><label class="checkbox"><input type="radio" name="tier"> 主号（只回复不主动加人，额度更高）</label></div><div class="alert warn xs">建议：小号先在群里正常聊几天再开自动触达</div></div></div>`, footer: '<button class="btn" data-close>稍后</button><button class="btn primary" id="ok">模拟设备上线</button>', onMount(m, close) { $('#ok', m).onclick = () => { close(); done(); }; } });
+  else if (action === 'oauth') Modal.open({ title: '授权抖音企业号', body: `<div class="alert info small mb12">跳转抖音开放平台授权：视频评论管理、私信（企业号需开通「私信」能力）。</div><div class="field"><label>企业号</label><input class="input" value="华东钢贸 官方抖音"></div><label class="checkbox small"><input type="checkbox" checked> 自家视频评论含「多少钱 / 有没有货 / 怎么买」自动成线索并回复</label>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">模拟授权成功</button>', onMount(m, close) { $('#ok', m).onclick = () => { close(); done(); }; } });
+  else if (action === 'web') Modal.open({ title: '登录小红书专业号', body: `<div class="center"><div class="qr"></div><div class="small">用小红书 App 扫码登录网页创作者中心（登录态加密存储，过期自动提醒）</div></div><div class="alert warn xs mt12">小红书禁止在笔记与评论中放微信 / 电话，系统会拦截并提示改为「戳我主页」</div>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">模拟登录成功</button>', onMount(m, close) { $('#ok', m).onclick = () => { close(); done(); }; } });
+  else Modal.open({ title: '绑定行业论坛', body: `<div class="field"><label>论坛</label><select class="select"><option>中国钢材网论坛</option><option>我的钢铁网社区</option><option>自定义…</option></select></div><div class="grid g2"><div class="field"><label>账号</label><input class="input" value="hdz_steel"></div><div class="field"><label>密码</label><input class="input" type="password" value="********"></div></div><div class="field"><label>抓取版块</label><input class="input" value="供求信息 / 求购"></div>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">验证并绑定</button>', onMount(m, close) { $('#ok', m).onclick = () => { close(); done(); }; } });
+}
+
+/* Step 4 */
+function s4() {
+  if (!W.testLeads) W.testLeads = [
+    { nickname: '张总', platform: 'DOUYIN', sourceChannel: '抖音-#钢材批发', sourceExcerpt: '有没有货，螺纹钢 HRB400 20 的' },
+    { nickname: '李工', platform: 'FORUM', sourceChannel: '中国钢材网论坛-供求版块', sourceExcerpt: '求购 HRB400E Φ12-25 螺纹钢 300 吨' },
+    { nickname: '赵老板', platform: 'WECHAT_PERSONAL', sourceChannel: '微信群-苏州建材采购群', sourceExcerpt: '谁有盘螺 8 个的，急要 50 吨' },
+    { nickname: '王经理', platform: 'WECOM', sourceChannel: '企微-客户朋友圈点赞', sourceExcerpt: '「苏州仓到货 2000 吨盘螺」' },
+    { nickname: '', platform: 'FORUM', sourceChannel: '中国钢材网论坛-供求版块', sourceExcerpt: '求购盘螺 100 吨 到南京' },
+  ];
+  const s = ACQ.script(101);
+  $('#body').innerHTML = `<div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="card"><div class="card-h"><h3>5 条测试线索</h3><button class="btn xs" onclick="W.testLeads.push({nickname:'',platform:'WECHAT_PERSONAL',sourceChannel:'',sourceExcerpt:''});ACQ.save();render()">＋ 添加</button></div><div class="card-b">
+      ${W.testLeads.map((l, i) => `<div class="row mb8" style="gap:6px"><input class="input sm" style="width:80px" placeholder="昵称" value="${esc(l.nickname)}" onchange="W.testLeads[${i}].nickname=this.value;ACQ.save()"><select class="select sm" onchange="W.testLeads[${i}].platform=this.value;ACQ.save()">${['DOUYIN', 'FORUM', 'WECHAT_PERSONAL', 'WECOM', 'XIAOHONGSHU', 'HDZ_INTERNAL'].map(p => `<option value="${p}" ${l.platform === p ? 'selected' : ''}>${UI.platformName(p)}</option>`).join('')}</select><input class="input sm" style="flex:1" placeholder="客户原话" value="${esc(l.sourceExcerpt)}" onchange="W.testLeads[${i}].sourceExcerpt=this.value;ACQ.save()"><button class="btn xs ghost" onclick="W.testLeads.splice(${i},1);ACQ.save();render()">✕</button></div>`).join('')}
+      <div class="small muted mt8">第 5 条故意留空昵称：模拟论坛匿名用户，看系统能否在发送前拦住「{nickname}」漏填。</div>
+      <div class="field mt12"><label>发到哪里验证</label><div class="chips">${ACQ.merchant.testPeers.map(p => `<span class="chip on">${p}</span>`).join('')}<span class="chip">＋ 添加测试号</span></div><div class="hint">试运行只发到你们自己的号，不会碰真实客户</div></div>
+      <button class="btn primary" style="width:100%;justify-content:center;padding:10px" onclick="runTest()">▶ 开始试运行</button>
+    </div></div>
+    <div class="card"><div class="card-h"><h3>运行结果</h3>${W.lastRun ? `<span class="small muted">${fmt.time(W.lastRun.t)}</span>` : ''}</div><div class="card-b" id="res">${W.lastRun ? resultHtml(W.lastRun) : '<div class="empty">点击左侧「开始试运行」</div>'}</div></div>
+  </div>${nav(W.lastRun && W.lastRun.fail === 0, '完成开通')}`;
+}
+function runTest() {
+  const el = $('#res'); const steps = ['写入 5 条测试线索（标记 is_test）', '意图识别与实体抽取', '渲染首触话术并校验变量', '内容安全检查（禁词 / 渠道规则）', '按渠道选择账号并模拟排队', '发送到测试号'];
+  let i = 0; el.innerHTML = `<div class="prog">${steps.map((s, k) => `<div id="ps${k}" class="pend">○ ${s}</div>`).join('')}</div>`;
+  const tick = () => { if (i > 0) { $('#ps' + (i - 1)).className = 'ok'; $('#ps' + (i - 1)).textContent = '✓ ' + steps[i - 1]; } if (i < steps.length) { $('#ps' + i).className = 'run'; $('#ps' + i).textContent = '⟳ ' + steps[i]; i++; setTimeout(tick, 380); } else finishRun(); };
+  tick();
+}
+function finishRun() {
+  const s = ACQ.script(101); const rows = W.testLeads.map((t, i) => { const c = Engine.classifyIntent(t.sourceExcerpt || ''); const lead = Object.assign({ id: 'T' + i, owner: 2, tags: [], product: '' }, t); const r = Engine.render(s, lead); const acc = ACQ.accounts.find(a => a.platform === t.platform && a.caps.includes('SEND_DM')) || ACQ.account('a2'); return { t, c, r, acc: acc.name, pacing: Engine.pacing(acc).preDelaySec }; });
+  W.lastRun = { t: Date.now(), rows, fail: rows.filter(x => !x.r.ok).length }; ACQ.save();
+  render();
+}
+function resultHtml(run) {
+  return `<div class="alert ${run.fail ? 'error' : 'ok'} small mb12">${run.fail ? `✖ ${run.rows.length - run.fail}/${run.rows.length} 条通过，${run.fail} 条被拦截：<b>缺少变量 {nickname}</b>。这正是要在试运行中暴露的问题 —— 正式运行时该线索会被跳过并记录 <code>ACQ-2001</code>，而不是把「{nickname}」发给客户。` : `✓ ${run.rows.length} 条全部通过并已发到测试号，请在手机上核对格式、变量与来源引用。`}</div>
+  <table class="table"><thead><tr><th>线索</th><th>意图</th><th>渲染</th><th>结果</th></tr></thead><tbody>${run.rows.map((x, i) => `<tr><td>${UI.platform(x.t.platform)}<b>${esc(x.t.nickname || '（空）')}</b><span class="sub">${esc(x.t.sourceExcerpt)}</span></td><td class="small">${UI.intent(x.c.intent)}<span class="sub">${x.c.score} 分</span></td><td class="small" style="max-width:260px">${x.r.ok ? esc(x.r.text) : UI.vars(ACQ.script(101).content, x.r.missing)}<span class="sub">经 ${esc(x.acc)} · 延迟 ${x.pacing}s</span></td><td class="small">${x.r.ok ? '<span class="tag success">已发测试号</span>' : `<span class="tag danger">拦截 ACQ-2001</span><div class="row mt8" style="gap:4px"><input class="input sm" style="width:80px" id="fx${i}" placeholder="补昵称"><button class="btn xs" onclick="fixNick(${i})">修复</button></div><div class="xs muted mt8">或改用「首触 · 通用模板」不依赖昵称（回复率低，不建议）</div>`}</td></tr>`).join('')}</tbody></table>`;
+}
+function fixNick(i) { const v = $('#fx' + i).value.trim(); if (!v) return toast('请输入昵称', 'warn'); W.testLeads[i].nickname = v; ACQ.save(); toast('已补充，重新运行', 'ok'); render(); runTest(); }
+function finish() {
+  ACQ.merchant.wizardStep = 5; W.jobs.filter(j => j.on).forEach(j => { if (!ACQ.jobs.find(x => x.nl === j.nl)) ACQ.jobs.push({ id: 'J' + (ACQ.jobs.length + 1), name: j.spec.name, nl: j.nl, action: j.spec.action, cron: j.spec.cron, scheduleText: j.spec.scheduleText, spec: j.spec.params, enabled: true, lastRun: null, lastStatus: null, nextRun: Date.now() + 4 * ACQ.H, runs: 0 }); }); ACQ.save();
+  Modal.open({ title: '🎉 开通完成', width: 620, body: `<div class="alert ok mb12">已跑通「抓取 → 触达 → 跟进 → 记录」。明天 09:00 起自动运行；今天可以立即手动跑一次抓取。</div><div class="grid g2"><div class="card" style="box-shadow:none"><div class="card-b"><b>已配置</b><ul class="small mt8" style="margin-left:16px;line-height:1.9"><li>${W.jobs.filter(j => j.on).length} 个自动化任务</li><li>SOP：${ACQ.flow(W.sopId).name}</li><li>${Object.values(W.bound).filter(x => x === 'ok').length} 个渠道</li><li>${ACQ.scripts.filter(s => s.enabled).length} 条话术</li></ul></div></div><div class="card" style="box-shadow:none"><div class="card-b"><b>接下来</b><ul class="small mt8" style="margin-left:16px;line-height:1.9"><li><a href="jobs.html">立即运行一次「抓取线索」</a></li><li><a href="workbench.html">告诉销售在会话工作台处理待人工</a></li><li><a href="dashboard.html">明天 17:00 看第一份看板</a></li><li><a href="poster-dispatch.html">把最近一张海报分发到群里</a></li></ul></div></div></div><div class="small muted mt12">本周验收：5 天内新线索 ≥ 50、首触回复率 ≥ 20%、销售每日待人工处理 ≤ 30 分钟。</div>`, footer: `<a class="btn primary" href="dashboard.html">进入看板</a>` });
+}
+render();
+App.note(`<b>演示提示</b>：第 4 步「开始试运行」会故意暴露第 5 条缺昵称线索被拦截（ACQ-2001），就地补昵称后自动重跑通过，才能点「完成开通」。`);
+</script>
+</body>
+</html>

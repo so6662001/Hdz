@@ -2,7 +2,7 @@
 (function (w) {
   const NOW = Date.now(), H = 3600e3, D = 24 * H;
   const ago = (h) => NOW - h * H, later = (h) => NOW + h * H;
-  const VERSION = 'acq:state:v5';
+  const VERSION = 'acq:state:v6';
   const rnd = (() => { let s = 20260925; return () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648; })();
   const pick = (a) => a[Math.floor(rnd() * a.length)];
   const ri = (a, b) => a + Math.floor(rnd() * (b - a + 1));
@@ -31,7 +31,7 @@
       { id: 'a1', platform: 'WECOM', exec: 'API', name: '华东钢贸·企业微信', key: 'corp:ww9f…', tier: 'MAJOR', status: 'ONLINE', todaySent: 18, todayBlocked: 0, daily: 200, hourly: 60, owner: 1, caps: ['CAPTURE_MOMENTS', 'CAPTURE_GROUP', 'SEND_DM', 'REPLY_GROUP', 'POST_MOMENT', 'PULL_INBOX'] },
       { id: 'a2', platform: 'WECHAT_PERSONAL', exec: 'RPA', name: '钢贸小助手A（小号）', tier: 'MINOR', device: 'd1', status: 'ONLINE', todaySent: 23, todayBlocked: 0, daily: 40, hourly: 8, warmupDay: 9, owner: 2, caps: ['CAPTURE_GROUP', 'CAPTURE_MOMENTS', 'SEND_DM', 'REPLY_GROUP', 'POST_MOMENT', 'PULL_INBOX'], queue: 2 },
       { id: 'a3', platform: 'WECHAT_PERSONAL', exec: 'RPA', name: '张三-主号', tier: 'MAJOR', device: 'd2', status: 'OFFLINE', todaySent: 6, todayBlocked: 0, daily: 60, hourly: 10, warmupDay: 20, owner: 2, caps: ['SEND_DM', 'REPLY_GROUP', 'PULL_INBOX'], note: '主号仅回复，不主动触达陌生人' },
-      { id: 'a4', platform: 'DOUYIN', exec: 'API', name: '华东钢贸 官方抖音（企业号）', tier: 'MAJOR', status: 'ONLINE', todaySent: 9, todayBlocked: 0, daily: 100, hourly: 30, owner: 1, caps: ['CAPTURE_OWN_COMMENTS', 'REPLY_COMMENT', 'PULL_INBOX'] },
+      { id: 'a4', platform: 'DOUYIN', exec: 'API', name: '华东钢贸 官方抖音（企业号）', tier: 'MAJOR', status: 'ONLINE', todaySent: 9, todayBlocked: 0, daily: 100, hourly: 30, owner: 1, caps: ['CAPTURE_OWN_COMMENTS', 'REPLY_COMMENT', 'SEND_DM', 'PULL_INBOX'] },
       { id: 'a5', platform: 'XIAOHONGSHU', exec: 'HTTP', name: '华东钢贸专业号（网页版）', tier: 'MAJOR', status: 'ONLINE', todaySent: 3, todayBlocked: 0, daily: 30, hourly: 5, owner: 1, caps: ['CAPTURE_OWN_COMMENTS', 'REPLY_COMMENT', 'PUBLISH_POST'] },
       { id: 'a6', platform: 'FORUM', exec: 'HTTP', name: '中国钢材网论坛 · hdz_steel', tier: 'MAJOR', status: 'ONLINE', todaySent: 14, todayBlocked: 0, daily: 100, hourly: 20, owner: 3, caps: ['CAPTURE_PUBLIC_COMMENTS', 'SEND_DM', 'REPLY_COMMENT', 'PUBLISH_POST', 'PULL_INBOX'] },
       { id: 'a7', platform: 'HDZ_INTERNAL', exec: 'API', name: '货袋子站内（圈子/询价/海报扫码）', tier: 'MAJOR', status: 'ONLINE', todaySent: 31, todayBlocked: 0, daily: 500, hourly: 60, owner: 1, caps: ['CAPTURE_OWN_COMMENTS', 'SEND_DM', 'PUBLISH_POST', 'PULL_INBOX'] },
