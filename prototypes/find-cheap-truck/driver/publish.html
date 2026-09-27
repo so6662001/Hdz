@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>悟运小程序 · 发布运力（驾驶员端）</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  .step { display: none; }
+  .step.on { display: block; }
+  .sec { background: #fff; margin-top: 10px; }
+  .sec .field:first-child { border-top: 0; }
+  .quick { margin: 10px 14px 0; background: #fff; border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); }
+  .quick .it { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .quick .it:last-child { border-bottom: 0; }
+  .quick .it .ic { width: 32px; height: 32px; border-radius: 8px; background: var(--wy-soft); color: var(--wy); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
+  .quick .it .t b { display: block; font-size: 14px; }
+  .quick .it .t span { color: var(--muted); font-size: 12px; }
+  .loc { display: flex; align-items: center; gap: 8px; }
+  .loc .input { flex: 1; }
+  .loc .gps { height: 42px; padding: 0 12px; border-radius: 10px; background: var(--wy-soft); color: var(--wy); font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .veh-sel { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .veh-sel::-webkit-scrollbar { display: none; }
+  .veh-sel .v { flex: none; width: 230px; border: 2px solid var(--line); border-radius: 12px; padding: 10px; position: relative; }
+  .veh-sel .v.on { border-color: var(--wy); background: var(--wy-soft); }
+  .veh-sel .v .ph-img { height: 70px; }
+  .veh-sel .v .pl { font-weight: 700; font-size: 15px; margin-top: 8px; }
+  .veh-sel .v .sp1 { font-size: 12px; color: var(--text-2); }
+  .veh-sel .v .chk { position: absolute; right: 10px; top: 10px; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 1px solid var(--line); }
+  .veh-sel .v.on .chk { background: var(--wy); border-color: var(--wy); }
+  .veh-sel .v.on .chk::after { content: "✓"; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .veh-sel .add { flex: none; width: 110px; border: 2px dashed var(--line); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; gap: 4px; }
+  .veh-sel .add b { font-size: 24px; color: var(--wy); }
+  .price-ref { margin-top: 8px; background: #f7f8fa; border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--text-2); }
+  .price-ref .bar { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0aa35a, #f5a300 60%, #e5312b); margin: 8px 0 4px; position: relative; }
+  .price-ref .bar .me { position: absolute; top: -6px; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--wy); transform: translateX(-50%); box-shadow: 0 1px 4px rgba(0,0,0,.2); transition: left .2s; }
+  .price-ref .lbl { display: flex; justify-content: space-between; }
+  .big-price { display: flex; align-items: baseline; gap: 4px; }
+  .big-price input { width: 120px; border: 0; border-bottom: 2px solid var(--wy); font-size: 30px; font-weight: 800; color: var(--hot); outline: 0; background: transparent; text-align: center; }
+  .voice { height: 42px; border-radius: 10px; background: var(--wy-soft); color: var(--wy); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; }
+  .preview { margin: 10px 14px 0; }
+  .success { text-align: center; padding: 40px 24px 20px; }
+  .success .ok { width: 72px; height: 72px; border-radius: 50%; background: var(--ok); color: #fff; font-size: 36px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+  .success h3 { font-size: 20px; }
+  .success p { color: var(--text-2); font-size: 13px; margin-top: 6px; line-height: 1.6; }
+  .tips { margin: 14px 14px 0; background: #fff; border-radius: 12px; padding: 12px 14px; font-size: 13px; }
+  .tips li { display: flex; gap: 8px; padding: 6px 0; color: var(--text-2); }
+  .tips li b { color: var(--wy); flex: none; min-width: 34px; white-space: nowrap; }
+</style>
+</head>
+<body class="wy-theme">
+<div class="m-stage">
+  <div class="phone dark-nav" id="phone">
+    <div class="statusbar" style="background:#ff6b1a"><span>9:21</span><span>●●● ᯤ 100%</span></div>
+    <div class="navbar" style="background:#ff6b1a"><a class="back" href="home.html">‹</a><div class="title" id="navTitle">发布运力</div><div class="capsule"><span>···</span><i></i><span>◉</span></div></div>
+    <div class="screen" id="screen">
+      <div class="steps" id="steps">
+        <div class="s on" data-s="1"><i>1</i>选场景</div><div class="ln"></div>
+        <div class="s" data-s="2"><i>2</i>线路时间</div><div class="ln"></div>
+        <div class="s" data-s="3"><i>3</i>车辆价格</div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step on" id="step1">
+        <div class="px14 mt12">
+          <div class="scene" id="scene">
+            <div class="sc on" data-kind="return"><span class="rec">最推荐</span><div class="ic">返程</div><h4>返程车</h4><p>卸完货空车回去，顺路带一车，不放空</p></div>
+            <div class="sc" data-kind="idle"><div class="ic">闲置</div><h4>车闲着</h4><p>车在等货，方向时间都灵活</p></div>
+            <div class="sc wide" data-kind="share"><div class="ic">顺路</div><div><h4>顺路捎货</h4><p>已经有货但没装满，沿线还能捎十来吨</p></div></div>
+          </div>
+        </div>
+        <div class="quick">
+          <div class="small b mb8">快捷填写 <span class="muted" style="font-weight:400">· 点一下，线路车辆全部带入</span></div>
+          <div class="it" data-q="order"><div class="ic">运单</div><div class="t"><b>当前运单卸货后返程：嘉兴 → 上海</b><span>WY20260927001 · 预计 11:30 卸货 · 沪D·8K3**</span></div><span class="btn wy xs">用这个</span></div>
+          <div class="it" data-q="last"><div class="ic">上次</div><div class="t"><b>上次发布：苏州 → 上海 · ¥27/吨</b><span>今天 09:15 发布 · 17.5m 平板</span></div><span class="btn ghost xs">复用</span></div>
+          <div class="it" data-q="route1"><div class="ic">常跑</div><div class="t"><b>常跑线路：上海 ⇄ 嘉兴</b><span>近 30 天跑了 9 趟</span></div><span class="btn ghost xs">复用</span></div>
+          <div class="it" data-q="route2"><div class="ic">常跑</div><div class="t"><b>常跑线路：上海 ⇄ 南京</b><span>近 30 天跑了 4 趟</span></div><span class="btn ghost xs">复用</span></div>
+        </div>
+        <div class="tips">
+          <li><b>免费</b><span>发布免费、不抽佣、不收信息费，货主直接打您电话，中间没有黄牛。</span></li>
+          <li><b>30秒</b><span>线路、时间、车辆都可一键带入，说明可以语音说。</span></li>
+          <li><b>自动</b><span>出发时间一到自动下架，接到活点一下就行，不会有人再打扰您。</span></li>
+        </div>
+        <div style="height:100px"></div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step" id="step2">
+        <div class="sec">
+          <div class="field">
+            <div class="lb"><span class="req">出发地（车现在 / 卸货后在哪）</span><span class="tip" id="locTip">已按当前定位填写</span></div>
+            <div class="loc"><input class="input" id="from" value="嘉兴 · 南湖区"><span class="gps" id="gps">◎ 用当前定位</span></div>
+            <div class="xs muted mt8">定位与出发地一致的信息会带「定位一致」标识，货主更信任。</div>
+          </div>
+          <div class="field">
+            <div class="lb"><span class="req">想去哪（可多选）</span><span class="tip">选「方向不限」= 哪都去</span></div>
+            <div class="chips" id="toChips"></div>
+            <input class="input mt8" id="toDetail" placeholder="补充说明：如 宝山/松江/浦东均可、300 公里内（选填）">
+          </div>
+          <div class="field">
+            <div class="lb"><span class="req">什么时候能走</span></div>
+            <div class="chips" id="dayChips"><span class="chip on">今天</span><span class="chip">明天</span><span class="chip">后天</span><span class="chip">3 天内</span><span class="chip">随时</span></div>
+            <div class="chips mt8" id="slotChips"><span class="chip">上午 6-12 点</span><span class="chip on">下午 12-18 点</span><span class="chip">晚上 18-24 点</span><span class="chip">全天</span><span class="chip">具体时间</span></div>
+          </div>
+          <div class="field">
+            <div class="lb"><span>展示到什么时候</span><span class="tip">到点自动下架，不用手动管</span></div>
+            <div class="notice blue"><span class="ic"></span><div id="ttlText">默认展示至 <b>今天 18:00</b>（出发时间窗结束）。到期前 2 小时提醒您，可延长；接到活随时点「已接单」。</div></div>
+            <div class="chips mt8" id="ttlChips"><span class="chip on">跟出发时间</span><span class="chip">12 小时</span><span class="chip">24 小时</span><span class="chip">48 小时</span></div>
+          </div>
+        </div>
+        <div style="height:100px"></div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step" id="step3">
+        <div class="sec">
+          <div class="field">
+            <div class="lb"><span class="req">用哪台车</span><span class="tip" id="vehTip">已选默认车辆</span></div>
+            <div class="veh-sel" id="vehSel"></div>
+          </div>
+          <div class="field" id="tonsField">
+            <div class="lb"><span class="req">能装多少</span></div>
+            <div class="chips" id="tonsChips"><span class="chip on">整车 32t</span><span class="chip">20t</span><span class="chip">15t</span><span class="chip">10t</span><span class="chip">自定义</span></div>
+          </div>
+          <div class="field">
+            <div class="lb"><span class="req">期望运费</span><span class="tip">回程车便宜一点走得快</span></div>
+            <div class="seg" id="unitSeg" style="width:180px"><button class="on" data-u="吨">元/吨</button><button data-u="车">元/车</button></div>
+            <div class="chips mt12" id="priceChips"><span class="chip">面议</span><span class="chip">市场价 -10%</span><span class="chip on">市场价 -15%</span><span class="chip">市场价 -20%</span><span class="chip">自己填</span></div>
+            <div class="row between mt12">
+              <div class="big-price"><span class="hot-c b" style="font-size:18px">¥</span><input id="priceInput" value="34"><span class="muted" id="unitLbl">/吨</span></div>
+              <span class="tag hot solid" id="discTag">比市场低 15%</span>
+            </div>
+            <div class="price-ref">
+              <div class="row between"><span>该线路近 7 天市场价 <b id="refRange">¥38 - 46/吨</b></span><span class="xs muted">来自平台撮合与询价</span></div>
+              <div class="bar"><span class="me" id="priceMe" style="left:22%"></span></div>
+              <div class="lbl"><span>便宜 · 走得快</span><span>市场价</span><span>偏贵</span></div>
+            </div>
+          </div>
+          <div class="field">
+            <div class="lb"><span>补充说明</span><span class="tip">点短句自动组句，也可以语音说</span></div>
+            <div class="chips" id="descChips"></div>
+            <textarea class="input mt8" id="desc" placeholder="例：早上宝山提的卷到嘉兴卸完，下午空车回上海，有鞍座，卷板板材都行，价格好谈。"></textarea>
+            <div class="voice" id="voice">● 按住说话，自动转文字</div>
+          </div>
+          <div class="field">
+            <div class="lb"><span class="req">联系电话</span></div>
+            <div class="input-row"><input class="input" value="138 2201 6210"><span class="unit">账号手机</span></div>
+            <div class="row between mt12"><div class="small">只对已认证企业货主展示电话<div class="xs muted">减少骚扰电话；个人用户需先认证</div></div><span class="switch on" data-sw></span></div>
+            <div class="row between mt12"><div class="small">卸货后自动提醒我发返程<div class="xs muted">悟运运单到达卸货点时弹出</div></div><span class="switch on" data-sw></span></div>
+          </div>
+        </div>
+        <div class="preview" id="preview"></div>
+        <div class="xs muted px14 mt8" style="line-height:1.6">发布即表示您承诺信息真实、人车证一致、不超载；平台仅展示信息，不参与运输交易与结算。虚假信息将被下架并限制发布。</div>
+        <div style="height:100px"></div>
+      </div>
+
+      <!-- Success -->
+      <div class="step" id="step4">
+        <div class="success">
+          <div class="ok">✓</div>
+          <h3>发布成功</h3>
+          <p id="okText">展示至 今天 18:00 · 到点自动下架<br>已推送给 <b>23</b> 位近期在找「嘉兴 → 上海」车的货主</p>
+        </div>
+        <div class="preview" id="preview2"></div>
+        <div class="tips">
+          <li><b>提醒</b><span>接到活请点「已接单」，出发了点「已出发」，这样货主不会再打给您。</span></li>
+          <li><b>分享</b><span>把卡片转到微信群、发朋友圈，扫码进货袋子小程序就能看到您的车。</span></li>
+        </div>
+        <div class="px14 mt12 row" style="gap:10px"><button class="btn block" style="background:#07c160" id="shareBtn">分享到微信群</button><a class="btn ghost block" href="home.html">回到我的运力</a></div>
+        <div style="height:60px"></div>
+      </div>
+    </div>
+
+    <div class="bottom-cta" id="cta">
+      <button class="btn ghost" id="prevBtn" style="flex:0 0 100px">上一步</button>
+      <button class="btn wy" id="nextBtn">下一步</button>
+    </div>
+    <div class="home-indicator"></div>
+  </div>
+</div>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+(function () {
+  var H = window.HDZ;
+  H.protoBar('publish', H.DRIVER_LINKS);
+
+  var state = { step: 1, kind: H.param('kind', 'return'), from: H.param('from', '嘉兴') + ' · 南湖区', to: [H.param('to', '上海')], day: '今天', slot: '下午 12-18 点', vehicle: 'v1', tons: '整车 32t', unit: '吨', price: 34, mode: '市场价 -15%', desc: '' };
+  var reuse = H.param('reuse');
+  if (reuse && reuse !== 'order') { var rp = H.MY_POSTS.filter(function (p) { return p.id === reuse; })[0]; if (rp) { state.kind = rp.kind; state.from = rp.from; state.to = rp.to.slice(); state.price = rp.price || 34; state.unit = rp.priceUnit; state.vehicle = rp.vehicle; if (rp.price == null) state.mode = '面议'; } }
+  if (H.param('edit')) H.qs('#navTitle').textContent = '修改运力信息';
+
+  /* Step 1 */
+  H.qsa('#scene .sc').forEach(function (s) { s.classList.toggle('on', s.dataset.kind === state.kind); s.onclick = function () { state.kind = s.dataset.kind; H.qsa('#scene .sc').forEach(function (x) { x.classList.toggle('on', x === s); }); }; });
+  H.qsa('.quick .it').forEach(function (it) { it.onclick = function () {
+    var q = it.dataset.q;
+    if (q === 'order') { state.kind = 'return'; state.from = '嘉兴 · 南湖区'; state.to = ['上海']; }
+    else if (q === 'last') { state.kind = 'return'; state.from = '苏州 · 张家港'; state.to = ['上海']; state.price = 27; }
+    else if (q === 'route1') { state.from = '上海 · 宝山区'; state.to = ['嘉兴']; }
+    else if (q === 'route2') { state.from = '上海 · 松江区'; state.to = ['南京']; }
+    H.toast('已带入线路与车辆，请确认时间'); go(2);
+  }; });
+
+  /* Step 2 */
+  var toChips = H.qs('#toChips');
+  function renderTo() {
+    toChips.innerHTML = H.CITIES.map(function (c) { return '<span class="chip' + (state.to.indexOf(c) > -1 ? ' on' : '') + '" data-c="' + c + '">' + c + '</span>'; }).join('');
+    H.qsa('[data-c]', toChips).forEach(function (ch) { ch.onclick = function () {
+      var c = ch.dataset.c;
+      if (c === '方向不限') state.to = ['方向不限'];
+      else { state.to = state.to.filter(function (x) { return x !== '方向不限'; }); var i = state.to.indexOf(c); i > -1 ? state.to.splice(i, 1) : state.to.push(c); }
+      renderTo(); updateRef();
+    }; });
+  }
+  renderTo();
+  H.qs('#from').value = state.from;
+  H.qs('#from').oninput = function () { state.from = this.value; updateRef(); };
+  H.qs('#gps').onclick = function () { H.qs('#from').value = state.from = '嘉兴 · 南湖区'; H.qs('#locTip').textContent = '定位成功 · 嘉兴市南湖区'; H.toast('已定位：嘉兴市南湖区'); };
+  function singleChips(sel, cb) { H.qsa(sel + ' .chip').forEach(function (c) { c.onclick = function () { H.qsa(sel + ' .chip').forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on'); cb(c.textContent); }; }); }
+  singleChips('#dayChips', function (v) { state.day = v; updateTtl(); });
+  singleChips('#slotChips', function (v) { state.slot = v; updateTtl(); });
+  singleChips('#ttlChips', function (v) { state.ttl = v; updateTtl(); });
+  function updateTtl() {
+    var end = state.slot.match(/(\d+) 点$/); var hh = end ? end[1] : '24';
+    var d = state.day === '随时' || state.day === '3 天内' ? '3 天后' : state.day;
+    var t = (!state.ttl || state.ttl === '跟出发时间') ? d + ' ' + hh + ':00' : '发布后 ' + state.ttl;
+    H.qs('#ttlText').innerHTML = '默认展示至 <b>' + t + '</b>（出发时间窗结束）。到期前 2 小时提醒您，可延长；接到活随时点「已接单」。';
+    state.ttlText = t;
+  }
+
+  /* Step 3 */
+  var vehSel = H.qs('#vehSel');
+  function renderVeh() {
+    vehSel.innerHTML = H.MY_VEHICLES.map(function (v) {
+      return '<div class="v' + (v.id === state.vehicle ? ' on' : '') + '" data-v="' + v.id + '"><span class="chk"></span><div class="ph-img truck">' + H.truckSvg() + '</div><div class="pl">' + v.plate + ' ' + (v.verified ? '<span class="badge">已认证</span>' : '<span class="badge pending">核验中</span>') + '</div><div class="sp1">' + H.vehicleLine(v) + '</div><div class="sp1">' + H.equipLine(v, 4) + '</div></div>';
+    }).join('') + '<a class="add" href="vehicle-add.html"><b>+</b>添加车辆</a>';
+    H.qsa('[data-v]', vehSel).forEach(function (el) { el.onclick = function () { state.vehicle = el.dataset.v; renderVeh(); var v = H.VEHICLES[state.vehicle]; H.qsa('#tonsChips .chip')[0].textContent = '整车 ' + v.load + 't'; }; });
+  }
+  renderVeh();
+  singleChips('#tonsChips', function (v) { state.tons = v; });
+  H.qsa('#unitSeg button').forEach(function (b) { b.onclick = function () { H.qsa('#unitSeg button').forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on'); state.unit = b.dataset.u; H.qs('#unitLbl').textContent = '/' + state.unit; if (state.unit === '车') { state.price = 1000; H.qs('#priceInput').value = 1000; } updateRef(); }; });
+  singleChips('#priceChips', function (v) { state.mode = v; applyMode(); });
+  H.qs('#priceInput').oninput = function () { state.price = +this.value || 0; state.mode = '自己填'; H.qsa('#priceChips .chip').forEach(function (x) { x.classList.toggle('on', x.textContent === '自己填'); }); updateRef(); };
+  function applyMode() {
+    var ref = H.refPrice(state.from.split(' ')[0], state.to[0]); var mid = (ref[0] + ref[1]) / 2;
+    var pi = H.qs('#priceInput');
+    if (state.mode === '面议') { pi.value = ''; pi.placeholder = '面议'; state.price = null; }
+    else if (state.mode.indexOf('市场价') === 0) { var pct = +state.mode.match(/-(\d+)/)[1]; state.price = Math.round(mid * (1 - pct / 100)); pi.value = state.price; }
+    updateRef();
+  }
+  function updateRef() {
+    var ref = H.refPrice(state.from.split(' ')[0], state.to[0]); var mid = (ref[0] + ref[1]) / 2;
+    H.qs('#refRange').textContent = '¥' + ref[0] + ' - ' + ref[1] + '/吨';
+    var tag = H.qs('#discTag');
+    if (state.unit !== '吨') { tag.textContent = '按车计价'; tag.className = 'tag gray'; H.qs('#priceMe').style.left = '50%'; return; }
+    if (state.price == null) { tag.textContent = '面议'; tag.className = 'tag gray'; H.qs('#priceMe').style.left = '50%'; return; }
+    var pct = Math.round((mid - state.price) / mid * 100);
+    tag.textContent = pct > 0 ? '比市场低 ' + pct + '%' : pct < 0 ? '比市场高 ' + (-pct) + '%' : '与市场持平';
+    tag.className = 'tag ' + (pct >= 10 ? 'hot solid' : pct > 0 ? 'ok' : 'warn');
+    H.qs('#priceMe').style.left = Math.max(3, Math.min(97, 50 - pct * 1.6)) + '%';
+  }
+  var descChips = H.qs('#descChips');
+  descChips.innerHTML = H.DESC_TEMPLATES.map(function (t) { return '<span class="chip sm">' + t + '</span>'; }).join('');
+  H.qsa('.chip', descChips).forEach(function (c) { c.onclick = function () { c.classList.toggle('on'); var ta = H.qs('#desc'); var parts = H.qsa('.chip.on', descChips).map(function (x) { return x.textContent; }); ta.value = parts.join('，') + (parts.length ? '。' : ''); state.desc = ta.value; }; });
+  H.qs('#desc').oninput = function () { state.desc = this.value; };
+  H.qs('#voice').onmousedown = function () { this.textContent = '● 正在听… 松开结束'; };
+  H.qs('#voice').onmouseup = function () { this.textContent = '● 按住说话，自动转文字'; var ta = H.qs('#desc'); ta.value = state.desc = '早上宝山提的卷到嘉兴卸完，下午空车回上海，有鞍座，卷板板材都行，价格好谈。'; H.toast('语音已转为文字，可修改'); };
+  H.qsa('[data-sw]').forEach(function (s) { s.onclick = function () { s.classList.toggle('on'); }; });
+
+  function previewHtml() {
+    var v = H.VEHICLES[state.vehicle] || H.VEHICLES.v1;
+    var post = { id: 'new', kind: state.kind, from: state.from.split(' ')[0], fromDetail: state.from.split(' · ')[1] || '', to: state.to, toDetail: H.qs('#toDetail').value, depart: state.day + ' ' + state.slot.replace(/ .*/, ''), price: state.price, priceUnit: state.unit, spareTons: parseInt(state.tons) || v.load, driver: 'd1', vehicle: v.id, posted: H.now.toISOString().slice(0, 19), views: 0, calls: 0, favs: 0, desc: state.desc, locOK: true };
+    return '<div class="small b mb8">货主将看到 <span class="muted" style="font-weight:400">· 电话需登录并阅读风险提示后才可查看</span></div>' + H.mobileCard(post, { noBtn: true });
+  }
+
+  /* 步骤切换 */
+  function go(n) {
+    state.step = n;
+    H.qsa('.step').forEach(function (s, i) { s.classList.toggle('on', i + 1 === n); });
+    H.qsa('#steps .s').forEach(function (s, i) { s.classList.toggle('on', i + 1 === n); s.classList.toggle('done', i + 1 < n); });
+    H.qs('#steps').style.display = n === 4 ? 'none' : '';
+    H.qs('#cta').style.display = n === 4 ? 'none' : '';
+    H.qs('#prevBtn').style.display = n === 1 ? 'none' : '';
+    H.qs('#nextBtn').textContent = n === 3 ? '确认发布' : '下一步';
+    if (n === 2) { H.qs('#from').value = state.from; renderTo(); updateTtl(); }
+    if (n === 3) { renderVeh(); applyMode(); H.qs('#preview').innerHTML = previewHtml(); H.qs('#tonsField').style.display = state.kind === 'share' ? '' : ''; }
+    if (n === 4) { H.qs('#preview2').innerHTML = previewHtml(); H.qs('#okText').innerHTML = '展示至 <b>' + state.ttlText + '</b> · 到点自动下架<br>已推送给 <b>23</b> 位近期在找「' + state.from.split(' ')[0] + ' → ' + state.to.join('/') + '」车的货主'; }
+    H.qs('#screen').scrollTop = 0;
+  }
+  H.qs('#screen').addEventListener('input', function () { if (state.step === 3) H.qs('#preview').innerHTML = previewHtml(); });
+  H.qs('#screen').addEventListener('click', function () { if (state.step === 3) setTimeout(function () { H.qs('#preview').innerHTML = previewHtml(); }, 0); });
+  H.qs('#nextBtn').onclick = function () {
+    if (state.step === 2 && !state.to.length) return H.toast('请选择目的地');
+    if (state.step === 3) { H.qs('#nextBtn').textContent = '发布中…'; setTimeout(function () { go(4); }, 500); return; }
+    go(state.step + 1);
+  };
+  H.qs('#prevBtn').onclick = function () { go(state.step - 1); };
+  H.qs('#shareBtn').onclick = function () { H.toast('已生成带小程序码的卡片'); };
+  updateTtl();
+  go(+H.param('step', reuse ? 2 : 1));
+
+  H.notes('驾驶员端 · 发布运力（设计说明）', [
+    '三步完成：<b>选场景 → 线路时间 → 车辆价格</b>；从运单 / 上次发布 / 常跑线路一键带入，可跳到第 2 步直接确认。',
+    '出发地默认取 <b>GPS 定位</b>，定位与填写一致的信息在找车端带"定位一致"标识（防信息部冒充）。',
+    '目的地支持 <b>多选 + 方向不限</b>，返程车通常"顺路就行"，不要逼司机填精确地址。',
+    '价格用 <b>市场参考区间 + 折扣快捷键</b>，司机不必查行情就能给出有竞争力的价；也允许面议。',
+    '说明用 <b>短句拼接 + 语音转文字</b>，钢材相关卖点（鞍座、篷布、12 米长材）前置。',
+    '展示期默认 = 出发时间窗结束，<b>自动下架</b>是终止机制的底座；"只对认证企业展示电话"减少骚扰。',
+    '成功页立刻给反馈："已推送给 N 位找该线路的货主"，并提供微信卡片分享，把司机的微信群变成平台流量。',
+  ]);
+})();
+</script>
+</body>
+</html>

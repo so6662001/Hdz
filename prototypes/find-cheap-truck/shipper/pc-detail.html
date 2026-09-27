@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>货袋子 · 运力详情（PC 端）</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  .dcard { background: #fff; border-radius: 12px; box-shadow: var(--shadow); padding: 20px 22px; }
+  .dcard + .dcard { margin-top: 14px; }
+  .dcard h3 { font-size: 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .dcard h3 small { color: var(--muted); font-size: 12px; font-weight: 400; }
+  .headline { display: flex; align-items: flex-start; gap: 18px; }
+  .headline .route { font-size: 26px; }
+  .headline .route .city small { font-size: 13px; }
+  .eq-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .eq-grid div { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .eq-grid div.off { color: #c5c9d3; border-style: dashed; }
+  .eq-grid i { width: 18px; height: 18px; border-radius: 50%; background: var(--ok); color: #fff; font-style: normal; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+  .eq-grid .off i { background: #e6e8ee; }
+  .quote { background: #f7f8fa; border-left: 3px solid var(--brand); padding: 12px 14px; border-radius: 0 10px 10px 0; font-size: 14px; line-height: 1.7; color: var(--text-2); }
+  .reviews li { padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .reviews li:last-child { border-bottom: 0; }
+  .reviews .r1 { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+  .reviews .r1 b { color: var(--text); }
+  .stars { color: #f5a300; letter-spacing: 1px; }
+  .sticky-side { position: sticky; top: 120px; }
+  .drv-card { text-align: center; }
+  .drv-card .avatar { margin: 0 auto 8px; }
+  .drv-card .nm { font-size: 18px; font-weight: 700; }
+  .drv-card .sub { font-size: 12px; color: var(--muted); }
+  .sim { display: flex; gap: 10px; }
+  .sim .s { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 12px; cursor: pointer; }
+  .sim .s:hover { border-color: var(--brand); }
+  .sim .s b { display: block; font-size: 14px; }
+  .sim .s .p { color: var(--hot); font-weight: 700; margin-top: 4px; }
+</style>
+</head>
+<body class="pc-body">
+<nav class="pc-nav"><div class="in">
+  <a class="logo" href="pc-find.html"><i>货</i>货袋子</a>
+  <div class="menu"><a>首页</a><a>现货商城</a><a>求购大厅</a><a>钢市行情</a><a>加工服务</a><a class="on" href="pc-find.html">找特价车<span class="new">NEW</span></a><a>资讯</a></div>
+  <div class="right"><span>客服 400-xxx-xxxx</span><span class="u"><span class="avatar">沪</span>上海某钢贸有限公司 <span class="tag ok">已认证</span></span><a>卖家中心</a></div>
+</div></nav>
+<div class="crumb"><a href="pc-find.html">找特价车</a> › <a href="pc-find.html">嘉兴 → 上海</a> › <span id="crumbCur">运力详情</span></div>
+
+<div class="detail-wrap">
+  <div id="main"></div>
+  <aside class="sticky-side" id="side"></aside>
+</div>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+(function () {
+  var H = window.HDZ;
+  H.protoBar('pcd', H.SHIPPER_LINKS);
+  var id = H.param('id', 'p1001');
+  var p = H.POSTS.filter(function (x) { return x.id === id; })[0] || H.POSTS[0];
+  var v = H.VEHICLES[p.vehicle], d = H.DRIVERS[p.driver], k = H.KIND[p.kind];
+  H.qs('#crumbCur').textContent = p.from + ' → ' + p.to.join('/') + ' · ' + v.plate;
+  document.title = '货袋子 · ' + p.from + ' → ' + p.to.join('/') + ' ' + k.name + ' · ' + H.vehicleLine(v);
+
+  var eqAll = H.EQUIP.map(function (e) { return e.name; });
+  var reviews = [
+    { who: '上海某钢贸 · 认证企业', when: '9 月 20 日', star: 5, txt: '宝山到嘉兴一车热卷，准时到仓，装车配合过磅，师傅很实在。' },
+    { who: '嘉兴某钢构 · 认证企业', when: '9 月 12 日', star: 5, txt: '回程车价格确实便宜，鞍座齐，卷没问题。' },
+    { who: '苏州某贸易 · 认证企业', when: '8 月 30 日', star: 4, txt: '到得稍晚半小时，提前打了电话说明，整体不错。' },
+  ];
+  var sims = H.POSTS.filter(function (x) { return x.id !== p.id && (x.to.indexOf(p.to[0]) > -1 || x.from === p.from); }).slice(0, 3);
+
+  H.qs('#main').innerHTML =
+    '<div class="dcard"><div class="headline">' +
+      '<div class="sp"><div class="row" style="gap:8px;margin-bottom:8px"><span class="tag ' + (p.kind === 'return' ? 'hot' : p.kind === 'idle' ? 'brand' : 'ok') + '">' + k.name + '</span>' + H.discountTag(p) + (p.locOK ? '<span class="tag gray">发布时定位与出发地一致</span>' : '<span class="tag warn">定位未校验</span>') + '<span class="tag gray">' + H.fmtAgo(p.posted) + ' 发布</span><span class="tag ok">展示中 · ' + H.fmtLeft(p.validUntil) + '后自动下架</span></div>' +
+      '<div class="route"><div class="city">' + p.from + '<small>' + (p.fromDetail || '') + '</small></div><div class="arrow"><div class="ln"></div><span>' + (p.kind === 'idle' ? '方向灵活' : '约 ' + (p.from === '嘉兴' ? '95' : '180') + ' km') + '</span></div><div class="city to">' + p.to.join(' / ') + '<small>' + (p.toDetail || '') + '</small></div></div></div></div>' +
+      '<div class="kv mt16" style="grid-template-columns:repeat(4,1fr)"><div><span>可出发时间</span><b>' + p.depart + '</b></div><div><span>可装吨位</span><b>' + p.spareTons + ' 吨' + (p.kind === 'share' ? '（顺路剩余）' : '（整车）') + '</b></div><div><span>浏览 / 查看电话</span><b>' + p.views + ' / ' + p.calls + '</b></div><div><span>信息编号</span><b>' + p.id.toUpperCase() + '</b></div></div>' +
+      '<div class="mt16"><div class="small b mb8">司机说明</div><div class="quote">"' + p.desc + '"</div></div>' +
+    '</div>' +
+
+    '<div class="dcard"><h3>车辆信息 <small>车牌脱敏展示，联系后可核对完整车牌</small></h3>' +
+      '<div class="gallery"><div class="ph-img truck">' + H.truckSvg() + '<span class="lb">车头含车牌 · ' + v.plate + '</span></div><div class="ph-img truck">' + H.truckSvg() + '<span class="lb">板面 / 鞍座</span></div><div class="ph-img truck">' + H.truckSvg() + '<span class="lb">侧面全貌</span></div></div>' +
+      '<div class="kv mt16" style="grid-template-columns:repeat(4,1fr)"><div><span>车型</span><b>' + v.type + '</b></div><div><span>板长</span><b>' + v.len + '</b></div><div><span>核定载质量</span><b>' + v.load + ' 吨</b></div><div><span>车辆年份</span><b>' + v.year + ' 年</b></div><div><span>行驶证</span><b class="ok-c">' + (v.verified ? '已核验' : '核验中') + '</b></div><div><span>道路运输证</span><b class="ok-c">' + (v.verified ? '已核验' : '核验中') + '</b></div><div><span>车辆照片</span><b>3 张 · 车牌一致</b></div><div><span>在途定位</span><b>' + (v.equip.indexOf('车载定位') > -1 ? '可开放（联系后授权）' : '未开放') + '</b></div></div>' +
+      '<div class="small b mt16 mb8">装钢材配置</div><div class="eq-grid">' + eqAll.map(function (e) { var on = v.equip.indexOf(e) > -1; return '<div class="' + (on ? '' : 'off') + '"><i>' + (on ? '✓' : '') + '</i>' + e + '</div>'; }).join('') + '</div>' +
+      '<div class="mt12 quote" style="border-color:var(--wy)">车辆说明："' + v.desc + '"</div>' +
+    '</div>' +
+
+    '<div class="dcard"><h3>司机履约与评价 <small>数据来自悟运运单与货袋子找车用户反馈</small></h3>' +
+      '<div class="kv" style="grid-template-columns:repeat(5,1fr)"><div><span>悟运履约运单</span><b>' + d.wyOrders + ' 单</b></div><div><span>好评率</span><b>' + d.good + '%</b></div><div><span>信息有效率</span><b>' + d.valid + '%</b></div><div><span>被投诉</span><b>' + d.complaints + ' 次</b></div><div><span>加入平台</span><b>' + d.joined + '</b></div></div>' +
+      '<div class="small b mt16 mb8">常拉钢材</div><div class="chips">' + d.steels.map(function (s) { return '<span class="chip sm on">' + s + '</span>'; }).join('') + '</div>' +
+      '<div class="small b mt16 mb8">找车用户评价（' + reviews.length + '）</div><ul class="reviews">' + reviews.map(function (r) { return '<li><div class="r1"><b>' + r.who + '</b><span class="stars">' + '★★★★★'.slice(0, r.star) + '</span><span>' + r.when + '</span></div>' + r.txt + '</li>'; }).join('') + '</ul>' +
+    '</div>' +
+
+    '<div class="dcard"><h3>信息状态轨迹 <small>透明展示，便于判断信息新鲜度</small></h3><ul class="tl">' +
+      '<li class="on"><b>' + H.fmtAgo(p.posted) + '</b> 司机发布 · 发布位置 ' + p.from + '（与出发地一致）</li>' +
+      '<li class="on">系统核验：实名 ✓ 车辆认证 ' + (v.verified ? '✓' : '进行中') + ' 一车一账号 ✓</li>' +
+      '<li class="on">已被 ' + p.calls + ' 位货主查看电话 · 最近一次 12 分钟前 · 反馈：在沟通</li>' +
+      '<li>将于 ' + p.validUntil.slice(5, 16).replace('T', ' ') + ' 自动下架（除司机延长 / 提前标记已接单）</li></ul>' +
+    '</div>' +
+
+    (sims.length ? '<div class="dcard"><h3>同线路其他特价车</h3><div class="sim">' + sims.map(function (s) { var sv = H.VEHICLES[s.vehicle]; return '<a class="s" href="pc-detail.html?id=' + s.id + '"><b>' + s.from + ' → ' + s.to.join('/') + '</b><span class="muted">' + s.depart + ' · ' + H.vehicleLine(sv) + '</span><div class="p">' + (s.price == null ? '面议' : '¥' + s.price + '/' + s.priceUnit) + '</div></a>'; }).join('') + '</div></div>' : '');
+
+  H.qs('#side').innerHTML =
+    '<div class="aside-box"><div class="price-box">' + H.priceHtml(p, true).replace('class="n"', 'class="n"') + '<div class="xs muted mt4">司机期望价 · 可议 · 不含装卸 / 等待费（联系时确认）</div></div>' +
+      '<button class="btn lg block" id="callBtn">查看司机电话</button>' +
+      '<div class="row mt8" style="gap:8px"><button class="btn line gray sm sp" id="favBtn">☆ 收藏</button><button class="btn line gray sm sp" id="shareBtn">分享给同事</button><button class="btn line gray sm sp" id="reportBtn">举报</button></div>' +
+      '<div class="xs muted mt12" style="text-align:center">查看电话需登录，记录将保留用于纠纷追溯</div></div>' +
+    '<div class="aside-box drv-card"><div class="avatar lg">' + d.surname + '</div><div class="nm">' + d.name + '</div><div class="sub">驾龄 ' + d.years + ' 年 · 装钢材 ' + d.steelYears + ' 年 · ' + d.joined + ' 加入</div><div class="badges mt8" style="justify-content:center">' + H.certBadges(d, v) + '</div>' +
+      '<div class="score"><div><b>' + d.wyOrders + '</b><span>悟运履约</span></div><div><b>' + d.good + '%</b><span>好评率</span></div><div><b>' + d.valid + '%</b><span>信息有效率</span></div></div>' +
+      '<div class="divider"></div><div class="small t2" style="text-align:left">已核验证件：' + d.certs.join('、') + '</div><div class="quote mt8" style="font-size:12px;text-align:left">"' + d.intro + '"</div></div>' +
+    '<div class="aside-box"><h3>联系前请确认</h3><ul class="list-check"><li>核对司机身份证、驾驶证与车牌是否与平台一致</li><li>约定运费含 / 不含装卸、等待费，到货时间与回单</li><li>使用平台运输协议模板；货值高请投货运险</li><li>运费直付司机，不向任何第三方转账</li></ul>' +
+      '<div class="row mt12" style="gap:8px"><button class="btn line sm sp">协议模板</button><button class="btn line sm sp">货运险报价</button></div>' +
+      '<div class="notice red mt12"><span class="ic"></span><div>货袋子仅提供信息展示，不是承运人，不参与交易与结算。</div></div></div>';
+
+  H.qs('#callBtn').onclick = function () { H.unlockPhone(p, 'pc'); };
+  H.qs('#reportBtn').onclick = function () { H.report(p, 'pc'); };
+  H.qs('#favBtn').onclick = function () { this.textContent = '★ 已收藏'; H.toast('已收藏，司机更新状态会通知您', document.body); };
+  H.qs('#shareBtn').onclick = function () { H.toast('链接已复制，同事打开即可查看（H5 页）', document.body); };
+
+  H.notes('PC 端 · 运力详情（设计说明）', [
+    '首屏：线路 + 时间 + 可装吨位 + 司机原话说明，右侧价格与「查看电话」始终吸顶。',
+    '车辆信息以 <b>照片 + 参数 + 装钢材配置矩阵</b> 展示，证件只显示"已核验"结论，不暴露证件本身。',
+    '司机履约来自悟运运单（真实履约），评价来自找车用户联系反馈，二者叠加形成信用。',
+    '<b>信息状态轨迹</b> 公开：发布时间与位置、核验项、被查看次数与最近反馈、自动下架时间，帮助货主判断"这条信息还新鲜吗"。',
+    '右侧固定"联系前请确认"和平台边界声明，把风险提示前置到每一次联系。',
+  ]);
+})();
+</script>
+</body>
+</html>

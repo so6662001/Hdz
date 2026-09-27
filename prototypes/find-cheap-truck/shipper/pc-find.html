@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>货袋子 · 找特价车（PC 端）</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  .trust-strip { width: 1200px; margin: 16px auto 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .trust-strip div { background: #fff; border-radius: 12px; padding: 12px 14px; display: flex; gap: 10px; align-items: center; box-shadow: var(--shadow); font-size: 13px; }
+  .trust-strip .ic { width: 34px; height: 34px; border-radius: 10px; background: var(--brand-soft); color: var(--brand); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; flex: none; }
+  .trust-strip b { display: block; }
+  .trust-strip span { color: var(--muted); font-size: 12px; }
+  .sub-form .row { margin-top: 8px; }
+  .sub-form .input { height: 36px; font-size: 13px; }
+  .drv-pop { position: absolute; z-index: 5; }
+</style>
+</head>
+<body class="pc-body">
+<nav class="pc-nav"><div class="in">
+  <a class="logo"><i>货</i>货袋子</a>
+  <div class="menu"><a>首页</a><a>现货商城</a><a>求购大厅</a><a>钢市行情</a><a>加工服务</a><a class="on">找特价车<span class="new">NEW</span></a><a>资讯</a></div>
+  <div class="right"><span>客服 400-xxx-xxxx</span><span class="u"><span class="avatar">沪</span>上海某钢贸有限公司 <span class="tag ok">已认证</span></span><a>卖家中心</a></div>
+</div></nav>
+
+<section class="hero"><div class="in">
+  <h1>找特价车 <span class="tj">返程车 · 闲置车</span></h1>
+  <p class="sub">司机自己发布的回程车、空闲车，专装钢材，运费通常比市场价低 10%～20%。平台只做信息展示，您与司机直接联系、直接成交。</p>
+  <div class="stats"><div><b>386</b><span>今日在展运力</span></div><div><b>42</b><span>覆盖城市</span></div><div><b>-14%</b><span>平均低于市场价</span></div><div><b>91%</b><span>信息有效率</span></div></div>
+  <div class="searchbar">
+    <div class="f"><label>出发地（车在哪 / 提货地附近）</label><div class="v" id="sFrom">嘉兴 <span class="ph">· 含周边 50km</span></div></div>
+    <div class="swap" title="交换">⇄</div>
+    <div class="f"><label>目的地（送到哪）</label><div class="v" id="sTo">上海 <span class="ph">· 全境</span></div></div>
+    <div class="f"><label>出发时间</label><div class="v">今天 ~ 明天</div></div>
+    <div class="f"><label>车型 / 板长</label><div class="v"><span class="ph">不限</span></div></div>
+    <div class="f" style="border-right:0"><label>货物</label><div class="v"><span class="ph">如：热卷 30t，需鞍座</span></div></div>
+    <button class="btn go" id="searchBtn">找车</button>
+  </div>
+  <div class="hot-routes">热门线路：<span id="hotRoutes"></span><span class="sp"></span><span style="color:#fff">从我的订单找车 → <a>订单 #HD2609270012 宝山仓 → 嘉兴</a></span></div>
+</div></section>
+
+<div class="trust-strip">
+  <div><span class="ic">实名</span><div><b>司机实名 + 人脸核验</b><span>四证核验：驾驶证、从业资格、行驶证、道路运输证</span></div></div>
+  <div><span class="ic">履约</span><div><b>悟运履约记录可见</b><span>司机在悟运平台的运单数、好评率、投诉数</span></div></div>
+  <div><span class="ic">留痕</span><div><b>联系记录留痕</b><span>查看电话需登录，记录可用于纠纷追溯</span></div></div>
+  <div><span class="ic">边界</span><div><b>平台不参与交易</b><span>您与司机直签协议、直付运费；建议投保货运险</span></div></div>
+</div>
+
+<main class="pc-main">
+  <aside class="filter-box" id="filters">
+    <h4>运力类型</h4><div class="opts" data-f="kind"><span class="chip on" data-v="">全部</span><span class="chip" data-v="return">返程车</span><span class="chip" data-v="idle">闲置车</span><span class="chip" data-v="share">顺路捎货</span></div>
+    <h4>出发时间</h4><div class="opts" data-f="day"><span class="chip on" data-v="">不限</span><span class="chip" data-v="今天">今天</span><span class="chip" data-v="明天">明天</span><span class="chip" data-v="3">3 天内</span></div>
+    <h4>车型</h4><div class="opts" data-f="type"><span class="chip on" data-v="">不限</span><span class="chip" data-v="平板半挂">平板半挂</span><span class="chip" data-v="低平板">低平板</span><span class="chip" data-v="高栏">高栏</span><span class="chip" data-v="单桥/前四后八">单桥</span></div>
+    <h4>板长</h4><div class="opts" data-f="len"><span class="chip on" data-v="">不限</span><span class="chip" data-v="17.5m">17.5m</span><span class="chip" data-v="13m">13m</span><span class="chip" data-v="9.6m">9.6m</span></div>
+    <h4>可装吨位</h4><div class="opts" data-f="tons"><span class="chip on" data-v="">不限</span><span class="chip" data-v="30">≥30t 整车</span><span class="chip" data-v="20">≥20t</span><span class="chip" data-v="10">≥10t 拼货</span></div>
+    <h4>装钢材配置</h4><div class="opts" data-f="equip"><span class="chip" data-v="鞍座">鞍座（卷板）</span><span class="chip" data-v="篷布">篷布</span><span class="chip" data-v="可装 12m 长材">12m 长材</span><span class="chip" data-v="可多点装卸">多点装卸</span><span class="chip" data-v="车载定位">在途定位</span></div>
+    <h4>可信度</h4><div class="opts" data-f="trust"><span class="chip" data-v="verified">车辆已认证</span><span class="chip" data-v="wy50">悟运履约 50+</span><span class="chip" data-v="loc">定位一致</span><span class="chip" data-v="good97">好评 ≥97%</span></div>
+    <h4>价格</h4><div class="opts" data-f="price"><span class="chip on" data-v="">不限</span><span class="chip" data-v="quoted">有明确报价</span><span class="chip" data-v="d10">低于市场 10%+</span><span class="chip" data-v="nego">面议</span></div>
+    <button class="btn line gray sm reset" id="reset">清空筛选</button>
+  </aside>
+
+  <section>
+    <div class="list-hd">
+      <div class="sort" id="sort"><a class="on" data-s="rec">综合推荐</a><a data-s="price">运费最低</a><a data-s="new">最新发布</a><a data-s="depart">最早出发</a><a data-s="trust">履约最多</a></div>
+      <span class="cnt" id="cnt"></span>
+    </div>
+    <div id="list"></div>
+    <div class="empty" id="emptyTip" style="display:none"><div class="ic"></div>该线路暂时没有合适的特价车<br><button class="btn line sm mt12" id="subBtn2">订阅这条线路，有车立即通知我</button></div>
+    <div class="aside-box mt16" style="display:flex;align-items:center;gap:14px">
+      <div class="sp"><b>没找到合适的车？</b><div class="small t2 mt4">发布一条「用车需求」，匹配线路的司机会看到并主动联系您。同样只是信息发布，平台不接单、不收费。</div></div>
+      <button class="btn line" id="needBtn">发布用车需求</button>
+    </div>
+  </section>
+
+  <aside>
+    <div class="aside-box">
+      <h3>找车安全须知 <small>平台仅展示信息</small></h3>
+      <ul class="list-check">
+        <li>装车前核对 <b>司机身份证、驾驶证与车牌</b> 是否与平台信息一致，提货凭证只交给核对无误的车</li>
+        <li>使用平台 <b>运输协议模板</b>，明确运费、到货时间、货损责任、回单</li>
+        <li>整车钢材货值 10 万+，建议按单购买 <b>货运险</b>（保险公司承保，平台不收费）</li>
+        <li>运费 <b>直接支付给司机 / 车队</b>，不要向任何"平台账户"或第三人转账</li>
+        <li>遇到坐地起价、放鸽子、信息不实，请 <b>举报</b>，我们核实后处理账号</li>
+      </ul>
+      <div class="row mt12" style="gap:8px"><button class="btn line sm sp">下载运输协议模板</button><button class="btn line sm sp" id="insBtn">货运险报价</button></div>
+    </div>
+    <div class="aside-box sub-form">
+      <h3>订阅线路 <small>有特价车立刻通知</small></h3>
+      <div class="row"><input class="input" value="嘉兴 / 苏州 / 杭州"><span class="muted">→</span><input class="input" value="上海"></div>
+      <div class="row"><span class="small t2">通知方式</span><span class="chip sm on">微信服务通知</span><span class="chip sm">短信</span></div>
+      <button class="btn block sm mt12" id="subBtn">订阅 · 目前 12 家企业在等这条线路</button>
+      <div class="xs muted mt8">订阅数会展示给司机，提示"这条线路有人要车"，吸引更多返程车发布。</div>
+    </div>
+    <div class="aside-box" style="text-align:center">
+      <h3 style="justify-content:center">手机找车更方便</h3>
+      <div class="qr"></div>
+      <div class="small t2">微信扫码进入货袋子小程序<br>「找特价车」· 到货现场也能联系司机</div>
+    </div>
+    <div class="aside-box">
+      <h3>常见问题</h3>
+      <ul class="faq">
+        <li><b>为什么便宜？</b><span>司机卸完货空车回程，与其空跑不如低价带一车；没有信息部层层加价。</span></li>
+        <li><b>车出了问题找谁？</b><span>运输合同在您与司机之间，平台不是承运人。平台负责核验身份、保留联系记录、协助取证并处理违规账号；货损请通过货运险与合同解决。</span></li>
+        <li><b>信息会不会过期？</b><span>每条信息按出发时间自动下架；司机接单或出发会标记；您的联系反馈也会帮助信息保持真实。</span></li>
+      </ul>
+    </div>
+  </aside>
+</main>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+(function () {
+  var H = window.HDZ;
+  H.protoBar('pc', H.SHIPPER_LINKS);
+  H.qs('#hotRoutes').innerHTML = H.HOT_ROUTES.map(function (r) { return '<a>' + r + '</a>'; }).join('');
+
+  var f = { kind: '', day: '', type: '', len: '', tons: '', equip: [], trust: [], price: '' }, sort = 'rec';
+  H.qsa('#filters .opts').forEach(function (g) {
+    var key = g.dataset.f, multi = key === 'equip' || key === 'trust';
+    H.qsa('.chip', g).forEach(function (c) { c.onclick = function () {
+      if (multi) { c.classList.toggle('on'); f[key] = H.qsa('.chip.on', g).map(function (x) { return x.dataset.v; }); }
+      else { H.qsa('.chip', g).forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on'); f[key] = c.dataset.v; }
+      render();
+    }; });
+  });
+  H.qs('#reset').onclick = function () { f = { kind: '', day: '', type: '', len: '', tons: '', equip: [], trust: [], price: '' }; H.qsa('#filters .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === '' ); }); render(); };
+  H.qsa('#sort a').forEach(function (a) { a.onclick = function () { H.qsa('#sort a').forEach(function (x) { x.classList.remove('on'); }); a.classList.add('on'); sort = a.dataset.s; render(); }; });
+
+  function match(p) {
+    var v = H.VEHICLES[p.vehicle], d = H.DRIVERS[p.driver];
+    if (f.kind && p.kind !== f.kind) return false;
+    if (f.day === '今天' && p.depart.indexOf('今天') < 0 && p.depart.indexOf('随时') < 0) return false;
+    if (f.day === '明天' && p.depart.indexOf('明天') < 0) return false;
+    if (f.type && v.type !== f.type) return false;
+    if (f.len && v.len !== f.len) return false;
+    if (f.tons && p.spareTons < +f.tons) return false;
+    if (f.equip.some(function (e) { return v.equip.indexOf(e) < 0; })) return false;
+    if (f.trust.indexOf('verified') > -1 && !v.verified) return false;
+    if (f.trust.indexOf('wy50') > -1 && d.wyOrders < 50) return false;
+    if (f.trust.indexOf('loc') > -1 && !p.locOK) return false;
+    if (f.trust.indexOf('good97') > -1 && d.good < 97) return false;
+    if (f.price === 'quoted' && p.price == null) return false;
+    if (f.price === 'nego' && p.price != null) return false;
+    if (f.price === 'd10') { var dd = H.discount(p); if (!dd || dd.pct < 10) return false; }
+    return true;
+  }
+  function score(p) { var d = H.DRIVERS[p.driver], v = H.VEHICLES[p.vehicle], dd = H.discount(p); return (dd ? dd.pct : 8) * 2 + d.good + (v.verified ? 20 : 0) + Math.min(30, d.wyOrders / 5) + (p.locOK ? 10 : 0) - (H.now - new Date(p.posted)) / 3600000; }
+
+  function card(p) {
+    var v = H.VEHICLES[p.vehicle], d = H.DRIVERS[p.driver], k = H.KIND[p.kind];
+    return '<article class="pc-card" data-id="' + p.id + '">' +
+      '<span class="corner ' + (p.kind === 'idle' ? 'idle' : p.kind === 'share' ? 'share' : '') + '">' + k.name + '</span>' +
+      '<div class="ph-img truck thumb">' + H.truckSvg() + '<span class="lb">' + v.plate + '</span></div>' +
+      '<div class="info">' +
+        '<div class="r1"><div class="route"><div class="city">' + p.from + '<small>' + (p.fromDetail || '').split(' · ')[0] + '</small></div><div class="arrow"><div class="ln"></div></div><div class="city to">' + p.to.join(' / ') + '<small>' + (p.toDetail || '') + '</small></div></div>' + H.discountTag(p) + (p.locOK ? '<span class="tag gray">定位一致</span>' : '<span class="tag warn">定位未校验</span>') + '</div>' +
+        '<div class="line2"><span>出发 <b>' + p.depart + '</b></span><span>可装 <b>' + p.spareTons + 't</b>' + (p.kind === 'share' ? '（顺路剩余）' : '') + '</span><span><b>' + H.vehicleLine(v) + '</b></span><span>' + H.equipLine(v, 4) + '</span></div>' +
+        '<div class="desc">"' + p.desc + '"</div>' +
+        '<div class="drv"><span class="avatar">' + d.surname + '</span><b>' + d.name + '</b><span>驾龄 ' + d.years + ' 年 · 装钢材 ' + d.steelYears + ' 年</span><span class="badges">' + H.certBadges(d, v) + '</span><span>好评 <b>' + d.good + '%</b></span><span>信息有效率 <b>' + d.valid + '%</b></span><span class="muted">· ' + H.fmtAgo(p.posted) + ' 发布 · ' + p.views + ' 次浏览</span></div>' +
+      '</div>' +
+      '<div class="side"><div class="price" style="text-align:right">' + H.priceHtml(p, true) + '</div>' +
+        '<div class="acts"><span class="ic" data-fav>☆ 收藏</span><span class="ic" data-report>举报</span><a class="btn sm line" href="pc-detail.html?id=' + p.id + '">详情</a><button class="btn sm" data-call>查看电话</button></div></div>' +
+      '</article>';
+  }
+
+  function render() {
+    var list = H.POSTS.filter(match);
+    if (sort === 'price') list.sort(function (a, b) { return (a.price == null ? 999 : a.priceUnit === '车' ? a.price / 15 : a.price) - (b.price == null ? 999 : b.priceUnit === '车' ? b.price / 15 : b.price); });
+    else if (sort === 'new') list.sort(function (a, b) { return new Date(b.posted) - new Date(a.posted); });
+    else if (sort === 'trust') list.sort(function (a, b) { return H.DRIVERS[b.driver].wyOrders - H.DRIVERS[a.driver].wyOrders; });
+    else if (sort === 'depart') list.sort(function (a, b) { return new Date(a.validUntil) - new Date(b.validUntil); });
+    else list.sort(function (a, b) { return score(b) - score(a); });
+    H.qs('#list').innerHTML = list.map(card).join('');
+    H.qs('#cnt').textContent = '共 ' + list.length + ' 条在展运力 · 每 5 分钟刷新 · 已自动隐藏到期 / 已接单信息';
+    H.qs('#emptyTip').style.display = list.length ? 'none' : '';
+  }
+  render();
+
+  H.qs('#list').addEventListener('click', function (e) {
+    var card = e.target.closest('.pc-card'); if (!card) return;
+    var p = H.POSTS.filter(function (x) { return x.id === card.dataset.id; })[0];
+    if (e.target.closest('[data-call]')) H.unlockPhone(p, 'pc');
+    else if (e.target.closest('[data-report]')) H.report(p, 'pc');
+    else if (e.target.closest('[data-fav]')) { e.target.textContent = '★ 已收藏'; H.toast('已收藏，司机更新状态会通知您', document.body); }
+    else if (!e.target.closest('a')) location.href = 'pc-detail.html?id=' + p.id;
+  });
+  H.qs('#searchBtn').onclick = function () { H.toast('已按 嘉兴 → 上海 · 今天~明天 搜索', document.body); render(); };
+  var sub = function () { H.toast('已订阅「嘉兴/苏州/杭州 → 上海」，有新特价车将通过微信通知', document.body); };
+  H.qs('#subBtn').onclick = sub; H.qs('#subBtn2').onclick = sub;
+  H.qs('#insBtn').onclick = function () { H.pcModal({ title: '货运险报价（合作保险经纪提供）', body: '<div class="kv"><div><span>货物</span><b>热卷 30t</b></div><div><span>货值</span><b>¥ 118,000</b></div><div><span>线路</span><b>嘉兴 → 上海</b></div></div><div class="divider"></div><div class="row between"><span>基本险（货损 / 盗抢 / 事故）</span><b class="hot-c" style="font-size:18px">¥ 59</b></div><div class="row between mt8"><span>综合险（+ 雨淋锈蚀 / 装卸损）</span><b class="hot-c" style="font-size:18px">¥ 89</b></div><div class="notice gray mt12"><span class="ic"></span><div>由 xx 保险经纪 / xx 保险公司承保出单，货袋子仅提供入口，不收取保费、不做保险代理。</div></div>', footer: '<button class="btn ghost" onclick="this.closest(\'.pc-mask\').remove()">稍后</button><button class="btn">去投保</button>' }); };
+  H.qs('#needBtn').onclick = function () { H.pcModal({ title: '发布用车需求（信息发布，平台不接单）', width: 520, body: '<div class="kv" style="grid-template-columns:1fr 1fr"><div><span>提货地</span><input class="input" value="上海宝山 · 宝钢大仓"></div><div><span>送货地</span><input class="input" value="嘉兴南湖"></div><div><span>货物 / 吨位</span><input class="input" value="热卷 31.6t，需鞍座"></div><div><span>装车时间</span><input class="input" value="明天 上午"></div><div><span>预算（选填）</span><input class="input" placeholder="如 ¥32/吨"></div><div><span>联系人</span><input class="input" value="张经理 138****"></div></div><div class="notice blue mt12"><span class="ic"></span><div>需求将推送给近 3 天在该线路发布过运力、或常跑该线路的司机；司机直接联系您。需求默认展示至装车时间结束。</div></div>', footer: '<button class="btn ghost" onclick="this.closest(\'.pc-mask\').remove()">取消</button><button class="btn">发布需求</button>' }); };
+  H.qs('.swap').onclick = function () { var a = H.qs('#sFrom').innerHTML, b = H.qs('#sTo').innerHTML; H.qs('#sFrom').innerHTML = b; H.qs('#sTo').innerHTML = a; };
+
+  H.notes('PC 端 · 找特价车（设计说明）', [
+    '入口进入货袋子主导航「找特价车」，命名突出价格优势；副标题解释"为什么便宜、平台角色是什么"。',
+    '搜索条按找车人的思维排：<b>车在哪 → 送到哪 → 什么时候 → 车型 → 货物</b>；支持从现货订单一键带入线路。',
+    '首屏 4 格信任条：实名四证 / 悟运履约 / 联系留痕 / 平台边界，先解决"敢不敢打电话"。',
+    '筛选把钢材特有维度放前面：<b>鞍座、篷布、12m 长材、多点装卸</b>；"可信度"筛选让货主自己选风险偏好。',
+    '卡片信息密度高：线路、时间、车、装备、司机资质、价格与市场参考对比、发布时间与浏览数。',
+    '「查看电话」需登录 → 风险提示确认 → 显示号码并留痕 → 联系结果反馈（反馈驱动信息真实性）。',
+    '右侧：安全须知 + 协议模板 + 货运险入口（保险公司承保）、订阅线路（订阅量反向刺激司机发布）、小程序码、FAQ。',
+  ]);
+})();
+</script>
+</body>
+</html>

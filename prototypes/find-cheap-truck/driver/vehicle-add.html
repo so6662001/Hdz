@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>悟运小程序 · 添加车辆（驾驶员端）</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  .myveh { margin: 10px 14px 0; background: #fff; border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); }
+  .myveh .it { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .myveh .it:last-child { border-bottom: 0; }
+  .myveh .it .ph-img { width: 56px; height: 40px; border-radius: 8px; flex: none; }
+  .myveh .it .t b { font-size: 14px; }
+  .myveh .it .t .sub { display: block; font-size: 12px; color: var(--muted); }
+  .ocr { margin: 10px 14px 0; border-radius: 14px; background: linear-gradient(135deg, #fff3ea, #ffe6d6); padding: 14px; border: 1px dashed #ffb27f; position: relative; overflow: hidden; }
+  .ocr h4 { font-size: 15px; color: var(--wy-dark); }
+  .ocr p { font-size: 12px; color: #8a5a3a; margin-top: 4px; line-height: 1.5; }
+  .ocr .doc { margin-top: 10px; height: 96px; border-radius: 10px; background: #fff; border: 1px solid #ffd2b5; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; color: var(--muted); font-size: 12px; position: relative; overflow: hidden; }
+  .ocr .doc .cam { width: 34px; height: 34px; border-radius: 10px; background: var(--wy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .ocr .doc .scan { position: absolute; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--wy), transparent); top: 0; display: none; }
+  .ocr .doc.scanning .scan { display: block; animation: scan 1.1s linear infinite; }
+  @keyframes scan { from { top: 0; } to { top: 100%; } }
+  .ocr .doc.done { background: #fff; color: var(--text); align-items: stretch; padding: 8px 10px; font-size: 11px; justify-content: flex-start; }
+  .ocr .doc.done .lic { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; }
+  .ocr .doc.done .lic span { color: var(--muted); }
+  .ocr .doc.done .lic b { color: var(--text); }
+  .sec { background: #fff; margin-top: 10px; }
+  .types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .types .ty { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 6px; text-align: center; font-size: 12px; cursor: pointer; }
+  .types .ty svg { width: 100%; height: 30px; margin-bottom: 2px; }
+  .types .ty.on { border-color: var(--wy); background: var(--wy-soft); color: var(--wy); font-weight: 600; }
+  .types .ty small { display: block; font-size: 10px; color: var(--muted); font-weight: 400; margin-top: 1px; }
+  .plate { display: flex; gap: 6px; }
+  .plate .prov { width: 64px; height: 42px; border-radius: 10px; background: #1e4fd1; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+  .plate .input { flex: 1; letter-spacing: 3px; font-weight: 700; font-size: 18px; text-transform: uppercase; }
+  .eq { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .eq:last-child { border-bottom: 0; }
+  .eq .ck { width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid #c5c9d3; flex: none; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; }
+  .eq.on .ck { background: var(--wy); border-color: var(--wy); }
+  .eq.on .ck::after { content: "✓"; }
+  .eq .t b { font-size: 14px; }
+  .eq .t span { display: block; font-size: 11px; color: var(--muted); }
+  .eq .imp { margin-left: auto; }
+  .photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .photos .slot { aspect-ratio: 1; border-radius: 10px; border: 1.5px dashed #c5c9d3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; color: var(--muted); text-align: center; cursor: pointer; padding: 6px; }
+  .photos .slot b { font-size: 20px; color: var(--wy); line-height: 1; }
+  .photos .slot.filled { border: 0; padding: 0; }
+  .photos .slot.filled .ph-img { width: 100%; height: 100%; }
+  .docs .d { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .docs .d:last-child { border-bottom: 0; }
+  .docs .d .t small { display: block; color: var(--muted); font-size: 11px; }
+  .gen { display: flex; align-items: center; justify-content: center; gap: 6px; height: 36px; border-radius: 10px; background: var(--wy-soft); color: var(--wy); font-size: 13px; font-weight: 600; margin-top: 8px; cursor: pointer; }
+</style>
+</head>
+<body class="wy-theme">
+<div class="m-stage">
+  <div class="phone dark-nav" id="phone">
+    <div class="statusbar" style="background:#ff6b1a"><span>9:22</span><span>●●● ᯤ 100%</span></div>
+    <div class="navbar" style="background:#ff6b1a"><a class="back" href="home.html">‹</a><div class="title">我的车辆</div><div class="capsule"><span>···</span><i></i><span>◉</span></div></div>
+    <div class="screen" id="screen">
+
+      <div class="myveh">
+        <div class="row between mb8"><span class="b">已添加 2 台</span><span class="xs muted">一车一档，发布时直接选</span></div>
+        <div class="it"><div class="ph-img truck" id="t1"></div><div class="t"><b>沪D·8K3** <span class="badge">已认证</span> <span class="tag wy" style="height:18px;font-size:10px">默认</span></b><span class="sub">17.5m 平板半挂 · 32t · 鞍座 / 篷布 / 绑带 / 12m 长材 / 定位</span></div><span class="sp"></span><span class="xs muted">编辑 ›</span></div>
+        <div class="it"><div class="ph-img truck" id="t2"></div><div class="t"><b>沪C·5M2** <span class="badge pending">道路运输证核验中</span></b><span class="sub">9.6m 单桥 · 15t · 绑带 / 多点装卸</span></div><span class="sp"></span><span class="xs muted">编辑 ›</span></div>
+      </div>
+
+      <div class="row px14 mt16 mb8" style="justify-content:space-between"><span class="b" style="font-size:16px">添加新车辆</span><span class="xs muted">带 * 为必填 · 约 2 分钟</span></div>
+
+      <div class="ocr">
+        <h4>拍一张行驶证，信息自动填</h4>
+        <p>识别车牌、车辆类型、核定载质量、车长、注册日期；半挂车请再拍一张挂车行驶证。</p>
+        <div class="doc" id="doc"><span class="scan"></span><span class="cam">拍</span><span>点击拍摄 / 上传 行驶证正页</span></div>
+      </div>
+
+      <div class="sec">
+        <div class="field">
+          <div class="lb"><span class="req">车牌号</span><span class="tip">与行驶证一致，找车方看到的是脱敏车牌</span></div>
+          <div class="plate"><span class="prov">沪 ▾</span><input class="input" id="plate" placeholder="D·8K372"></div>
+        </div>
+        <div class="field">
+          <div class="lb"><span class="req">车辆类型</span></div>
+          <div class="types" id="types"></div>
+        </div>
+        <div class="field">
+          <div class="lb"><span class="req">车板长度</span></div>
+          <div class="chips" id="lenChips"></div>
+        </div>
+        <div class="field">
+          <div class="lb"><span class="req">核定载质量</span><span class="tip">按行驶证 / 合规吨位，平台不支持超载信息</span></div>
+          <div class="input-row"><input class="input" id="load" placeholder="如 32"><span class="unit">吨</span><input class="input" id="year" placeholder="车辆年份 如 2021" style="flex:1.4"></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="field">
+          <div class="lb"><span>装钢材配置</span><span class="tip">这是货主最关心的，勾得越全越好找货</span></div>
+          <div id="equip"></div>
+        </div>
+        <div class="field">
+          <div class="lb"><span>常拉钢材品种</span></div>
+          <div class="chips" id="steelChips"></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="field">
+          <div class="lb"><span class="req">车辆照片</span><span class="tip">3 张，车牌清晰可见</span></div>
+          <div class="photos" id="photos">
+            <div class="slot" data-p="车头含车牌"><b>+</b>车头<br>含车牌</div>
+            <div class="slot" data-p="板面与鞍座"><b>+</b>板面 / 鞍座<br>篷布</div>
+            <div class="slot" data-p="侧面全貌"><b>+</b>侧面全貌</div>
+          </div>
+          <div class="xs muted mt8">照片会展示给找车的货主，是"这台车真实存在、确实装过钢材"的最直接证明。</div>
+        </div>
+        <div class="field docs">
+          <div class="lb"><span class="req">车辆证件</span><span class="tip">仅用于核验，不对外展示</span></div>
+          <div class="d"><span class="badge" id="licBadge" style="visibility:hidden">已识别</span><div class="t">行驶证<small>正页 + 副页，识别后自动带入</small></div><span class="sp"></span><span class="btn ghost xs" id="licBtn">上传</span></div>
+          <div class="d"><span class="badge pending">待上传</span><div class="t">道路运输证<small>4.5 吨以上货车必需，核验通过显示「车辆认证」</small></div><span class="sp"></span><span class="btn ghost xs" data-up>上传</span></div>
+          <div class="d"><span class="badge pending">待上传</span><div class="t">挂车行驶证<small>半挂车必填</small></div><span class="sp"></span><span class="btn ghost xs" data-up>上传</span></div>
+          <div class="d"><span class="tag gray">选填</span><div class="t">交强险 / 货运险保单<small>上传后展示「已投保」标识，货主更放心</small></div><span class="sp"></span><span class="btn ghost xs" data-up>上传</span></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="field">
+          <div class="lb"><span>车辆说明</span><span class="tip">展示给货主</span></div>
+          <div class="gen" id="gen">✦ 根据以上配置一键生成说明</div>
+          <div class="chips mt8" id="descChips"></div>
+          <textarea class="input mt8" id="desc" placeholder="例：17.5 米平板半挂，核载 32 吨，配鞍座 4 组可装卷板，篷布齐全，常年拉钢材。"></textarea>
+        </div>
+        <div class="field">
+          <div class="row between"><div class="small">设为默认车辆<div class="xs muted">发布运力时默认选中</div></div><span class="switch" data-sw></span></div>
+        </div>
+      </div>
+      <div class="xs muted px14 mt8" style="line-height:1.6">提交即承诺车辆信息与证件真实、人车证一致。平台通过第三方接口核验行驶证与道路运输证，核验结果仅用于展示认证标识。</div>
+      <div style="height:100px"></div>
+    </div>
+    <div class="bottom-cta"><button class="btn wy lg block" id="saveBtn">保存并提交核验</button></div>
+    <div class="home-indicator"></div>
+  </div>
+</div>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+(function () {
+  var H = window.HDZ;
+  H.protoBar('vehicle', H.DRIVER_LINKS);
+  H.qs('#t1').innerHTML = H.truckSvg(); H.qs('#t2').innerHTML = H.truckSvg();
+
+  var st = { type: null, len: null, equip: [], steels: [] };
+
+  /* 车型 */
+  var svgs = {
+    flat: '<svg viewBox="0 0 120 40" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="20" width="82" height="8" rx="1"/><path d="M86 28V12h14l8 10v6"/><circle cx="16" cy="33" r="4"/><circle cx="28" cy="33" r="4"/><circle cx="70" cy="33" r="4"/><circle cx="100" cy="33" r="4"/></svg>',
+    low: '<svg viewBox="0 0 120 40" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 26h20l4-8h40l4 8h14V14h14l8 10v4"/><circle cx="14" cy="32" r="4"/><circle cx="76" cy="32" r="4"/><circle cx="100" cy="32" r="4"/></svg>',
+    fence: '<svg viewBox="0 0 120 40" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="10" width="82" height="18" rx="1"/><path d="M14 10v18M24 10v18M34 10v18M44 10v18M54 10v18M64 10v18M74 10v18" opacity=".5"/><path d="M86 28V12h14l8 10v6"/><circle cx="16" cy="33" r="4"/><circle cx="70" cy="33" r="4"/><circle cx="100" cy="33" r="4"/></svg>',
+    warehouse: '<svg viewBox="0 0 120 40" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="6" width="82" height="22" rx="1"/><path d="M86 28V12h14l8 10v6"/><circle cx="16" cy="33" r="4"/><circle cx="70" cy="33" r="4"/><circle cx="100" cy="33" r="4"/></svg>',
+    single: '<svg viewBox="0 0 120 40" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="20" y="18" width="56" height="10" rx="1"/><path d="M76 28V10h16l8 12v6"/><circle cx="32" cy="33" r="4"/><circle cx="60" cy="33" r="4"/><circle cx="92" cy="33" r="4"/></svg>',
+    dump: '<svg viewBox="0 0 120 40" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 28l-4-16h56l4 16z"/><path d="M78 28V10h16l8 12v6"/><circle cx="32" cy="33" r="4"/><circle cx="60" cy="33" r="4"/><circle cx="92" cy="33" r="4"/></svg>',
+  };
+  var types = H.qs('#types');
+  function renderTypes() {
+    types.innerHTML = H.VEHICLE_TYPES.map(function (t) { return '<div class="ty' + (st.type === t.id ? ' on' : '') + '" data-t="' + t.id + '">' + svgs[t.id] + t.name + '<small>' + t.desc + '</small></div>'; }).join('');
+    H.qsa('[data-t]', types).forEach(function (el) { el.onclick = function () { st.type = el.dataset.t; renderTypes(); }; });
+  }
+  renderTypes();
+  var lenChips = H.qs('#lenChips');
+  function renderLen() {
+    lenChips.innerHTML = H.LENGTHS.map(function (l) { return '<span class="chip' + (st.len === l ? ' on' : '') + '">' + l + '</span>'; }).join('');
+    H.qsa('.chip', lenChips).forEach(function (c) { c.onclick = function () { st.len = c.textContent; renderLen(); }; });
+  }
+  renderLen();
+
+  /* 装备 */
+  var eqEl = H.qs('#equip');
+  function renderEq() {
+    eqEl.innerHTML = H.EQUIP.map(function (e) { return '<div class="eq' + (st.equip.indexOf(e.name) > -1 ? ' on' : '') + '" data-e="' + e.name + '"><span class="ck"></span><div class="t"><b>' + e.name + '</b><span>' + e.tip + '</span></div>' + (e.id === 'saddle' || e.id === 'tarp' ? '<span class="tag hot imp">货主常筛</span>' : '') + '</div>'; }).join('');
+    H.qsa('[data-e]', eqEl).forEach(function (el) { el.onclick = function () { var n = el.dataset.e; var i = st.equip.indexOf(n); i > -1 ? st.equip.splice(i, 1) : st.equip.push(n); renderEq(); }; });
+  }
+  renderEq();
+  var stEl = H.qs('#steelChips');
+  function renderSteel() {
+    stEl.innerHTML = H.STEELS.map(function (s) { return '<span class="chip sm' + (st.steels.indexOf(s) > -1 ? ' on' : '') + '">' + s + '</span>'; }).join('');
+    H.qsa('.chip', stEl).forEach(function (c) { c.onclick = function () { var i = st.steels.indexOf(c.textContent); i > -1 ? st.steels.splice(i, 1) : st.steels.push(c.textContent); renderSteel(); }; });
+  }
+  renderSteel();
+
+  /* OCR 模拟 */
+  var doc = H.qs('#doc');
+  function ocr() {
+    if (doc.classList.contains('done')) return;
+    doc.classList.add('scanning'); doc.innerHTML = '<span class="scan"></span><span>正在识别行驶证…</span>';
+    setTimeout(function () {
+      doc.classList.remove('scanning'); doc.classList.add('done');
+      doc.innerHTML = '<div class="row between mb4" style="margin-bottom:4px"><b class="ok-c">识别成功，已自动填写 ✓</b><span class="muted">可手动修改</span></div><div class="lic"><div><span>号牌号码 </span><b>沪D8K372</b></div><div><span>车辆类型 </span><b>重型半挂牵引车</b></div><div><span>核定载质量 </span><b>—（见挂车）</b></div><div><span>注册日期 </span><b>2021-06-18</b></div><div><span>所有人 </span><b>王*</b></div><div><span>使用性质 </span><b>货运</b></div></div>';
+      H.qs('#plate').value = 'D·8K372'; st.type = 'flat'; renderTypes(); st.len = '17.5m'; renderLen(); H.qs('#load').value = '32'; H.qs('#year').value = '2021';
+      var lb = H.qs('#licBadge'); lb.style.visibility = 'visible'; H.qs('#licBtn').textContent = '重新上传';
+      H.toast('已识别：沪D8K372 · 重型半挂牵引车 · 2021 年');
+    }, 1300);
+  }
+  doc.onclick = ocr; H.qs('#licBtn').onclick = ocr;
+  H.qsa('[data-up]').forEach(function (b) { b.onclick = function () { var d = b.closest('.d'); var bd = H.qs('.badge, .tag', d); bd.className = 'badge pending'; bd.textContent = '核验中'; b.textContent = '已上传'; H.toast('已上传，正在核验（约 10 分钟）'); }; });
+
+  /* 照片 */
+  H.qsa('#photos .slot').forEach(function (s) { s.onclick = function () { if (s.classList.contains('filled')) return; s.classList.add('filled'); s.innerHTML = '<div class="ph-img truck">' + H.truckSvg() + '<span class="lb">' + s.dataset.p + '</span></div>'; }; });
+
+  /* 说明 */
+  var dc = H.qs('#descChips');
+  dc.innerHTML = H.DESC_TEMPLATES.slice(0, 6).map(function (t) { return '<span class="chip sm">' + t + '</span>'; }).join('');
+  H.qsa('.chip', dc).forEach(function (c) { c.onclick = function () { c.classList.toggle('on'); var ta = H.qs('#desc'); ta.value = (ta.value.replace(/。$/, '') + (ta.value ? '，' : '') + c.textContent + '。').replace(/^，/, ''); }; });
+  H.qs('#gen').onclick = function () {
+    var t = H.VEHICLE_TYPES.filter(function (x) { return x.id === st.type; })[0];
+    if (!t || !st.len) return H.toast('请先选择车型和板长');
+    var s = st.len.replace('m', ' 米') + t.name + '，核载 ' + (H.qs('#load').value || '—') + ' 吨';
+    if (st.equip.indexOf('鞍座') > -1) s += '，配鞍座可装卷板';
+    if (st.equip.indexOf('篷布') > -1) s += '，篷布齐全薄板不淋雨';
+    if (st.equip.indexOf('可装 12m 长材') > -1) s += '，12 米定尺长材没问题';
+    if (st.equip.indexOf('可多点装卸') > -1) s += '，可多点装卸';
+    if (st.steels.length) s += '，常拉' + st.steels.slice(0, 3).join('、');
+    s += '，常年拉钢材，装卸熟练，不超载。';
+    H.qs('#desc').value = s; H.toast('已生成，可继续修改');
+  };
+  H.qsa('[data-sw]').forEach(function (s) { s.onclick = function () { s.classList.toggle('on'); }; });
+
+  H.qs('#saveBtn').onclick = function () {
+    if (!H.qs('#plate').value) return H.toast('请先拍行驶证或填写车牌');
+    H.sheet({ center: true, title: '已提交核验', body: '<div class="small t2" style="line-height:1.7">车辆 <b>沪D·8K3**</b> 已保存。<br>行驶证已识别通过，道路运输证核验通常 <b>10 分钟</b>内完成。<br><br>核验前也可以先发布运力，找车方看到的是「车辆待核验」；核验通过后自动升级为「车辆认证」。</div>',
+      footer: '<a class="btn ghost" href="home.html">返回</a><a class="btn wy" href="publish.html">去发布运力</a>' });
+  };
+
+  H.notes('驾驶员端 · 添加车辆（设计说明）', [
+    '<b>拍行驶证 OCR</b> 自动填车牌 / 车型 / 核载 / 年份，把最烦的输入变成一次拍照。',
+    '车型用图标网格、板长用快捷 chips，都是钢材运输最常见的规格（13m / 17.5m 平板半挂为主）。',
+    '<b>装钢材配置</b>（鞍座、篷布、绑带、12 米长材、多点装卸、车载定位）是找车方筛选与信任的核心，单列一节并标注"货主常筛"。',
+    '3 张车辆照片（车头含车牌 / 板面 / 侧面）对外展示，是"车真实存在、确实装钢材"的直接证明；证件仅用于核验不展示。',
+    '车辆说明支持 <b>一键生成</b>（由配置拼句）+ 模板短句，降低司机写字负担。',
+    '核验不阻塞发布：先发、后核验、认证标识自动升级。',
+  ]);
+})();
+</script>
+</body>
+</html>
