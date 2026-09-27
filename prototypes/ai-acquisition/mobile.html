@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>销售企微 H5</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  .lay { display: grid; grid-template-columns: minmax(260px, 1fr) 400px minmax(260px, 1fr); gap: 18px; align-items: start; }
+  .lay .card + .card { margin-top: 14px; }
+  .lay h4 { font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .lay ul { padding-left: 16px; font-size: 12.5px; color: var(--text-2); line-height: 1.8; }
+  .lay .card-b p { font-size: 12.5px; color: var(--text-2); line-height: 1.7; }
+  .links a { display: block; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 12.5px; } .links a:last-child { border: 0; }
+  .links code { color: var(--text-3); }
+  .push { display: flex; flex-direction: column; gap: 6px; } .push button { text-align: left; }
+
+  /* 手机壳（企业微信容器内的 H5） */
+  .frame { width: 390px; height: 800px; background: #1c2430; border-radius: 34px; padding: 10px; margin: 0 auto; position: relative; }
+  .screen { width: 100%; height: 100%; background: #f4f6f8; border-radius: 26px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+  .sbar { height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 6px 22px 0; font-size: 12.5px; font-weight: 600; color: #fff; background: #2a3441; }
+  .wxbar { height: 44px; background: #2a3441; color: #fff; display: flex; align-items: center; gap: 10px; padding: 0 12px; font-size: 15px; font-weight: 600; }
+  .wxbar .bk { cursor: pointer; display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border-radius: 4px; } .wxbar .bk:hover { background: #3a4656; }
+  .wxbar .bk svg.i { width: 20px; height: 20px; transform: rotate(180deg); }
+  .wxbar .t { flex: 1; text-align: center; padding-right: 28px; }
+  .wxbar .who { font-size: 11px; font-weight: 400; color: #b7c0cc; }
+  .body { flex: 1; overflow-y: auto; padding: 10px 12px 14px; } .body::-webkit-scrollbar { width: 0; }
+  .tabbar { height: 62px; border-top: 1px solid var(--border); background: #fff; display: flex; padding-bottom: 6px; }
+  .tabbar button { flex: 1; border: 0; background: none; font-size: 10.5px; color: var(--text-3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; position: relative; }
+  .tabbar button svg.i { width: 21px; height: 21px; }
+  .tabbar button.on { color: var(--primary); font-weight: 600; }
+  .tabbar button .dot { position: absolute; top: 6px; right: 20px; min-width: 16px; height: 16px; border-radius: 4px; background: var(--hot); color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center; padding: 0 4px; font-weight: 700; }
+
+  .mc { background: #fff; border-radius: var(--radius); padding: 12px 14px; margin-bottom: 10px; border: 1px solid var(--border); }
+  .mc h5 { margin: 0 0 8px; font-size: 13px; display: flex; align-items: center; gap: 6px; } .mc h5 .r { margin-left: auto; font-weight: 400; font-size: 11px; color: var(--text-3); }
+  .mc.hot { border-left: 3px solid var(--hot); } .mc.ai { border-left: 3px solid var(--ai); } .mc.ok { border-left: 3px solid var(--success); } .mc.warn { border-left: 3px solid var(--warning); }
+  .stat4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; } .stat4 div { cursor: pointer; padding: 6px 0; border-radius: var(--radius-sm); } .stat4 div:hover { background: var(--steel-weak); }
+  .stat4 b { display: block; font-size: 22px; line-height: 1.1; } .stat4 b.hot { color: var(--hot); } .stat4 span { font-size: 10.5px; color: var(--text-3); }
+  .li { display: flex; gap: 10px; padding: 9px 0; border-top: 1px solid var(--steel-weak); cursor: pointer; align-items: flex-start; } .li:first-of-type { border-top: 0; }
+  .li .av { width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--steel-weak); display: grid; place-items: center; font-weight: 700; font-size: 14px; color: var(--text-2); flex: none; position: relative; }
+  .li .av .pf { position: absolute; right: -4px; bottom: -4px; transform: scale(.8); }
+  .li .m { flex: 1; min-width: 0; } .li .n { display: flex; align-items: center; gap: 6px; font-size: 13.5px; } .li .n b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .li .n .t { margin-left: auto; font-size: 11px; color: var(--text-4); font-weight: 400; }
+  .li .p { font-size: 12px; color: var(--text-3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .li .tags { margin-top: 4px; display: flex; gap: 4px; flex-wrap: wrap; }
+  .tag.xs { font-size: 10.5px; padding: 0 5px; }
+  .bigbtn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 11px; border: 0; border-radius: var(--radius-sm); background: var(--primary); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .bigbtn.ghost { background: #fff; color: var(--primary); border: 1px solid var(--border-2); } .bigbtn.hot { background: var(--hot); } .bigbtn.danger { background: #fff; color: var(--danger); border: 1px solid #e8b4b0; }
+  .bigbtn:disabled { background: var(--border-2); color: #fff; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .row2 .bigbtn, .row3 .bigbtn { padding: 9px 6px; font-size: 13px; }
+  .seg { display: flex; border: 1px solid var(--border-2); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 10px; background: #fff; } .seg button { flex: 1; border: 0; background: none; padding: 7px 0; font-size: 12px; color: var(--text-3); cursor: pointer; } .seg button.on { background: var(--text); color: #fff; font-weight: 600; }
+  /* 聊天 */
+  .chatwrap { display: flex; flex-direction: column; height: 100%; }
+  .chatwrap .msgs { flex: 1; overflow-y: auto; padding: 10px 12px; } .chatwrap .msgs::-webkit-scrollbar { width: 0; }
+  .chatwrap .msg { max-width: 86%; } .chatwrap .bubble { font-size: 13px; padding: 7px 10px; }
+  .sysline { text-align: center; font-size: 11px; color: var(--text-4); margin: 6px 0; } .sysline span { background: var(--steel-weak); padding: 2px 8px; border-radius: 3px; display: inline-block; }
+  .composer { border-top: 1px solid var(--border); background: #fff; padding: 8px 10px; }
+  .sugg { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; } .sugg::-webkit-scrollbar { height: 0; }
+  .sugg .s { flex: none; max-width: 240px; border: 1px solid #d7d2f0; background: var(--ai-weak); color: #3b2f8a; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11.5px; cursor: pointer; line-height: 1.4; } .sugg .s .lb { display: block; font-weight: 700; font-size: 10.5px; color: var(--ai); }
+  .composer textarea { width: 100%; border: 1px solid var(--border-2); border-radius: var(--radius-sm); padding: 6px 8px; font-size: 13px; resize: none; height: 56px; font-family: inherit; outline: none; } .composer textarea:focus { border-color: var(--primary); }
+  .composer .bar { display: flex; gap: 6px; align-items: center; margin-top: 6px; } .composer .bar .btn { padding: 3px 8px; font-size: 12px; }
+  .lock { background: var(--warning-weak); color: #7a4a06; font-size: 11.5px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid #f2d9a3; }
+  /* 审核 */
+  .ap textarea { width: 100%; border: 1px solid var(--border-2); border-radius: var(--radius-sm); padding: 8px; font-size: 13px; line-height: 1.6; height: 108px; resize: none; font-family: inherit; outline: none; background: var(--ai-weak); }
+  .ap .trig { background: var(--steel-weak); border-radius: var(--radius-sm); padding: 6px 8px; font-size: 12px; color: var(--text-2); }
+  .ap .due { font-size: 11px; color: var(--hot); font-weight: 600; }
+  /* 投喂 */
+  .ways { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; } .ways div { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 4px 8px; text-align: center; font-size: 11.5px; cursor: pointer; background: #fff; color: var(--text-2); } .ways div svg.i { display: block; margin: 0 auto 6px; width: 22px; height: 22px; color: var(--primary); } .ways div:hover { border-color: var(--primary); }
+  .raw { background: var(--steel-weak); border-radius: var(--radius-sm); padding: 6px 8px; font-size: 11.5px; color: var(--text-2); line-height: 1.55; max-height: 88px; overflow: auto; }
+  .ex { display: grid; grid-template-columns: 78px 1fr; gap: 6px 8px; font-size: 12.5px; align-items: center; } .ex label { color: var(--text-3); font-size: 11.5px; } .ex input { width: 100%; }
+  .ex input.miss { border-color: var(--warning); background: var(--warning-weak); }
+  .thinking { display: inline-flex; gap: 3px; vertical-align: middle; } .thinking i { width: 6px; height: 6px; border-radius: 50%; background: var(--ai); animation: bl 1s infinite; } .thinking i:nth-child(2) { animation-delay: .2s } .thinking i:nth-child(3) { animation-delay: .4s } @keyframes bl { 0%, 80%, 100% { opacity: .2 } 40% { opacity: 1 } }
+  .rec { text-align: center; padding: 18px 0; } .rec .mic { width: 64px; height: 64px; border-radius: 50%; background: var(--hot); color: #fff; display: grid; place-items: center; margin: 0 auto 8px; animation: pulse 1s infinite; } .rec .mic svg.i { width: 28px; height: 28px; } @keyframes pulse { 50% { opacity: .6 } }
+  /* 线索详情 */
+  .kv2 { display: grid; grid-template-columns: 64px 1fr; gap: 4px 8px; font-size: 12.5px; } .kv2 span:nth-child(odd) { color: var(--text-3); }
+  .tl2 { border-left: 2px solid var(--border); padding-left: 10px; margin-left: 4px; } .tl2 div { font-size: 12px; padding: 3px 0; color: var(--text-2); } .tl2 div small { color: var(--text-4); margin-right: 6px; }
+  /* 企微通知横幅 */
+  .notif { position: absolute; left: 10px; right: 10px; top: 42px; background: #fff; border: 1px solid var(--border); border-left: 3px solid var(--hot); border-radius: var(--radius); padding: 8px 12px; font-size: 12px; z-index: 5; cursor: pointer; box-shadow: var(--shadow-lg); display: flex; gap: 8px; align-items: center; }
+  .notif b { display: block; font-size: 12.5px; } .notif .from { color: var(--text-4); font-size: 10.5px; }
+  .notif svg.i { color: var(--hot); flex: none; }
+  .empty.sm { padding: 24px 0; font-size: 12px; }
+</style>
+</head>
+<body>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/app.js"></script>
+<script>
+const me = App.me(); const root = App.mount({ active: 'mobile', title: '销售企微 H5' });
+const isMine = l => me.role === 'admin' || l.owner === me.id;
+const myLeads = () => ACQ.leads.filter(isMine);
+const myConvs = () => ACQ.conversations.filter(c => { const l = ACQ.lead(c.leadId); return l && isMine(l); });
+const myAps = () => ACQ.approvals.filter(a => a.status === 'PENDING' && (me.role === 'admin' || a.assignee === me.id));
+const myFus = () => ACQ.followUps.filter(f => f.status === 'PENDING' && f.type !== 'FLOW_TIMER' && (me.role === 'admin' || f.owner === me.id) && ACQ.lead(f.leadId));
+const myIntake = () => ACQ.intake.filter(i => me.role === 'admin' || i.by === me.id);
+const TABS = [['home', 'grid', '待办'], ['conv', 'chat', '会话'], ['approve', 'check', '审核'], ['feed', 'camera', '投喂'], ['leads', 'users', '线索']];
+const TITLE = { home: '货袋子获客', conv: '会话', approve: '审核', feed: '投喂线索', leads: '我的线索' };
+let V = { tab: qs('tab', 'home'), conv: qs('c', null), lead: qs('lead', null), leadFilter: 'ALL', feedKind: null, feedText: '', rec: false };
+if (V.conv) V.tab = 'conv'; if (V.lead) V.tab = 'leads';
+
+/* ---------- 页面外框 ---------- */
+root.innerHTML = App.pageHead('销售企微 H5', '销售不装新 App：企业微信「工作台」里的一个 H5 应用（Q16 = C）。所有需要人处理的事——待人工会话、报价审核、到期跟进、现场投喂——都以企微消息推送并深链到这里，一次点击就能处理。', `<a class="btn" href="workbench.html">${App.icon('chat')} 后台会话工作台</a><a class="btn" href="app.html">${App.icon('tablet')} 执行端 App</a>`) + `
+<div class="lay">
+  <div>
+    <div class="card"><div class="card-b"><h4>${App.icon('info')} 为什么是企微 H5，而不是独立 App</h4><ul><li>销售已在企微里收客户消息、看审批，H5 免安装、免登录（企微 OAuth 身份 = 后台负责人）。</li><li>所有提醒都是企微应用消息：<b>待人工 / 待审核 / 到期跟进 / 高意向</b>，点开即深链到对应卡片。</li><li>只做「处理」不做「配置」：话术、流程、渠道、风控仍在后台管理端。</li><li>与执行端 App 分工：执行端跑在工作手机上替人操作微信；H5 是销售本人的手机。</li></ul></div></div>
+    <div class="card"><div class="card-b"><h4>${App.icon('phone')} 现场高频动作（Q13 / Q15）</h4><ul><li><b>打电话</b>：线索详情一键拨号，挂断后 30 秒内弹「记录结果」，接通 / 未接 / 拒绝分支自动推进 SOP。</li><li><b>拍铭牌 / 名片</b>：投喂页拍照 → OCR → AI 抽取项目 / 企业 / 联系人 → 确认即入库，自动关联到项目档案。</li><li><b>语音速记</b>：走访结束说 30 秒，转写后抽取企业名 / 吨位 / 规格 / 联系电话。</li><li><b>报线索</b>：介绍人扫码提交的线索归到对应销售，成交后按规则分成（Q12，线下结算）。</li></ul></div></div>
+    <div class="card"><div class="card-b"><h4>${App.icon('link')} 深链参数</h4><div class="links"><a href="mobile.html?tab=home"><code>?tab=home</code> 今日待办</a><a href="mobile.html?tab=conv"><code>?tab=conv</code> 待人工会话</a><a href="mobile.html?c=C1"><code>?c=C1</code> 直接打开某会话</a><a href="mobile.html?tab=approve"><code>?tab=approve</code> 待审核</a><a href="mobile.html?tab=feed"><code>?tab=feed</code> 投喂（拍照 / 语音）</a><a href="mobile.html?lead=L033"><code>?lead=L033</code> 线索详情（可拨号）</a></div></div></div>
+  </div>
+  <div class="frame"><div class="screen" id="screen"></div></div>
+  <div>
+    <div class="card"><div class="card-b"><h4>${App.icon('bell')} 模拟企微推送 → 深链</h4><p class="mb8">点一下，手机顶部出现企微应用消息横幅；点横幅直达对应卡片。这就是销售日常的入口。</p><div class="push">
+      <button class="btn" onclick="pushNotice('quote')">${App.icon('coin')} 客户询价，AI 已草拟报价待审核</button>
+      <button class="btn" onclick="pushNotice('human')">${App.icon('chat')} 客户消息无话术命中，需人工</button>
+      <button class="btn" onclick="pushNotice('call')">${App.icon('phone')} SOP 到电话节点：请拨打 李工</button>
+      <button class="btn" onclick="pushNotice('hot')">${App.icon('flame')} 高意向：项目线索评分升到 90+</button>
+      <button class="btn" onclick="pushNotice('referral')">${App.icon('handshake')} 介绍人报送了一条新线索</button>
+    </div></div></div>
+    <div class="card"><div class="card-b"><h4>${App.icon('users')} 当前视角</h4><p>${me.role === 'admin' ? '管理员 <b>陈总</b>：看到全部销售的会话 / 审核 / 线索（用于演示）。切到右上角「销售·张三」可看到销售本人的收窄视图。' : '销售 <b>张三</b>：只看到分配给自己的线索、会话、审核与投喂记录，这是真实的使用视角。'}</p><p class="mt8 muted xs">数据与后台其他页面同源（localStorage）：在这里采纳的报价、记录的电话、确认的投喂，会立刻出现在会话工作台 / 线索 / 项目页。</p></div></div>
+  </div>
+</div>`;
+
+/* ---------- 手机渲染 ---------- */
+function go(tab, extra) { V.tab = tab; V.conv = null; V.lead = null; Object.assign(V, extra || {}); history.replaceState(null, '', '?tab=' + tab + (V.conv ? '&c=' + V.conv : '') + (V.lead ? '&lead=' + V.lead : '')); render(); }
+function render() {
+  const s = $('#screen'); const aps = myAps(), needH = myConvs().filter(c => c.status === 'NEED_HUMAN'), pendIn = myIntake().filter(i => i.status === 'PENDING' || i.status === 'EXTRACTING');
+  const badge = { conv: needH.length, approve: aps.length, feed: pendIn.length };
+  let title = TITLE[V.tab], back = null, body = '';
+  if (V.tab === 'conv' && V.conv) { const c = ACQ.conversations.find(x => x.id === V.conv); const l = ACQ.lead(c.leadId); title = l.nickname; back = () => go('conv'); body = chatView(c, l); }
+  else if (V.tab === 'leads' && V.lead) { const l = ACQ.lead(V.lead); title = '线索详情'; back = () => go('leads'); body = leadView(l); }
+  else body = `<div class="body">${{ home: homeView, conv: convList, approve: approveView, feed: feedView, leads: leadList }[V.tab]()}</div>`;
+  s.innerHTML = `<div class="sbar"><span>${fmt.hm(Date.now())}</span><span>企业微信 · 5G</span></div><div class="wxbar">${back ? `<span class="bk" id="bk">${App.icon('arrow')}</span>` : '<span style="width:28px"></span>'}<span class="t">${esc(title)}${!back ? `<div class="who">${me.name} · 华东钢贸</div>` : ''}</span><span class="bk">···</span></div>${body}<div class="tabbar">${TABS.map(t => `<button class="${V.tab === t[0] ? 'on' : ''}" onclick="go('${t[0]}')">${App.icon(t[1])}${t[2]}${badge[t[0]] ? `<span class="dot">${badge[t[0]]}</span>` : ''}</button>`).join('')}</div>`;
+  if (back) $('#bk').onclick = back;
+  const ms = $('.msgs'); if (ms) ms.scrollTop = ms.scrollHeight;
+}
+
+/* 待办 */
+function homeView() {
+  const aps = myAps(), needH = myConvs().filter(c => c.status === 'NEED_HUMAN'), fus = myFus().filter(f => f.dueAt <= Date.now() + ACQ.D), pendIn = myIntake().filter(i => i.status === 'PENDING');
+  const items = [];
+  aps.forEach(a => items.push({ t: a.dueAt, cls: 'hot', ic: 'coin', title: `审核 · ${ACQ.lead(a.leadId).nickname}`, sub: `「${a.triggerText.slice(0, 26)}」 · ${fmt.left(a.dueAt)}升级`, go: () => go('approve') }));
+  needH.forEach(c => { const l = ACQ.lead(c.leadId); const last = c.messages[c.messages.length - 1]; items.push({ t: c.lastAt, cls: 'hot', ic: 'chat', title: `待人工 · ${l.nickname}`, sub: last.text.slice(0, 30), go: () => go('conv', { conv: c.id }) }); });
+  fus.forEach(f => { const l = ACQ.lead(f.leadId); items.push({ t: f.dueAt, cls: f.type === 'CALL' || f.type === 'FLOW_HUMAN_TASK' ? 'warn' : '', ic: f.type === 'CALL' ? 'phone' : 'clock', title: `${f.type === 'CALL' ? '电话' : '跟进'} · ${l.nickname}`, sub: `${f.note || ({ NO_REPLY: '未回复自动跟进', CONSIDERING: '客户说再考虑', FLOW_HUMAN_TASK: '流程人工任务' })[f.reason] || '跟进'} · ${f.dueAt < Date.now() ? '<span style="color:var(--danger)">已逾期</span>' : fmt.left(f.dueAt)}`, go: () => go('leads', { lead: l.id }) }); });
+  items.sort((a, b) => a.t - b.t); window.__home = items;
+  const hot = myLeads().filter(l => l.stage === 'HOT' || (l.score >= 85 && ['NEW', 'CONTACTED', 'REPLIED'].includes(l.stage))).slice(0, 3);
+  return `<div class="mc"><h5>今日<span class="r">${fmt.date(Date.now())} · ${me.name}</span></h5><div class="stat4"><div onclick="go('conv')"><b class="${needH.length ? 'hot' : ''}">${needH.length}</b><span>待人工</span></div><div onclick="go('approve')"><b class="${aps.length ? 'hot' : ''}">${aps.length}</b><span>待审核</span></div><div onclick="go('leads',{leadFilter:'TODO'})"><b>${fus.length}</b><span>今日跟进</span></div><div onclick="go('feed')"><b>${pendIn.length}</b><span>待确认投喂</span></div></div></div>
+  <div class="mc"><h5>${App.icon('flame')} 现在要处理<span class="r">按紧急度</span></h5>${items.slice(0, 8).map((i, k) => `<div class="li" onclick="__home[${k}].go()"><span class="av" style="${i.cls === 'hot' ? 'background:var(--hot-weak);color:var(--hot)' : i.cls === 'warn' ? 'background:var(--warning-weak);color:var(--warning)' : ''}">${App.icon(i.ic)}</span><div class="m"><div class="n"><b>${esc(i.title)}</b></div><div class="p">${i.sub}</div></div></div>`).join('') || '<div class="empty sm">今天没有待处理事项</div>'}</div>
+  ${hot.length ? `<div class="mc hot"><h5>高意向</h5>${hot.map(l => `<div class="li" onclick="go('leads',{lead:'${l.id}'})"><span class="av">${esc((l.nickname || '?')[0])}${UI.platform(l.platform)}</span><div class="m"><div class="n"><b>${esc(l.nickname)}</b>${UI.score(l.score)}<span class="t">${fmt.ago(l.lastActiveAt || l.createdAt)}</span></div><div class="p">${UI.leadType(l.leadType)} ${esc(l.product || '')} ${esc(l.region || '')}${l.projectId ? ' · ' + esc(ACQ.project(l.projectId).name) : ''}</div></div></div>`).join('')}</div>` : ''}
+  <div class="row2"><button class="bigbtn hot" onclick="go('feed',{feedKind:'IMAGE'})">${App.icon('camera')} 拍铭牌 / 名片</button><button class="bigbtn ghost" onclick="go('feed',{feedKind:'VOICE'})">${App.icon('mic')} 语音速记</button></div>`;
+}
+
+/* 会话 */
+function convList() {
+  const list = myConvs().sort((a, b) => (a.status === 'NEED_HUMAN' ? 0 : 1) - (b.status === 'NEED_HUMAN' ? 0 : 1) || b.lastAt - a.lastAt);
+  return `<div class="mc" style="padding:4px 14px">${list.map(c => { const l = ACQ.lead(c.leadId); const last = c.messages[c.messages.length - 1]; return `<div class="li" onclick="go('conv',{conv:'${c.id}'})"><span class="av">${esc((l.nickname || '?')[0])}${UI.platform(l.platform)}</span><div class="m"><div class="n"><b>${esc(l.nickname || '（无昵称）')}</b>${UI.score(l.score)}<span class="t">${fmt.ago(last.t)}</span></div><div class="p">${last.dir === 'OUT' ? (last.from === 'AI' ? 'AI：' : '我：') : ''}${esc(last.text)}</div><div class="tags">${UI.status(c.status).replace('class="tag', 'class="tag xs')}${c.needHumanReason ? `<span class="tag xs">${({ APPROVAL: '待审核报价', HOT: '高意向', NO_MATCH: '无话术命中' })[c.needHumanReason] || ''}</span>` : ''}</div></div></div>`; }).join('') || '<div class="empty sm">没有会话</div>'}</div>`;
+}
+function chatView(c, l) {
+  const acc = ACQ.account(c.account); const lastIn = c.messages.filter(m => m.dir === 'IN').slice(-1)[0]; const ap = ACQ.approvals.find(a => a.convId === c.id && a.status === 'PENDING');
+  const sugg = []; if (lastIn) { const m = Engine.matchScript(lastIn.text, 'REPLY'); if (m.script) { const r = Engine.render(m.script, l); sugg.push({ label: `话术 · ${m.script.name}`, text: r.text, scriptId: m.script.id }); } if (ap) sugg.push({ label: 'AI 草拟报价（需核实）', text: ap.aiSuggestion, approvalId: ap.id }); if (!sugg.length) sugg.push({ label: 'AI 建议', text: `${l.nickname || '您好'}，收到，我这边给您安排一下，稍后回您。` }); }
+  window.__sugg = sugg;
+  return `<div class="chatwrap">${c.status === 'NEED_HUMAN' ? `<div class="lock">${App.icon('warn')} 机器已暂停自动回复${({ APPROVAL: '：报价需您审核', NO_MATCH: '：无话术命中', HOT: '：高意向转人工' })[c.needHumanReason] || ''}</div>` : c.status === 'HUMAN' ? `<div class="lock" style="background:var(--primary-weak);color:#143d6b;border-color:#c9d8ea">${App.icon('users')} 您已接管，机器不自动回复 <a style="margin-left:auto" onclick="release('${c.id}')">交还机器</a></div>` : ''}
+    <div class="msgs"><div class="sysline"><span>${fmt.md(l.createdAt)} 来自「${esc(l.sourceChannel)}」· ${UI.intent(l.intent)} ${l.score} 分</span></div><div class="chat">${c.messages.map(m => `<div class="msg ${m.dir === 'OUT' ? 'out' + (m.from === 'AI' ? ' ai' : '') : ''}"><div class="av">${m.dir === 'IN' ? esc((l.nickname || '?')[0]) : m.from === 'AI' ? 'AI' : me.short}</div><div><div class="bubble">${esc(m.text)}</div><div class="meta">${fmt.hm(m.t)}${m.from === 'AI' ? ' · 自动回复' : ''}${m.status === 'QUEUED' ? ' · 排队中' : ''}</div></div></div>`).join('')}</div>${c.status === 'CLOSED' ? '<div class="sysline"><span>客户拒绝，已拉黑</span></div>' : ''}</div>
+    ${c.status === 'CLOSED' ? '' : `<div class="composer"><div class="sugg">${sugg.map((x, i) => `<div class="s" onclick="useSugg(${i})"><span class="lb">${esc(x.label)}</span>${esc(x.text.slice(0, 60))}${x.text.length > 60 ? '…' : ''}</div>`).join('')}</div><textarea id="draft" placeholder="回复 ${esc(l.nickname || '')}…"></textarea><div class="bar"><button class="btn" onclick="pickScript('${c.id}')">${App.icon('doc')} 话术</button><button class="btn" onclick="App.recordCall('${l.id}',{onDone:render})">${App.icon('phone')} 电话</button><span class="sp"></span>${c.status !== 'HUMAN' ? `<button class="btn" onclick="takeover('${c.id}')">接管</button>` : ''}<button class="btn primary" onclick="send('${c.id}')">发送</button></div></div>`}</div>`;
+}
+function useSugg(i) { const s = window.__sugg[i]; $('#draft').value = s.text; $('#draft').dataset.scriptId = s.scriptId || ''; $('#draft').dataset.approvalId = s.approvalId || ''; }
+function pickScript(cid) { const c = ACQ.conversations.find(x => x.id === cid), l = ACQ.lead(c.leadId); Drawer.open({ title: '插入话术', narrow: true, body: ACQ.scripts.filter(s => s.enabled && s.scene !== 'CALL').map(s => { const r = Engine.render(s, l); return `<div class="card mb8" style="padding:10px;cursor:pointer" onclick="$('#draft').value=${JSON.stringify(r.text)};$('#draft').dataset.scriptId='${s.id}';this.closest('.drawer-mask').remove()"><div class="row"><b>${esc(s.name)}</b><span class="tag">${s.category}</span></div><div class="small muted mt8">${UI.vars(s.content)}</div></div>`; }).join('') }); }
+function takeover(cid) { const c = ACQ.conversations.find(x => x.id === cid); c.status = 'HUMAN'; c.takenBy = me.id; c.takenAt = Date.now(); c.needHumanReason = null; const inst = ACQ.instanceOf(c.leadId); if (inst && inst.status === 'WAITING' && inst.waitingType !== 'HUMAN_TASK') { inst.status = 'PAUSED'; inst.pausedReason = '人工接管'; } ACQ.addEvent(ACQ.lead(c.leadId), { type: 'TAKEOVER', text: `${me.name} 在企微 H5 接管会话`, cls: 'user' }); ACQ.save(); render(); toast('已接管', 'ok'); }
+function release(cid) { const c = ACQ.conversations.find(x => x.id === cid); c.status = 'AUTO'; c.takenBy = null; const inst = ACQ.instanceOf(c.leadId); if (inst && inst.status === 'PAUSED') { inst.status = 'WAITING'; inst.pausedReason = null; } ACQ.save(); render(); toast('已交还机器', 'ok'); }
+function send(cid, text, approvalId) {
+  const c = ACQ.conversations.find(x => x.id === cid), l = ACQ.lead(c.leadId), acc = ACQ.account(c.account); const d = $('#draft'); text = text || (d ? d.value.trim() : ''); if (!text) return toast('请输入内容', 'warn');
+  const mod = Engine.moderate(text, l.platform); if (!mod.pass) return Modal.open({ title: '内容安全检查未通过', body: `<div class="alert error">${mod.reasons.join('<br>')}</div>` });
+  if (c.status !== 'HUMAN') { c.status = 'HUMAN'; c.takenBy = me.id; c.takenAt = Date.now(); c.needHumanReason = null; const inst = ACQ.instanceOf(l.id); if (inst && inst.status === 'WAITING' && inst.waitingType !== 'HUMAN_TASK') { inst.status = 'PAUSED'; inst.pausedReason = '人工接管'; } }
+  const pacing = Engine.pacing(acc); const m = { id: c.id + '-' + (c.messages.length + 1), dir: 'OUT', from: 'USER', by: me.id, text, t: Date.now(), status: acc.exec === 'RPA' ? 'QUEUED' : 'SENT', pacing, scriptId: d && +d.dataset.scriptId || null, approvalId: approvalId || (d && d.dataset.approvalId) || null };
+  c.messages.push(m); c.lastAt = m.t; acc.todaySent++; l.lastContactedAt = m.t; if (l.stage === 'NEW') l.stage = 'CONTACTED';
+  ACQ.outreach.unshift({ id: 'OT' + Date.now().toString().slice(-6), leadId: l.id, account: acc.id, trigger: 'MANUAL', round: 0, scriptId: m.scriptId, content: text, hits: [], status: m.status, sentAt: m.status === 'SENT' ? m.t : null, scheduledAt: m.t + pacing.preDelaySec * 1000 });
+  ACQ.addEvent(l, { type: 'HUMAN_REPLY', text: `企微 H5 人工回复：${text.slice(0, 30)}…`, cls: 'user' }); ACQ.save(); render();
+  if (m.status === 'QUEUED') setTimeout(() => { m.status = 'SENT'; ACQ.save(); render(); }, 2500);
+  toast(m.status === 'QUEUED' ? `已交工作手机「${acc.name}」排队发送` : '已发送', 'ok');
+}
+
+/* 审核 */
+function approveView() {
+  const aps = myAps().sort((a, b) => a.dueAt - b.dueAt); const done = ACQ.approvals.filter(a => a.status !== 'PENDING' && (me.role === 'admin' || a.assignee === me.id)).slice(0, 5);
+  return (aps.map(a => { const l = ACQ.lead(a.leadId); return `<div class="mc ap hot"><h5>${({ QUOTE: '报价', CONTRACT: '合同 / 账期', AI_POLISH: 'AI 润色' })[a.type]} · ${esc(l.nickname)}<span class="r due">${fmt.left(a.dueAt)}升级主管</span></h5><div class="trig">客户：「${esc(a.triggerText)}」</div><div class="xs muted" style="margin:8px 0 4px">${App.icon('bot')} AI 草拟（依据企业资料库「今日价格表」，可直接改）</div><textarea id="ap_${a.id}">${esc(a.aiSuggestion)}</textarea><div class="row2 mt8"><button class="bigbtn danger" onclick="rejectAp('${a.id}')">驳回</button><button class="bigbtn" onclick="approveAp('${a.id}')">${App.icon('send')} 采纳并发送</button></div>${a.convId ? `<div class="xs mt8"><a onclick="go('conv',{conv:'${a.convId}'})">查看完整会话 →</a></div>` : ''}</div>`; }).join('') || '<div class="mc"><div class="empty sm">没有待审核事项</div></div>')
+    + (done.length ? `<div class="mc"><h5>最近已处理</h5>${done.map(a => `<div class="li"><span class="av">${esc(ACQ.lead(a.leadId).nickname[0])}</span><div class="m"><div class="n"><b>${esc(ACQ.lead(a.leadId).nickname)}</b>${UI.status(a.status).replace('class="tag', 'class="tag xs')}<span class="t">${fmt.md(a.decidedAt || a.createdAt)}</span></div><div class="p">${esc(a.finalContent || a.triggerText)}</div></div></div>`).join('')}</div>` : '');
+}
+function approveAp(id) {
+  const a = ACQ.approvals.find(x => x.id === id); const text = $('#ap_' + id).value.trim(); if (!text) return toast('内容不能为空', 'warn');
+  a.status = 'APPROVED_SENT'; a.decidedAt = Date.now(); a.decidedBy = me.id; a.finalContent = text; a.editedByHuman = text !== a.aiSuggestion;
+  const c = a.convId && ACQ.conversations.find(x => x.id === a.convId);
+  if (c) { const l = ACQ.lead(c.leadId), acc = ACQ.account(c.account); c.messages.push({ id: c.id + '-' + (c.messages.length + 1), dir: 'OUT', from: 'USER', by: me.id, text, t: Date.now(), status: 'SENT', approvalId: id }); c.lastAt = Date.now(); if (c.status === 'NEED_HUMAN' && c.needHumanReason === 'APPROVAL') { c.status = 'AUTO'; c.needHumanReason = null; } acc.todaySent++; ACQ.outreach.unshift({ id: 'OT' + Date.now().toString().slice(-6), leadId: l.id, account: acc.id, trigger: 'MANUAL', round: 0, scriptId: null, content: text, hits: [], status: 'SENT', sentAt: Date.now() }); ACQ.addEvent(l, { type: 'APPROVED', text: `企微 H5 审核通过并发送：${text.slice(0, 30)}…`, cls: 'user' }); const inst = ACQ.instanceOf(l.id); if (inst && inst.status !== 'PAUSED') { const def = ACQ.flow(inst.flowId); const tr = Engine.flow.advance(inst, def, { type: 'HUMAN_DONE' }); inst.log = (inst.log || []).concat(tr.map(t => Object.assign({ t: Date.now() }, t))); tr.forEach(t => { if (t.setStage) l.stage = t.setStage; }); } ACQ.followUps.filter(f => f.leadId === l.id && f.type === 'FLOW_HUMAN_TASK' && f.status === 'PENDING').forEach(f => { f.status = 'DONE'; f.doneAt = Date.now(); }); }
+  ACQ.save(); render(); toast(`已发送给客户${a.editedByHuman ? '（人工修改过，样本回流训练）' : ''}`, 'ok');
+}
+function rejectAp(id) { const a = ACQ.approvals.find(x => x.id === id); a.status = 'REJECTED'; a.decidedAt = Date.now(); a.decidedBy = me.id; ACQ.save(); render(); toast('已驳回，请到会话里手工回复', 'warn'); }
+
+/* 投喂 */
+const FEED_SAMPLES = { IMAGE: ['F1_SITE_OCR', '建设单位：苏州某电子有限公司  施工单位：江苏某建设集团  监理单位：苏州某监理  建筑面积 32000㎡  开工 2026.08 竣工 2027.06  项目经理 周工 138****5566'], VOICE: ['E7_DISTRIBUTOR', '刚在张家港见了一个做钢结构加工的徐厂长，张家港某钢构有限公司，他们每个月大概要300吨 Q355B 中板，电话 150****6720，让我下周报个价'], TEXT: ['P2_BID', '南通开发区某学校新建工程 中标公示：中标人 江苏某建设工程有限公司，中标价 1.26亿，建设单位 南通经济技术开发区教育局，建筑面积 38,500㎡，工期 2026-11 至 2028-03，联系人 王工。'], LINK: ['P2_BID', 'https://ggzy.nantong.gov.cn/.../zbgs_2026_0925.html'] };
+const KIND = { TEXT: ['粘贴', 'doc'], LINK: ['链接', 'link'], IMAGE: ['拍照', 'camera'], VOICE: ['语音', 'mic'], PDF: ['文件', 'file'] };
+const FIELDS = { PROJECT: [['project_name', '项目', 1], ['owner_org', '建设单位'], ['contractor_org', '总包'], ['area', '面积'], ['contract_amount', '合同价'], ['period', '工期'], ['quantity', '吨位'], ['spec', '规格'], ['contact_name', '联系人'], ['phone', '电话']], COMPANY: [['company_name', '企业', 1], ['company_scope', '经营'], ['contact_name', '联系人'], ['phone', '电话'], ['need', '需求']], PERSON: [['name', '姓名', 1], ['org', '单位'], ['phone', '电话']] };
+function feedView() {
+  const list = myIntake().filter(i => i.via === 'MOBILE' || i.status === 'PENDING' || i.status === 'EXTRACTING').sort((a, b) => b.t - a.t).slice(0, 6);
+  let top = '';
+  if (V.rec) top = `<div class="mc"><div class="rec"><div class="mic">${App.icon('mic')}</div><b>正在录音…</b><div class="xs muted mt8">说清楚：企业 / 项目名、要什么规格、大概多少吨、联系人电话</div><button class="bigbtn hot mt12" onclick="stopRec()">停止并转写</button></div></div>`;
+  else if (V.feedKind) top = `<div class="mc ai"><h5>${App.icon(KIND[V.feedKind][1])} ${KIND[V.feedKind][0]}${V.feedKind === 'IMAGE' ? ' · OCR 结果' : V.feedKind === 'VOICE' ? ' · 转写结果' : ''}<span class="r"><a onclick="V.feedKind=null;render()">取消</a></span></h5>${V.feedKind === 'IMAGE' || V.feedKind === 'PDF' ? `<div class="raw mb8" style="text-align:center;padding:14px">${App.icon(V.feedKind === 'IMAGE' ? 'image' : 'file')} ${V.feedKind === 'IMAGE' ? 'IMG_20260927_1032.jpg · 工地铭牌' : '重点项目清单.xlsx'} · 已上传</div>` : ''}<textarea class="input" id="feedtext" rows="4" style="width:100%" placeholder="${V.feedKind === 'LINK' ? '粘贴公示 / 公告链接' : '可在此修正识别结果'}">${esc(V.feedText)}</textarea><div class="field mt8" style="margin-bottom:8px"><select class="select sm" id="feedsrc">${ACQ.sources.filter(s => s.acquisition.some(a => a.adapter === 'INTAKE' || a.adapter === 'MANUAL')).map(s => `<option value="${s.code}" ${s.code === (FEED_SAMPLES[V.feedKind] || [])[0] ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div><button class="bigbtn" onclick="feed()">${App.icon('bot')} AI 抽取</button></div>`;
+  else top = `<div class="mc"><h5>投喂线索<span class="r">拍、说、贴，剩下的 AI 做</span></h5><div class="ways">${Object.entries(KIND).filter(([k]) => k !== 'PDF').map(([k, v]) => `<div onclick="startFeed('${k}')">${App.icon(v[1])}${v[0]}</div>`).join('')}</div><div class="xs muted mt8">拍工地铭牌 / 名片 / 招标公告截图；走访后语音速记；群里看到的采购信息直接粘贴。抽取结果确认后自动关联项目 / 企业并评分。</div></div>`;
+  return top + list.map(i => {
+    const ex = i.extracted, ent = ex && ex.entity;
+    return `<div class="mc ${i.status === 'PENDING' ? 'warn' : i.status === 'DONE' ? 'ok' : i.status === 'EXTRACTING' ? 'ai' : ''}"><h5>${App.icon(KIND[i.kind][1])} ${esc(i.title)}<span class="r">${fmt.ago(i.t)}</span></h5>
+      ${i.status === 'EXTRACTING' ? `<div class="small muted">AI 抽取中 <span class="thinking"><i></i><i></i><i></i></span></div>` : ''}
+      ${i.status === 'PENDING' && ex ? `<div class="row mb8" style="gap:6px">${UI.leadType(ent)}<span class="xs muted">置信度 ${Math.round(ex.confidence * 100)}%</span></div><div class="ex">${(FIELDS[ent] || []).map(f => `<label>${f[1]}${f[2] ? ' *' : ''}</label><input class="input sm ${!ex[f[0]] && f[2] ? 'miss' : ''}" value="${esc(ex[f[0]] || '')}" placeholder="${!ex[f[0]] ? '未识别' : ''}" oninput="ACQ.intake.find(x=>x.id==='${i.id}').extracted['${f[0]}']=this.value">`).join('')}</div>${ex.problems && ex.problems.length ? `<div class="alert warn xs mt8">${ex.problems.map(esc).join('；')}</div>` : ''}<div class="row2 mt8"><button class="bigbtn danger" onclick="rejectIn('${i.id}')">丢弃</button><button class="bigbtn" onclick="confirmIn('${i.id}')">${App.icon('check')} 确认入库</button></div>` : ''}
+      ${i.status === 'DONE' ? `<div class="small">${i.projectId ? `→ 项目 <a onclick="location.href='projects.html?open=${i.projectId}'">${esc(ACQ.project(i.projectId).name)}</a> ` : ''}${i.companyId ? `→ 企业 <a onclick="location.href='companies.html?open=${i.companyId}'">${esc(ACQ.company(i.companyId).name)}</a> ` : ''}${i.leadId && ACQ.lead(i.leadId) ? `→ 线索 <a onclick="go('leads',{lead:'${i.leadId}'})">${esc(ACQ.lead(i.leadId).nickname)}</a>` : ''}</div>` : ''}
+      ${i.status === 'REJECTED' ? `<div class="small muted">已丢弃 · ${esc(i.rejectReason || '')}</div>` : ''}</div>`;
+  }).join('');
+}
+function startFeed(kind) { V.feedKind = kind; V.feedText = ''; if (kind === 'VOICE') { V.rec = true; render(); return; } if (kind === 'IMAGE') { V.feedText = FEED_SAMPLES.IMAGE[1]; toast('已拍照 · OCR 完成', 'ok'); } if (kind === 'LINK') V.feedText = FEED_SAMPLES.LINK[1]; if (kind === 'TEXT') V.feedText = FEED_SAMPLES.TEXT[1]; render(); }
+function stopRec() { V.rec = false; V.feedText = FEED_SAMPLES.VOICE[1]; render(); toast('录音 14 秒 · 转写完成', 'ok'); }
+function feed() {
+  const raw = ($('#feedtext').value || '').trim(); if (!raw) return toast('没有内容', 'warn'); const kind = V.feedKind, src = $('#feedsrc').value;
+  const it = { id: 'IN' + Date.now().toString(36), t: Date.now(), by: me.id, via: 'MOBILE', kind, title: { IMAGE: '拍照 OCR', VOICE: '语音速记', TEXT: '粘贴', LINK: '链接', PDF: '文件' }[kind] + ' · ' + me.name, sourceCode: src, status: 'EXTRACTING', extracted: null, raw: kind === 'LINK' ? FEED_SAMPLES.TEXT[1] : raw };
+  ACQ.intake.unshift(it); ACQ.save(); V.feedKind = null; render();
+  setTimeout(() => { it.extracted = Engine.extractIntake(it.raw, kind); it.status = 'PENDING'; ACQ.save(); render(); toast(`抽取完成 · ${({ PROJECT: '项目', COMPANY: '企业', PERSON: '联系人' })[it.extracted.entity]} · 置信度 ${Math.round(it.extracted.confidence * 100)}%`, 'ok'); }, 1500);
+}
+function confirmIn(id) { const it = ACQ.intake.find(x => x.id === id); const r = App.commitIntake(it, { by: me.id }); if (r.error) return toast(r.error, 'warn'); render(); toast(r.msg, 'ok'); }
+function rejectIn(id) { const it = ACQ.intake.find(x => x.id === id); it.status = 'REJECTED'; it.rejectReason = '现场判断非目标'; ACQ.save(); render(); }
+
+/* 线索 */
+function leadList() {
+  const F = [['ALL', '全部'], ['HOT', '高意向'], ['PROJECT', '项目'], ['COMPANY', '企业'], ['TODO', '待跟进']];
+  let list = myLeads().filter(l => !['LOST', 'IGNORED'].includes(l.stage));
+  if (V.leadFilter === 'HOT') list = list.filter(l => l.stage === 'HOT' || l.score >= 85); else if (V.leadFilter === 'PROJECT') list = list.filter(l => l.projectId || l.leadType === 'PROJECT'); else if (V.leadFilter === 'COMPANY') list = list.filter(l => l.companyId || l.leadType === 'COMPANY'); else if (V.leadFilter === 'TODO') { const ids = new Set(myFus().map(f => f.leadId)); list = list.filter(l => ids.has(l.id)); }
+  list.sort((a, b) => b.score - a.score);
+  return `<div class="seg">${F.map(f => `<button class="${V.leadFilter === f[0] ? 'on' : ''}" onclick="V.leadFilter='${f[0]}';render()">${f[1]}</button>`).join('')}</div><div class="mc" style="padding:4px 14px">${list.slice(0, 30).map(l => `<div class="li" onclick="go('leads',{lead:'${l.id}'})"><span class="av">${esc((l.nickname || '?')[0])}${UI.platform(l.platform)}</span><div class="m"><div class="n"><b>${esc(l.nickname || '（无昵称）')}</b>${UI.score(l.score)}<span class="t">${fmt.ago(l.lastActiveAt || l.createdAt)}</span></div><div class="p">${esc(l.company || l.sourceChannel || '')}${l.product ? ' · ' + esc(l.product) : ''}</div><div class="tags">${UI.leadType(l.leadType)}${UI.stage(l.stage).replace('class="tag', 'class="tag xs')}${l.projectId && ACQ.project(l.projectId) ? `<span class="tag xs">${esc(ACQ.project(l.projectId).name.slice(0, 12))}</span>` : ''}</div></div></div>`).join('') || '<div class="empty sm">没有线索</div>'}</div>`;
+}
+function leadView(l) {
+  const p = l.projectId && ACQ.project(l.projectId), co = l.companyId && ACQ.company(l.companyId), c = ACQ.convOf(l.id), inst = ACQ.instanceOf(l.id), def = inst && ACQ.flow(inst.flowId); const fus = ACQ.followUps.filter(f => f.leadId === l.id && f.status === 'PENDING');
+  const atCall = inst && def && def.nodes[inst.currentNode] && def.nodes[inst.currentNode].type === 'Call';
+  return `<div class="body"><div class="mc"><div class="row" style="gap:8px"><span class="av" style="width:44px;height:44px;border-radius:4px;background:var(--steel-weak);display:grid;place-items:center;font-weight:700;font-size:18px">${esc((l.nickname || '?')[0])}</span><div style="flex:1"><div class="row" style="gap:6px"><b style="font-size:16px">${esc(l.nickname)}</b>${UI.leadType(l.leadType)}${UI.stage(l.stage)}</div><div class="xs muted">${esc(l.role || '')}${l.company ? ' · ' + esc(l.company) : ''}</div></div>${UI.score(l.score)}</div>
+    ${atCall ? `<div class="alert warn xs mt8">${App.icon('phone')} 流程「${esc(def.name)}」在电话节点：${esc(Engine.flow.label(def, inst.currentNode))}，请拨打并记录结果</div>` : ''}
+    <div class="row3 mt12"><button class="bigbtn ${atCall ? 'hot' : ''}" onclick="App.recordCall('${l.id}',{onDone:render})" ${l.phone ? '' : 'title="无电话"'}>${App.icon('phone')} 打电话</button><button class="bigbtn ghost" onclick="${c ? `go('conv',{conv:'${c.id}'})` : `toast('该线索没有在线会话，先加微信 / 企微','warn')`}">${App.icon('chat')} 发消息</button><button class="bigbtn ghost" onclick="stageDlg('${l.id}')">${App.icon('arrow')} 改阶段</button></div></div>
+  <div class="mc"><h5>资料</h5><div class="kv2">${l.phone ? `<span>电话</span><span class="mono">${esc(l.phone)}</span>` : ''}<span>来源</span><span>${UI.platform(l.platform, true)} · ${esc(l.sourceChannel || '')}</span>${l.sourceExcerpt ? `<span>原文</span><span>${esc(l.sourceExcerpt)}</span>` : ''}<span>意图</span><span>${UI.intent(l.intent)}</span>${l.product ? `<span>产品</span><span>${esc(l.product)}</span>` : ''}${l.region ? `<span>地区</span><span>${esc(l.region)}</span>` : ''}<span>负责人</span><span>${ACQ.user(l.owner).name}</span></div></div>
+  ${p ? `<div class="mc hot"><h5>${App.icon('crane')} 项目<span class="r"><a onclick="location.href='projects.html?open=${p.id}'">项目档案 →</a></span></h5><b>${esc(p.name)}</b><div class="kv2 mt8"><span>阶段</span><span>${esc(p.stageText || p.stage)}</span><span>用钢量</span><span>${p.estTon ? `${fmt.num(p.estTon[0])}–${fmt.num(p.estTon[1])} 吨` : '—'}</span><span>窗口</span><span>${esc((p.window || {}).text || '—')}</span><span>总包</span><span>${esc(p.contractorOrg || '—')}</span><span>距离</span><span>${p.distanceKm} km</span></div>${p.nextAction ? `<div class="xs mt8" style="color:var(--hot)">下一步：${esc(p.nextAction)}</div>` : ''}</div>` : ''}
+  ${co ? `<div class="mc"><h5>${App.icon('building')} 企业<span class="r"><a onclick="location.href='companies.html?open=${co.id}'">企业档案 →</a></span></h5><b>${esc(co.name)}</b><div class="kv2 mt8"><span>类型</span><span>${({ CONTRACTOR: '施工总包', MANUFACTURER: '制造企业', PROCESSING: '加工厂', PROCESSING_CENTER: '二级配送 / 加工中心', DEVELOPER: '开发商' })[co.type] || co.type}</span><span>月用量</span><span>${co.estMonthlyTon ? co.estMonthlyTon + ' 吨' : '—'}</span><span>信用</span><span>${co.credit && co.credit.level === 'WARN' ? `<span style="color:var(--danger)">${esc(co.credit.text)}</span>` : '正常'}</span></div></div>` : ''}
+  ${inst ? `<div class="mc ai"><h5>${App.icon('route')} 跟进流程<span class="r">${UI.status(inst.status).replace('class="tag', 'class="tag xs')}</span></h5><div class="small">${esc(def.name)} · 当前 <b>${esc(Engine.flow.label(def, inst.currentNode))}</b></div></div>` : ''}
+  ${fus.length ? `<div class="mc warn"><h5>${App.icon('clock')} 待办</h5>${fus.map(f => `<div class="li"><div class="m"><div class="n"><b>${esc(f.note || ({ NO_REPLY: '未回复自动跟进', CONSIDERING: '客户说再考虑' })[f.reason] || '跟进')}</b><span class="t">${f.dueAt < Date.now() ? '<span style="color:var(--danger)">已逾期</span>' : fmt.left(f.dueAt)}</span></div></div><button class="btn sm" onclick="doneFu('${f.id}')">完成</button></div>`).join('')}</div>` : ''}
+  ${(l.calls || []).length ? `<div class="mc"><h5>${App.icon('phone')} 通话</h5>${l.calls.slice(0, 4).map(k => `<div class="li"><div class="m"><div class="n"><b>${Engine.flow.CALL_RESULTS[k.result] || k.result}</b>${k.dur ? `<span class="xs muted">${Math.round(k.dur / 60)} 分钟</span>` : ''}<span class="t">${fmt.time(k.t)}</span></div>${k.note ? `<div class="p" style="white-space:normal">${esc(k.note)}</div>` : ''}</div></div>`).join('')}</div>` : ''}
+  <div class="mc"><h5>时间线</h5><div class="tl2">${(l.events || []).slice(0, 8).map(e => `<div><small>${fmt.time(e.t)}</small>${esc(e.text)}</div>`).join('') || '<div class="muted">—</div>'}</div></div></div>`;
+}
+function stageDlg(id) { const l = ACQ.lead(id); Modal.open({ title: '修改阶段', body: `<div class="field"><label>阶段</label><select class="select" id="st">${['NEW', 'CONTACTED', 'REPLIED', 'HOT', 'WON', 'LOST'].map(s => `<option value="${s}" ${l.stage === s ? 'selected' : ''}>${UI.stage(s).replace(/<[^>]+>/g, '')}</option>`).join('')}</select></div><div class="field"><label>备注</label><input class="input" id="nt" placeholder="例如：已约周二上门"></div>`, footer: '<button class="btn" data-close>取消</button><button class="btn primary" id="ok">保存</button>', onMount(m, close) { $('#ok', m).onclick = () => { l.stage = $('#st', m).value; if (l.stage === 'WON') l.wonAt = Date.now(); ACQ.addEvent(l, { type: 'STAGE', text: `企微 H5 改阶段 → ${UI.stage(l.stage).replace(/<[^>]+>/g, '')}${$('#nt', m).value ? ' · ' + $('#nt', m).value : ''}`, cls: 'user' }); ACQ.save(); close(); render(); toast('已更新', 'ok'); }; } }); }
+function doneFu(id) { const f = ACQ.followUps.find(x => x.id === id); f.status = 'DONE'; f.doneAt = Date.now(); ACQ.save(); render(); toast('待办已完成', 'ok'); }
+
+/* ---------- 企微推送模拟 ---------- */
+function pushNotice(kind) {
+  let n;
+  if (kind === 'quote') { let a = myAps().find(x => x.type === 'QUOTE'); if (!a) { const l = myLeads().find(x => x.stage === 'REPLIED' || x.stage === 'HOT') || myLeads()[0]; const c = ACQ.convOf(l.id); a = { id: 'AP' + Date.now().toString(36).toUpperCase(), leadId: l.id, convId: c ? c.id : null, type: 'QUOTE', assignee: l.owner, status: 'PENDING', createdAt: Date.now(), dueAt: Date.now() + 2 * ACQ.H, triggerText: '多少钱一吨？发到苏州', aiSuggestion: `${l.nickname}，今日苏州仓 HRB400 Φ20 出厂价 3,850 元/吨（含税），量大可谈；园区内送到约 +30/吨。（AI 依据企业资料库「今日价格表」，请核实后发送）` }; ACQ.approvals.unshift(a); if (c) { c.status = 'NEED_HUMAN'; c.needHumanReason = 'APPROVAL'; } } n = { title: `【待审核】${ACQ.lead(a.leadId).nickname} 询价`, text: '「' + a.triggerText + '」AI 已草拟报价，2 小时内未处理升级主管', go: () => go('approve') }; }
+  if (kind === 'human') { let c = myConvs().find(x => x.status === 'NEED_HUMAN' && x.needHumanReason === 'NO_MATCH'); if (!c) { c = myConvs().find(x => x.status === 'AUTO') || myConvs()[0]; const l = ACQ.lead(c.leadId); c.messages.push({ id: c.id + '-' + (c.messages.length + 1), dir: 'IN', from: 'CUSTOMER', text: '你们能做定尺切割吗？12 米的', t: Date.now(), read: false, match: { source: 'LLM', confidence: 0.52 } }); c.lastAt = Date.now(); c.status = 'NEED_HUMAN'; c.needHumanReason = 'NO_MATCH'; l.replyCount = (l.replyCount || 0) + 1; } n = { title: `【待人工】${ACQ.lead(c.leadId).nickname}`, text: c.messages[c.messages.length - 1].text + ' · 无话术命中，机器已暂停', go: () => go('conv', { conv: c.id }) }; }
+  if (kind === 'call') { const l = ACQ.lead('L033') || myLeads().find(x => x.phone); if (l && !ACQ.followUps.some(f => f.leadId === l.id && f.type === 'CALL' && f.status === 'PENDING')) ACQ.followUps.unshift({ id: 'FU' + Date.now().toString(36), leadId: l.id, owner: l.owner, type: 'CALL', reason: 'FLOW_HUMAN_TASK', dueAt: Date.now() + 4 * ACQ.H, status: 'PENDING', note: '中标后首呼（开场白 124）' }); n = { title: `【请拨打】${l.nickname} · ${l.company || ''}`, text: '项目跟进 SOP 到电话节点，24 小时内完成并记录结果', go: () => go('leads', { lead: l.id }) }; }
+  if (kind === 'hot') { const l = myLeads().filter(x => x.projectId).sort((a, b) => b.score - a.score)[0] || myLeads()[0]; l.score = Math.max(l.score, 91); if (['NEW', 'CONTACTED', 'REPLIED'].includes(l.stage)) l.stage = 'HOT'; n = { title: `【高意向】${l.nickname} 评分 ${l.score}`, text: (l.projectId ? ACQ.project(l.projectId).name + ' · ' : '') + '多信号叠加：招标 + 施工许可 + 询价', go: () => go('leads', { lead: l.id }) }; }
+  if (kind === 'referral') { const rf = ACQ.referrers[0]; const lid = 'L' + String(ACQ.leads.length + 1).padStart(3, '0'); ACQ.leads.push({ id: lid, nickname: '钱经理', leadType: 'PERSON', role: '采购', platform: 'PHONE', sourceType: 'REFERRAL', sourceCode: 'R1_REFERRAL', sourceChannel: `介绍人-${rf.name}`, sourceExcerpt: '常熟一个钢结构厂，月用 200 吨 Q355B', intent: 'INQUIRY', score: 78, stage: 'NEW', owner: me.role === 'admin' ? 2 : me.id, product: 'Q355B 中板', region: '常熟', phone: '139****2201', company: '常熟某钢结构有限公司', tags: ['介绍人'], events: [{ t: Date.now(), cls: 'sys', text: `介绍人 ${rf.name} 扫码报送` }], createdAt: Date.now(), lastActiveAt: Date.now() }); ACQ.referrals.unshift({ id: 'RL' + Date.now().toString(36).toUpperCase(), referrerId: rf.id, t: Date.now(), projectId: null, leadId: lid, text: '常熟某钢结构有限公司，月用 200 吨 Q355B，钱经理 139****2201', status: 'NEW', ton: null, amount: null, accrued: 0, via: 'QR_FORM' }); rf.referred++; n = { title: `【新线索】介绍人 ${rf.name} 报送`, text: '常熟某钢结构有限公司 · 钱经理 · 月用 200 吨 Q355B，请 24 小时内首触', go: () => go('leads', { lead: lid }) }; }
+  ACQ.notices.unshift({ t: Date.now(), cls: 'flow', text: n.title + ' ' + n.text, link: 'mobile.html' }); ACQ.save(); render();
+  const old = $('.notif'); if (old) old.remove();
+  const d = document.createElement('div'); d.className = 'notif'; d.innerHTML = `${App.icon('bell')}<div style="flex:1;min-width:0"><span class="from">货袋子获客 · 企微应用消息 · 刚刚</span><b>${esc(n.title)}</b><div class="ell">${esc(n.text)}</div></div>`; d.onclick = () => { d.remove(); n.go(); }; $('#screen').appendChild(d); setTimeout(() => d.remove(), 6000);
+}
+render();
+App.note('<b>演示提示</b>：右侧「模拟企微推送」→ 点手机顶部横幅深链到卡片；「审核」可改 AI 草拟后采纳发送；「投喂」拍照 / 语音 → 抽取 → 确认入库；线索详情「打电话」记录结果并推进 SOP。');
+</script>
+</body>
+</html>

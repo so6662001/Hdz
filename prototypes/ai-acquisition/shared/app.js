@@ -170,6 +170,32 @@
           };
         } });
     },
+    /* 投喂箱入库（Q15）：把一条已抽取的投喂记录写成项目 / 企业 / 线索；后台、企微 H5、执行端 App 共用 */
+    commitIntake(it, opt) {
+      opt = opt || {}; const A = w.ACQ, E = w.Engine, ex = it.extracted, src = A.source(it.sourceCode), by = opt.by || App.me().id, now = Date.now();
+      const num = s => parseFloat(String(s || '').replace(/[^\d.]/g, '')) || 0;
+      const newLead = (o) => { const lid = 'L' + String(A.leads.length + 1).padStart(3, '0'); A.leads.push(Object.assign({ id: lid, leadType: 'PERSON', platform: 'PHONE', sourceType: 'INTAKE', sourceCode: it.sourceCode, sourceChannel: `投喂箱-${it.title}`, sourceExcerpt: it.raw.slice(0, 60), intent: 'UNKNOWN', score: 50, stage: 'NEW', owner: by, region: '江苏', phone: ex.phone || '', tags: [], events: [], createdAt: now, lastActiveAt: now }, o)); return lid; };
+      if (!ex) return { error: '尚未完成抽取' };
+      if (ex.entity === 'PROJECT') {
+        if (!ex.project_name && !opt.mergeTo) return { error: '项目名称为必填' };
+        if (opt.mergeTo) { const p = A.project(opt.mergeTo); p.sources.push({ code: it.sourceCode, t: now, text: `投喂箱 · ${it.title}` }); p.signals++; p.score = Math.min(99, p.score + 3); it.projectId = p.id; }
+        else {
+          const area = ex.area ? num(ex.area) * (/万/.test(ex.area) ? 10000 : 1) : null; const t = E.estimateTon(area, 'COMMERCIAL'); const qty = ex.quantity ? parseInt(String(ex.quantity).replace(/[^\d]/g, '')) : 0; const pid = 'PJ' + (A.projects.length + 1);
+          A.projects.unshift({ id: pid, name: ex.project_name, type: '待分类', region: '江苏', distanceKm: 60, stage: /中标/.test(it.raw) ? 'BID' : /许可|铭牌|开工/.test(it.raw + it.title) ? 'PERMIT' : 'PLAN', stageText: `投喂箱入库 · ${it.title}`, area, structure: 'COMMERCIAL', estTon: t || (qty ? [qty, qty] : null), estTonBasis: t ? `${fmt.num(area)} ㎡ × 55–90 kg/㎡（默认商业 / 公建，可改）` : qty ? '公告工程量' : '待补充面积', window: {}, ownerOrg: ex.owner_org || '—', contractorOrg: ex.contractor_org || '（未知）', supervisorOrg: ex.supervisor_org || '', contractAmount: ex.contract_amount ? Math.round(num(ex.contract_amount) * (/亿/.test(ex.contract_amount) ? 10000 : 1)) : null, sources: [{ code: it.sourceCode, t: now, text: `投喂箱 · ${it.title}` }], signals: 1, score: src ? src.scoring.base + (t ? Math.min(20, Math.round(t[1] / 500)) : 5) : 50, scoreDims: { ton: t ? Math.min(30, Math.round(t[1] / 400)) : 8, window: 10, chain: ex.contact_name ? 6 : 2, credit: 10, logistics: 10 }, owner: by, status: 'NEW', companyIds: [], contacts: ex.contact_name ? [{ name: ex.contact_name, role: '项目经理', org: ex.contractor_org || '—', phone: ex.phone || '—', leadId: null }] : [], nextAction: ex.contact_name ? '电话首呼' : '查找项目部联系人', createdAt: now, updatedAt: now }); it.projectId = pid;
+          const lid = newLead({ nickname: ex.contact_name || ex.project_name.slice(0, 12) + '项目部', leadType: ex.contact_name ? 'PERSON' : 'PROJECT', role: ex.contact_name ? '项目经理' : '', projectId: pid, platform: 'GOV', score: A.project(pid).score, product: ex.spec || '螺纹钢', company: ex.contractor_org || '' }); it.leadId = lid; if (ex.contact_name) A.project(pid).contacts[0].leadId = lid;
+        }
+      } else if (ex.entity === 'COMPANY') {
+        if (!ex.company_name) return { error: '企业名称为必填' };
+        const cid = 'CO' + (A.companies.length + 1); const ton = ex.need ? parseInt((String(ex.need).match(/(\d+)\s*吨/) || [])[1]) || null : null;
+        A.companies.unshift({ id: cid, name: ex.company_name, type: ex.company_type || 'MANUFACTURER', region: '江苏', distanceKm: 80, regCapital: 0, established: '—', scope: ex.company_scope || '—', credit: { level: 'OK', text: '入库后自动查询工商 / 信用' }, signals: [{ code: it.sourceCode, t: now, text: `投喂箱 · ${it.title}${ex.need ? ' · ' + ex.need : ''}` }], estMonthlyTon: ton, score: ton ? Math.min(85, 50 + Math.round(ton / 20)) : 50, stage: 'NEW', owner: by, leadIds: [], projectIds: [], contacts: [], createdAt: now, updatedAt: now }); it.companyId = cid;
+        if (ex.contact_name) { const lid = newLead({ nickname: ex.contact_name, companyId: cid, intent: ex.need ? 'INQUIRY' : 'UNKNOWN', score: A.company(cid).score, product: ex.need || '', company: ex.company_name }); A.company(cid).leadIds.push(lid); A.company(cid).contacts.push({ name: ex.contact_name, role: '', leadId: lid }); it.leadId = lid; }
+      } else {
+        if (!ex.name && !ex.org) return { error: '姓名或单位至少填一项' };
+        it.leadId = newLead({ nickname: ex.name || ex.org, region: '', company: ex.org || '' });
+      }
+      it.status = 'DONE'; it.confirmedBy = by; it.confirmedAt = now; A.save();
+      return { ok: true, msg: `已入库${it.projectId ? ` · 项目 ${it.projectId}` : ''}${it.companyId ? ` · 企业 ${it.companyId}` : ''}${it.leadId ? ` · 线索 ${it.leadId}` : ''} · 已按渠道评分并分配` };
+    },
     pageHead(title, desc, actions) { return `<div class="page-head"><div><h1>${title}</h1>${desc ? `<p>${desc}</p>` : ''}</div><div class="actions">${actions || ''}</div></div>`; },
     note(html) { if (sessionStorage.getItem('acq:note:' + location.pathname)) return; const d = document.createElement('div'); d.className = 'demo-note'; d.innerHTML = html + ' <span style="opacity:.7;cursor:pointer;margin-left:6px">✕</span>'; d.title = '点击关闭'; d.onclick = () => { d.remove(); sessionStorage.setItem('acq:note:' + location.pathname, '1'); }; document.body.appendChild(d); setTimeout(() => d.remove(), 15000); },
   };
