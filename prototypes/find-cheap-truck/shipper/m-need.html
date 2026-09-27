@@ -57,6 +57,15 @@
   .my-card .confirm .btn { height: 32px; font-size: 12px; flex: 1; }
   .who li { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid var(--line); color: var(--text-2); }
   .who li:last-child { border-bottom: 0; }
+  .my-card .ibox { margin-top: 10px; background: #f7f8fa; border-radius: 10px; padding: 8px 10px 2px; }
+  .my-card .ibox .intent-row { padding: 8px 0; }
+  .my-card .who-wrap { margin-top: 8px; }
+  .my-card .who-wrap summary { cursor: pointer; list-style: none; }
+  .my-card .who-wrap summary::-webkit-details-marker { display: none; }
+  .my-card .who-wrap summary::before { content: '▸ '; }
+  .my-card .who-wrap[open] summary::before { content: '▾ '; }
+  .my-card .result { margin-top: 10px; background: #f7f8fa; border-radius: 10px; padding: 10px 12px; }
+  .my-card .result .feedback-chips { justify-content: flex-start; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -121,7 +130,8 @@
       <div id="mineView" style="display:none">
         <div class="row px14 mt12" style="gap:14px;font-size:13px;color:var(--text-2)" id="mineSeg"><span class="on b" data-s="active" style="color:var(--brand)">进行中</span><span data-s="ended">已结束</span><span class="sp"></span><span class="xs muted">谈成请点「已找到车」</span></div>
         <div id="mineList"></div>
-        <div class="px14 mt12"><div class="notice blue"><span class="ic"></span><div><b>需求怎么消失：</b>装车时间到自动下架；您点「已找到车」立即隐藏；2 位以上司机反馈"货主已找到车"自动隐藏；发布满 24 小时未找到车会请您确认。</div></div></div>
+        <div class="px14 mt12"><div class="notice blue"><span class="ic"></span><div><b>"有意向"不是报价、不是接单：</b>司机一键告诉您"能接"，可带一个参考价（以电话为准）。您决定先打给谁——只是联系顺序，平台不比价、不排序、不记录成交。谈定后点「已找到车」，其余有意向的司机会收到通知不再等。</div></div></div>
+        <div class="px14 mt8"><div class="notice gray"><span class="ic"></span><div><b>需求怎么消失：</b>装车时间到自动下架；您点「已找到车」立即隐藏；2 位以上司机反馈"货主已找到车"自动隐藏；发布满 24 小时未找到车会请您确认。意向 24 小时自动过期，一条需求最多 5 位司机有意向。</div></div></div>
         <div style="height:100px"></div>
       </div>
     </div>
@@ -253,7 +263,7 @@
     H.MY_NEEDS.unshift(n);
     var good = lastMatch.filter(function (m) { return m.level === 'good'; }), pushed = 9 + Math.floor(Math.random() * 12);
     H.sheet({ title: '需求已发布', body:
-      '<div class="notice" style="background:var(--ok-soft);color:#0a6b3b"><span class="ic" style="background:var(--ok)"></span><div>' + n.from + ' → ' + n.to[0] + ' · 展示至 <b>' + n.when.replace(' 装车', '') + '</b> 结束自动下架。已推送给 <b>' + pushed + '</b> 位常跑这条线的司机，他们会主动打给您；谁看了您的电话，「我的需求」里能看到。</div></div>' +
+      '<div class="notice" style="background:var(--ok-soft);color:#0a6b3b"><span class="ic" style="background:var(--ok)"></span><div>' + n.from + ' → ' + n.to[0] + ' · 展示至 <b>' + n.when.replace(' 装车', '') + '</b> 结束自动下架。已推送给 <b>' + pushed + '</b> 位常跑这条线的司机，他们会点「有意向」或直接打给您；谁有意向、谁看了您的电话，「我的需求」里能看到，您决定先打给谁。</div></div>' +
       '<div class="row between mt12"><span class="b">' + good.length + ' 台顺路车现在就能联系</span><span class="xs muted">不用等，直接打</span></div>' +
       (good.length ? good.map(function (m) { return H.mobileCard(m.post).replace('<div class="veh">', '<div class="chips" style="gap:4px;margin-top:6px">' + H.matchTags(m, 2) + '</div><div class="veh">'); }).join('') : '<div class="empty" style="padding:20px 0">暂无在展车辆完全匹配，等司机联系您</div>') +
       '<div class="notice gray mt12"><span class="ic"></span><div>接到司机电话时可让其报车牌，与「谁联系过我」比对；运费、装卸、回单直接与司机约定。平台不参与。</div></div>',
@@ -269,12 +279,19 @@
   function card(n) {
     var s = H.NEED_STATUS[n.status], live = isLive(n), matched = live ? H.matchPosts(n).filter(function (m) { return m.level === 'good'; }).length : (n.matched || 0);
     var drv = n.contacts ? n.contacts.filter(function (c) { return c.who !== '您'; }) : [];
+    var its = H.intentsOf(n.id), chosen = its.filter(function (i) { return i.chosen; })[0];
     var h = '<div class="my-card" data-id="' + n.id + '">' +
       '<div class="row"><span class="tag ' + s.cls + '">' + s.name + '</span><span class="tag gray">' + (n.req.whole === false ? '可拼车' : '整车') + '</span><span class="xs muted">' + H.fmtAgo(n.posted) + '</span><span class="sp"></span>' + (live ? '<span class="xs muted">' + H.fmtLeft(n.validUntil) + '后下架</span>' : '') + '</div>' +
       '<div class="route mt8" style="font-size:16px"><div class="city">' + n.from + '<small>' + (n.fromDetail || '').split(' · ')[0] + '</small></div><div class="arrow"><div class="ln"></div></div><div class="city to">' + n.to.join('/') + '<small>' + (n.toDetail || '').split(' · ')[0] + '</small></div><span class="sp"></span><span class="hot-c" style="font-size:15px">' + (n.budget == null ? '电话谈' : '¥' + n.budget + '<small style="font-size:11px;font-weight:500">/' + n.budgetUnit + '</small>') + '</span></div>' +
       '<div class="l2">装车 <b>' + n.when + '</b><br>' + H.cargoLine(n) + ' · 需 ' + H.reqLine(n) + '</div>' +
-      '<div class="stat-line mt8"><span><b>' + n.views + '</b>司机看过</span><span><b>' + (n.contacts ? drv.length : n.calls) + '</b>查看电话</span><span><b>' + matched + '</b>匹配车</span></div>' +
-      (drv.length ? '<ul class="who mt8">' + drv.map(function (c) { return '<li><span>' + c.who.split(' · 悟运')[0] + ' · ' + c.what + '</span><span class="muted">' + c.when + '</span></li>'; }).join('') + '</ul>' : '');
+      '<div class="stat-line mt8"><span><b>' + n.views + '</b>司机看过</span><span><b>' + its.length + '</b>有意向</span><span><b>' + (n.contacts ? drv.length : n.calls) + '</b>查看电话</span><span><b>' + matched + '</b>匹配车</span></div>' +
+      (live ? '<div class="ibox"><div class="row" style="gap:6px"><b class="small">有意向的司机</b><span class="tag ok">' + its.length + '</span><span class="xs muted" style="margin-left:auto">您决定先打给谁</span></div>' + H.intentList(n) + '</div>' : '') +
+      (drv.length ? '<details class="who-wrap"><summary class="xs muted">谁查看了我的电话 (' + drv.length + ')</summary><ul class="who">' + drv.map(function (c) { return '<li><span>' + c.who.split(' · 悟运')[0] + ' · ' + c.what + '</span><span class="muted">' + c.when + '</span></li>'; }).join('') + '</ul></details>' : '');
+    if (n.status === 'found' && chosen) {
+      var cd = H.DRIVERS[chosen.driver], cv = H.VEHICLES[chosen.vehicle];
+      h += '<div class="result"><div class="row" style="gap:8px"><div class="avatar" style="width:26px;height:26px;font-size:11px">' + cd.surname + '</div><span class="small b">' + cd.name + ' · ' + cv.plate + '</span></div><div class="xs muted mt4">装车后反馈联系结果 · 只在您与司机之间，不公开评分</div>' +
+        (chosen.result ? '<div class="mt8"><span class="tag ok">已反馈 · ' + chosen.result + '</span></div>' : H.fbChips('shipper')) + '</div>';
+    }
     if (n.status === 'confirming') h += '<div class="confirm"><b>发布已满 24 小时，还需要车吗？</b><div class="small" style="opacity:.85;margin-top:2px">未确认将于 2 小时后自动隐藏，避免司机打到已经不需要车的您。</div><div class="row"><button class="btn hot" data-act="still">还需要，继续展示</button><button class="btn ghost" data-act="found">已找到车</button></div></div>';
     if (live) h += '<div class="acts"><button class="btn" data-act="match">看匹配车 (' + matched + ')</button><button class="btn line" data-act="found">已找到车</button><button class="btn ghost" data-act="more">更多</button></div>';
     else h += '<div class="end">' + n.endReason + ' · ' + n.endAt + '</div><div class="acts"><button class="btn" data-act="again">再发一次</button></div>';
@@ -289,12 +306,24 @@
   H.qsa('#mineSeg [data-s]').forEach(function (a) { a.onclick = function () { mineSeg = a.dataset.s; renderMine(); }; });
   function endNeed(n, st, reason) { n.status = st; n.endReason = reason; n.endAt = '今天 09:2' + Math.floor(Math.random() * 9); renderMine(); }
   H.qs('#mineList').addEventListener('click', function (e) {
+    var card = e.target.closest('.my-card'); if (!card) return;
+    var n = H.MY_NEEDS.filter(function (x) { return x.id === card.dataset.id; })[0];
+    var ci = e.target.closest('[data-call-it]');
+    if (ci) {
+      var it = H.INTENTS.filter(function (x) { return x.id === ci.dataset.callIt; })[0];
+      var post = H.POSTS.filter(function (x) { return x.id === it.post; })[0] || { driver: it.driver, vehicle: it.vehicle, calls: 0 };
+      H.unlockPhone(post);
+      it.called = true; it.calledAt = '刚刚'; n.contacts = n.contacts || []; n.contacts.push({ who: '您', what: '查看了 ' + H.DRIVERS[it.driver].name + ' 的电话', when: '刚刚' });
+      renderMine(); return;
+    }
+    if (e.target.closest('[data-fb]')) {
+      var f = H.FEEDBACK.shipper.filter(function (x) { return x.k === e.target.closest('[data-fb]').dataset.fb; })[0], ch = H.intentsOf(n.id).filter(function (i) { return i.chosen; })[0];
+      if (ch) ch.result = f.t; H.toast(f.msg); renderMine(); return;
+    }
     var b = e.target.closest('[data-act]'); if (!b) return;
-    var n = H.MY_NEEDS.filter(function (x) { return x.id === e.target.closest('.my-card').dataset.id; })[0], act = b.dataset.act;
+    var act = b.dataset.act;
     if (act === 'match') matchSheet(H.matchPosts(n), '匹配这条需求的顺路车');
-    else if (act === 'found') H.sheet({ title: '找到车了？', body: '<div class="small t2">确认后需求立即隐藏，司机不会再打给您。从哪找到的（只用于统计）：</div><div class="chips mt12"><span class="chip on" data-src>列表里的顺路车</span><span class="chip" data-src>司机看到需求主动联系</span><span class="chip" data-src>自有车 / 熟车队</span><span class="chip" data-src>其他平台</span></div>',
-      footer: '<button class="btn ghost" data-c>再想想</button><button class="btn" data-ok>确认已找到车</button>',
-      onReady: function (root, close) { H.qsa('[data-src]', root).forEach(function (c) { c.onclick = function () { H.qsa('[data-src]', root).forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on'); }; }); H.qs('[data-c]', root).onclick = close; H.qs('[data-ok]', root).onclick = function () { close(); endNeed(n, 'found', '已找到车（' + H.qs('[data-src].on', root).textContent + '）'); H.toast('已隐藏需求。装车时记得核对人车证'); }; } });
+    else if (act === 'found') H.foundDialog(n, null, function (reason, it) { endNeed(n, 'found', reason); H.toast(it ? '已隐藏需求并通知其余司机。装车后可反馈联系结果' : '已隐藏需求。装车时记得核对人车证'); });
     else if (act === 'still') { n.status = 'active'; var d = new Date(n.validUntil); d.setHours(d.getHours() + 24); n.validUntil = d.toISOString().slice(0, 19); renderMine(); H.toast('已确认，继续展示 24 小时'); }
     else if (act === 'more') H.sheet({ title: '更多操作', body: '<div class="col" style="gap:8px"><button class="btn ghost block" style="justify-content:flex-start" data-m="edit">修改时间 / 预算 / 车型</button><button class="btn ghost block" style="justify-content:flex-start" data-m="extend">延长 12 小时</button><button class="btn ghost block" style="justify-content:flex-start" data-m="share">分享到微信群（司机群）</button><button class="btn ghost block" style="justify-content:flex-start;color:var(--hot)" data-m="off">不需要车了，下架</button></div>',
       onReady: function (root, close) { H.qsa('[data-m]', root).forEach(function (x) { x.onclick = function () { var m = x.dataset.m; close(); if (m === 'extend') { var d = new Date(n.validUntil); d.setHours(d.getHours() + 12); n.validUntil = d.toISOString().slice(0, 19); renderMine(); H.toast('已延长 12 小时'); } else if (m === 'off') { endNeed(n, 'withdrawn', '您手动下架'); H.toast('已下架'); } else if (m === 'share') H.toast('生成需求卡片（带小程序码），司机点开进悟运查看电话'); else { switchSeg('pub'); H.toast('已带入，修改后重新发布即可'); } }; }); } });
@@ -316,8 +345,9 @@
     '<b>三种填法</b>：从订单带入（线路、货物、装备自动填）/ 按住说一句（规则解析填表）/ 手动 chips。目标是到货现场 30 秒发完。',
     '底部吸底的"<b>N 台顺路车现在就匹配</b>"随填随变，点开就是带匹配理由的车卡片，可直接查看电话，不必等发布。',
     '发布成功弹层同时给两条路：现在能打的车 + 已推送给 N 位司机（他们会主动打来）；提醒接电话时核对车牌。',
-    '「我的需求」：谁查看了我的电话（司机姓氏 + 车牌 + 悟运履约）、匹配车数、24h 确认、已找到车、延长、下架、再发一次，与司机端"我的运力"对称。',
-    '全页不出现"接单 / 抢单 / 平台确认成交"；预算旁永远是市场参考，不是平台指导价。',
+    '「我的需求」：<b>有意向的司机</b>（姓氏 + 车牌 + 悟运履约 + 参考价 + 一句话，「先打给他」只是联系顺序）、谁查看了我的电话、匹配车数、24h 确认、已找到车、延长、下架、再发一次，与司机端"我的运力"对称。',
+    '「已找到车」可选勾是哪位司机，只用于通知其余有意向司机（服务通知 D8），平台不据此确认成交；已找到车的记录下给<b>联系结果反馈</b>（如约到车 / 没谈成 / 爽约 / 坐地起价 / 信息不实）替代互评，不打分、不公开。',
+    '全页不出现"接单 / 抢单 / 报价榜 / 选定司机 / 平台确认成交"；预算与参考价旁永远是市场参考，不是平台指导价，也不显示"最低价"。',
   ]);
 })();
 </script>

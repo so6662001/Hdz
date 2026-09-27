@@ -177,8 +177,8 @@
       '<li>有问题请 <b>举报</b>，平台提供联系记录并处理该账号</li></ul>' +
       '<label class="checkline mt12"><input type="checkbox" id="agreeRisk"> 我已知悉：平台不参与交易，运输风险由我与司机自行约定与承担</label>';
     var step2 = '<div class="phone-reveal"><div class="sub">' + d.name + ' · ' + v.plate + ' · ' + H.vehicleLine(v) + '</div><div class="num">' + d.phoneFull + '</div><div class="sub">本次查看已记录，便于纠纷时追溯 · 该运力已有 <b>' + (post.calls + 1) + '</b> 位货主查看</div></div>' +
-      '<div class="divider"></div><div class="small t2" style="text-align:center">联系后请反馈结果，帮助信息保持真实</div>' +
-      '<div class="feedback-chips"><span class="chip sm" data-fb="deal">已谈成</span><span class="chip sm" data-fb="talk">在沟通</span><span class="chip sm" data-fb="noanswer">未接通</span><span class="chip sm" data-fb="gone">车已被订走</span><span class="chip sm" data-fb="fake">信息不实</span></div>';
+      '<div class="divider"></div><div class="small t2" style="text-align:center">联系结果反馈 <span class="xs muted">· 只在您与司机之间，不公开评分</span></div>' +
+      H.fbChips('shipper');
     var footer1 = '<button class="btn ghost" data-cancel>取消</button><button class="btn' + (mode === 'pc' ? '' : '') + '" data-next disabled>查看号码</button>';
     var footer2 = mode === 'pc' ? '<button class="btn ghost" data-copy>复制号码</button><button class="btn" data-cancel>关闭</button>' : '<button class="btn ghost" data-copy>复制</button><button class="btn" data-dial>拨打电话</button>';
 
@@ -191,13 +191,7 @@
         qsa('[data-cancel]', root).forEach(function (b) { b.onclick = close; });
         var cp = qs('[data-copy]', root); if (cp) cp.onclick = function () { H.toast('号码已复制', mode === 'pc' ? document.body : null); };
         var dl = qs('[data-dial]', root); if (dl) dl.onclick = function () { H.toast('正在呼叫 ' + d.phoneFull); };
-        qsa('[data-fb]', root).forEach(function (c) {
-          c.onclick = function () {
-            qsa('[data-fb]', root).forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on');
-            var m = { deal: '感谢反馈！祝顺利。平台不参与交易，请签订协议并投保。', talk: '已记录', noanswer: '已记录，3 位以上货主反馈未接通将提醒司机确认', gone: '已记录，我们将提醒司机更新状态；多人反馈后自动隐藏', fake: '已提交核实，核实后将下架并处理该账号，感谢！' }[c.dataset.fb];
-            H.toast(m, mode === 'pc' ? document.body : null);
-          };
-        });
+        H.bindFb(root, 'shipper', mode);
       };
     };
 
@@ -283,11 +277,106 @@
     return h;
   };
 
+  /* ---------- 联系结果反馈（结构化选项，替代互评；只在联系过的双方之间，不公开评分） ---------- */
+  H.fbChips = function (side) {
+    return '<div class="feedback-chips">' + H.FEEDBACK[side].map(function (f) { return '<span class="chip sm' + (f.cls === 'warn' ? ' warn' : '') + '" data-fb="' + f.k + '">' + f.t + '</span>'; }).join('') + '</div>';
+  };
+  H.bindFb = function (root, side, mode, onPick) {
+    qsa('[data-fb]', root).forEach(function (c) {
+      c.onclick = function () {
+        qsa('[data-fb]', root).forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on');
+        var f = H.FEEDBACK[side].filter(function (x) { return x.k === c.dataset.fb; })[0];
+        H.toast(f.msg, mode === 'pc' ? document.body : null);
+        if (onPick) onPick(f);
+      };
+    });
+  };
+
+  /* ---------- 意向：司机一键"有意向"，不是报价、不是接单、不锁定 ---------- */
+  H.intentsOf = function (needId) { return H.INTENTS.filter(function (i) { return i.need === needId; }); };
+  H.myIntent = function (needId) { return H.INTENTS.filter(function (i) { return i.need === needId && i.driver === H.ME_DRIVER && !i.chosen; })[0]; };
+  H.intentCount = function (need) { var c = H.INTENT_COUNT[need.id]; return c == null ? H.intentsOf(need.id).length : c; };
+  H.intentRefHtml = function (it) {
+    return it.ref == null ? '<b>价格电话谈</b>' : '<b>参考 ¥' + it.ref + '/' + it.refUnit + '</b> <span class="xs muted">以电话为准</span>';
+  };
+  /* 司机端弹层 */
+  H.intentSheet = function (need, mode, onDone) {
+    var ref = H.refPrice(need.from, need.to[0]), sh = H.SHIPPERS[need.shipper];
+    var cnt = H.intentCount(need);
+    var body = '<div class="notice gray"><span class="ic"></span><div><b>告诉货主"我能接这单"。</b>货主会看到您的姓氏、车牌、悟运履约和下面的参考价，决定先打给谁。这<b>不是报价、不是接单</b>，也不会锁定这条需求，您随时可以直接打电话。</div></div>' +
+      '<div class="small b mt12">参考价 <span class="xs muted" style="font-weight:400">选填 · 以电话为准 · 货主看不到别人的价</span></div>' +
+      '<div class="chips mt8" id="itRef"><span class="chip on" data-r="">价格电话谈</span><span class="chip" data-r="' + ref[0] + '">按市场 ¥' + ref[0] + '</span>' + (need.budget != null && need.budgetUnit === '吨' ? '<span class="chip" data-r="' + need.budget + '">按货主预算 ¥' + need.budget + '</span>' : '') + '<span class="chip" data-r="x">自己填</span></div>' +
+      '<div class="input-row mt8" id="itRefRow" style="display:none"><input class="input" id="itRefN" placeholder="元" value="' + (need.budget || ref[0]) + '"><span class="unit">/' + (need.budgetUnit || '吨') + '</span></div>' +
+      '<div class="small b mt12">给货主带一句 <span class="xs muted" style="font-weight:400">选填</span></div>' +
+      '<div class="chips mt8" id="itNote"><span class="chip">卸完就能过去</span><span class="chip">明早能到</span><span class="chip">可以等装</span><span class="chip">有鞍座 / 篷布</span><span class="chip">可多点卸</span></div>' +
+      '<div class="xs muted mt12">意向 24 小时内货主没联系自动过期 · 该需求已有 ' + cnt + ' 位司机有意向' + (cnt >= H.INTENT_CAP - 1 ? '，<span class="hot-c">名额快满</span>' : '') + ' · 货主找到车会通知您，不用干等</div>';
+    var footer = '<button class="btn ghost" data-cancel>直接打电话</button><button class="btn' + (mode === 'pc' ? '' : ' wy') + '" data-ok>发送意向</button>';
+    var onReady = function (root, close) {
+      var refV = '';
+      qsa('#itRef .chip', root).forEach(function (c) { c.onclick = function () { qsa('#itRef .chip', root).forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on'); refV = c.dataset.r; qs('#itRefRow', root).style.display = refV === 'x' ? '' : 'none'; }; });
+      qsa('#itNote .chip', root).forEach(function (c) { c.onclick = function () { c.classList.toggle('on'); }; });
+      qs('[data-cancel]', root).onclick = function () { close(); H.unlockShipperPhone(need, mode); };
+      qs('[data-ok]', root).onclick = function () {
+        var r = refV === 'x' ? Number(qs('#itRefN', root).value) || null : (refV ? Number(refV) : null);
+        var note = qsa('#itNote .chip.on', root).map(function (c) { return c.textContent; }).join('，');
+        var it = { id: 'i' + Date.now(), need: need.id, driver: H.ME_DRIVER, vehicle: 'v1', ref: r, refUnit: need.budgetUnit || '吨', note: note, at: new Date().toISOString().slice(0, 19), called: false, mine: true };
+        H.INTENTS.push(it); H.INTENT_COUNT[need.id] = cnt + 1;
+        close(); H.toast('已告知货主 · 他会看到您的车牌与履约，24 小时内没联系自动过期', mode === 'pc' ? document.body : null);
+        if (onDone) onDone(it);
+      };
+    };
+    mode === 'pc' ? H.pcModal({ title: '对这条需求有意向', body: body, footer: footer, onReady: onReady }) : H.sheet({ title: '对这条需求有意向', body: body, footer: footer, onReady: onReady });
+  };
+  /* 货主端：有意向司机一行 */
+  H.intentRow = function (it, opts) {
+    opts = opts || {};
+    var d = H.DRIVERS[it.driver], v = H.VEHICLES[it.vehicle];
+    return '<div class="intent-row' + (it.called ? ' called' : '') + '" data-it="' + it.id + '">' +
+      '<div class="avatar" style="width:32px;height:32px;font-size:12px">' + d.surname + '</div>' +
+      '<div class="col" style="min-width:0;flex:1">' +
+        '<div class="row" style="gap:6px"><b class="small">' + d.name + ' · ' + v.plate + '</b><span class="xs muted">' + v.len + ' ' + v.type + '</span></div>' +
+        '<div class="xs muted">悟运履约 ' + d.wyOrders + ' 单 · 好评 ' + d.good + '% · 投诉 ' + d.complaints + '</div>' +
+        '<div class="small mt4">' + H.intentRefHtml(it) + (it.note ? ' <span class="t2">· "' + it.note + '"</span>' : '') + '</div>' +
+      '</div>' +
+      '<div class="col" style="align-items:flex-end;gap:4px;flex:none">' +
+        '<span class="xs muted">' + H.fmtAgo(it.at) + '</span>' +
+        (opts.noBtn ? '' : (it.called ? '<span class="tag ok">已打过 ' + (it.calledAt || '') + '</span>' : '<button class="btn sm' + (opts.pc ? '' : '') + '" data-call-it="' + it.id + '">先打给他</button>')) +
+      '</div></div>';
+  };
+  /* 货主端：有意向司机列表（含名额提示） */
+  H.intentList = function (need, opts) {
+    var its = H.intentsOf(need.id);
+    if (!its.length) return '<div class="xs muted" style="padding:6px 0">还没有司机表达意向 · 推送后司机可一键告诉您"能接"</div>';
+    var cap = its.length >= H.INTENT_CAP ? '<div class="notice red mt8" style="padding:8px 10px"><span class="ic"></span><div class="xs">已有 ' + its.length + ' 位司机有意向，已暂停推送；建议尽快联系，谈定后点「已找到车」让其他司机不再等。</div></div>' : '';
+    return its.map(function (it) { return H.intentRow(it, opts); }).join('') + cap;
+  };
+  /* 货主端：「已找到车」弹层 —— 可选勾是哪位有意向 / 联系过的司机，其余司机收到"已找到车"通知 */
+  H.foundDialog = function (need, mode, onOk) {
+    var its = H.intentsOf(need.id).filter(function (i) { return !i.chosen; });
+    var body = '<div class="small t2">确认后需求立即隐藏，司机不会再打给您。<b>是哪位司机？</b>选填——只是让其余有意向的司机收到"已找到车"通知，不再空等；平台不据此确认成交。</div>' +
+      '<div class="col mt12" style="gap:6px" id="fdWho">' + its.map(function (it) { var d = H.DRIVERS[it.driver], v = H.VEHICLES[it.vehicle]; return '<label class="checkline" style="margin:0"><input type="radio" name="fdw" value="' + it.id + '"> ' + d.name + ' · ' + v.plate + ' <span class="xs muted">· ' + (it.ref == null ? '电话谈' : '参考 ¥' + it.ref) + (it.called ? ' · 您打过' : '') + '</span></label>'; }).join('') +
+      '<label class="checkline" style="margin:0"><input type="radio" name="fdw" value="other"> 不是他们（自有车 / 熟车队 / 其他渠道）</label><label class="checkline" style="margin:0"><input type="radio" name="fdw" value="" checked> 不说</label></div>' +
+      (its.length ? '<div class="xs muted mt12">其余 ' + (its.length - 1) + ' 位有意向的司机将收到服务通知 D8「该需求已找到车」。</div>' : '');
+    var footer = '<button class="btn ghost" data-cancel>再想想</button><button class="btn" data-ok>确认已找到车</button>';
+    var onReady = function (root, close) {
+      qs('[data-cancel]', root).onclick = close;
+      qs('[data-ok]', root).onclick = function () {
+        var pick = (qs('input[name=fdw]:checked', root) || {}).value, it = its.filter(function (x) { return x.id === pick; })[0];
+        var reason = '已找到车';
+        if (it) { it.chosen = true; var d = H.DRIVERS[it.driver], v = H.VEHICLES[it.vehicle]; reason += '（有意向司机 · ' + d.name + ' ' + v.plate + '）'; its.forEach(function (x) { if (x !== it) x.notified = true; }); if (its.length > 1) reason += ' · 已通知其余 ' + (its.length - 1) + ' 位司机'; }
+        else if (pick === 'other') { reason += '（自有车 / 其他渠道）'; its.forEach(function (x) { x.notified = true; }); if (its.length) reason += ' · 已通知 ' + its.length + ' 位有意向司机'; }
+        else if (its.length) { its.forEach(function (x) { x.notified = true; }); reason += ' · 已通知 ' + its.length + ' 位有意向司机'; }
+        close(); onOk(reason, it);
+      };
+    };
+    mode === 'pc' ? H.pcModal({ title: '找到车了？', body: body, footer: footer, onReady: onReady }) : H.sheet({ title: '找到车了？', body: body, footer: footer, onReady: onReady });
+  };
+
   /* 手机端需求卡片（司机在悟运看到的 / 货主在小程序看到的） */
   H.needCard = function (need, opts) {
     opts = opts || {};
-    var sh = H.SHIPPERS[need.shipper];
-    return '<div class="post-card need-card" data-id="' + need.id + '">' +
+    var sh = H.SHIPPERS[need.shipper], mine = H.myIntent(need.id), icnt = H.intentCount(need);
+    return '<div class="post-card need-card' + (mine ? ' has-intent' : '') + '" data-id="' + need.id + '">' +
       '<div class="top"><span class="tag brand">用车需求</span><span class="tag ' + (need.req.whole === false ? 'ok' : 'gray') + '">' + (need.req.whole === false ? '可拼车' : '整车') + '</span>' +
         (need.source === 'order' ? '<span class="tag gray">来自货袋子订单</span>' : '') + '<span class="sp"></span><span class="xs muted">' + H.fmtAgo(need.posted) + '</span></div>' +
       '<div class="row between" style="align-items:flex-start">' +
@@ -298,8 +387,9 @@
       '<div class="veh"><b>' + H.cargoLine(need) + '</b> <span class="eq">· 需 ' + H.reqLine(need) + '</span></div>' +
       (opts.match ? '<div class="chips mt8" style="gap:4px">' + H.matchTags(opts.match, 3) + '</div>' : '') +
       '<div class="drv"><div class="avatar" style="width:30px;height:30px;font-size:12px;background:linear-gradient(135deg,#9fb4ff,#1f5eff)">' + sh.short + '</div><div class="col"><span class="nm">' + sh.company + '</span><div class="badges" style="margin-top:3px">' + H.shipperBadges(sh) + '</div></div><span class="sp"></span>' +
-        (opts.noBtn ? '' : '<button class="btn sm" data-call-need="' + need.id + '">查看货主电话</button>') + '</div>' +
-      '<div class="meta"><span>' + need.views + ' 位司机看过</span><span>' + need.calls + ' 位司机已联系</span>' + (need.calls >= 3 ? '<span class="hot-c">联系的人多，尽快打</span>' : '') + '</div>' +
+        (opts.noBtn ? '' : (mine ? '<span class="tag ok" style="height:26px;display:inline-flex;align-items:center">✓ 已有意向</span>' : (icnt >= H.INTENT_CAP ? '<span class="tag gray" style="height:26px;display:inline-flex;align-items:center">意向已满</span>' : '<button class="btn sm ghost" data-intent="' + need.id + '">有意向</button>')) + '<button class="btn sm" data-call-need="' + need.id + '">查看货主电话</button>') + '</div>' +
+      (mine ? '<div class="intent-bar"><span>您 ' + H.fmtAgo(mine.at) + ' 表达了意向' + (mine.ref != null ? ' · 参考 ¥' + mine.ref + '/' + mine.refUnit : ' · 价格电话谈') + '</span><span class="sp"></span><span class="muted">等货主回电 · 24h 后自动过期</span></div>' : '') +
+      '<div class="meta"><span>' + need.views + ' 位司机看过</span><span>' + icnt + ' 位有意向</span><span>' + need.calls + ' 位已联系</span>' + (icnt >= H.INTENT_CAP ? '<span class="hot-c">名额已满，可直接打</span>' : (need.calls >= 3 ? '<span class="hot-c">联系的人多，尽快打</span>' : '')) + '</div>' +
       '</div>';
   };
 
@@ -314,8 +404,8 @@
       '<li>联系后请反馈结果；货主找到车后需求会自动隐藏</li></ul>' +
       '<label class="checkline mt12"><input type="checkbox" id="agreeRiskN"> 我已知悉：平台只展示信息，运输事宜由我与货主自行约定</label>';
     var step2 = '<div class="phone-reveal"><div class="sub">' + sh.company + ' · ' + sh.contact + ' · ' + need.from + ' → ' + need.to.join('/') + '</div><div class="num">' + sh.phoneFull + '</div><div class="sub">本次查看已记录（货主端可见"' + (mode === 'pc' ? '有司机' : '王师傅 沪D·8K3**') + ' 查看了您的电话"）· 已有 <b>' + (need.calls + 1) + '</b> 位司机联系</div></div>' +
-      '<div class="divider"></div><div class="small t2" style="text-align:center">联系后请反馈，帮需求保持真实</div>' +
-      '<div class="feedback-chips"><span class="chip sm" data-fb="deal">已谈成</span><span class="chip sm" data-fb="talk">在沟通</span><span class="chip sm" data-fb="noanswer">未接通</span><span class="chip sm" data-fb="found">货主已找到车</span><span class="chip sm" data-fb="fake">信息不实</span></div>';
+      '<div class="divider"></div><div class="small t2" style="text-align:center">联系结果反馈 <span class="xs muted">· 只在您与货主之间，不公开评分</span></div>' +
+      H.fbChips('driver');
     var footer1 = '<button class="btn ghost" data-cancel>取消</button><button class="btn' + (mode === 'pc' ? '' : ' wy') + '" data-next disabled>查看号码</button>';
     var footer2 = mode === 'pc' ? '<button class="btn ghost" data-copy>复制号码</button><button class="btn" data-cancel>关闭</button>' : '<button class="btn ghost" data-copy>复制</button><button class="btn wy" data-dial>拨打电话</button>';
     var bind = function (root, close, setBody, setFooter) {
@@ -327,13 +417,7 @@
         qsa('[data-cancel]', root).forEach(function (b) { b.onclick = close; });
         var cp = qs('[data-copy]', root); if (cp) cp.onclick = function () { H.toast('号码已复制', mode === 'pc' ? document.body : null); };
         var dl = qs('[data-dial]', root); if (dl) dl.onclick = function () { H.toast('正在呼叫 ' + sh.phoneFull); };
-        qsa('[data-fb]', root).forEach(function (c) {
-          c.onclick = function () {
-            qsa('[data-fb]', root).forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on');
-            var m = { deal: '祝顺利！运费、装卸请与货主电话说清并留好凭证。平台不参与结算。', talk: '已记录', noanswer: '已记录，多位司机反馈未接通将提醒货主确认', found: '已记录，将提醒货主标记「已找到车」；2 位以上司机反馈后自动隐藏', fake: '已提交核实，属实将下架并处理该账号，感谢！' }[c.dataset.fb];
-            H.toast(m, mode === 'pc' ? document.body : null);
-          };
-        });
+        H.bindFb(root, 'driver', mode);
       };
     };
     if (mode === 'pc') {

@@ -168,3 +168,46 @@ HDZ.NEED_STATUS = {
   expired: { name: '已过期', cls: 'st-expired' },
   withdrawn: { name: '已下架', cls: 'st-withdrawn' },
 };
+
+/* ---------- 意向（司机对需求一键"有意向"） ----------
+   不是报价、不是接单、不锁定：司机只是告诉货主"我能接这单"，可选填一个参考价（以电话为准）。
+   货主看到的是"谁有意向、大概什么价、先打给谁"，不排序、不比价；24 小时未联系自动过期。
+   一条需求最多 5 位司机有意向，达到后暂停推送，提示货主尽快联系。 */
+HDZ.INTENT_CAP = 5;
+HDZ.INTENTS = [
+  { id: 'i1', need: 'n2001', driver: 'd1', vehicle: 'v1', post: 'p1001', ref: 29, refUnit: '吨', note: '嘉兴卸完 14:00 就能到恒源仓，有鞍座 4 组', at: '2026-09-27T09:11:00', called: true, calledAt: '09:16' },
+  { id: 'i2', need: 'n2001', driver: 'd5', vehicle: 'v5', post: 'p1003', ref: null, refUnit: '吨', note: '车在宝山闲着，随时能过去，价格电话谈', at: '2026-09-27T09:14:00', called: false },
+  { id: 'i3', need: 'n2001', driver: 'd2', vehicle: 'v2', post: 'p1005', ref: 27, refUnit: '吨', note: '今晚从南京回，明早到嘉兴装可以吗', at: '2026-09-27T09:21:00', called: false },
+  { id: 'i4', need: 'n1996', driver: 'd2', vehicle: 'v2', post: 'p1004', ref: 38, refUnit: '吨', note: '12 米定尺没问题，可多点卸', at: '2026-09-26T15:20:00', called: false },
+  { id: 'i5', need: 'n1990', driver: 'd1', vehicle: 'v1', post: 'p0991', ref: 30, refUnit: '吨', note: '', at: '2026-09-24T16:30:00', called: true, calledAt: '9月24日 16:40', chosen: true, result: '如约到车' },
+  { id: 'i6', need: 'n1990', driver: 'd5', vehicle: 'v5', post: 'p1003', ref: 31, refUnit: '吨', note: '', at: '2026-09-24T16:35:00', called: false, notified: true },
+  { id: 'i7', need: 'n1990', driver: 'd3', vehicle: 'v3', post: 'p1002', ref: null, refUnit: '吨', note: '', at: '2026-09-24T16:52:00', called: false, notified: true },
+  /* 当前司机（d1 王师傅）已对这条需求表达意向，等货主回电 */
+  { id: 'i8', need: 'n2005', driver: 'd1', vehicle: 'v1', post: 'p1007', ref: 27, refUnit: '吨', note: '明天张家港卸完顺路，10 点前能到', at: '2026-09-27T09:19:00', called: false, mine: true },
+];
+/* 需求卡片上展示的意向人数（含非本司机的） */
+HDZ.INTENT_COUNT = { n2001: 3, n2002: 1, n2003: 0, n2004: 5, n2005: 1, n2006: 0 };
+HDZ.ME_DRIVER = 'd1';
+
+/* ---------- 联系结果反馈（替代互评） ----------
+   只在真实联系过的双方之间发生；是几个结构化选项，不是打分，不公开展示。
+   负面项累计触发现有的核验 / 黑名单流程，不需要平台判定"完成"。 */
+HDZ.FEEDBACK = {
+  shipper: [ /* 货主反馈司机 */
+    { k: 'ok', t: '如约到车', cls: 'ok', msg: '感谢反馈！这条记录只用于司机的真实履约，不公开评分。' },
+    { k: 'talk', t: '在沟通', cls: '', msg: '已记录' },
+    { k: 'no', t: '没谈成', cls: '', msg: '已记录，不影响双方' },
+    { k: 'miss', t: '司机爽约', cls: 'warn', msg: '已记录。同一司机累计 2 次爽约将暂停展示并人工核实' },
+    { k: 'raise', t: '坐地起价', cls: 'warn', msg: '已记录。多位货主反馈将核实并处理该账号' },
+    { k: 'fake', t: '信息不实', cls: 'warn', msg: '已提交核实，属实将下架并处理该账号，感谢！' },
+  ],
+  driver: [ /* 司机反馈货主 */
+    { k: 'ok', t: '如约装车', cls: 'ok', msg: '祝顺利！运费、装卸请电话说清并留好凭证。平台不参与结算。' },
+    { k: 'talk', t: '在沟通', cls: '', msg: '已记录' },
+    { k: 'no', t: '没谈成', cls: '', msg: '已记录，不影响双方' },
+    { k: 'found', t: '货主已找到车', cls: '', msg: '已记录，将提醒货主标记「已找到车」；2 位以上司机反馈后自动隐藏' },
+    { k: 'empty', t: '货主放空', cls: 'warn', msg: '已记录。同一货主累计 2 次放空将限制发布并人工核实' },
+    { k: 'press', t: '电话里压价', cls: 'warn', msg: '已记录。预算是货主自填，多位司机反馈将提示其调整' },
+    { k: 'fake', t: '信息不实', cls: 'warn', msg: '已提交核实，属实将下架并处理该账号，感谢！' },
+  ],
+};

@@ -48,7 +48,7 @@
     <div class="screen" id="screen">
       <div class="wy-head">
         <h2>沿线用车需求 <span class="tj">货主自己发的</span></h2>
-        <p>货袋子的钢材买卖方发的用车需求。看中哪条就打货主电话，运费您自己谈；平台不派单、不抽成、不收信息费。</p>
+        <p>货袋子的钢材买卖方发的用车需求。看中哪条可以点「有意向」让货主先联系您，或直接打货主电话，运费您自己谈；平台不派单、不比价、不抽成。</p>
         <div class="stats"><div><b id="stMatch">0</b><span>匹配我的运力</span></div><div><b id="stNear">0</b><span>附近出发</span></div><div><b>12</b><span>今日新增</span></div><div><b>76%</b><span>3 小时内找到车</span></div></div>
       </div>
       <div class="lift"><div class="segbar" id="seg"><span class="on" data-seg="match">匹配我的运力<i id="cMatch"></i></span><span data-seg="near">附近出发<i id="cNear"></i></span><span data-seg="all">全部<i id="cAll"></i></span></div></div>
@@ -94,10 +94,16 @@
   H.qs('#stNear').textContent = nearList.length; H.qs('#cNear').textContent = '(' + nearList.length + ')';
   H.qs('#cAll').textContent = '(' + H.NEEDS.filter(function (n) { return n.status === 'active'; }).length + ')';
 
+  function myIntentStrip() {
+    var mine = H.INTENTS.filter(function (i) { return i.driver === H.ME_DRIVER && !i.chosen && !i.notified; });
+    if (!mine.length) return '';
+    return '<div class="grp"><div class="pl" style="border-color:#b9e6cc;background:#f0fbf4"><span class="tag ok">意向</span><b>您对 ' + mine.length + ' 条需求有意向</b><span class="xs muted" style="margin-left:auto">等货主回电 · 24h 自动过期</span><span class="sub">货主会看到您的车牌与履约，决定先打给谁；货主找到车会通知您，不用干等。' + mine.map(function (i) { var n = H.NEEDS.filter(function (x) { return x.id === i.need; })[0]; return n ? ' · ' + n.from + '→' + n.to[0] : ''; }).join('') + '</span></div></div>';
+  }
   function render() {
     var el = H.qs('#content'), html = '';
     H.qs('#quick').style.display = seg === 'all' ? '' : 'none';
     if (seg === 'match') {
+      html += myIntentStrip();
       matchGroups.forEach(function (g) {
         var p = g.post, v = H.VEHICLES[p.vehicle];
         html += '<div class="grp"><div class="pl"><span class="tag ' + (p.kind === 'return' ? 'hot' : 'brand') + '">' + H.KIND[p.kind].short + '</span><b>我的运力 · ' + p.from + ' → ' + p.to.join('/') + '</b><span class="tag ok">' + g.ms.filter(function (m) { return m.level === 'good'; }).length + ' 条匹配</span><span class="sub">' + p.depart + ' 出发 · ' + v.plate + ' · ' + H.vehicleLine(v) + '</span></div></div>';
@@ -135,6 +141,7 @@
     var card = e.target.closest('.need-card'); if (!card) return;
     var n = H.NEEDS.filter(function (x) { return x.id === card.dataset.id; })[0];
     if (e.target.closest('[data-call-need]')) H.unlockShipperPhone(n);
+    else if (e.target.closest('[data-intent]')) H.intentSheet(n, null, function () { render(); });
     else detail(n);
   });
   function detail(n) {
@@ -145,9 +152,9 @@
       (n.cargo.note ? '<div class="small t2 mt8">备注：' + n.cargo.note + '</div>' : '') +
       '<div class="notice gray mt12" style="font-style:italic"><span class="ic"></span><div>"' + n.desc + '"</div></div>' +
       '<div class="divider"></div><div class="row"><div class="avatar" style="background:linear-gradient(135deg,#9fb4ff,#1f5eff)">' + sh.short + '</div><div class="col"><b class="small">' + sh.company + ' · ' + sh.contact + '</b><span class="xs muted">' + sh.tip + ' · 发过 ' + sh.needs + ' 次需求 · 找到车 ' + sh.found + ' 次 · 投诉 ' + sh.complaints + '</span></div></div>' +
-      '<div class="xs muted mt8">' + n.views + ' 位司机看过 · ' + n.calls + ' 位司机已联系 · 装车时间到自动下架 · 货主找到车后自动隐藏</div>',
-      footer: '<button class="btn ghost" data-rep style="flex:0 0 80px">举报</button><button class="btn wy" data-call>查看货主电话</button>',
-      onReady: function (root, close) { H.qs('[data-call]', root).onclick = function () { close(); H.unlockShipperPhone(n); }; H.qs('[data-rep]', root).onclick = function () { close(); H.report(n); }; } });
+      '<div class="xs muted mt8">' + n.views + ' 位司机看过 · ' + H.intentCount(n) + ' 位有意向 · ' + n.calls + ' 位已联系 · 装车时间到自动下架 · 货主找到车后自动隐藏并通知有意向的司机</div>',
+      footer: '<button class="btn ghost" data-rep style="flex:0 0 64px">举报</button>' + (H.myIntent(n.id) ? '<span class="tag ok" style="height:40px;display:inline-flex;align-items:center;padding:0 12px">✓ 已有意向</span>' : (H.intentCount(n) >= H.INTENT_CAP ? '' : '<button class="btn ghost" data-it style="color:var(--wy);border-color:var(--wy)">有意向</button>')) + '<button class="btn wy" data-call>查看货主电话</button>',
+      onReady: function (root, close) { H.qs('[data-call]', root).onclick = function () { close(); H.unlockShipperPhone(n); }; H.qs('[data-rep]', root).onclick = function () { close(); H.report(n); }; var it = H.qs('[data-it]', root); if (it) it.onclick = function () { close(); H.intentSheet(n, null, function () { render(); }); }; } });
   }
   H.qs('#subSw').onclick = function () { this.classList.toggle('on'); H.toast(this.classList.contains('on') ? '已开启线路需求通知' : '已关闭'); };
   H.qsa('.sub-card .r .chip').forEach(function (c) { c.onclick = function () { if (c.textContent.indexOf('添加') > -1) return H.toast('原型：选择常跑线路'); c.classList.toggle('on'); }; });
@@ -159,8 +166,10 @@
     '默认 Tab「<b>匹配我的运力</b>」按司机展示中的每条运力分组，卡片上直接给匹配理由（✓ 同城出发 / ✓ 有鞍座 / ! 车明天走），司机一眼判断值不值得打。',
     '「附近出发」按当前运单位置（卸货地 + 出发地）取需求；「全部」给筛选 chips（今天 / 明天 / 整车 / 拼车 / 认证企业 / 品种）。',
     '需求卡片与货主看到的运力卡片同构：线路、时间、货物、所需装备、预算与市场参考、货主认证与历史（发过 N 次 / 找到车 N 次）、已有几位司机联系。',
-    '「查看货主电话」与货主查看司机电话对称：风险提示（平台不派单、不确认成交、不收费；防保证金骗局）→ 号码留痕（货主端可见谁看了）→ 反馈（已谈成 / 在沟通 / 未接通 / 货主已找到车 / 不实）。',
-    '不做"抢单 / 报价 / 接单"按钮，只有电话；订阅常跑线路的需求通知有频控；底部给"发一条运力让货主来找您"的反向入口。',
+    '「查看货主电话」与货主查看司机电话对称：风险提示（平台不派单、不确认成交、不收费；防保证金骗局）→ 号码留痕（货主端可见谁看了）→ <b>联系结果反馈</b>（如约装车 / 在沟通 / 没谈成 / 货主已找到车 / 货主放空 / 电话里压价 / 信息不实）。反馈只在联系过的双方之间，是几个选项不是打分，不公开；负面项累计触发核验 / 黑名单。',
+    '<b>「有意向」</b>：一键告诉货主"我能接这单"，可选填参考价（标注"以电话为准"）和一句话。<b>不是报价、不是接单、不锁定</b>——货主看不到别人的价，没有排序比价，司机随时可以直接打电话。意向 24h 自动过期；一条需求最多 5 位司机有意向，达到后卡片显示"意向已满，可直接打"。',
+    '货主谈定后点「已找到车」（可选勾是哪位司机），其余有意向的司机收到服务通知 D8「该需求已找到车」，不用干等；顶部"您对 N 条需求有意向"条实时显示等待中的意向。',
+    '不做"抢单 / 报价 / 接单 / 选定"按钮，只有意向 + 电话；订阅常跑线路的需求通知有频控；底部给"发一条运力让货主来找您"的反向入口。',
   ]);
 })();
 </script>

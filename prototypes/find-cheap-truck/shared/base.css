@@ -435,6 +435,17 @@ textarea.input { height: auto; min-height: 80px; padding: 10px 12px; resize: non
 .phone-reveal .num { font-size: 28px; font-weight: 800; letter-spacing: 2px; margin: 6px 0; }
 .phone-reveal .sub { font-size: 12px; color: var(--muted); }
 .feedback-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+.chip.warn.on { background: var(--warn-soft); color: #b47600; border-color: #e0a800; }
+
+/* 意向（司机一键"有意向"，货主看到"谁有意向、先打给谁"） */
+.post-card .intent-bar { display: flex; gap: 6px; font-size: 11px; color: var(--ok); background: var(--ok-soft); border-radius: 6px; padding: 5px 8px; margin-top: 8px; flex-wrap: wrap; }
+.post-card .intent-bar .muted { color: var(--muted); }
+.post-card.has-intent { border: 1px solid #b9e6cc; }
+.intent-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.intent-row:last-child { border-bottom: 0; }
+.intent-row.called { opacity: .78; }
+.intent-row .t2 { color: var(--text-2); }
+.intent-row .btn.sm { height: 28px; padding: 0 10px; font-size: 12px; white-space: nowrap; }
 
 .empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 13px; }
 .empty .ic { width: 64px; height: 64px; border-radius: 16px; background: #e9ebf0; margin: 0 auto 10px; }

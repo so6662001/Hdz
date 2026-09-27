@@ -71,7 +71,15 @@
   .succ .two p { font-size: 12px; color: var(--text-2); margin-top: 4px; line-height: 1.6; }
   /* 我的需求 */
   .mygrid { display: grid; grid-template-columns: 1fr 300px; gap: 16px; align-items: start; margin-top: 14px; }
-  .ncard { background: #fff; border-radius: 12px; box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 12px; display: grid; grid-template-columns: 1fr 260px; gap: 16px; }
+  .ncard { background: #fff; border-radius: 12px; box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 12px; display: grid; grid-template-columns: 1fr 340px; gap: 16px; }
+  .ncard .side .ilist { margin-top: 2px; }
+  .ncard .side .who-wrap { margin-top: 6px; }
+  .ncard .side .who-wrap summary { cursor: pointer; list-style: none; color: var(--text-2); }
+  .ncard .side .who-wrap summary::-webkit-details-marker { display: none; }
+  .ncard .side .who-wrap summary::before { content: '▸ '; font-size: 11px; }
+  .ncard .side .who-wrap[open] summary::before { content: '▾ '; }
+  .ncard .result { grid-column: span 2; background: #f7f8fa; border-radius: 10px; padding: 10px 12px; }
+  .ncard .result .fbwrap .feedback-chips { justify-content: flex-start; margin-top: 8px; }
   .ncard .r1 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .ncard .route { font-size: 18px; margin-top: 8px; }
   .ncard .l2 { font-size: 13px; color: var(--text-2); margin-top: 6px; display: flex; gap: 14px; flex-wrap: wrap; }
@@ -178,7 +186,7 @@
           <h3>发布后会发生什么</h3>
           <ol>
             <li><b>匹配的顺路车</b>列在这里，您自己查看电话联系（登录 → 风险提示 → 号码留痕 → 反馈）。</li>
-            <li>需求同时出现在悟运司机端「<b>沿线用车需求</b>」，常跑这条线的司机会主动打给您；谁看了您的电话，「我的需求」里都能看到。</li>
+            <li>需求同时出现在悟运司机端「<b>沿线用车需求</b>」，常跑这条线的司机会点「有意向」或直接打给您；谁有意向、谁看了您的电话，「我的需求」里都能看到，您决定先打给谁。</li>
             <li>谈成后点「<b>已找到车</b>」，需求立即隐藏，不再有司机打来；装车时间一到也会自动下架。</li>
             <li>平台不派单、不确认成交、不收运费；装车时核对 <b>人 / 车 / 证</b>，货值高投一份货运险。</li>
           </ol>
@@ -203,6 +211,15 @@
             <li><b>司机反馈"已找到车"≥2 位自动隐藏</b>您忘了点也不会一直被打扰，可 1 小时内恢复。</li>
             <li><b>发布满 24 小时未找到车要确认</b>"还需要车吗？"未确认自动隐藏。</li>
             <li><b>谁能看到您的电话</b>只有实名 + 车辆认证的司机，且需勾选风险提示；每次查看留痕，纠纷时可作凭证。</li>
+          </ul>
+        </div>
+        <div class="aside-box">
+          <h3>"有意向"是什么 <small>不是报价，不是接单</small></h3>
+          <ul class="rules">
+            <li><b>司机一键告诉您"能接"</b>可选填一个参考价，标注"以电话为准"。您看到的是谁有意向、大概什么价、悟运履约如何。</li>
+            <li><b>您决定先打给谁</b>这只是联系顺序，不是"选定"；平台不记录成交、不比价、不排序。</li>
+            <li><b>谈定后点「已找到车」</b>可选勾是哪位司机，其余有意向的司机收到通知不再等；意向 24 小时自动过期，一条需求最多 5 位。</li>
+            <li><b>装车后反馈联系结果</b>如约到车 / 没谈成 / 爽约 / 坐地起价 / 信息不实——几个选项，不是打分，只在您与司机之间；累计负面进入核验与黑名单。</li>
           </ul>
         </div>
         <div class="aside-box">
@@ -322,7 +339,7 @@
     var pushed = 9 + Math.floor(Math.random() * 12);
     H.qs('#formWrap').innerHTML = '<div class="succ"><div class="hd"><span class="ok">✓</span><div><h2>需求已发布 · ' + n.from + ' → ' + n.to[0] + '</h2><p>展示至 <b>' + n.when.replace(' 装车', '') + '</b> 结束自动下架 · 谈成后请点「已找到车」· 平台不接单、不收费</p></div></div>' +
       '<div class="two"><div><h4><b>' + good.length + '</b> 台顺路车现在就能联系</h4><p>右侧列表就是，点「查看电话」直接打。这些司机的车正好在 ' + n.from + ' 附近、往 ' + n.to[0] + ' 走。</p></div>' +
-      '<div><h4><b>' + pushed + '</b> 位司机已收到您的需求</h4><p>近 3 天在 ' + n.from + ' → ' + n.to[0] + ' 发过运力、或常跑这条线的司机，已通过微信服务通知收到；他们会主动给 张经理 打电话。谁看了您的电话，「我的需求」里能看到。</p></div></div>' +
+      '<div><h4><b>' + pushed + '</b> 位司机已收到您的需求</h4><p>近 3 天在 ' + n.from + ' → ' + n.to[0] + ' 发过运力、或常跑这条线的司机，已通过微信服务通知收到；他们会点「有意向」（可带参考价，以电话为准）或直接给 张经理 打电话。谁有意向、谁看了您的电话，「我的需求」里能看到，您决定先打给谁。</p></div></div>' +
       '<div class="notice blue mt16"><span class="ic"></span><div>接到司机电话时：核对对方是否为悟运实名司机（可让其报车牌，在「我的需求 › 谁联系过我」里比对）；运费、装卸、回单直接与司机约定；货值高投一份货运险。</div></div>' +
       '<div class="row mt16" style="gap:10px"><button class="btn" id="goMine">查看我的需求</button><button class="btn ghost" onclick="location.reload()">再发一条</button><a class="btn ghost" href="pc-find.html">去列表找车</a></div></div>';
     H.qs('#goMine').onclick = function () { switchTab('mine'); };
@@ -335,17 +352,26 @@
   function ncard(n) {
     var s = H.NEED_STATUS[n.status], live = isLive(n);
     var matched = live ? H.matchPosts(n).filter(function (m) { return m.level === 'good'; }).length : (n.matched || 0);
+    var its = H.intentsOf(n.id), chosen = its.filter(function (i) { return i.chosen; })[0];
+    var drv = n.contacts ? n.contacts.filter(function (c) { return c.who !== '您'; }) : [];
     var h = '<div class="ncard" data-id="' + n.id + '"><div>' +
       '<div class="r1"><span class="tag ' + s.cls + '">' + s.name + '</span><span class="tag gray">' + (n.req.whole === false ? '可拼车' : '整车') + '</span>' + (n.source === 'order' ? '<span class="tag gray">订单 ' + n.orderNo + '</span>' : '') + '<span class="xs muted">' + H.fmtAgo(n.posted) + ' 发布</span>' + (live ? '<span class="xs muted">· ' + H.fmtLeft(n.validUntil) + '后自动下架</span>' : '') + '</div>' +
       '<div class="route"><div class="city">' + n.from + '<small>' + (n.fromDetail || '') + '</small></div><div class="arrow"><div class="ln"></div></div><div class="city to">' + n.to.join('/') + '<small>' + (n.toDetail || '') + '</small></div></div>' +
       '<div class="l2"><span>装车 <b>' + n.when + '</b></span><span>' + H.cargoLine(n) + '</span><span>需 <b>' + H.reqLine(n) + '</b></span><span>预算 <b>' + (n.budget == null ? '电话谈' : '¥' + n.budget + '/' + n.budgetUnit) + '</b></span></div>' +
-      '<div class="stat"><span><b>' + n.views + '</b>司机看过</span><span><b>' + (n.contacts ? n.contacts.filter(function (c) { return c.who !== '您'; }).length : n.calls) + '</b>司机查看了电话</span><span><b>' + matched + '</b>台匹配顺路车</span></div>' +
+      '<div class="stat"><span><b>' + n.views + '</b>司机看过</span><span><b>' + its.length + '</b>位司机有意向</span><span><b>' + (n.contacts ? drv.length : n.calls) + '</b>司机查看了电话</span><span><b>' + matched + '</b>台匹配顺路车</span></div>' +
       '</div><div class="side">' +
-      '<div class="small b">谁联系过我</div><ul class="who">' + ((n.contacts && n.contacts.length) ? n.contacts.map(function (c) { return '<li><span>' + c.who + ' · ' + c.what + '</span><span class="muted">' + c.when + '</span></li>'; }).join('') : '<li><span class="muted">还没有司机查看电话' + (live ? '，匹配的车您可以先打' : '') + '</span></li>') + '</ul>' +
+      (live ? '<div class="small b row" style="gap:6px">有意向的司机 <span class="tag ok">' + its.length + '</span><span class="xs muted" style="font-weight:400;margin-left:auto">您决定先打给谁</span></div><div class="ilist">' + H.intentList(n, { pc: true }) + '</div>' : '') +
+      (live && its.length ? '<div class="xs muted">参考价是司机自填、以电话为准；不排序、不比价。谈定后点「已找到车」，其余司机会收到通知。</div>' : '') +
+      '<details class="who-wrap"' + (live ? '' : ' open') + '><summary class="small b">谁查看了我的电话 (' + drv.length + ')</summary><ul class="who">' + (drv.length ? drv.map(function (c) { return '<li><span>' + c.who + ' · ' + c.what + '</span><span class="muted">' + c.when + '</span></li>'; }).join('') : '<li><span class="muted">还没有司机查看电话' + (live ? '，匹配的车您可以先打' : '') + '</span></li>') + '</ul></details>' +
       '<div class="acts">' + (live ? '<button class="btn sm" data-act="match">看匹配车 (' + matched + ')</button><button class="btn sm line" data-act="found">已找到车</button><button class="btn sm ghost" data-act="extend">延长</button><button class="btn sm ghost" data-act="off">下架</button>' : '<button class="btn sm" data-act="again">再发一次</button>') + '</div>' +
       '</div>';
     if (n.status === 'confirming') h += '<div class="confirm"><span class="sp"><b>发布已满 24 小时，还需要车吗？</b> 未确认将于 2 小时后自动隐藏，避免司机打到已经不需要车的您。</span><button class="btn hot" data-act="still">还需要，继续展示</button><button class="btn ghost" data-act="found">已找到车</button></div>';
     if (!live) h += '<div class="end">' + n.endReason + ' · ' + n.endAt + '</div>';
+    if (n.status === 'found' && chosen) {
+      var cd = H.DRIVERS[chosen.driver], cv = H.VEHICLES[chosen.vehicle];
+      h += '<div class="result"><div class="row" style="gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:12px">' + cd.surname + '</div><span class="small b">' + cd.name + ' · ' + cv.plate + '</span><span class="xs muted">装车后反馈联系结果 · 只在您与司机之间，不公开评分，不需要平台确认"完成"</span></div>' +
+        (chosen.result ? '<div class="small mt8"><span class="tag ok">已反馈 · ' + chosen.result + '</span></div>' : '<div class="fbwrap">' + H.fbChips('shipper') + '</div>') + '</div>';
+    }
     return h + '</div>';
   }
   function renderMine() {
@@ -358,16 +384,28 @@
   H.qsa('#mineSeg a').forEach(function (a) { a.onclick = function () { mineSeg = a.dataset.s; renderMine(); }; });
   function endNeed(n, st, reason) { n.status = st; n.endReason = reason; n.endAt = '今天 09:2' + Math.floor(Math.random() * 9); renderMine(); }
   H.qs('#mineList').addEventListener('click', function (e) {
+    var card = e.target.closest('.ncard'); if (!card) return;
+    var n = H.MY_NEEDS.filter(function (x) { return x.id === card.dataset.id; })[0];
+    var ci = e.target.closest('[data-call-it]');
+    if (ci) {
+      var it = H.INTENTS.filter(function (x) { return x.id === ci.dataset.callIt; })[0];
+      var post = H.POSTS.filter(function (x) { return x.id === it.post; })[0] || { driver: it.driver, vehicle: it.vehicle, calls: 0 };
+      H.unlockPhone(post, 'pc');
+      it.called = true; it.calledAt = '刚刚'; n.contacts = n.contacts || []; n.contacts.push({ who: '您', what: '查看了 ' + H.DRIVERS[it.driver].name + ' 的电话', when: '刚刚' });
+      renderMine(); return;
+    }
+    if (e.target.closest('[data-fb]')) {
+      var f = H.FEEDBACK.shipper.filter(function (x) { return x.k === e.target.closest('[data-fb]').dataset.fb; })[0], ch = H.intentsOf(n.id).filter(function (i) { return i.chosen; })[0];
+      if (ch) ch.result = f.t; H.toast(f.msg, document.body); renderMine(); return;
+    }
     var b = e.target.closest('[data-act]'); if (!b) return;
-    var n = H.MY_NEEDS.filter(function (x) { return x.id === e.target.closest('.ncard').dataset.id; })[0], act = b.dataset.act;
+    var act = b.dataset.act;
     if (act === 'match') {
       var ms = H.matchPosts(n);
       H.pcModal({ title: '匹配这条需求的顺路车 · ' + n.from + ' → ' + n.to[0], width: 560, body: ms.length ? ms.map(mrow).join('') : '<div class="empty">暂无在展车辆匹配，司机看到需求会主动联系您</div>', footer: '<button class="btn ghost" data-cancel>关闭</button>',
         onReady: function (root, close) { H.qs('[data-cancel]', root).onclick = close; root.addEventListener('click', function (ev) { var r = ev.target.closest('.mrow'); if (r && ev.target.closest('[data-call]')) H.unlockPhone(H.POSTS.filter(function (x) { return x.id === r.dataset.id; })[0], 'pc'); }); } });
     } else if (act === 'found') {
-      H.pcModal({ title: '找到车了？', body: '<div class="small t2">确认后需求立即隐藏，司机不会再打给您。顺便告诉我们从哪找到的（只用于统计，平台不参与交易）：</div><div class="chips mt12"><span class="chip on" data-src>列表里的顺路车</span><span class="chip" data-src>司机看到需求主动联系</span><span class="chip" data-src>自有车 / 熟车队</span><span class="chip" data-src>其他平台</span></div>',
-        footer: '<button class="btn ghost" data-cancel>再想想</button><button class="btn" data-ok>确认已找到车</button>',
-        onReady: function (root, close) { H.qsa('[data-src]', root).forEach(function (c) { c.onclick = function () { H.qsa('[data-src]', root).forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on'); }; }); H.qs('[data-cancel]', root).onclick = close; H.qs('[data-ok]', root).onclick = function () { close(); endNeed(n, 'found', '已找到车（' + H.qs('[data-src].on', root).textContent + '）'); H.toast('已隐藏需求，祝顺利。装车时记得核对人车证', document.body); }; } });
+      H.foundDialog(n, 'pc', function (reason, it) { endNeed(n, 'found', reason); H.toast(it ? '已隐藏需求并通知其余司机。装车后可在这条记录下反馈联系结果' : '已隐藏需求，祝顺利。装车时记得核对人车证', document.body); });
     } else if (act === 'extend') {
       var d = new Date(n.validUntil); d.setHours(d.getHours() + 12); n.validUntil = d.toISOString().slice(0, 19); n.status = 'active'; renderMine(); H.toast('已延长 12 小时（装车时间同步顺延，司机看到的是最新时间）', document.body);
     } else if (act === 'off') { endNeed(n, 'withdrawn', '您手动下架'); H.toast('已下架', document.body); }
@@ -394,7 +432,9 @@
     '右侧<b>实时匹配</b>随填随变：不用等发布，在展的顺路车现在就能查看电话。匹配理由（✓ 同城出发 / ✓ 有鞍座 / ! 只剩 12t 位）原样展示，让货主自己判断。',
     '发布后两条路并行：货主主动打匹配车；需求推送给常跑该线的司机，司机主动打货主。司机查看货主电话同样要 <b>实名 + 车辆认证 → 风险提示 → 留痕 → 反馈</b>。',
     '需求有自己的生命周期：装车时间到自动下架 / 已找到车 / 司机反馈"已找到车"≥2 自动隐藏 / 24h 未找到车要确认 / 手动下架，与运力信息的终止机制对称。',
-    '红线：页面上不出现"抢单 / 接单 / 平台确认成交 / 代收运费"；预算只是货主自填，旁边永远放市场参考而非平台指导价。',
+    '<b>意向（v0.4）</b>：司机在悟运一键"有意向"（可选填参考价，以电话为准），「我的需求」侧栏列出有意向司机（姓氏 + 车牌 + 悟运履约 + 参考价 + 一句话），货主点「先打给他」——只是联系顺序，不是选定；不排序、不比价、不显示最低价。',
+    '<b>已找到车</b>可选勾是哪位司机：只用于通知其余有意向司机"不用等了"（服务通知 D8），平台不据此确认成交。已找到车的记录下给<b>联系结果反馈</b>（如约到车 / 没谈成 / 爽约 / 坐地起价 / 信息不实）替代互评：结构化选项、只在双方之间、不公开、不需要平台判定"完成"。',
+    '红线：页面上不出现"抢单 / 接单 / 报价榜 / 选定司机 / 平台确认成交 / 代收运费"；预算只是货主自填，旁边永远放市场参考而非平台指导价。',
   ]);
 })();
 </script>

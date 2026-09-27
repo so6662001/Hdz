@@ -75,7 +75,7 @@
   <div class="top">
     <h1>找顺路车 <span class="tj">返程车 · 闲置车 · 专装钢材</span></h1>
     <p>驾驶员在<b>悟运小程序</b>发布返程车、闲置车、顺路捎货信息；卖家、买家在<b>货袋子 PC 端、微信小程序、H5</b> 三端找车并直接联系司机；找车方也可以<b>发布用车需求</b>，系统推荐匹配的顺路车、司机在悟运看到需求主动联系。这是一个<b>双方信息互动板块</b>：平台只做信息展示与真人真车核验，<b>不参与交易、不派单、不收运费、不做承运人、不做网络货运平台</b>。本页为高保真 HTML 原型总览，所有页面可点击交互（纯前端、模拟数据）。</p>
-    <div class="pills"><span>驾驶员端 5 页（一键 / 语音发布 · 返程 / 闲置 / 顺路）</span><span>PC 找车 2 页</span><span>小程序 / H5 找车 2 页 × 2 壳</span><span>运营后台 1 页 3 视图（轻量）</span><span>统一的"查看电话 → 风险提示 → 留痕 → 反馈"流程</span><span>5 条运力终止路径</span><span>v0.2 补充：服务通知 / 申诉 / 合作承运 / 语音校准</span><span>v0.3：用车需求（车找货）三端 + 司机端沿线需求</span></div>
+    <div class="pills"><span>驾驶员端 5 页（一键 / 语音发布 · 返程 / 闲置 / 顺路）</span><span>PC 找车 2 页</span><span>小程序 / H5 找车 2 页 × 2 壳</span><span>运营后台 1 页 3 视图（轻量）</span><span>统一的"查看电话 → 风险提示 → 留痕 → 反馈"流程</span><span>5 条运力终止路径</span><span>v0.2 补充：服务通知 / 申诉 / 合作承运 / 语音校准</span><span>v0.3：用车需求（车找货）三端 + 司机端沿线需求</span><span>v0.4：意向 + 先打给谁 + 联系结果反馈（替代竞价 / 互评）</span></div>
   </div>
 
   <h2>原型页面 <small>点击卡片进入可交互页面；每页右上角有"设计说明"面板</small></h2>
@@ -117,11 +117,12 @@
 
   <div class="role-hd"><span class="ic bg-brand" style="background:#0aa35a">v0.3</span><h3>用车需求 · 车找货的另一半</h3><span>找车方发需求 → 系统推荐顺路车、司机看到需求主动联系 → 双方自己打电话；平台不接单、不派单、不确认成交</span></div>
   <div class="grid3">
-    <a class="pcard" href="shipper/pc-need.html"><div class="thumb pc"><span class="role tag brand">PC · 用车需求</span><iframe src="shipper/pc-need.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>PC · 发布用车需求 + 实时匹配 + 我的需求</h3><p>从货袋子订单带入线路与货物，选品种自动勾装备；右侧<b>实时匹配</b>随填随变，在展顺路车现在就能查看电话，匹配理由（✓ 同城出发 / ✓ 有鞍座 / ! 只剩 12t）原样展示；发布后推送给常跑该线的司机。「我的需求」：谁查看了我的电话、匹配车数、已找到车 / 延长 / 下架 / 24h 确认 / 再发一次。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
-    <a class="pcard" href="shipper/m-need.html?shell=mp"><div class="thumb m"><span class="role tag brand">小程序 / H5 · 用车需求</span><iframe src="shipper/m-need.html?shell=mp&embed=1" loading="lazy"></iframe></div><div class="body"><h3>小程序 / H5 · 用车需求（?shell=mp|h5）</h3><p>三种填法：订单带入 / <b>按住说一句</b>自动填表 / chips；吸底的"N 台顺路车现在就匹配"点开即可查看电话；发布成功弹层同时给"现在能打的车"和"已推送给 N 位司机"；我的需求与司机端"我的运力"对称。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
-    <a class="pcard" href="driver/needs.html"><div class="thumb m"><span class="role tag wy">悟运 · 沿线用车需求</span><iframe src="driver/needs.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>司机端 · 沿线用车需求</h3><p>按司机展示中的每条运力分组给匹配的需求（带匹配理由）；附近出发 / 全部 + 筛选；需求卡片含货主认证与历史（发过 N 次、找到车 N 次）、货物与所需装备、预算与市场参考、已有几位司机联系；「<b>查看货主电话</b>」走与货主对称的 风险提示 → 留痕 → 反馈；只有电话，没有抢单 / 报价 / 接单按钮。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
+    <a class="pcard" href="shipper/pc-need.html"><div class="thumb pc"><span class="role tag brand">PC · 用车需求</span><iframe src="shipper/pc-need.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>PC · 发布用车需求 + 实时匹配 + 我的需求</h3><p>从货袋子订单带入线路与货物，选品种自动勾装备；右侧<b>实时匹配</b>随填随变，在展顺路车现在就能查看电话，匹配理由（✓ 同城出发 / ✓ 有鞍座 / ! 只剩 12t）原样展示；发布后推送给常跑该线的司机。「我的需求」：<b>有意向的司机</b>（车牌 · 悟运履约 · 参考价 · 一句话，「先打给他」）、谁查看了我的电话、已找到车（可勾司机，通知其余司机）/ 延长 / 下架 / 24h 确认；已找到车的记录下给联系结果反馈。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
+    <a class="pcard" href="shipper/m-need.html?shell=mp"><div class="thumb m"><span class="role tag brand">小程序 / H5 · 用车需求</span><iframe src="shipper/m-need.html?shell=mp&embed=1" loading="lazy"></iframe></div><div class="body"><h3>小程序 / H5 · 用车需求（?shell=mp|h5）</h3><p>三种填法：订单带入 / <b>按住说一句</b>自动填表 / chips；吸底的"N 台顺路车现在就匹配"点开即可查看电话；发布成功弹层同时给"现在能打的车"和"已推送给 N 位司机"；我的需求：有意向的司机 → 先打给谁 → 已找到车 → 联系结果反馈，与司机端"我的运力"对称。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
+    <a class="pcard" href="driver/needs.html"><div class="thumb m"><span class="role tag wy">悟运 · 沿线用车需求</span><iframe src="driver/needs.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>司机端 · 沿线用车需求</h3><p>按司机展示中的每条运力分组给匹配的需求（带匹配理由）；附近出发 / 全部 + 筛选；需求卡片含货主认证与历史（发过 N 次、找到车 N 次）、货物与所需装备、预算与市场参考、已有几位司机联系；「<b>有意向</b>」一键告诉货主"能接"（可选填参考价，以电话为准，不比价不锁定）；「<b>查看货主电话</b>」走与货主对称的 风险提示 → 留痕 → 联系结果反馈；没有抢单 / 报价榜 / 接单按钮。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
   </div>
   <div class="pcard" style="padding:18px 22px;color:var(--text-2);font-size:13px;line-height:1.8;margin-top:14px"><div><b style="color:var(--text);font-size:15px;display:block;margin-bottom:6px">用车需求为什么不会把平台做重</b>需求和运力一样，<b>只是信息</b>。平台做的是按线路 / 时间 / 装备 / 吨位<b>推荐</b>，推荐理由透明展示，成不成由双方电话决定；平台不派单、不接单、不确认成交、不定价（预算是货主自填，旁边永远是市场参考而非平台指导价）、不收信息费。司机查看货主电话与货主查看司机电话完全对称：实名 + 车辆认证 → 风险提示 → 留痕 → 反馈。需求有自己的自动失效机制（装车时间到 / 已找到车 / 司机反馈"已找到车"≥2 / 24h 确认），不需要人工维护。红线：三端任何页面不出现"抢单 / 接单 / 平台确认成交 / 代收运费"。</div></div>
+  <div class="pcard" style="padding:18px 22px;color:var(--text-2);font-size:13px;line-height:1.8;margin-top:14px"><div><b style="color:var(--text);font-size:15px;display:block;margin-bottom:6px">v0.4 · 为什么是"意向 + 先打给谁 + 结果反馈"，而不是"司机报价 → 商家选一个 → 完成互评"</b>竞价链路的四个问题：多司机盯一条需求报价必然<b>互相压价</b>，而顺路车司机是最稀缺的供给；"商家选一个"一旦被平台记录就是<b>平台确认成交</b>，爽约、放空、货损的责任随之进来；钢材用车的装卸等待、吊车、回单、结算周期在报价框里说不清，两句电话就清楚；互评需要平台判定"完成"，又是一层确认，且钢材圈子小、双向评分很快被"给差评就不合作"架空。但它想解决的两个痛点是真的：货主拿到推荐名单后<b>不知道谁有意向</b>要挨个打；司机打完没谈成<b>没有闭环</b>，大家空等。所以综合为：司机一键<b>「有意向」</b>（可选填参考价，标注"以电话为准"，货主看不到别人的价，不排序、不比价、不锁定，24h 过期，一条需求最多 5 位）→ 货主在「我的需求」看到谁有意向、大概什么价、悟运履约如何，<b>决定先打给谁</b>（只是联系顺序，不是选定）→ 电话 / 微信谈定后点<b>「已找到车」</b>（可选勾是哪位司机，其余有意向司机收到 D8 通知不再等；平台不据此确认成交）→ <b>联系结果反馈</b>替代互评：货主侧 如约到车 / 没谈成 / 爽约 / 坐地起价 / 信息不实，司机侧 如约装车 / 没谈成 / 放空 / 压价 / 信息不实——结构化选项、只在真实联系过的双方之间、不打分、不公开，负面项累计进入现有的核验 / 黑名单，不需要平台判定"完成"。微信在电话之后由双方自行加，平台不做名片交换，留痕与黑名单才不会被绕过。</div></div>
 
   <h2>轻平台原则 <small>只做双方信息互动；不做网络货运平台、不做承运人，但要把信任解决掉</small></h2>
   <table>
@@ -207,7 +208,7 @@
     </div>
   </div>
 
-  <div class="foot">货袋子 · 找顺路车 / 悟运 · 发布运力 高保真原型 v0.3 · 纯前端、无依赖、数据为模拟 · 与《物流板块介入路径分析》L1 运力撮合档对应</div>
+  <div class="foot">货袋子 · 找顺路车 / 悟运 · 发布运力 高保真原型 v0.4 · 纯前端、无依赖、数据为模拟 · 与《物流板块介入路径分析》L1 运力撮合档对应</div>
 </div>
 </body>
 </html>
