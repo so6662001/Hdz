@@ -41,13 +41,13 @@
 <div class="m-stage">
   <div class="phone" id="phone">
     <div class="statusbar" style="background:#1a2440;color:#fff"><span>9:25</span><span>●●● ᯤ 100%</span></div>
-    <div class="h5bar"><span>‹</span><span>›</span><div class="url"><span class="lock">🔒</span><span>m.huodaizi.com/tejiache/l2</span></div><span>⟳</span></div>
+    <div class="h5bar"><span>‹</span><span>›</span><div class="url"><span class="lock">🔒</span><span>m.huodaizi.com/shunluche/l2</span></div><span>⟳</span></div>
     <div class="navbar mp-only" style="background:#1a2440;color:#fff"><a class="back" id="backBtn">‹</a><div class="title">合作承运</div><div class="capsule" style="border-color:rgba(255,255,255,.35);background:rgba(0,0,0,.18);color:#fff"><span>···</span><i style="background:rgba(255,255,255,.35)"></i><span>◉</span></div></div>
     <div class="screen" id="screen">
       <div class="h5-guide h5-only"><div class="logo">货</div><div class="t">在货袋子小程序中查看<small>可保存找车记录</small></div><button>打开</button></div>
       <div class="l2-top">
         <h2>要发票、要有人对货负责？</h2>
-        <p>特价车是司机自己发的信息，您与司机直接成交，便宜但没发票、没平台责任。这一单需要 <b>9% 发票 / 对公付款 / 承运人赔货损</b>，就交给合作的持牌网络货运平台。货袋子不承运、不结算、不开票。</p>
+        <p>顺路车是司机自己发的信息，您与司机直接成交，便宜但没发票、没平台责任。这一单需要 <b>9% 发票 / 对公付款 / 承运人赔货损</b>，就交给合作的持牌网络货运平台。货袋子不承运、不结算、不开票。</p>
       </div>
 
       <div class="blk"><h4>这一单您需要 <small>选完给建议</small></h4>
@@ -60,7 +60,7 @@
         <div class="verdict" id="verdict"><b>还没选</b>两条路随时可以切换。</div>
       </div>
 
-      <div class="blk" id="bringBlk"><h4>就用这台特价车 <small>合作方承运并开票</small></h4>
+      <div class="blk" id="bringBlk"><h4>就用这台顺路车 <small>合作方承运并开票</small></h4>
         <div class="car" id="car"></div>
         <ul class="steps2 mt8">
           <li><i class="hdz">1</i><span><b>货袋子</b>把这台车和您的货物信息转给合作方，之后不再参与</span></li>
@@ -71,7 +71,7 @@
 
       <div class="blk"><h4>两条路的区别</h4>
         <table class="cmp">
-          <tr><th></th><th class="a">找特价车</th><th class="b">合作承运</th></tr>
+          <tr><th></th><th class="a">找顺路车</th><th class="b">合作承运</th></tr>
           <tr><td>承运人</td><td>司机本人</td><td>持牌合作平台</td></tr>
           <tr><td>货损</td><td>按协议找司机，建议投保</td><td>合作平台负责，自带保险</td></tr>
           <tr><td>发票</td><td>无</td><td>9% 运输发票</td></tr>
@@ -121,8 +121,8 @@
     if (k === 'none') { need = need.none ? {} : { none: true }; } else { delete need.none; need[k] ? delete need[k] : need[k] = true; }
     H.qsa('#need div').forEach(function (x) { x.classList.toggle('on', !!need[x.dataset.n]); });
     var vd = H.qs('#verdict'), heavy = need.invoice || need.liable || need.b2b;
-    if (heavy) { vd.className = 'verdict b'; vd.innerHTML = '<b>建议：这一单走合作承运</b>您需要 ' + [need.invoice && '发票', need.liable && '承运人负责', need.b2b && '对公付款'].filter(Boolean).join('、') + '，只有持牌承运人能提供。可指定下面这台特价车由合作方承运，价格约 +8~12%。'; }
-    else if (need.none) { vd.className = 'verdict'; vd.innerHTML = '<b>建议：直接找特价车</b>回到详情页查看电话，用协议模板与司机直签，货值高投一份货运险即可。'; }
+    if (heavy) { vd.className = 'verdict b'; vd.innerHTML = '<b>建议：这一单走合作承运</b>您需要 ' + [need.invoice && '发票', need.liable && '承运人负责', need.b2b && '对公付款'].filter(Boolean).join('、') + '，只有持牌承运人能提供。可指定下面这台顺路车由合作方承运，价格约 +8~12%。'; }
+    else if (need.none) { vd.className = 'verdict'; vd.innerHTML = '<b>建议：直接找顺路车</b>回到详情页查看电话，用协议模板与司机直签，货值高投一份货运险即可。'; }
     else { vd.className = 'verdict'; vd.innerHTML = '<b>还没选</b>两条路随时可以切换。'; }
   }; });
 
@@ -144,7 +144,7 @@
   H.notes('小程序 / H5 · 合作承运分流页（设计说明）', [
     '与 PC 版同一逻辑的手机版：从运力详情页「要发票 / 要有人负责」进入，带入当前这台车。',
     '先选需求再给建议；"都不需要"直接劝回详情页直联司机，避免把用户往贵 10% 的路推。',
-    '"就用这台特价车"由合作方完成司机入驻与承运，货袋子只<b>转交信息</b>，底部提交前有离开声明与勾选确认。',
+    '"就用这台顺路车"由合作方完成司机入驻与承运，货袋子只<b>转交信息</b>，底部提交前有离开声明与勾选确认。',
     '货袋子在这里的收入是合作方的推广费用，与货主运费无关，页面如实说明。',
   ]);
 })();

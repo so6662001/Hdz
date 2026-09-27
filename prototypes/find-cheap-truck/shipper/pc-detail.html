@@ -38,10 +38,10 @@
 <body class="pc-body">
 <nav class="pc-nav"><div class="in">
   <a class="logo" href="pc-find.html"><i>货</i>货袋子</a>
-  <div class="menu"><a>首页</a><a>现货商城</a><a>求购大厅</a><a>钢市行情</a><a>加工服务</a><a class="on" href="pc-find.html">找特价车<span class="new">NEW</span></a><a>资讯</a></div>
+  <div class="menu"><a>首页</a><a>现货商城</a><a>求购大厅</a><a>钢市行情</a><a>加工服务</a><a class="on" href="pc-find.html">找顺路车<span class="new">NEW</span></a><a>资讯</a></div>
   <div class="right"><span>客服 400-xxx-xxxx</span><span class="u"><span class="avatar">沪</span>上海某钢贸有限公司 <span class="tag ok">已认证</span></span><a>卖家中心</a></div>
 </div></nav>
-<div class="crumb"><a href="pc-find.html">找特价车</a> › <a href="pc-find.html">嘉兴 → 上海</a> › <span id="crumbCur">运力详情</span></div>
+<div class="crumb"><a href="pc-find.html">找顺路车</a> › <a href="pc-find.html">嘉兴 → 上海</a> › <span id="crumbCur">运力详情</span></div>
 
 <div class="detail-wrap">
   <div id="main"></div>
@@ -96,7 +96,7 @@
       '<li>将于 ' + p.validUntil.slice(5, 16).replace('T', ' ') + ' 自动下架（除司机延长 / 提前标记已接单）</li></ul>' +
     '</div>' +
 
-    (sims.length ? '<div class="dcard"><h3>同线路其他特价车</h3><div class="sim">' + sims.map(function (s) { var sv = H.VEHICLES[s.vehicle]; return '<a class="s" href="pc-detail.html?id=' + s.id + '"><b>' + s.from + ' → ' + s.to.join('/') + '</b><span class="muted">' + s.depart + ' · ' + H.vehicleLine(sv) + '</span><div class="p">' + (s.price == null ? '面议' : '¥' + s.price + '/' + s.priceUnit) + '</div></a>'; }).join('') + '</div></div>' : '');
+    (sims.length ? '<div class="dcard"><h3>同线路其他顺路车</h3><div class="sim">' + sims.map(function (s) { var sv = H.VEHICLES[s.vehicle]; return '<a class="s" href="pc-detail.html?id=' + s.id + '"><b>' + s.from + ' → ' + s.to.join('/') + '</b><span class="muted">' + s.depart + ' · ' + H.vehicleLine(sv) + '</span><div class="p">' + (s.price == null ? '面议' : '¥' + s.price + '/' + s.priceUnit) + '</div></a>'; }).join('') + '</div></div>' : '');
 
   H.qs('#side').innerHTML =
     '<div class="aside-box"><div class="price-box">' + H.priceHtml(p, true).replace('class="n"', 'class="n"') + '<div class="xs muted mt4">司机期望价 · 可议 · 不含装卸 / 等待费（联系时确认）</div></div>' +
