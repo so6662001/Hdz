@@ -41,9 +41,12 @@
     vars(lead, opt) {
       opt = opt || {}; const owner = S.users.find(u => u.id === lead.owner);
       const lastIn = (S.conversations.find(c => c.leadId === lead.id) || { messages: [] }).messages.filter(m => m.dir === 'IN').slice(-1)[0];
-      return { nickname: lead.nickname || '', source_channel: lead.sourceChannel || '', source_excerpt: lead.sourceExcerpt ? `「${lead.sourceExcerpt}」` : '', last_interaction: lastIn ? lastIn.text : '', product: lead.product && lead.product !== '—' ? lead.product : (S.merchant.products[0] || ''), sales_name: opt.salesName || (owner ? owner.name : S.merchant.defaultVars.sales_name), company: S.merchant.name, case_link: S.merchant.defaultVars.case_link, company_intro: S.merchant.intro };
+      const pj = lead.projectId && S.projects ? S.projects.find(p => p.id === lead.projectId) : null; const co = lead.companyId && S.companies ? S.companies.find(c => c.id === lead.companyId) : null;
+      const rf = lead.sourceCode && /^R\d/.test(lead.sourceCode) && S.referrals ? (S.referrals.find(r => r.leadId === lead.id) || {}) : {}; const rfr = rf.referrerId ? S.referrers.find(r => r.id === rf.referrerId) : null;
+      return { nickname: lead.nickname || '', source_channel: lead.sourceChannel || '', source_excerpt: lead.sourceExcerpt ? `「${lead.sourceExcerpt}」` : '', last_interaction: lastIn ? lastIn.text : '', product: lead.product && lead.product !== '—' ? lead.product : (S.merchant.products[0] || ''), sales_name: opt.salesName || (owner ? owner.name : S.merchant.defaultVars.sales_name), company: S.merchant.name, case_link: S.merchant.defaultVars.case_link, company_intro: S.merchant.intro,
+        project_name: pj ? pj.name : '', project_region: pj ? pj.region : (lead.region || ''), project_stage: pj ? pj.stageText : '', distance_km: pj && pj.distanceKm != null ? String(pj.distanceKm) : (co && co.distanceKm != null ? String(co.distanceKm) : ''), company_name: co ? co.name : (lead.company || ''), company_scope: co ? co.scope : '', referrer_name: rfr ? `${rfr.org}${rfr.name}` : '' };
     },
-    PERSONAL_VARS: ['nickname', 'source_channel', 'source_excerpt', 'last_interaction'],
+    PERSONAL_VARS: ['nickname', 'source_channel', 'source_excerpt', 'last_interaction', 'project_name', 'company_name', 'referrer_name'],
     render(script, lead, opt) {
       opt = opt || {}; const v = Engine.vars(lead, opt); const tpl = opt.variant != null && script.variants && script.variants[opt.variant] ? script.variants[opt.variant] : script.content;
       const used = [...tpl.matchAll(/\{(\w+)\}/g)].map(m => m[1]);
@@ -65,6 +68,41 @@
     },
     pacing(account) { const p = S.riskPolicies.find(r => r.platform === account.platform && r.tier === account.tier && r.platformDefault) || S.riskPolicies[0]; const mu = (p.delayMin + p.delayMax) / 2, sd = (p.delayMax - p.delayMin) / 4; let x = mu + sd * (Math.random() + Math.random() + Math.random() - 1.5) * 1.6; x = Math.max(p.delayMin, Math.min(p.delayMax, Math.round(x))); return { preDelaySec: x, typingCps: 6, postDelaySec: Math.round(x / 3), policy: p }; },
     quota(account) { const remainDay = account.daily - account.todaySent; const warm = account.warmupDay ? (account.warmupDay <= 3 ? .2 : account.warmupDay <= 7 ? .5 : 1) : 1; return { remainDay: Math.max(0, Math.round(account.daily * warm) - account.todaySent), effectiveDaily: Math.round(account.daily * warm), warm, hourly: account.hourly, circuit: account.status === 'RESTRICTED', offline: account.status === 'OFFLINE' }; },
+
+    /* [LLM] 投喂箱抽取：任意文本 / 链接 / OCR 结果 → 项目 / 企业 / 联系人结构化记录（规则模拟，正式实现走 JSON Schema 约束输出） */
+    extractIntake(raw, kind) {
+      const t = String(raw || ''); const out = { entity: 'PERSON', confidence: 0.6 }; const problems = [];
+      const g = (re) => { const m = t.match(re); return m ? m[1].trim() : ''; };
+      const isProject = /项目|工程|中标|招标|施工|建设单位|厂房|住宅|电站|改造|公示/.test(t); const isCompany = /有限公司|加工厂|配送|工厂|厂长|注册|经营范围/.test(t) && !isProject;
+      if (isProject) {
+        out.entity = 'PROJECT';
+        out.project_name = g(/(?:项目名称[:：]?\s*|中标\s*)?([\u4e00-\u9fa5A-Za-z0-9（）()]{2,40}?(?:项目|工程|产业园|电站|厂房|住宅|改造))/) || (kind === 'LINK' ? '（链接标题待解析）' : '');
+        out.owner_org = g(/建设单位[:：]?\s*([\u4e00-\u9fa5A-Za-z0-9（）()]{4,30})/); out.contractor_org = g(/(?:施工单位|中标单位|中标人|总包)[:：]?\s*([\u4e00-\u9fa5A-Za-z0-9（）()]{4,30})/) || g(/([\u4e00-\u9fa5]{2,20}(?:局|集团|建设|建工|工程有限公司))\s*(?:中标|承建)/) || g(/((?:中建|中铁|中交|中冶|中电建)[\u4e00-\u9fa5]{1,10}?(?:局|公司|集团))/);
+        const specs = t.match(/(HRB\d{3}E?|Q\d{3}[A-D]?|H\s?型钢|中厚板|中板|螺纹钢|盘螺|线材|C\s?型钢|彩涂板)/g); if (specs) out.spec = Array.from(new Set(specs)).join(' / '); out.contact_name = g(/(?:联系人[:：]?\s*)?([\u4e00-\u9fa5](?:厂长|经理|老板|总|工))(?=[\s，,。、：:）)]|$)/); if (/^(开|竣|施|加|完|用|做|收|返)工$/.test(out.contact_name)) out.contact_name = '';
+        out.supervisor_org = g(/监理单位[:：]?\s*([\u4e00-\u9fa5A-Za-z0-9（）()]{4,30})/); out.area = g(/(?:建筑面积|面积)[:：]?\s*([\d,\.]+\s*(?:㎡|平方米|万㎡|万平方米))/); out.contract_amount = g(/([\d\.,]+\s*(?:亿|万元|万))/);
+        out.period = g(/((?:开工|工期)[:：]?\s*[\d\.\-年月]+\s*(?:至|到|→|—)\s*[\d\.\-年月]+)/) || (function () { const m = t.match(/开工[:：]?\s*([\d\.\-年月]+)\s*竣工[:：]?\s*([\d\.\-年月]+)/); return m ? `${m[1]} → ${m[2]}` : ''; })() || g(/(\d{4}[\.\-]\d{1,2}\s*(?:至|到|→|—)\s*\d{4}[\.\-]\d{1,2})/);
+        const ents = Engine.extractEntities(t); if (ents.quantity) out.quantity = ents.quantity;
+        if (!out.project_name) problems.push('未识别项目名称，请手工填写'); if (!out.owner_org && !out.contractor_org) problems.push('未识别建设 / 施工单位'); if (!out.area && !out.contract_amount && !out.quantity) problems.push('无面积 / 合同价 / 吨位，无法估算用钢量');
+        out.confidence = Math.max(0.35, Math.min(0.95, 0.95 - problems.length * 0.15));
+      } else if (isCompany) {
+        out.entity = 'COMPANY';
+        out.company_name = g(/([\u4e00-\u9fa5A-Za-z0-9]{2,20}?(?:有限公司|集团|加工厂|配送中心))/); out.company_type = /配送|加工/.test(t) ? 'PROCESSING_CENTER' : /钢结构|建设|建筑/.test(t) ? 'CONTRACTOR' : 'MANUFACTURER'; out.company_scope = g(/做([\u4e00-\u9fa5]{2,10}?)的/) || g(/经营范围[:：]?\s*([\u4e00-\u9fa5、，]{2,30})/);
+        out.contact_name = g(/([\u4e00-\u9fa5](?:厂长|经理|老板|总|工))(?=[\s，,。、：:）)]|$)/); out.phone = g(/(1[3-9]\d[\d\*一二三四五六七八九零]{6,12})/); const ents = Engine.extractEntities(t); const specs = t.match(/(HRB\d{3}E?|Q\d{3}[A-D]?|H\s?型钢|中厚板|中板|螺纹钢|盘螺|线材)/g); if (ents.quantity || specs) out.need = [specs ? Array.from(new Set(specs)).join(' / ') : '', ents.quantity].filter(Boolean).join(' ');
+        if (!out.company_name) problems.push('未识别企业名称'); if (out.phone && /[一二三四五六七八九零\*]/.test(out.phone)) problems.push('电话号码含转写不清字符，请核对');
+        out.confidence = Math.max(0.35, Math.min(0.95, 0.92 - problems.length * 0.14));
+      } else {
+        out.name = g(/([\u4e00-\u9fa5]{1,3}(?:总|经理|工|老板|先生|女士))/); out.org = g(/([\u4e00-\u9fa5A-Za-z0-9]{2,30}(?:有限公司|公司|集团))/); out.phone = g(/(1[3-9]\d{9})/);
+        if (!out.name && !out.org) problems.push('未识别联系人或单位，请补充'); out.confidence = problems.length ? 0.45 : 0.8;
+      }
+      out.problems = problems; out.model = 'Qwen3.5-Plus (JSON Schema: intake.' + out.entity.toLowerCase() + '.v1)';
+      return out;
+    },
+    /* 项目用钢量估算（08 分册 §1 经验系数） */
+    estimateTon(area, structure, mw) {
+      const K = { RESIDENTIAL: [40, 55], COMMERCIAL: [55, 90], LIGHT_STEEL: [30, 60], HEAVY_STEEL: [80, 150], PV: [30, 45] };
+      if (structure === 'PV' && mw) return [Math.round(mw * 30), Math.round(mw * 45)];
+      const k = K[structure] || [40, 70]; if (!area) return null; return [Math.round(area * k[0] / 1000), Math.round(area * k[1] / 1000)];
+    },
 
     /* [LLM] 自然语言 → JobSpec */
     parseJob(text) {
@@ -121,12 +159,13 @@
 
     /* 流程：校验与推进（与 02 分册 5A 一致） */
     flow: {
-      NODE_META: { Send: ['发送话术', 'send', '✉️'], Wait: ['等待', 'wait', '⏳'], WaitForReply: ['等待回复', 'wait', '💬'], Branch: ['条件分支', 'branch', '⑂'], HumanTask: ['人工任务', 'human', '👤'], SetStage: ['置阶段', 'set', '🏷️'], Tag: ['打标签', 'set', '🔖'], Notify: ['通知', 'set', '🔔'], GoTo: ['回到', 'goto', '↺'], End: ['结束', 'end', '◼'] },
-      BRANCH_LABEL: { NO_REPLY: '未回复（超时）', REFUSED: '拒绝', ASK_PRICE: '问价格', ASK_CASE: '问案例', ASK_MATERIAL: '求资料', CONSIDERING: '再考虑', HAS_ENTITIES: '提到数量/规格', INQUIRY: '询货', CONTRACT: '问合同/账期', '*': '其他回复', DONE: '完成', ESCALATED: '升级' },
-      label(def, id) { const n = def.nodes[id]; if (!n) return id; const M = Engine.flow.NODE_META[n.type]; switch (n.type) { case 'Send': { const s = S.scripts.find(x => x.id === n.scriptId); return `发送话术「${s ? s.name : n.scriptId}」`; } case 'Wait': return `等待 ${n.hours >= 24 ? n.hours / 24 + ' 天' : n.hours + ' 小时'}`; case 'WaitForReply': return `等待回复 · 最长 ${n.timeoutHours >= 24 ? n.timeoutHours / 24 + ' 天' : n.timeoutHours + ' 小时'}`; case 'HumanTask': return `人工任务 · ${{ QUOTE: '报价', CONTRACT: '合同', FOLLOW_UP: '跟进', CUSTOM: '自定义' }[n.kind] || n.kind}${n.escalateAfterHours ? ` · ${n.escalateAfterHours}h 未处理升级` : ''}`; case 'SetStage': return `置阶段为「${{ HOT: '高意向', SILENT: '静默', LOST: '流失' }[n.stage] || n.stage}」`; case 'Notify': return `通知 ${n.to === 'owner' ? '负责人' : n.to}`; case 'GoTo': return `回到「${Engine.flow.label(def, n.target)}」 · 上限 ${n.maxLoops} 次`; case 'End': return `结束${n.stage ? ' · 置为 ' + ({ SILENT: '静默', LOST: '流失' }[n.stage] || n.stage) : ''}${n.handoff ? ' · 交人工' : ''}`; case 'Tag': return `打标签 ${n.tags}`; default: return M ? M[0] : n.type; } },
+      NODE_META: { Send: ['发送话术', 'send', 'S'], Wait: ['等待', 'wait', 'W'], WaitForReply: ['等待回复', 'wait', 'R'], Branch: ['条件分支', 'branch', 'B'], HumanTask: ['人工任务', 'human', 'H'], Call: ['电话（人工拨打 + 记录）', 'call', 'C'], SetStage: ['置阶段', 'set', '#'], Tag: ['打标签', 'set', 'T'], Notify: ['通知', 'set', 'N'], GoTo: ['回到', 'goto', '↺'], End: ['结束', 'end', '■'] },
+      BRANCH_LABEL: { NO_REPLY: '未回复（超时）', REFUSED: '拒绝', ASK_PRICE: '问价格', ASK_CASE: '问案例', ASK_MATERIAL: '求资料', CONSIDERING: '再考虑', HAS_ENTITIES: '提到数量/规格', INQUIRY: '询货', CONTRACT: '问合同/账期', '*': '其他回复', DONE: '完成', ESCALATED: '升级', CONNECTED: '接通', NO_ANSWER: '未接通', WRONG_NUMBER: '号码错误 / 非本人' },
+      CALL_RESULTS: { CONNECTED: '接通', NO_ANSWER: '未接通 / 占线', REFUSED: '拒绝', WRONG_NUMBER: '号码错误 / 非本人' },
+      label(def, id) { const n = def.nodes[id]; if (!n) return id; const M = Engine.flow.NODE_META[n.type]; switch (n.type) { case 'Send': { const s = S.scripts.find(x => x.id === n.scriptId); return `发送话术「${s ? s.name : n.scriptId}」`; } case 'Wait': return `等待 ${n.hours >= 24 ? n.hours / 24 + ' 天' : n.hours + ' 小时'}`; case 'WaitForReply': return `等待回复 · 最长 ${n.timeoutHours >= 24 ? n.timeoutHours / 24 + ' 天' : n.timeoutHours + ' 小时'}`; case 'HumanTask': return `人工任务 · ${{ QUOTE: '报价', CONTRACT: '合同', FOLLOW_UP: '跟进', CUSTOM: '自定义' }[n.kind] || n.kind}${n.escalateAfterHours ? ` · ${n.escalateAfterHours}h 未处理升级` : ''}`; case 'Call': { const s = S.scripts.find(x => x.id === n.scriptId); return `电话 · 开场白「${s ? s.name.replace('电话开场白 · ', '') : n.scriptId}」 · ${n.dueHours || 24}h 内拨打`; } case 'SetStage': return `置阶段为「${{ HOT: '高意向', SILENT: '静默', LOST: '流失' }[n.stage] || n.stage}」`; case 'Notify': return `通知 ${n.to === 'owner' ? '负责人' : n.to}`; case 'GoTo': return `回到「${Engine.flow.label(def, n.target)}」 · 上限 ${n.maxLoops} 次`; case 'End': return `结束${n.stage ? ' · 置为 ' + ({ SILENT: '静默', LOST: '流失' }[n.stage] || n.stage) : ''}${n.handoff ? ' · 交人工' : ''}`; case 'Tag': return `打标签 ${n.tags}`; default: return M ? M[0] : n.type; } },
       validate(def) {
         const errors = [], warnings = []; const ids = Object.keys(def.nodes); const reach = new Set(); const stack = [def.first];
-        while (stack.length) { const id = stack.pop(); if (!id || reach.has(id)) continue; reach.add(id); const n = def.nodes[id]; if (!n) { errors.push(`节点 ${id} 不存在（被引用）`); continue; } const outs = n.type === 'WaitForReply' || n.type === 'Branch' ? Object.values(n.branches || {}) : n.type === 'GoTo' ? [n.target, n.onExceed] : n.type === 'HumanTask' ? [n.next, n.onEscalate] : n.type === 'End' ? [] : [n.next]; outs.forEach(o => { if (o && !def.nodes[o]) errors.push(`节点「${id}」的出口指向不存在的节点 ${o}`); else if (o) stack.push(o); }); if (n.type !== 'End' && n.type !== 'GoTo' && n.type !== 'WaitForReply' && n.type !== 'Branch' && !n.next) errors.push(`节点「${id}」缺少下一步`); if (n.type === 'Send' && !S.scripts.find(s => s.id === n.scriptId)) errors.push(`节点「${id}」引用的话术不存在`); if (n.type === 'WaitForReply' && !(n.branches && n.branches['*'])) warnings.push(`节点「${id}」未配置「其他回复」出口，默认回到等待`); }
+        while (stack.length) { const id = stack.pop(); if (!id || reach.has(id)) continue; reach.add(id); const n = def.nodes[id]; if (!n) { errors.push(`节点 ${id} 不存在（被引用）`); continue; } const outs = n.type === 'WaitForReply' || n.type === 'Branch' || n.type === 'Call' ? Object.values(n.branches || {}) : n.type === 'GoTo' ? [n.target, n.onExceed] : n.type === 'HumanTask' ? [n.next, n.onEscalate] : n.type === 'End' ? [] : [n.next]; outs.forEach(o => { if (o && !def.nodes[o]) errors.push(`节点「${id}」的出口指向不存在的节点 ${o}`); else if (o) stack.push(o); }); if (n.type !== 'End' && n.type !== 'GoTo' && n.type !== 'WaitForReply' && n.type !== 'Branch' && n.type !== 'Call' && !n.next) errors.push(`节点「${id}」缺少下一步`); if (n.type === 'Call' && !(n.branches && n.branches.CONNECTED && n.branches.NO_ANSWER)) errors.push(`电话节点「${id}」必须配置「接通」与「未接通」出口`); if (n.type === 'Send' && !S.scripts.find(s => s.id === n.scriptId)) errors.push(`节点「${id}」引用的话术不存在`); if (n.type === 'WaitForReply' && !(n.branches && n.branches['*'])) warnings.push(`节点「${id}」未配置「其他回复」出口，默认回到等待`); }
         ids.forEach(id => { if (!reach.has(id)) warnings.push(`节点「${id}」不可达（孤立）`); });
         if (!ids.some(id => def.nodes[id].type === 'End' && reach.has(id))) errors.push('没有任何可达的结束节点');
         const sends = ids.filter(id => def.nodes[id].type === 'Send').length; if (def.guardrails && sends > def.guardrails.maxAutoSends) warnings.push(`发送节点数 ${sends} 超过护栏 maxAutoSends=${def.guardrails.maxAutoSends}，部分路径会被护栏截断`);
@@ -144,6 +183,7 @@
             if (ev && (ev.type === 'TIMEOUT' || ev.type === 'REPLY')) { let key = ev.type === 'TIMEOUT' ? 'NO_REPLY' : (ev.refusal ? 'REFUSED' : (ev.entities && (ev.entities.quantity || ev.entities.spec) && n.branches.HAS_ENTITIES ? 'HAS_ENTITIES' : (n.branches[ev.category] ? ev.category : '*'))); const to = n.branches[key] || n.branches['*'] || cur; step(cur, key); cur = to; if (to === inst.currentNode && key === '*') { /* 回到自身等待 */ } continue; }
             step(cur, `WAITING(${n.timeoutHours}h)`); inst.status = 'WAITING'; inst.waitingType = 'REPLY'; inst.currentNode = cur; inst.waitingUntil = Date.now() + n.timeoutHours * 3600e3; return trace;
           }
+          if (n.type === 'Call') { if (ev && ev.type === 'CALL') { const key = n.branches[ev.result] ? ev.result : (n.branches['*'] ? '*' : 'NO_ANSWER'); step(cur, key, { call: ev.result }); cur = n.branches[key]; continue; } if (ev && ev.type === 'TIMEOUT') { step(cur, 'OVERDUE → 未拨打，按未接通处理'); cur = n.branches.NO_ANSWER; continue; } step(cur, `WAITING(电话 · ${n.dueHours || 24}h)`); inst.status = 'WAITING'; inst.waitingType = 'CALL'; inst.currentNode = cur; inst.waitingUntil = Date.now() + (n.dueHours || 24) * 3600e3; return trace; }
           if (n.type === 'HumanTask') { if (ev && ev.type === 'HUMAN_DONE') { step(cur, 'DONE'); cur = n.next; continue; } if (ev && ev.type === 'TIMEOUT') { step(cur, 'ESCALATED'); cur = n.onEscalate || n.next; continue; } step(cur, `WAITING(人工 · ${n.escalateAfterHours || 24}h 升级)`); inst.status = 'WAITING'; inst.waitingType = 'HUMAN_TASK'; inst.currentNode = cur; inst.waitingUntil = Date.now() + (n.escalateAfterHours || 24) * 3600e3; return trace; }
           if (n.type === 'SetStage') { step(cur, n.stage, { setStage: n.stage }); cur = n.next; continue; }
           if (n.type === 'Tag' || n.type === 'Notify') { step(cur, 'next'); cur = n.next; continue; }
