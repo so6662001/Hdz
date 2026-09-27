@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>货袋子小程序 / H5 · 找特价车</title>
+<title>货袋子小程序 / H5 · 找顺路车</title>
 <link rel="stylesheet" href="../shared/base.css">
 <style>
   .m-hero { background: linear-gradient(160deg, #1a3fb0, #1f5eff 70%, #3b7bff); color: #fff; padding: 8px 14px 46px; }
@@ -41,12 +41,12 @@
 <div class="m-stage">
   <div class="phone" id="phone">
     <div class="statusbar" style="background:#1a3fb0;color:#fff"><span>9:24</span><span>●●● ᯤ 100%</span></div>
-    <div class="h5bar"><span>‹</span><span>›</span><div class="url"><span class="lock">🔒</span>m.huodaizi.com/tejiache</div><span>⟳</span></div>
-    <div class="navbar mp-only" style="background:#1a3fb0;color:#fff"><div class="title">找特价车</div><div class="capsule" style="border-color:rgba(255,255,255,.35);background:rgba(0,0,0,.18);color:#fff"><span>···</span><i style="background:rgba(255,255,255,.35)"></i><span>◉</span></div></div>
+    <div class="h5bar"><span>‹</span><span>›</span><div class="url"><span class="lock">🔒</span>m.huodaizi.com/shunluche</div><span>⟳</span></div>
+    <div class="navbar mp-only" style="background:#1a3fb0;color:#fff"><div class="title">找顺路车</div><div class="capsule" style="border-color:rgba(255,255,255,.35);background:rgba(0,0,0,.18);color:#fff"><span>···</span><i style="background:rgba(255,255,255,.35)"></i><span>◉</span></div></div>
     <div class="screen" id="screen">
-      <div class="h5-guide h5-only"><div class="logo">货</div><div class="t">货袋子小程序 · 找特价车<small>收藏司机、订阅线路、接收通知更方便</small></div><button>打开小程序</button></div>
+      <div class="h5-guide h5-only"><div class="logo">货</div><div class="t">货袋子小程序 · 找顺路车<small>收藏司机、订阅线路、接收通知更方便</small></div><button>打开小程序</button></div>
       <div class="m-hero">
-        <div class="h"><h2>找特价车</h2><span class="tj">返程车 · 闲置车</span><div class="st">今日在展 <b>386</b> 台<br>平均低于市场 <b>14%</b></div></div>
+        <div class="h"><h2>找顺路车</h2><span class="tj">返程车 · 闲置车</span><div class="st">今日在展 <b>386</b> 台<br>平均低于市场 <b>14%</b></div></div>
         <p>司机自发的回程车、空闲车，专装钢材。平台只展示信息，您与司机直接联系。</p>
       </div>
       <div class="m-search">
@@ -59,12 +59,12 @@
       <div class="list" id="list"></div>
       <div class="px14 mt12"><div class="notice gray"><span class="ic"></span><div><b>安全提示：</b>装车前核对司机身份证、驾驶证、车牌与平台一致；使用协议模板并投保货运险；运费直付司机，不向第三方转账；遇问题请举报。货袋子仅展示信息，不参与运输交易。</div></div></div>
       <div style="height:30px"></div>
-      <div class="bottom-cta h5-only"><button class="btn ghost" style="flex:0 0 120px" id="subBtnH5">订阅线路</button><button class="btn">打开小程序找车</button></div>
+      <div class="bottom-cta h5-only"><button class="btn ghost" style="flex:0 0 110px" id="subBtnH5">订阅线路</button><a class="btn line" href="m-need.html?shell=h5">发用车需求</a><button class="btn">打开小程序</button></div>
     </div>
     <div class="tabbar mp-only">
       <a><span class="ic"></span>首页</a>
       <a><span class="ic"></span>现货</a>
-      <a class="on"><span class="ic"></span>找特价车</a>
+      <a class="on"><span class="ic"></span>找顺路车</a>
       <a><span class="ic"></span>消息<span class="dot">2</span></a>
       <a><span class="ic"></span>我的</a>
     </div>
@@ -104,15 +104,17 @@
     var html = '';
     list.forEach(function (p, i) {
       html += H.mobileCard(p);
-      if (i === 2) html += '<div class="sub-card"><div class="t"><b>订阅「嘉兴 → 上海」</b><small>有新特价车微信通知您 · 已有 12 家企业订阅</small></div><button class="btn sm" data-sub>订阅</button></div>';
+      if (i === 0) html += '<a class="sub-card" href="m-need.html?shell=' + shell + '" style="background:linear-gradient(120deg,#1a3fb0,#3b7bff);color:#fff;border-color:transparent"><div class="t"><b>没找到合适的车？发一条用车需求</b><small style="color:rgba(255,255,255,.8)">系统实时推荐匹配的顺路车，司机也会主动联系您 · 不接单、不收费</small></div><span class="btn sm" style="background:#fff;color:var(--brand)">去发布</span></a>';
+      if (i === 2) html += '<div class="sub-card"><div class="t"><b>订阅「嘉兴 → 上海」</b><small>有新顺路车微信通知您 · 已有 12 家企业订阅</small></div><button class="btn sm" data-sub>订阅</button></div>';
     });
-    H.qs('#list').innerHTML = html || '<div class="empty"><div class="ic"></div>暂无合适的车<br><button class="btn line sm mt12" data-sub>订阅线路，有车通知我</button></div>';
+    H.qs('#list').innerHTML = html || '<div class="empty"><div class="ic"></div>暂无合适的车<br><a class="btn sm mt12" href="m-need.html?shell=' + shell + '">发布用车需求，让车来找我</a><br><button class="btn line sm mt12" data-sub>订阅线路，有车通知我</button></div>';
     H.qs('#cnt').textContent = list.length + ' 条 · 已隐藏到期/已接单';
   }
   render();
 
   H.qs('#list').addEventListener('click', function (e) {
     if (e.target.closest('[data-sub]')) return H.toast('已订阅，有新车通过微信通知您');
+    if (e.target.closest('a.sub-card')) return;
     var card = e.target.closest('.post-card'); if (!card) return;
     var p = H.POSTS.filter(function (x) { return x.id === card.dataset.id; })[0];
     if (e.target.closest('[data-call]')) H.unlockPhone(p);
@@ -132,10 +134,10 @@
       onReady: function (root, close) { H.qsa('.chip', root).forEach(function (c) { c.onclick = function () { c.classList.toggle('on'); }; }); H.qs('[data-r]', root).onclick = function () { H.qsa('.chip', root).forEach(function (c) { c.classList.remove('on'); }); }; H.qs('[data-ok]', root).onclick = close; } });
   };
 
-  H.notes((shell === 'h5' ? 'H5 端' : '小程序端') + ' · 找特价车（设计说明）', [
-    shell === 'h5' ? 'H5 用于 <b>微信群 / 朋友圈分享、短信链接、PC 扫码</b> 等场景，顶部引导打开小程序；查看电话需手机号登录。' : '小程序入口放在货袋子小程序 <b>Tab 栏</b>「找特价车」，卖家、买家共用；支持收藏、订阅通知、服务通知提醒。',
+  H.notes((shell === 'h5' ? 'H5 端' : '小程序端') + ' · 找顺路车（设计说明）', [
+    shell === 'h5' ? 'H5 用于 <b>微信群 / 朋友圈分享、短信链接、PC 扫码</b> 等场景，顶部引导打开小程序；查看电话需手机号登录。' : '小程序入口放在货袋子小程序 <b>Tab 栏</b>「找顺路车」，卖家、买家共用；支持收藏、订阅通知、服务通知提醒。',
     '搜索框沿用 PC 逻辑但简化为 <b>车在哪 → 送到哪 + 时间 + 筛选</b>；下方快捷 chips 覆盖最常用筛选（返程 / 鞍座 / 篷布 / 17.5m / 已认证）。',
-    '信任 4 格常驻首屏；列表第 3 条后插入「订阅线路」卡片，把"没找到"转化为需求信号回传给司机端。',
+    '信任 4 格常驻首屏；列表第 1 条后插入「<b>发布用车需求</b>」卡片（shipper/m-need.html），第 3 条后插入「订阅线路」卡片，把"没找到"转化为需求信号回传给司机端。',
     '卡片与 PC 一致的数据结构：线路、时间、车与装备、司机资质徽章、价格与市场参考。',
     '「查看电话」为底部弹层：风险提示确认 → 号码（拨打 / 复制）→ 联系结果反馈。',
     '页面底部与详情页均有平台边界声明；两种壳（小程序 / H5）用右上角按钮切换。',

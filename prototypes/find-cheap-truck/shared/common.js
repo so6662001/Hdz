@@ -1,4 +1,4 @@
-/* 找特价车 · 通用交互（纯前端原型，无后端） */
+/* 找顺路车 · 通用交互（纯前端原型，无后端） */
 (function () {
   var H = window.HDZ = window.HDZ || {};
   var qs = function (s, r) { return (r || document).querySelector(s); };
@@ -12,7 +12,7 @@
     if (H.embed) { document.body.classList.add('embed'); return; }
     var bar = document.createElement('div');
     bar.className = 'proto-bar';
-    var html = '<b>货袋子 · 找特价车 原型</b>';
+    var html = '<b>货袋子 · 找顺路车 原型</b>';
     html += '<a href="' + H.rel('index.html') + '">总览</a>';
     links.forEach(function (l) { html += '<a href="' + l.href + '" class="' + (l.key === current ? 'on' : '') + '">' + l.label + '</a>'; });
     html += '<span class="sp"></span><span class="hint">纯前端演示 · 数据为模拟</span>';
@@ -27,21 +27,24 @@
     { key: 'publish', label: '发布运力', href: 'publish.html' },
     { key: 'form', label: '手动表单', href: 'publish-form.html' },
     { key: 'vehicle', label: '添加车辆', href: 'vehicle-add.html' },
+    { key: 'needs', label: '沿线需求', href: 'needs.html' },
     { key: 'notify', label: '服务通知', href: 'notify.html' },
     { key: 'appeal', label: '申诉', href: 'appeal.html' },
     { key: 'pc', label: 'PC找车', href: '../shipper/pc-find.html' },
     { key: 'm', label: '小程序找车', href: '../shipper/m-find.html?shell=mp' },
-    { key: 'h5', label: 'H5找车', href: '../shipper/m-find.html?shell=h5' },
+    { key: 'need', label: '用车需求', href: '../shipper/pc-need.html' },
     { key: 'admin', label: '运营后台', href: '../admin/console.html' },
   ];
   H.SHIPPER_LINKS = [
     { key: 'pc', label: 'PC找车', href: 'pc-find.html' },
     { key: 'pcd', label: 'PC详情', href: 'pc-detail.html?id=p1001' },
+    { key: 'need', label: 'PC用车需求', href: 'pc-need.html' },
     { key: 'm', label: '小程序找车', href: 'm-find.html?shell=mp' },
+    { key: 'mneed', label: '小程序需求', href: 'm-need.html?shell=mp' },
     { key: 'h5', label: 'H5找车', href: 'm-find.html?shell=h5' },
     { key: 'l2', label: '合作承运', href: 'pc-l2.html?id=p1001' },
     { key: 'home', label: '悟运·运力', href: '../driver/home.html' },
-    { key: 'publish', label: '发布运力', href: '../driver/publish.html' },
+    { key: 'needs', label: '悟运·沿线需求', href: '../driver/needs.html' },
     { key: 'admin', label: '运营后台', href: '../admin/console.html' },
   ];
 
@@ -204,6 +207,141 @@
     } else {
       H.sheet({ title: '联系司机前请确认', body: step1, footer: footer1, onReady: function (root, close) {
         bind(root, close, function (b) { qs('.sh-bd', root).innerHTML = b; qs('.sh-hd span', root).textContent = '司机联系方式'; }, function (f) { qs('.sh-ft', root).innerHTML = f; });
+      } });
+    }
+  };
+
+  /* ---------- 用车需求：匹配（只推荐，不派单） ----------
+     规则透明、可解释：出发地同城/周边 → 目的地一致/方向不限/沿线可捎 → 时间 → 装备 → 车型板长 → 吨位 → 司机履约。
+     命中项与缺项都返回，页面上原样展示给双方，由他们自己判断、自己打电话。 */
+  H.matchPosts = function (need, posts) {
+    posts = posts || H.POSTS;
+    var out = [];
+    posts.forEach(function (p) {
+      if (p.status && p.status !== 'active') return;
+      var v = H.VEHICLES[p.vehicle], d = H.DRIVERS[p.driver] || { good: 90, wyOrders: 0 };
+      var s = 0, hit = [], miss = [];
+      if (p.from === need.from) { s += 40; hit.push('同城出发'); }
+      else if ((H.NEAR[need.from] || []).indexOf(p.from) > -1) { s += 15; hit.push('周边出发 · ' + p.from); }
+      else return;
+      var dest = need.to[0];
+      if (p.to.some(function (t) { return t === dest || t.indexOf(dest) === 0 || dest.indexOf(t) === 0; })) { s += 30; hit.push('目的地一致'); }
+      else if (p.to.indexOf('方向不限') > -1) { s += 20; hit.push('方向不限'); }
+      else if ((p.toDetail || '').indexOf(dest) > -1) { s += 20; hit.push('沿线可捎 ' + dest); }
+      else { s -= 40; miss.push('目的地是 ' + p.to.join('/')); }
+      if (!need.day || p.depart.indexOf(need.day) > -1 || /随时|起/.test(p.depart)) { s += 15; hit.push('时间吻合'); }
+      else { s -= 10; miss.push('车 ' + p.depart + ' 走'); }
+      ((need.req && need.req.equip) || []).forEach(function (e) {
+        if (v.equip.indexOf(e) > -1) { s += 10; hit.push('有' + e); } else { s -= 25; miss.push('无' + e); }
+      });
+      if (need.req && need.req.type) { if (v.type === need.req.type) s += 5; else miss.push('车型是' + v.type); }
+      if (need.req && need.req.len && v.len === need.req.len) s += 5;
+      if (p.spareTons >= need.cargo.tons) { s += 10; hit.push('可装 ' + p.spareTons + 't'); } else { s -= 30; miss.push('只剩 ' + p.spareTons + 't 位'); }
+      s += d.good / 10 + (v.verified ? 5 : 0) + Math.min(10, d.wyOrders / 20);
+      if (s < 50) return;
+      out.push({ post: p, score: Math.round(s), hit: hit, miss: miss, level: miss.length ? 'part' : 'good' });
+    });
+    return out.sort(function (a, b) { return b.score - a.score; });
+  };
+  H.matchNeeds = function (post, needs) {
+    needs = needs || H.NEEDS;
+    var out = [];
+    needs.forEach(function (n) {
+      if (n.status !== 'active') return;
+      var r = H.matchPosts(n, [post])[0];
+      if (r) out.push({ need: n, score: r.score, hit: r.hit, miss: r.miss, level: r.level });
+    });
+    return out.sort(function (a, b) { return b.score - a.score; });
+  };
+  H.matchTags = function (m, max) {
+    var h = m.hit.slice(0, max || 3).map(function (t) { return '<span class="tag ok">✓ ' + t + '</span>'; }).join('');
+    h += m.miss.map(function (t) { return '<span class="tag warn">! ' + t + '</span>'; }).join('');
+    return '<span class="tag ' + (m.level === 'good' ? 'brand' : 'gray') + '">' + (m.level === 'good' ? '完全匹配' : '部分匹配') + ' ' + m.score + '</span>' + h;
+  };
+
+  H.needBudgetHtml = function (need, big) {
+    var ref = H.refPrice(need.from, need.to[0]);
+    if (need.budget == null) return '<div class="n" style="font-size:' + (big ? 22 : 18) + 'px">电话谈</div><div class="ref" style="text-decoration:none">市场参考 ¥' + ref.join('-') + '/吨</div>';
+    if (need.budgetUnit === '车') return '<div class="n">¥' + need.budget + '<small>/车</small></div><div class="ref" style="text-decoration:none">货主预算 · 可议</div>';
+    return '<div class="n">¥' + need.budget + '<small>/吨</small></div><div class="ref" style="text-decoration:none">货主预算 · 市场 ¥' + ref.join('-') + '</div>';
+  };
+  H.cargoLine = function (need) {
+    var c = need.cargo;
+    return c.steel + ' <b>' + c.tons + 't</b>' + (c.pieces ? ' · ' + c.pieces : '') + (need.req.whole === false ? ' · <span class="ok-c">可拼车</span>' : ' · 整车');
+  };
+  H.reqLine = function (need) {
+    var r = need.req, a = [];
+    if (r.len) a.push(r.len); if (r.type) a.push(r.type);
+    a = a.concat(r.equip || []);
+    return a.length ? a.join(' · ') : '车型不限';
+  };
+  H.shipperBadges = function (sh) {
+    var h = sh.certified ? '<span class="badge">认证企业</span>' : '<span class="badge pending">未企业认证</span>';
+    h += '<span class="badge">实名</span>';
+    if (sh.needs >= 5) h += '<span class="badge brand">发过 ' + sh.needs + ' 次需求 · 找到车 ' + sh.found + ' 次</span>';
+    return h;
+  };
+
+  /* 手机端需求卡片（司机在悟运看到的 / 货主在小程序看到的） */
+  H.needCard = function (need, opts) {
+    opts = opts || {};
+    var sh = H.SHIPPERS[need.shipper];
+    return '<div class="post-card need-card" data-id="' + need.id + '">' +
+      '<div class="top"><span class="tag brand">用车需求</span><span class="tag ' + (need.req.whole === false ? 'ok' : 'gray') + '">' + (need.req.whole === false ? '可拼车' : '整车') + '</span>' +
+        (need.source === 'order' ? '<span class="tag gray">来自货袋子订单</span>' : '') + '<span class="sp"></span><span class="xs muted">' + H.fmtAgo(need.posted) + '</span></div>' +
+      '<div class="row between" style="align-items:flex-start">' +
+        '<div class="route"><div class="city">' + need.from + '<small>' + (need.fromDetail || '').split(' · ')[0] + '</small></div><div class="arrow"><div class="ln"></div></div><div class="city to">' + need.to.join(' / ') + '<small>' + (need.toDetail || '').split(' · ')[0] + '</small></div></div>' +
+        '<div class="price">' + H.needBudgetHtml(need) + '</div>' +
+      '</div>' +
+      '<div class="time">装车 <b>' + need.when + '</b></div>' +
+      '<div class="veh"><b>' + H.cargoLine(need) + '</b> <span class="eq">· 需 ' + H.reqLine(need) + '</span></div>' +
+      (opts.match ? '<div class="chips mt8" style="gap:4px">' + H.matchTags(opts.match, 3) + '</div>' : '') +
+      '<div class="drv"><div class="avatar" style="width:30px;height:30px;font-size:12px;background:linear-gradient(135deg,#9fb4ff,#1f5eff)">' + sh.short + '</div><div class="col"><span class="nm">' + sh.company + '</span><div class="badges" style="margin-top:3px">' + H.shipperBadges(sh) + '</div></div><span class="sp"></span>' +
+        (opts.noBtn ? '' : '<button class="btn sm" data-call-need="' + need.id + '">查看货主电话</button>') + '</div>' +
+      '<div class="meta"><span>' + need.views + ' 位司机看过</span><span>' + need.calls + ' 位司机已联系</span>' + (need.calls >= 3 ? '<span class="hot-c">联系的人多，尽快打</span>' : '') + '</div>' +
+      '</div>';
+  };
+
+  /* ---------- 司机查看货主电话（与货主查看司机电话对称：风险提示 → 号码留痕 → 反馈） ---------- */
+  H.unlockShipperPhone = function (need, mode) {
+    var sh = H.SHIPPERS[need.shipper];
+    var step1 = '<div class="notice red"><span class="ic"></span><div><b>这是货主自己发布的用车需求，运费、装卸、结算都由您和货主电话谈。</b>货袋子不派单、不确认成交、不收信息费。</div></div>' +
+      '<ul class="list-check mt12">' +
+      '<li>货主 ' + (sh.certified ? '<b>企业认证 + 联系人实名</b>' : '<b>手机号实名</b>，<span class="hot-c">未做企业认证</span>，建议先核实公司') + '；在货袋子发过 ' + sh.needs + ' 次需求、找到车 ' + sh.found + ' 次</li>' +
+      '<li>预算是货主自填，<b>以电话沟通为准</b>；平台不定价、不抽成</li>' +
+      '<li>任何要求向"平台账户"缴纳 <b>保证金 / 信息费</b> 的都是骗子，请举报</li>' +
+      '<li>联系后请反馈结果；货主找到车后需求会自动隐藏</li></ul>' +
+      '<label class="checkline mt12"><input type="checkbox" id="agreeRiskN"> 我已知悉：平台只展示信息，运输事宜由我与货主自行约定</label>';
+    var step2 = '<div class="phone-reveal"><div class="sub">' + sh.company + ' · ' + sh.contact + ' · ' + need.from + ' → ' + need.to.join('/') + '</div><div class="num">' + sh.phoneFull + '</div><div class="sub">本次查看已记录（货主端可见"' + (mode === 'pc' ? '有司机' : '王师傅 沪D·8K3**') + ' 查看了您的电话"）· 已有 <b>' + (need.calls + 1) + '</b> 位司机联系</div></div>' +
+      '<div class="divider"></div><div class="small t2" style="text-align:center">联系后请反馈，帮需求保持真实</div>' +
+      '<div class="feedback-chips"><span class="chip sm" data-fb="deal">已谈成</span><span class="chip sm" data-fb="talk">在沟通</span><span class="chip sm" data-fb="noanswer">未接通</span><span class="chip sm" data-fb="found">货主已找到车</span><span class="chip sm" data-fb="fake">信息不实</span></div>';
+    var footer1 = '<button class="btn ghost" data-cancel>取消</button><button class="btn' + (mode === 'pc' ? '' : ' wy') + '" data-next disabled>查看号码</button>';
+    var footer2 = mode === 'pc' ? '<button class="btn ghost" data-copy>复制号码</button><button class="btn" data-cancel>关闭</button>' : '<button class="btn ghost" data-copy>复制</button><button class="btn wy" data-dial>拨打电话</button>';
+    var bind = function (root, close, setBody, setFooter) {
+      var ck = qs('#agreeRiskN', root), nx = qs('[data-next]', root);
+      ck.onchange = function () { nx.disabled = !ck.checked; };
+      qsa('[data-cancel]', root).forEach(function (b) { b.onclick = close; });
+      nx.onclick = function () {
+        setBody(step2); setFooter(footer2);
+        qsa('[data-cancel]', root).forEach(function (b) { b.onclick = close; });
+        var cp = qs('[data-copy]', root); if (cp) cp.onclick = function () { H.toast('号码已复制', mode === 'pc' ? document.body : null); };
+        var dl = qs('[data-dial]', root); if (dl) dl.onclick = function () { H.toast('正在呼叫 ' + sh.phoneFull); };
+        qsa('[data-fb]', root).forEach(function (c) {
+          c.onclick = function () {
+            qsa('[data-fb]', root).forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on');
+            var m = { deal: '祝顺利！运费、装卸请与货主电话说清并留好凭证。平台不参与结算。', talk: '已记录', noanswer: '已记录，多位司机反馈未接通将提醒货主确认', found: '已记录，将提醒货主标记「已找到车」；2 位以上司机反馈后自动隐藏', fake: '已提交核实，属实将下架并处理该账号，感谢！' }[c.dataset.fb];
+            H.toast(m, mode === 'pc' ? document.body : null);
+          };
+        });
+      };
+    };
+    if (mode === 'pc') {
+      H.pcModal({ title: '联系货主前请确认', body: step1, footer: footer1, onReady: function (root, close) {
+        bind(root, close, function (b) { qs('.mb', root).innerHTML = b; qs('.mh span', root).textContent = '货主联系方式'; }, function (f) { qs('.mf', root).innerHTML = f; });
+      } });
+    } else {
+      H.sheet({ title: '联系货主前请确认', body: step1, footer: footer1, onReady: function (root, close) {
+        bind(root, close, function (b) { qs('.sh-bd', root).innerHTML = b; qs('.sh-hd span', root).textContent = '货主联系方式'; }, function (f) { qs('.sh-ft', root).innerHTML = f; });
       } });
     }
   };

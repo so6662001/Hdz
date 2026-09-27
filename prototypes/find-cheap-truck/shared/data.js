@@ -1,4 +1,4 @@
-/* 找特价车 · 模拟数据（纯前端原型） */
+/* 找顺路车 · 模拟数据（纯前端原型） */
 window.HDZ = window.HDZ || {};
 
 HDZ.now = new Date('2026-09-27T09:20:00');
@@ -116,3 +116,55 @@ HDZ.STATUS = {
 
 HDZ.HOT_ROUTES = ['上海 → 杭州', '上海 → 南京', '嘉兴 → 上海', '苏州 → 上海', '宁波 → 上海', '无锡 → 上海'];
 HDZ.CITIES = ['上海', '苏州', '无锡', '常州', '南京', '南通', '杭州', '嘉兴', '宁波', '湖州', '绍兴', '合肥', '方向不限'];
+/* 周边城市（约 50~100km，用于"周边出发"推荐） */
+HDZ.NEAR = { '上海': ['嘉兴', '苏州'], '嘉兴': ['上海', '杭州', '湖州', '苏州'], '苏州': ['上海', '无锡', '嘉兴'], '杭州': ['嘉兴', '绍兴', '湖州'], '南京': ['常州'], '宁波': ['绍兴'], '无锡': ['苏州', '常州'] };
+
+/* ---------- 用车需求（找车方发布的信息） ----------
+   平台只做展示与按线路/时间/装备推荐，不派单、不接单、不确认成交、不定价。
+   司机自己查看货主电话联系；货主自己查看匹配车辆电话联系。 */
+HDZ.SHIPPERS = {
+  s1: { id: 's1', company: '上海某钢贸有限公司', short: '沪', certified: true, contact: '张经理', phone: '138****0921', phoneFull: '138 0166 0921', needs: 23, found: 19, complaints: 0, since: '2021-04', tip: '货袋子认证企业 · 平台交易 386 单' },
+  s2: { id: 's2', company: '杭州某建材有限公司', short: '杭', certified: true, contact: '周总', phone: '139****5580', phoneFull: '139 5711 5580', needs: 8, found: 7, complaints: 0, since: '2023-02', tip: '货袋子认证企业 · 平台交易 92 单' },
+  s3: { id: 's3', company: '上海某建筑工程有限公司', short: '建', certified: true, contact: '李工', phone: '137****2264', phoneFull: '137 0192 2264', needs: 15, found: 11, complaints: 1, since: '2022-09', tip: '货袋子认证企业 · 平台采购 148 单' },
+  s4: { id: 's4', company: '宁波某物资经营部', short: '甬', certified: false, contact: '陈先生', phone: '150****7731', phoneFull: '150 5847 7731', needs: 2, found: 1, complaints: 0, since: '2026-08', tip: '手机号实名 · 未做企业认证' },
+  s5: { id: 's5', company: '苏州某钢结构有限公司', short: '苏', certified: true, contact: '王经理', phone: '136****9016', phoneFull: '136 6212 9016', needs: 31, found: 27, complaints: 0, since: '2020-11', tip: '货袋子认证企业 · 平台交易 512 单' },
+  s6: { id: 's6', company: '南京某贸易有限公司', short: '宁', certified: true, contact: '赵经理', phone: '135****4488', phoneFull: '135 8451 4488', needs: 6, found: 5, complaints: 0, since: '2024-05', tip: '货袋子认证企业 · 平台交易 47 单' },
+};
+
+HDZ.NEEDS = [
+  { id: 'n2001', shipper: 's1', from: '嘉兴', fromDetail: '南湖区 · 恒源钢构仓', to: ['上海'], toDetail: '宝山 · 某钢材市场', day: '今天', when: '今天 15:00-19:00 装车', validUntil: '2026-09-27T19:00:00',
+    cargo: { steel: '热卷', tons: 31.6, pieces: '3 卷', note: '每卷约 10.5t，需鞍座固定' }, req: { type: '平板半挂', len: '17.5m', equip: ['鞍座'], whole: true },
+    budget: 30, budgetUnit: '吨', posted: '2026-09-27T09:05:00', views: 46, calls: 3, status: 'active', source: 'order', orderNo: 'HD2609270019', desc: '嘉兴仓 3 卷热卷回上海宝山，下午装，今天到就行，现场有吊车。' },
+  { id: 'n2002', shipper: 's2', from: '杭州', fromDetail: '萧山区 · 建材市场', to: ['上海'], toDetail: '松江 · 工地', day: '明天', when: '明天 上午 8:00-11:00 装车', validUntil: '2026-09-28T11:00:00',
+    cargo: { steel: '冷轧/镀锌', tons: 28, pieces: '6 卷', note: '怕雨，必须篷布' }, req: { type: '平板半挂', len: '', equip: ['篷布', '鞍座'], whole: true },
+    budget: null, budgetUnit: '吨', posted: '2026-09-27T08:30:00', views: 31, calls: 1, status: 'active', source: 'manual', desc: '镀锌卷 28 吨到松江工地，明早装，工地白天可卸，价格电话谈。' },
+  { id: 'n2003', shipper: 's3', from: '上海', fromDetail: '松江区 · 某钢材市场', to: ['苏州'], toDetail: '昆山 · 工地', day: '明天', when: '明天 08:00 左右 装车', validUntil: '2026-09-28T09:00:00',
+    cargo: { steel: '螺纹钢', tons: 10, pieces: '12m 定尺', note: '10 吨可拼车' }, req: { type: '', len: '', equip: ['可装 12m 长材'], whole: false },
+    budget: 1200, budgetUnit: '车', posted: '2026-09-27T09:12:00', views: 18, calls: 0, status: 'active', source: 'order', orderNo: 'HD2609260087', desc: '10 吨螺纹钢 12 米定尺到昆山工地，可以拼别人的车，按车 1200 左右。' },
+  { id: 'n2004', shipper: 's4', from: '上海', fromDetail: '宝山区 · 大仓', to: ['宁波'], toDetail: '北仑 · 仓库', day: '后天', when: '后天 全天 装车', validUntil: '2026-09-29T18:00:00',
+    cargo: { steel: '中厚板', tons: 30, pieces: '18 张', note: '' }, req: { type: '平板半挂', len: '', equip: [], whole: true },
+    budget: 55, budgetUnit: '吨', posted: '2026-09-26T20:10:00', views: 52, calls: 2, status: 'active', source: 'manual', desc: '宝山提 30 吨中厚板到北仑，后天装，时间灵活。' },
+  { id: 'n2005', shipper: 's5', from: '苏州', fromDetail: '张家港 · 某钢厂仓', to: ['上海'], toDetail: '嘉定 · 钢构厂', day: '明天', when: '明天 10:00-14:00 装车', validUntil: '2026-09-28T14:00:00',
+    cargo: { steel: '型钢（H型/槽/角）', tons: 26, pieces: 'H 型钢 12m', note: '需绑带固定' }, req: { type: '平板半挂', len: '13m', equip: ['绑带/链条', '可装 12m 长材'], whole: true },
+    budget: 28, budgetUnit: '吨', posted: '2026-09-27T09:18:00', views: 9, calls: 0, status: 'active', source: 'order', orderNo: 'HD2609270031', desc: '张家港装 26 吨 H 型钢到嘉定，明天上午，常年有货，找长期回程车。' },
+  { id: 'n2006', shipper: 's6', from: '南京', fromDetail: '江宁区 · 物流园', to: ['上海'], toDetail: '青浦 · 仓库', day: '今天', when: '今天 17:00 后 装车', validUntil: '2026-09-27T22:00:00',
+    cargo: { steel: '钢管', tons: 20, pieces: '6m 焊管', note: '高栏或平板都可以' }, req: { type: '', len: '', equip: ['绑带/链条'], whole: true },
+    budget: 50, budgetUnit: '吨', posted: '2026-09-27T07:50:00', views: 27, calls: 2, status: 'active', source: 'manual', desc: '20 吨焊管今晚走，明早到青浦就行。' },
+];
+
+/* 找车方自己的需求（货袋子端「我的需求」） */
+HDZ.MY_NEEDS = [
+  Object.assign({}, HDZ.NEEDS[0], { matched: 2, contacts: [{ who: '王师傅 · 沪D·8K3** · 悟运履约 126 单', what: '查看了您的电话', when: '09:11' }, { who: '周师傅 · 苏B·9C6**', what: '查看了您的电话', when: '09:14' }, { who: '您', what: '查看了 王师傅 的电话', when: '09:16' }] }),
+  { id: 'n1996', shipper: 's1', from: '上海', fromDetail: '宝山区 · 宝钢大仓', to: ['南通'], toDetail: '海门 · 工地', day: '明天', when: '明天 下午 装车', validUntil: '2026-09-28T18:00:00', cargo: { steel: '螺纹钢', tons: 32, pieces: '12m 定尺', note: '' }, req: { type: '平板半挂', len: '', equip: ['可装 12m 长材'], whole: true }, budget: 40, budgetUnit: '吨', posted: '2026-09-26T09:00:00', views: 38, calls: 1, status: 'confirming', matched: 0, contacts: [{ who: '李师傅 · 苏E·3F1**', what: '查看了您的电话', when: '昨天 15:20' }] },
+  { id: 'n1990', shipper: 's1', from: '上海', fromDetail: '宝山区', to: ['嘉兴'], toDetail: '南湖 · 恒源钢构', day: '9月25日', when: '9月25日 上午 装车', validUntil: '2026-09-25T12:00:00', cargo: { steel: '热卷', tons: 31.6, pieces: '3 卷', note: '' }, req: { type: '平板半挂', len: '17.5m', equip: ['鞍座'], whole: true }, budget: 30, budgetUnit: '吨', posted: '2026-09-24T16:00:00', views: 71, calls: 5, status: 'found', matched: 3, endReason: '已找到车（顺路车 · 王师傅 沪D·8K3**）', endAt: '9月24日 17:05' },
+  { id: 'n1985', shipper: 's1', from: '上海', fromDetail: '宝山区', to: ['杭州'], toDetail: '萧山', day: '9月22日', when: '9月22日 全天 装车', validUntil: '2026-09-22T18:00:00', cargo: { steel: '中厚板', tons: 30, pieces: '', note: '' }, req: { type: '平板半挂', len: '', equip: [], whole: true }, budget: 42, budgetUnit: '吨', posted: '2026-09-21T10:00:00', views: 40, calls: 2, status: 'expired', matched: 1, endReason: '装车时间已过，系统自动下架', endAt: '9月22日 18:00' },
+  { id: 'n1978', shipper: 's1', from: '苏州', fromDetail: '张家港', to: ['上海'], toDetail: '宝山', day: '9月19日', when: '9月19日 下午 装车', validUntil: '2026-09-19T18:00:00', cargo: { steel: '热卷', tons: 32, pieces: '3 卷', note: '' }, req: { type: '平板半挂', len: '17.5m', equip: ['鞍座'], whole: true }, budget: 27, budgetUnit: '吨', posted: '2026-09-19T08:00:00', views: 22, calls: 0, status: 'withdrawn', matched: 2, endReason: '您手动下架（改用自有车辆）', endAt: '9月19日 10:30' },
+];
+
+HDZ.NEED_STATUS = {
+  active: { name: '展示中', cls: 'st-active' },
+  confirming: { name: '待确认', cls: 'st-confirming' },
+  found: { name: '已找到车', cls: 'st-booked' },
+  expired: { name: '已过期', cls: 'st-expired' },
+  withdrawn: { name: '已下架', cls: 'st-withdrawn' },
+};

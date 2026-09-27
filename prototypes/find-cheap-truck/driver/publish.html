@@ -151,7 +151,7 @@
     var h = '<div class="oc' + (hi ? ' hi' : '') + '" data-id="' + c.id + '">' +
       '<div class="src"><span class="tag ' + (hi ? 'wy' : 'gray') + '">' + c.srcTag + '</span>' + c.src + (hi ? '<span class="sp"></span><b>推荐</b>' : '') + '</div>';
     if (c.state === 'done') {
-      h += '<div class="done"><span class="ok">✓</span><div class="t"><b>已发布 · ' + c.from + ' → ' + c.to.join('/') + '</b>展示至 ' + c.validUntil.slice(5, 16).replace('T', ' ') + ' 自动下架 · 已推送给 ' + (12 + i * 5) + ' 位找这条线路的货主</div><span class="undo" data-undo>撤销</span></div>' +
+      h += '<div class="done"><span class="ok">✓</span><div class="t"><b>已发布 · ' + c.from + ' → ' + c.to.join('/') + '</b>展示至 ' + c.validUntil.slice(5, 16).replace('T', ' ') + ' 自动下架 · 已推送给 ' + (12 + i * 5) + ' 位找这条线路的货主' + (function () { var post = { from: c.from, to: c.to, depart: c.depart, vehicle: c.vehicle, spareTons: H.VEHICLES[c.vehicle].load, driver: 'd1', status: 'active' }; var k = H.matchNeeds(post).filter(function (m) { return m.level === 'good'; }).length; return k ? ' · <a href="needs.html" style="color:var(--wy);font-weight:600;text-decoration:underline">' + k + ' 条用车需求匹配这条线，去联系货主 ›</a>' : ''; })() + '</div><span class="undo" data-undo>撤销</span></div>' +
         '<div class="acts" style="padding-top:10px"><button class="btn ghost" data-share style="flex:1;height:36px;font-size:13px">分享到微信群</button><a class="btn line wy" href="home.html" style="flex:1;height:36px;font-size:13px">去我的运力</a></div>';
       return h + '</div>';
     }

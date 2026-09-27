@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>货袋子 · 用车需求（PC 端）</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  .nhero { background: radial-gradient(900px 300px at 15% -20%, #4d7fff 0%, transparent 60%), linear-gradient(120deg, #1a3fb0, #1f5eff 60%, #3b7bff); color: #fff; }
+  .nhero .in { width: 1200px; margin: 0 auto; padding: 26px 0 22px; display: flex; align-items: center; gap: 30px; }
+  .nhero h1 { font-size: 26px; display: flex; align-items: center; gap: 10px; }
+  .nhero h1 .tj { background: rgba(255,255,255,.18); font-size: 13px; padding: 3px 9px; border-radius: 6px; font-weight: 600; }
+  .nhero p { margin-top: 6px; font-size: 14px; color: rgba(255,255,255,.86); max-width: 720px; line-height: 1.6; }
+  .nhero .stats { margin-left: auto; display: flex; gap: 26px; }
+  .nhero .stats div { text-align: center; }
+  .nhero .stats b { display: block; font-size: 24px; font-weight: 800; }
+  .nhero .stats span { font-size: 12px; color: rgba(255,255,255,.75); }
+  .nwrap { width: 1200px; margin: 16px auto 60px; }
+  .ntabs { display: flex; gap: 6px; background: #fff; border-radius: 12px; padding: 6px; box-shadow: var(--shadow); width: fit-content; }
+  .ntabs a { padding: 8px 18px; border-radius: 8px; font-size: 14px; color: var(--text-2); cursor: pointer; }
+  .ntabs a.on { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+  .ntabs a i { font-style: normal; font-size: 12px; color: var(--muted); margin-left: 3px; }
+  .ngrid { display: grid; grid-template-columns: 1fr 400px; gap: 16px; align-items: start; margin-top: 14px; }
+  .nform { background: #fff; border-radius: 12px; box-shadow: var(--shadow); }
+  .nform .sec { padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .nform .sec:last-child { border-bottom: 0; }
+  .nform .sec h4 { font-size: 14px; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .nform .sec h4 small { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .nform .sec h4 .req::after { content: " *"; color: var(--hot); }
+  .nform .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .nform .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .nform .lb { font-size: 12px; color: var(--muted); margin-bottom: 4px; display: block; }
+  .nform .input { height: 38px; font-size: 14px; }
+  .nform .inline-select { height: 38px; font-size: 14px; }
+  .nform .chip { height: 30px; font-size: 13px; }
+  .nform .ordchip { display: flex; gap: 8px; flex-wrap: wrap; }
+  .nform .ordchip .oc { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; font-size: 12px; cursor: pointer; background: #fafbfc; min-width: 220px; }
+  .nform .ordchip .oc b { display: block; font-size: 13px; }
+  .nform .ordchip .oc.on { border-color: var(--brand); background: var(--brand-soft); }
+  .nform .auto { font-size: 11px; color: var(--brand); background: var(--brand-soft); padding: 2px 6px; border-radius: 4px; }
+  .nform .foot { padding: 16px 20px 20px; }
+  .mbox { background: #fff; border-radius: 12px; box-shadow: var(--shadow); padding: 16px; position: sticky; top: 120px; }
+  .mbox h3 { font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .mbox h3 .cnt { color: var(--hot); font-size: 20px; }
+  .mbox h3 small { margin-left: auto; font-size: 12px; color: var(--muted); font-weight: 400; }
+  .mrow { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-top: 10px; transition: .15s; }
+  .mrow:hover { border-color: #c9d6ff; }
+  .mrow.part { opacity: .85; }
+  .mrow .r1 { display: flex; align-items: center; gap: 8px; }
+  .mrow .r1 .rt { font-weight: 700; font-size: 14px; }
+  .mrow .r1 .pr { margin-left: auto; color: var(--hot); font-weight: 800; font-size: 16px; }
+  .mrow .r1 .pr small { font-size: 11px; font-weight: 500; }
+  .mrow .r2 { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+  .mrow .r3 { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+  .mrow .r4 { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--text-2); }
+  .mrow .r4 .avatar { width: 22px; height: 22px; font-size: 10px; }
+  .mrow .r4 .btn { margin-left: auto; }
+  .mbox .more { text-align: center; font-size: 12px; color: var(--brand); margin-top: 10px; cursor: pointer; }
+  .how { background: #fff; border-radius: 12px; box-shadow: var(--shadow); padding: 16px; margin-top: 14px; }
+  .how h3 { font-size: 14px; margin-bottom: 8px; }
+  .how ol { padding-left: 18px; font-size: 13px; color: var(--text-2); line-height: 1.7; }
+  .how ol b { color: var(--text); }
+  .succ { background: #fff; border-radius: 12px; box-shadow: var(--shadow); padding: 24px; }
+  .succ .hd { display: flex; align-items: center; gap: 14px; }
+  .succ .hd .ok { width: 48px; height: 48px; border-radius: 50%; background: var(--ok); color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+  .succ .hd h2 { font-size: 20px; }
+  .succ .hd p { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+  .succ .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+  .succ .two > div { border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .succ .two h4 { font-size: 14px; display: flex; align-items: center; gap: 6px; }
+  .succ .two h4 b { color: var(--hot); font-size: 20px; }
+  .succ .two p { font-size: 12px; color: var(--text-2); margin-top: 4px; line-height: 1.6; }
+  /* 我的需求 */
+  .mygrid { display: grid; grid-template-columns: 1fr 300px; gap: 16px; align-items: start; margin-top: 14px; }
+  .ncard { background: #fff; border-radius: 12px; box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 12px; display: grid; grid-template-columns: 1fr 260px; gap: 16px; }
+  .ncard .r1 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ncard .route { font-size: 18px; margin-top: 8px; }
+  .ncard .l2 { font-size: 13px; color: var(--text-2); margin-top: 6px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .ncard .l2 b { color: var(--text); }
+  .ncard .stat { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: var(--text-2); }
+  .ncard .stat b { font-size: 16px; color: var(--text); margin-right: 2px; }
+  .ncard .side { border-left: 1px dashed var(--line); padding-left: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .ncard .side .who { font-size: 12px; color: var(--text-2); }
+  .ncard .side .who li { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--line); }
+  .ncard .side .who li:last-child { border-bottom: 0; }
+  .ncard .side .acts { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+  .ncard .confirm { grid-column: span 2; background: var(--hot-soft); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #8f1f1a; display: flex; align-items: center; gap: 10px; }
+  .ncard .confirm .btn { height: 30px; font-size: 12px; }
+  .ncard .end { grid-column: span 2; font-size: 12px; color: var(--muted); background: #f7f8fa; border-radius: 8px; padding: 6px 10px; }
+  .rules li { font-size: 13px; color: var(--text-2); padding: 7px 0; border-bottom: 1px solid var(--line); line-height: 1.5; }
+  .rules li:last-child { border-bottom: 0; }
+  .rules li b { color: var(--text); display: block; }
+</style>
+</head>
+<body class="pc-body">
+<nav class="pc-nav"><div class="in">
+  <a class="logo"><i>货</i>货袋子</a>
+  <div class="menu"><a>首页</a><a>现货商城</a><a>求购大厅</a><a>钢市行情</a><a>加工服务</a><a class="on" href="pc-find.html">找顺路车<span class="new">NEW</span></a><a>资讯</a></div>
+  <div class="right"><span>客服 400-xxx-xxxx</span><span class="u"><span class="avatar">沪</span>上海某钢贸有限公司 <span class="tag ok">已认证</span></span><a>卖家中心</a></div>
+</div></nav>
+
+<section class="nhero"><div class="in">
+  <div>
+    <h1>用车需求 <span class="tj">让顺路车来找您</span></h1>
+    <p>发一条需求，系统按 <b>线路 · 时间 · 装备 · 吨位</b> 推荐正在展示的顺路车，您直接查看电话；常跑这条线的司机也会在悟运看到您的需求，主动打给您。平台只传递信息：不接单、不派单、不确认成交、不收费。</p>
+  </div>
+  <div class="stats"><div><b>128</b><span>今日在展需求</span></div><div><b>2.3h</b><span>平均找到车用时</span></div><div><b>76%</b><span>需求被司机主动联系</span></div></div>
+</div></section>
+
+<div class="nwrap">
+  <div class="crumb" style="width:auto;margin:0 0 12px"><a href="pc-find.html">找顺路车</a> › 用车需求</div>
+  <div class="ntabs"><a class="on" data-tab="pub">发布需求</a><a data-tab="mine">我的需求<i id="mineCnt"></i></a></div>
+
+  <!-- 发布 -->
+  <div id="pubView">
+    <div class="ngrid">
+      <div id="formWrap">
+        <div class="nform" id="nform">
+          <div class="sec">
+            <h4>从我的订单带入 <small>线路、货物、装备自动填好，也可以手动填</small></h4>
+            <div class="ordchip" id="orders">
+              <div class="oc on" data-o="0"><b>HD2609270019 · 采购</b>嘉兴恒源仓 → 上海宝山 · 热卷 31.6t（3 卷）</div>
+              <div class="oc" data-o="1"><b>HD2609270012 · 销售</b>宝山大仓 → 嘉兴南湖 · 热卷 31.6t（3 卷）</div>
+              <div class="oc" data-o="2"><b>HD2609260087 · 采购</b>松江市场 → 昆山工地 · 螺纹钢 10t</div>
+              <div class="oc" data-o="-1"><b>不带入</b>手动填写</div>
+            </div>
+          </div>
+          <div class="sec">
+            <h4><span class="req">线路</span></h4>
+            <div class="g2">
+              <div><span class="lb">提货地（车要来哪装）</span><div class="input-row"><select class="inline-select" id="fFrom"></select><input class="input" id="fFromD" placeholder="区县 / 仓库 / 市场"></div></div>
+              <div><span class="lb">送货地</span><div class="input-row"><select class="inline-select" id="fTo"></select><input class="input" id="fToD" placeholder="区县 / 工地 / 仓库"></div></div>
+            </div>
+          </div>
+          <div class="sec">
+            <h4><span class="req">装车时间</span> <small>需求会在装车时间结束后自动下架</small></h4>
+            <div class="row" style="gap:8px;flex-wrap:wrap"><div class="chips" id="fDay"><span class="chip on" data-v="今天">今天</span><span class="chip" data-v="明天">明天</span><span class="chip" data-v="后天">后天</span><span class="chip" data-v="日期">选日期</span></div><span class="muted">·</span><div class="chips" id="fSlot"><span class="chip" data-v="上午 8:00-12:00">上午</span><span class="chip on" data-v="下午 13:00-18:00">下午</span><span class="chip" data-v="全天">全天</span><span class="chip" data-v="具体">具体时段</span></div><input class="input" id="fSlotD" style="width:150px;display:none" placeholder="如 15:00-19:00"></div>
+          </div>
+          <div class="sec">
+            <h4><span class="req">货物</span> <small>选品种后自动勾选需要的装备</small></h4>
+            <div class="chips" id="fSteel"></div>
+            <div class="g3 mt12">
+              <div><span class="lb">吨数</span><div class="input-row"><input class="input" id="fTons" value="31.6"><span class="unit">吨</span></div></div>
+              <div><span class="lb">件数 / 规格</span><input class="input" id="fPieces" value="3 卷，每卷约 10.5t"></div>
+              <div><span class="lb">整车还是拼车</span><div class="seg" style="height:38px"><button class="on" data-w="1">整车</button><button data-w="0">可拼车</button></div></div>
+            </div>
+          </div>
+          <div class="sec">
+            <h4>需要的车 <small>不填 = 不限；系统按这里匹配</small> <span class="auto" id="autoTip" style="display:none">已按货物自动勾选，可改</span></h4>
+            <span class="lb">车型</span><div class="chips" id="fType"></div>
+            <span class="lb mt12" style="display:block;margin-top:12px">板长</span><div class="chips" id="fLen"></div>
+            <span class="lb" style="display:block;margin-top:12px">装钢材配置</span><div class="chips" id="fEquip"></div>
+          </div>
+          <div class="sec">
+            <h4>预算 <small>选填；不填即"电话谈"。平台不定价、不抽成，只显示市场参考</small></h4>
+            <div class="g3">
+              <div><span class="lb">预算</span><div class="input-row"><input class="input" id="fBudget" value="30"><div class="seg" style="height:38px;width:130px"><button class="on" data-u="吨">元/吨</button><button data-u="车">元/车</button></div></div></div>
+              <div><span class="lb">市场参考（近 30 天成交区间）</span><div class="input" style="display:flex;align-items:center;color:var(--text-2)" id="fRef">¥30-34/吨</div></div>
+              <div><span class="lb">联系人（来自账号，司机查看时留痕）</span><div class="input" style="display:flex;align-items:center;gap:8px">张经理 · 138****0921 <span class="tag ok">认证企业</span></div></div>
+            </div>
+            <div class="mt12"><span class="lb">补充说明（司机会看到原话）</span><textarea class="input" id="fDesc" style="min-height:60px">嘉兴仓 3 卷热卷回上海宝山，下午装，今天到就行，现场有吊车。</textarea></div>
+          </div>
+          <div class="foot">
+            <label class="checkline"><input type="checkbox" id="agree"> 我知悉：用车需求只是信息发布，货袋子不接单、不派单、不确认成交、不收任何费用；司机会直接给我打电话，运费与合同由我与司机自行约定。</label>
+            <div class="row mt12" style="gap:10px"><button class="btn lg" id="pubBtn" disabled style="min-width:200px">发布需求</button><span class="small t2">发布后立即推送给近 3 天在该线路发布过运力、或常跑该线路的司机（微信服务通知）</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="mbox">
+          <h3><span class="cnt" id="mCnt">0</span> 台顺路车现在就匹配 <small>随您填写实时更新</small></h3>
+          <div class="small t2 mt4">这些车正在展示中，不用等发布，现在就能查看电话。</div>
+          <div id="mList"></div>
+          <div class="more" id="mMore" style="display:none"></div>
+          <div class="notice gray mt12" style="font-size:11px"><span class="ic"></span><div>推荐只按 线路 / 时间 / 装备 / 吨位 排序，不代表平台推荐或担保；成不成，您与司机电话定。</div></div>
+        </div>
+        <div class="how">
+          <h3>发布后会发生什么</h3>
+          <ol>
+            <li><b>匹配的顺路车</b>列在这里，您自己查看电话联系（登录 → 风险提示 → 号码留痕 → 反馈）。</li>
+            <li>需求同时出现在悟运司机端「<b>沿线用车需求</b>」，常跑这条线的司机会主动打给您；谁看了您的电话，「我的需求」里都能看到。</li>
+            <li>谈成后点「<b>已找到车</b>」，需求立即隐藏，不再有司机打来；装车时间一到也会自动下架。</li>
+            <li>平台不派单、不确认成交、不收运费；装车时核对 <b>人 / 车 / 证</b>，货值高投一份货运险。</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 我的需求 -->
+  <div id="mineView" style="display:none">
+    <div class="mygrid">
+      <div>
+        <div class="list-hd"><div class="sort" id="mineSeg"><a class="on" data-s="active">进行中</a><a data-s="ended">已结束</a></div><span class="cnt" id="mineTip"></span></div>
+        <div id="mineList" class="mt12"></div>
+      </div>
+      <aside>
+        <div class="aside-box">
+          <h3>需求的展示规则 <small>系统自动</small></h3>
+          <ul class="rules">
+            <li><b>装车时间一到自动下架</b>不会有司机打到"已经装完"的货。</li>
+            <li><b>「已找到车」立即隐藏</b>谈成后点一下，匹配的车与推送同时停止。</li>
+            <li><b>司机反馈"已找到车"≥2 位自动隐藏</b>您忘了点也不会一直被打扰，可 1 小时内恢复。</li>
+            <li><b>发布满 24 小时未找到车要确认</b>"还需要车吗？"未确认自动隐藏。</li>
+            <li><b>谁能看到您的电话</b>只有实名 + 车辆认证的司机，且需勾选风险提示；每次查看留痕，纠纷时可作凭证。</li>
+          </ul>
+        </div>
+        <div class="aside-box">
+          <h3>还没找到车？</h3>
+          <div class="small t2">试试：放宽车型板长、把预算调到市场参考区间、或允许拼车。也可以直接去列表 <a class="brand-c" href="pc-find.html">找顺路车 ›</a></div>
+          <a class="row mt12" href="pc-l2.html" style="gap:10px;background:#fff1e8;border-radius:10px;padding:10px 12px;font-size:12px;color:#7a2e0e"><span class="sp"><b>要发票、要有人对货负责？</b><br>走合作的持牌网络货运平台</span><span>›</span></a>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+(function () {
+  var H = window.HDZ;
+  H.protoBar('need', H.SHIPPER_LINKS);
+
+  /* ---------- 表单状态 ---------- */
+  var ORDERS = [
+    { from: '嘉兴', fromD: '南湖区 · 恒源钢构仓', to: '上海', toD: '宝山 · 某钢材市场', steel: '热卷', tons: '31.6', pieces: '3 卷，每卷约 10.5t', desc: '嘉兴仓 3 卷热卷回上海宝山，下午装，今天到就行，现场有吊车。' },
+    { from: '上海', fromD: '宝山区 · 宝钢大仓', to: '嘉兴', toD: '南湖 · 恒源钢构', steel: '热卷', tons: '31.6', pieces: '3 卷', desc: '宝山大仓提 3 卷热卷到嘉兴恒源钢构，现场有吊车。' },
+    { from: '上海', fromD: '松江区 · 某钢材市场', to: '苏州', toD: '昆山 · 工地', steel: '螺纹钢', tons: '10', pieces: '12m 定尺', desc: '10 吨螺纹钢 12 米定尺到昆山工地，可以拼别人的车。' },
+  ];
+  var AUTO_EQUIP = { '热卷': ['鞍座'], '冷轧/镀锌': ['鞍座', '篷布'], '中厚板': ['护角/垫木'], '螺纹钢': ['可装 12m 长材', '绑带/链条'], '型钢（H型/槽/角）': ['可装 12m 长材', '绑带/链条'], '钢管': ['绑带/链条'], '线材': ['篷布'], '不锈钢': ['篷布', '护角/垫木'] };
+  var f = { from: '嘉兴', fromD: '', to: '上海', toD: '', day: '今天', slot: '下午 13:00-18:00', steel: '热卷', tons: 31.6, pieces: '', whole: true, type: '平板半挂', len: '17.5m', equip: ['鞍座'], budget: 30, unit: '吨', desc: '' };
+
+  var cities = H.CITIES.filter(function (c) { return c !== '方向不限'; });
+  H.qs('#fFrom').innerHTML = cities.map(function (c) { return '<option>' + c + '</option>'; }).join('');
+  H.qs('#fTo').innerHTML = cities.map(function (c) { return '<option>' + c + '</option>'; }).join('');
+  H.qs('#fSteel').innerHTML = H.STEELS.map(function (s) { return '<span class="chip" data-v="' + s + '">' + s + '</span>'; }).join('');
+  H.qs('#fType').innerHTML = '<span class="chip" data-v="">不限</span>' + H.VEHICLE_TYPES.map(function (t) { return '<span class="chip" data-v="' + t.name + '">' + t.name + '</span>'; }).join('');
+  H.qs('#fLen').innerHTML = '<span class="chip" data-v="">不限</span>' + H.LENGTHS.filter(function (l) { return l !== '其他'; }).map(function (l) { return '<span class="chip" data-v="' + l + '">' + l + '</span>'; }).join('');
+  H.qs('#fEquip').innerHTML = H.EQUIP.map(function (e) { return '<span class="chip" data-v="' + e.name + '" title="' + e.tip + '">' + e.name + '</span>'; }).join('');
+
+  function syncUI() {
+    H.qs('#fFrom').value = f.from; H.qs('#fTo').value = f.to; H.qs('#fFromD').value = f.fromD; H.qs('#fToD').value = f.toD;
+    H.qsa('#fDay .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === f.day); });
+    H.qsa('#fSlot .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === f.slot || (c.dataset.v === '具体' && /\d/.test(f.slot) && !/上午|下午/.test(f.slot))); });
+    H.qsa('#fSteel .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === f.steel); });
+    H.qs('#fTons').value = f.tons; H.qs('#fPieces').value = f.pieces; H.qs('#fDesc').value = f.desc;
+    H.qsa('#nform [data-w]').forEach(function (b) { b.classList.toggle('on', (b.dataset.w === '1') === f.whole); });
+    H.qsa('#fType .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === f.type); });
+    H.qsa('#fLen .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === f.len); });
+    H.qsa('#fEquip .chip').forEach(function (c) { c.classList.toggle('on', f.equip.indexOf(c.dataset.v) > -1); });
+    H.qs('#fBudget').value = f.budget == null ? '' : f.budget;
+    H.qsa('#nform [data-u]').forEach(function (b) { b.classList.toggle('on', b.dataset.u === f.unit); });
+    H.qs('#fRef').textContent = '¥' + H.refPrice(f.from, f.to).join('-') + '/吨';
+  }
+  function toNeed() {
+    return { id: 'new', shipper: 's1', from: f.from, fromDetail: f.fromD, to: [f.to], toDetail: f.toD, day: f.day === '日期' ? '' : f.day, when: f.day + ' ' + f.slot + ' 装车',
+      validUntil: '2026-09-27T19:00:00', cargo: { steel: f.steel, tons: +f.tons || 0, pieces: f.pieces, note: '' }, req: { type: f.type, len: f.len, equip: f.equip.slice(), whole: f.whole },
+      budget: f.budget === '' || f.budget == null ? null : +f.budget, budgetUnit: f.unit, posted: H.now.toISOString().slice(0, 19), views: 0, calls: 0, status: 'active', source: 'manual', desc: f.desc };
+  }
+
+  /* ---------- 实时匹配 ---------- */
+  var showAll = false, lastMatch = [];
+  function mrow(m) {
+    var p = m.post, v = H.VEHICLES[p.vehicle], d = H.DRIVERS[p.driver];
+    return '<div class="mrow ' + m.level + '" data-id="' + p.id + '"><div class="r1"><span class="tag ' + (p.kind === 'return' ? 'hot' : p.kind === 'idle' ? 'brand' : 'ok') + '">' + H.KIND[p.kind].short + '</span><span class="rt">' + p.from + ' → ' + p.to.join('/') + '</span><span class="pr">' + (p.price == null ? '<small>面议</small>' : '¥' + p.price + '<small>/' + p.priceUnit + '</small>') + '</span></div>' +
+      '<div class="r2">出发 <b>' + p.depart + '</b> · ' + H.vehicleLine(v) + ' · ' + H.equipLine(v, 3) + '</div>' +
+      '<div class="r3">' + H.matchTags(m, 3) + '</div>' +
+      '<div class="r4"><span class="avatar">' + d.surname + '</span>' + d.name + ' · 好评 ' + d.good + '% · 悟运 ' + d.wyOrders + ' 单<a class="small brand-c" href="pc-detail.html?id=' + p.id + '" style="margin-left:6px">详情</a><button class="btn xs" data-call>查看电话</button></div></div>';
+  }
+  function renderMatch() {
+    lastMatch = H.matchPosts(toNeed());
+    var good = lastMatch.filter(function (m) { return m.level === 'good'; }), part = lastMatch.filter(function (m) { return m.level === 'part'; });
+    H.qs('#mCnt').textContent = good.length;
+    var list = showAll ? lastMatch : good;
+    H.qs('#mList').innerHTML = list.length ? list.map(mrow).join('') : '<div class="empty" style="padding:24px 0">暂无完全匹配的在展车辆<br><span class="xs">发布后会推送给常跑这条线的司机，他们会主动联系您</span></div>';
+    var more = H.qs('#mMore');
+    if (part.length && !showAll) { more.style.display = ''; more.textContent = '还有 ' + part.length + ' 台部分匹配（时间或装备不完全符合）· 展开看看'; }
+    else if (showAll && part.length) { more.style.display = ''; more.textContent = '收起部分匹配'; }
+    else more.style.display = 'none';
+  }
+  H.qs('#mMore').onclick = function () { showAll = !showAll; renderMatch(); };
+  H.qs('#mList').addEventListener('click', function (e) {
+    var r = e.target.closest('.mrow'); if (!r) return;
+    var p = H.POSTS.filter(function (x) { return x.id === r.dataset.id; })[0];
+    if (e.target.closest('[data-call]')) H.unlockPhone(p, 'pc');
+  });
+
+  /* ---------- 表单交互 ---------- */
+  function applyOrder(i) {
+    var o = ORDERS[i]; if (!o) { f.fromD = ''; f.toD = ''; f.pieces = ''; f.desc = ''; syncUI(); renderMatch(); return; }
+    f.from = o.from; f.fromD = o.fromD; f.to = o.to; f.toD = o.toD; f.steel = o.steel; f.tons = o.tons; f.pieces = o.pieces; f.desc = o.desc;
+    f.whole = +o.tons >= 20; f.type = +o.tons >= 20 ? '平板半挂' : ''; f.len = o.steel === '热卷' && +o.tons > 30 ? '17.5m' : '';
+    f.equip = (AUTO_EQUIP[o.steel] || []).slice(); H.qs('#autoTip').style.display = '';
+    f.budget = o.steel === '螺纹钢' && +o.tons < 15 ? 1200 : H.refPrice(o.from, o.to)[0]; f.unit = o.steel === '螺纹钢' && +o.tons < 15 ? '车' : '吨';
+    syncUI(); renderMatch();
+  }
+  H.qsa('#orders .oc').forEach(function (c) { c.onclick = function () { H.qsa('#orders .oc').forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on'); applyOrder(+c.dataset.o); }; });
+  H.qs('#fFrom').onchange = function () { f.from = this.value; syncUI(); renderMatch(); };
+  H.qs('#fTo').onchange = function () { f.to = this.value; syncUI(); renderMatch(); };
+  H.qs('#fFromD').oninput = function () { f.fromD = this.value; };
+  H.qs('#fToD').oninput = function () { f.toD = this.value; };
+  H.qs('#fTons').oninput = function () { f.tons = this.value; renderMatch(); };
+  H.qs('#fPieces').oninput = function () { f.pieces = this.value; };
+  H.qs('#fDesc').oninput = function () { f.desc = this.value; };
+  H.qs('#fBudget').oninput = function () { f.budget = this.value; };
+  H.qsa('#fDay .chip').forEach(function (c) { c.onclick = function () { f.day = c.dataset.v; if (f.day === '日期') H.toast('原型：日期选择器', document.body); syncUI(); renderMatch(); }; });
+  H.qsa('#fSlot .chip').forEach(function (c) { c.onclick = function () { var d = H.qs('#fSlotD'); if (c.dataset.v === '具体') { d.style.display = ''; d.focus(); f.slot = d.value || '15:00-19:00'; d.value = f.slot; } else { d.style.display = 'none'; f.slot = c.dataset.v; } syncUI(); }; });
+  H.qs('#fSlotD').oninput = function () { f.slot = this.value; };
+  H.qs('#fSteel').onclick = function (e) { var c = e.target.closest('.chip'); if (!c) return; f.steel = c.dataset.v; f.equip = (AUTO_EQUIP[f.steel] || []).slice(); H.qs('#autoTip').style.display = ''; syncUI(); renderMatch(); };
+  H.qsa('#nform [data-w]').forEach(function (b) { b.onclick = function () { f.whole = b.dataset.w === '1'; syncUI(); }; });
+  H.qsa('#nform [data-u]').forEach(function (b) { b.onclick = function () { f.unit = b.dataset.u; syncUI(); }; });
+  H.qs('#fType').onclick = function (e) { var c = e.target.closest('.chip'); if (!c) return; f.type = c.dataset.v; syncUI(); renderMatch(); };
+  H.qs('#fLen').onclick = function (e) { var c = e.target.closest('.chip'); if (!c) return; f.len = c.dataset.v; syncUI(); renderMatch(); };
+  H.qs('#fEquip').onclick = function (e) { var c = e.target.closest('.chip'); if (!c) return; var i = f.equip.indexOf(c.dataset.v); i > -1 ? f.equip.splice(i, 1) : f.equip.push(c.dataset.v); H.qs('#autoTip').style.display = 'none'; syncUI(); renderMatch(); };
+  H.qs('#agree').onchange = function () { H.qs('#pubBtn').disabled = !this.checked; };
+
+  H.qs('#pubBtn').onclick = function () {
+    var n = toNeed(); n.id = 'n' + (2100 + Math.floor(Math.random() * 100)); n.matched = lastMatch.filter(function (m) { return m.level === 'good'; }).length; n.contacts = [];
+    H.MY_NEEDS.unshift(n);
+    var good = lastMatch.filter(function (m) { return m.level === 'good'; });
+    var pushed = 9 + Math.floor(Math.random() * 12);
+    H.qs('#formWrap').innerHTML = '<div class="succ"><div class="hd"><span class="ok">✓</span><div><h2>需求已发布 · ' + n.from + ' → ' + n.to[0] + '</h2><p>展示至 <b>' + n.when.replace(' 装车', '') + '</b> 结束自动下架 · 谈成后请点「已找到车」· 平台不接单、不收费</p></div></div>' +
+      '<div class="two"><div><h4><b>' + good.length + '</b> 台顺路车现在就能联系</h4><p>右侧列表就是，点「查看电话」直接打。这些司机的车正好在 ' + n.from + ' 附近、往 ' + n.to[0] + ' 走。</p></div>' +
+      '<div><h4><b>' + pushed + '</b> 位司机已收到您的需求</h4><p>近 3 天在 ' + n.from + ' → ' + n.to[0] + ' 发过运力、或常跑这条线的司机，已通过微信服务通知收到；他们会主动给 张经理 打电话。谁看了您的电话，「我的需求」里能看到。</p></div></div>' +
+      '<div class="notice blue mt16"><span class="ic"></span><div>接到司机电话时：核对对方是否为悟运实名司机（可让其报车牌，在「我的需求 › 谁联系过我」里比对）；运费、装卸、回单直接与司机约定；货值高投一份货运险。</div></div>' +
+      '<div class="row mt16" style="gap:10px"><button class="btn" id="goMine">查看我的需求</button><button class="btn ghost" onclick="location.reload()">再发一条</button><a class="btn ghost" href="pc-find.html">去列表找车</a></div></div>';
+    H.qs('#goMine').onclick = function () { switchTab('mine'); };
+    H.toast('需求已发布，已推送给 ' + pushed + ' 位司机', document.body);
+  };
+
+  /* ---------- 我的需求 ---------- */
+  var mineSeg = 'active';
+  var isLive = function (n) { return n.status === 'active' || n.status === 'confirming'; };
+  function ncard(n) {
+    var s = H.NEED_STATUS[n.status], live = isLive(n);
+    var matched = live ? H.matchPosts(n).filter(function (m) { return m.level === 'good'; }).length : (n.matched || 0);
+    var h = '<div class="ncard" data-id="' + n.id + '"><div>' +
+      '<div class="r1"><span class="tag ' + s.cls + '">' + s.name + '</span><span class="tag gray">' + (n.req.whole === false ? '可拼车' : '整车') + '</span>' + (n.source === 'order' ? '<span class="tag gray">订单 ' + n.orderNo + '</span>' : '') + '<span class="xs muted">' + H.fmtAgo(n.posted) + ' 发布</span>' + (live ? '<span class="xs muted">· ' + H.fmtLeft(n.validUntil) + '后自动下架</span>' : '') + '</div>' +
+      '<div class="route"><div class="city">' + n.from + '<small>' + (n.fromDetail || '') + '</small></div><div class="arrow"><div class="ln"></div></div><div class="city to">' + n.to.join('/') + '<small>' + (n.toDetail || '') + '</small></div></div>' +
+      '<div class="l2"><span>装车 <b>' + n.when + '</b></span><span>' + H.cargoLine(n) + '</span><span>需 <b>' + H.reqLine(n) + '</b></span><span>预算 <b>' + (n.budget == null ? '电话谈' : '¥' + n.budget + '/' + n.budgetUnit) + '</b></span></div>' +
+      '<div class="stat"><span><b>' + n.views + '</b>司机看过</span><span><b>' + (n.contacts ? n.contacts.filter(function (c) { return c.who !== '您'; }).length : n.calls) + '</b>司机查看了电话</span><span><b>' + matched + '</b>台匹配顺路车</span></div>' +
+      '</div><div class="side">' +
+      '<div class="small b">谁联系过我</div><ul class="who">' + ((n.contacts && n.contacts.length) ? n.contacts.map(function (c) { return '<li><span>' + c.who + ' · ' + c.what + '</span><span class="muted">' + c.when + '</span></li>'; }).join('') : '<li><span class="muted">还没有司机查看电话' + (live ? '，匹配的车您可以先打' : '') + '</span></li>') + '</ul>' +
+      '<div class="acts">' + (live ? '<button class="btn sm" data-act="match">看匹配车 (' + matched + ')</button><button class="btn sm line" data-act="found">已找到车</button><button class="btn sm ghost" data-act="extend">延长</button><button class="btn sm ghost" data-act="off">下架</button>' : '<button class="btn sm" data-act="again">再发一次</button>') + '</div>' +
+      '</div>';
+    if (n.status === 'confirming') h += '<div class="confirm"><span class="sp"><b>发布已满 24 小时，还需要车吗？</b> 未确认将于 2 小时后自动隐藏，避免司机打到已经不需要车的您。</span><button class="btn hot" data-act="still">还需要，继续展示</button><button class="btn ghost" data-act="found">已找到车</button></div>';
+    if (!live) h += '<div class="end">' + n.endReason + ' · ' + n.endAt + '</div>';
+    return h + '</div>';
+  }
+  function renderMine() {
+    var list = H.MY_NEEDS.filter(function (n) { return mineSeg === 'active' ? isLive(n) : !isLive(n); });
+    H.qs('#mineList').innerHTML = list.length ? list.map(ncard).join('') : '<div class="empty"><div class="ic"></div>暂无需求</div>';
+    H.qs('#mineCnt').textContent = '(' + H.MY_NEEDS.filter(isLive).length + ')';
+    H.qs('#mineTip').textContent = mineSeg === 'active' ? '进行中的需求会被推荐给司机；谈成请点「已找到车」' : '已结束的需求 7 天内可「再发一次」，信息自动带入';
+    H.qsa('#mineSeg a').forEach(function (a) { a.classList.toggle('on', a.dataset.s === mineSeg); });
+  }
+  H.qsa('#mineSeg a').forEach(function (a) { a.onclick = function () { mineSeg = a.dataset.s; renderMine(); }; });
+  function endNeed(n, st, reason) { n.status = st; n.endReason = reason; n.endAt = '今天 09:2' + Math.floor(Math.random() * 9); renderMine(); }
+  H.qs('#mineList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]'); if (!b) return;
+    var n = H.MY_NEEDS.filter(function (x) { return x.id === e.target.closest('.ncard').dataset.id; })[0], act = b.dataset.act;
+    if (act === 'match') {
+      var ms = H.matchPosts(n);
+      H.pcModal({ title: '匹配这条需求的顺路车 · ' + n.from + ' → ' + n.to[0], width: 560, body: ms.length ? ms.map(mrow).join('') : '<div class="empty">暂无在展车辆匹配，司机看到需求会主动联系您</div>', footer: '<button class="btn ghost" data-cancel>关闭</button>',
+        onReady: function (root, close) { H.qs('[data-cancel]', root).onclick = close; root.addEventListener('click', function (ev) { var r = ev.target.closest('.mrow'); if (r && ev.target.closest('[data-call]')) H.unlockPhone(H.POSTS.filter(function (x) { return x.id === r.dataset.id; })[0], 'pc'); }); } });
+    } else if (act === 'found') {
+      H.pcModal({ title: '找到车了？', body: '<div class="small t2">确认后需求立即隐藏，司机不会再打给您。顺便告诉我们从哪找到的（只用于统计，平台不参与交易）：</div><div class="chips mt12"><span class="chip on" data-src>列表里的顺路车</span><span class="chip" data-src>司机看到需求主动联系</span><span class="chip" data-src>自有车 / 熟车队</span><span class="chip" data-src>其他平台</span></div>',
+        footer: '<button class="btn ghost" data-cancel>再想想</button><button class="btn" data-ok>确认已找到车</button>',
+        onReady: function (root, close) { H.qsa('[data-src]', root).forEach(function (c) { c.onclick = function () { H.qsa('[data-src]', root).forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on'); }; }); H.qs('[data-cancel]', root).onclick = close; H.qs('[data-ok]', root).onclick = function () { close(); endNeed(n, 'found', '已找到车（' + H.qs('[data-src].on', root).textContent + '）'); H.toast('已隐藏需求，祝顺利。装车时记得核对人车证', document.body); }; } });
+    } else if (act === 'extend') {
+      var d = new Date(n.validUntil); d.setHours(d.getHours() + 12); n.validUntil = d.toISOString().slice(0, 19); n.status = 'active'; renderMine(); H.toast('已延长 12 小时（装车时间同步顺延，司机看到的是最新时间）', document.body);
+    } else if (act === 'off') { endNeed(n, 'withdrawn', '您手动下架'); H.toast('已下架', document.body); }
+    else if (act === 'still') { n.status = 'active'; var d2 = new Date(n.validUntil); d2.setHours(d2.getHours() + 24); n.validUntil = d2.toISOString().slice(0, 19); renderMine(); H.toast('已确认，继续展示 24 小时', document.body); }
+    else if (act === 'again') { switchTab('pub'); H.toast('已带入上次的线路与货物，确认时间后发布', document.body); }
+  });
+
+  /* ---------- tab ---------- */
+  function switchTab(t) {
+    H.qsa('.ntabs a').forEach(function (a) { a.classList.toggle('on', a.dataset.tab === t); });
+    H.qs('#pubView').style.display = t === 'pub' ? '' : 'none'; H.qs('#mineView').style.display = t === 'mine' ? '' : 'none';
+    if (t === 'mine') renderMine();
+    window.scrollTo(0, 0);
+  }
+  H.qsa('.ntabs a').forEach(function (a) { a.onclick = function () { switchTab(a.dataset.tab); }; });
+
+  applyOrder(0);
+  renderMine();
+  if (H.param('tab') === 'mine') switchTab('mine');
+
+  H.notes('PC 端 · 用车需求（设计说明）', [
+    '这是"找车"的另一半：<b>找车方发需求，车来找人</b>。与运力信息对称，都只是信息，平台按线路 / 时间 / 装备 / 吨位<b>推荐</b>，不派单、不接单、不确认成交、不定价。',
+    '表单尽量不用填：从<b>货袋子订单带入</b>线路与货物；选品种自动勾选装备（热卷 → 鞍座；冷轧 → 篷布；螺纹钢 → 12m 长材）。',
+    '右侧<b>实时匹配</b>随填随变：不用等发布，在展的顺路车现在就能查看电话。匹配理由（✓ 同城出发 / ✓ 有鞍座 / ! 只剩 12t 位）原样展示，让货主自己判断。',
+    '发布后两条路并行：货主主动打匹配车；需求推送给常跑该线的司机，司机主动打货主。司机查看货主电话同样要 <b>实名 + 车辆认证 → 风险提示 → 留痕 → 反馈</b>。',
+    '需求有自己的生命周期：装车时间到自动下架 / 已找到车 / 司机反馈"已找到车"≥2 自动隐藏 / 24h 未找到车要确认 / 手动下架，与运力信息的终止机制对称。',
+    '红线：页面上不出现"抢单 / 接单 / 平台确认成交 / 代收运费"；预算只是货主自填，旁边永远放市场参考而非平台指导价。',
+  ]);
+})();
+</script>
+</body>
+</html>

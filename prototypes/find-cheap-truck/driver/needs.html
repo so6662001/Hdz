@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>悟运小程序 · 沿线用车需求（驾驶员端）</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  .wy-head { background: linear-gradient(160deg, #ff7a2e, #ff5a1a 55%, #ff8340); color: #fff; padding: 6px 16px 40px; }
+  .wy-head h2 { font-size: 20px; display: flex; align-items: center; gap: 8px; }
+  .wy-head h2 .tj { background: rgba(255,255,255,.2); font-size: 11px; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
+  .wy-head p { font-size: 12px; opacity: .9; margin-top: 4px; line-height: 1.5; }
+  .wy-head .stats { display: flex; margin-top: 12px; background: rgba(255,255,255,.14); border-radius: 12px; padding: 10px 0; }
+  .wy-head .stats div { flex: 1; text-align: center; }
+  .wy-head .stats b { display: block; font-size: 20px; }
+  .wy-head .stats span { font-size: 11px; opacity: .85; }
+  .lift { margin: -28px 14px 0; position: relative; }
+  .segbar { display: flex; gap: 4px; background: #fff; border-radius: 12px; padding: 4px; box-shadow: var(--shadow); }
+  .segbar span { flex: 1; text-align: center; padding: 8px 0; border-radius: 9px; font-size: 13px; color: var(--text-2); cursor: pointer; }
+  .segbar span.on { background: var(--wy-soft); color: var(--wy); font-weight: 700; }
+  .segbar span i { font-style: normal; font-size: 11px; margin-left: 1px; }
+  .quick { display: flex; gap: 8px; overflow-x: auto; padding: 12px 14px 0; scrollbar-width: none; }
+  .quick::-webkit-scrollbar { display: none; }
+  .quick .chip { flex: none; height: 28px; font-size: 12px; }
+  .grp { margin: 12px 14px 0; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); }
+  .grp .pl { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; display: flex; align-items: center; gap: 6px; flex: 1; flex-wrap: wrap; row-gap: 2px; }
+  .grp .pl b { color: var(--text); white-space: nowrap; }
+  .grp .pl .tag { margin-left: auto; }
+  .grp .pl .sub { flex-basis: 100%; font-size: 11px; color: var(--muted); }
+  .list { padding: 10px 14px 0; }
+  .need-card .price .n { color: var(--wy); }
+  .need-card .btn { background: var(--wy); }
+  .sub-card { margin: 12px 14px 0; background: linear-gradient(120deg, #fff1e8, #fff8f3); border: 1px solid #ffd9c2; border-radius: 12px; padding: 12px 14px; }
+  .sub-card .t { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .sub-card .t .switch { margin-left: auto; }
+  .sub-card .r { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .sub-card .r .chip { height: 26px; font-size: 12px; background: #fff; }
+  .sub-card small { display: block; font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .pub-tip { margin: 12px 14px 0; background: #fff; border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow); font-size: 12px; color: var(--text-2); }
+  .pub-tip b { display: block; color: var(--text); font-size: 13px; }
+</style>
+</head>
+<body class="wy-theme">
+<div class="m-stage">
+  <div class="phone dark-nav" id="phone">
+    <div class="statusbar" style="background:#ff6b1a"><span>9:22</span><span>●●● ᯤ 100%</span></div>
+    <div class="navbar" style="background:#ff6b1a"><a class="back" href="home.html">‹</a><div class="title">沿线用车需求</div><div class="capsule"><span>···</span><i></i><span>◉</span></div></div>
+    <div class="screen" id="screen">
+      <div class="wy-head">
+        <h2>沿线用车需求 <span class="tj">货主自己发的</span></h2>
+        <p>货袋子的钢材买卖方发的用车需求。看中哪条就打货主电话，运费您自己谈；平台不派单、不抽成、不收信息费。</p>
+        <div class="stats"><div><b id="stMatch">0</b><span>匹配我的运力</span></div><div><b id="stNear">0</b><span>附近出发</span></div><div><b>12</b><span>今日新增</span></div><div><b>76%</b><span>3 小时内找到车</span></div></div>
+      </div>
+      <div class="lift"><div class="segbar" id="seg"><span class="on" data-seg="match">匹配我的运力<i id="cMatch"></i></span><span data-seg="near">附近出发<i id="cNear"></i></span><span data-seg="all">全部<i id="cAll"></i></span></div></div>
+
+      <div class="quick" id="quick" style="display:none"><span class="chip on" data-q="">全部</span><span class="chip" data-q="今天">今天装</span><span class="chip" data-q="明天">明天装</span><span class="chip" data-w="1">整车</span><span class="chip" data-w="0">可拼车</span><span class="chip" data-c="1">认证企业</span><span class="chip" data-s="热卷">热卷</span><span class="chip" data-s="螺纹钢">螺纹钢</span></div>
+
+      <div id="content"></div>
+
+      <div class="sub-card">
+        <div class="t">常跑线路有新需求时通知我 <span class="switch on" id="subSw"></span></div>
+        <div class="r"><span class="chip on">嘉兴 → 上海</span><span class="chip on">苏州 → 上海</span><span class="chip">上海 → 嘉兴</span><span class="chip">+ 添加线路</span></div>
+        <small>微信服务通知，每条线路每 4 小时最多 1 条，多条需求合并为"及另 N 条"。不发营销消息。</small>
+      </div>
+      <div class="pub-tip"><div class="sp"><b>没有合适的需求？发一条运力，让货主来找您</b>发布后匹配的需求会直接推给您，货主也能看到您的车。</div><a class="btn wy sm" href="publish.html">一键发布</a></div>
+      <div class="px14 mt12"><div class="notice gray"><span class="ic"></span><div><b>防骚扰 / 防骗：</b>需求都是货袋子实名用户发布，装车时间一到自动消失；货主找到车会标记，您反馈"货主已找到车"也会让它消失。任何要您先交<b>保证金、信息费</b>的都不是货袋子，请举报。</div></div></div>
+      <div style="height:30px"></div>
+    </div>
+    <div class="tabbar wy">
+      <a><span class="ic"></span>首页</a>
+      <a><span class="ic"></span>运单<span class="dot">1</span></a>
+      <a class="on"><span class="ic"></span>运力</a>
+      <a><span class="ic"></span>我的</a>
+    </div>
+    <div class="home-indicator"></div>
+  </div>
+</div>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+(function () {
+  var H = window.HDZ;
+  H.protoBar('needs', H.DRIVER_LINKS);
+
+  var myPosts = H.POSTS.filter(function (p) { return p.driver === 'd1' && p.status === 'active'; });
+  var here = ['嘉兴', '上海'];  // 当前运单：上海宝山 → 嘉兴南湖，11:30 卸货；附近 = 卸货地与出发地
+  var seg = 'match', q = { day: '', whole: '', cert: '', steel: '' };
+
+  var matchGroups = myPosts.map(function (p) { return { post: p, ms: H.matchNeeds(p) }; });
+  var matchedIds = {}; matchGroups.forEach(function (g) { g.ms.forEach(function (m) { if (m.level === 'good') matchedIds[m.need.id] = 1; }); });
+  var nearList = H.NEEDS.filter(function (n) { return n.status === 'active' && here.indexOf(n.from) > -1; }).sort(function (a, b) { return new Date(b.posted) - new Date(a.posted); });
+  H.qs('#stMatch').textContent = Object.keys(matchedIds).length; H.qs('#cMatch').textContent = '(' + Object.keys(matchedIds).length + ')';
+  H.qs('#stNear').textContent = nearList.length; H.qs('#cNear').textContent = '(' + nearList.length + ')';
+  H.qs('#cAll').textContent = '(' + H.NEEDS.filter(function (n) { return n.status === 'active'; }).length + ')';
+
+  function render() {
+    var el = H.qs('#content'), html = '';
+    H.qs('#quick').style.display = seg === 'all' ? '' : 'none';
+    if (seg === 'match') {
+      matchGroups.forEach(function (g) {
+        var p = g.post, v = H.VEHICLES[p.vehicle];
+        html += '<div class="grp"><div class="pl"><span class="tag ' + (p.kind === 'return' ? 'hot' : 'brand') + '">' + H.KIND[p.kind].short + '</span><b>我的运力 · ' + p.from + ' → ' + p.to.join('/') + '</b><span class="tag ok">' + g.ms.filter(function (m) { return m.level === 'good'; }).length + ' 条匹配</span><span class="sub">' + p.depart + ' 出发 · ' + v.plate + ' · ' + H.vehicleLine(v) + '</span></div></div>';
+        html += '<div class="list">' + (g.ms.length ? g.ms.map(function (m) { return H.needCard(m.need, { match: m }); }).join('') : '<div class="empty" style="padding:18px 0">这条运力暂无匹配需求，货主发布后会第一时间推给您</div>') + '</div>';
+      });
+      if (!matchGroups.length) html = '<div class="empty"><div class="ic"></div>您没有展示中的运力<br>发一条运力，系统就会把沿线需求推给您</div>';
+    } else if (seg === 'near') {
+      html += '<div class="grp"><div class="pl">车在 <b>上海宝山 → 嘉兴</b> 途中，预计 11:30 卸货 · 显示 <b>嘉兴、上海</b> 出发的需求<span class="tag gray">按发布时间</span></div></div>';
+      html += '<div class="list">' + nearList.map(function (n) { var m = null; matchGroups.forEach(function (g) { g.ms.forEach(function (x) { if (x.need.id === n.id && (!m || x.score > m.score)) m = x; }); }); return H.needCard(n, { match: m }); }).join('') + '</div>';
+    } else {
+      var list = H.NEEDS.filter(function (n) {
+        if (n.status !== 'active') return false;
+        if (q.day && n.day !== q.day) return false;
+        if (q.whole === '1' && n.req.whole === false) return false;
+        if (q.whole === '0' && n.req.whole !== false) return false;
+        if (q.cert && !H.SHIPPERS[n.shipper].certified) return false;
+        if (q.steel && n.cargo.steel !== q.steel) return false;
+        return true;
+      }).sort(function (a, b) { return (matchedIds[b.id] || 0) - (matchedIds[a.id] || 0) || new Date(b.posted) - new Date(a.posted); });
+      html += '<div class="list">' + (list.length ? list.map(function (n) { return H.needCard(n); }).join('') : '<div class="empty">没有符合筛选的需求</div>') + '</div>';
+    }
+    el.innerHTML = html;
+    H.qsa('#seg span').forEach(function (s) { s.classList.toggle('on', s.dataset.seg === seg); });
+  }
+  H.qsa('#seg span').forEach(function (s) { s.onclick = function () { seg = s.dataset.seg; render(); }; });
+  H.qsa('#quick .chip').forEach(function (c) { c.onclick = function () {
+    if (c.dataset.q !== undefined) { H.qsa('#quick [data-q]').forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on'); q.day = c.dataset.q; }
+    else if (c.dataset.w !== undefined) { var on = c.classList.toggle('on'); H.qsa('#quick [data-w]').forEach(function (x) { if (x !== c) x.classList.remove('on'); }); q.whole = on ? c.dataset.w : ''; }
+    else if (c.dataset.c) { q.cert = c.classList.toggle('on') ? '1' : ''; }
+    else if (c.dataset.s) { var on2 = c.classList.toggle('on'); H.qsa('#quick [data-s]').forEach(function (x) { if (x !== c) x.classList.remove('on'); }); q.steel = on2 ? c.dataset.s : ''; }
+    render();
+  }; });
+
+  H.qs('#content').addEventListener('click', function (e) {
+    var card = e.target.closest('.need-card'); if (!card) return;
+    var n = H.NEEDS.filter(function (x) { return x.id === card.dataset.id; })[0];
+    if (e.target.closest('[data-call-need]')) H.unlockShipperPhone(n);
+    else detail(n);
+  });
+  function detail(n) {
+    var sh = H.SHIPPERS[n.shipper];
+    H.sheet({ title: '需求详情', body:
+      '<div class="route" style="font-size:18px"><div class="city">' + n.from + '<small>' + (n.fromDetail || '') + '</small></div><div class="arrow"><div class="ln"></div></div><div class="city to">' + n.to.join('/') + '<small>' + (n.toDetail || '') + '</small></div></div>' +
+      '<div class="kv mt12" style="grid-template-columns:1fr 1fr"><div><span>装车时间</span><b>' + n.when + '</b></div><div><span>货物</span><b>' + n.cargo.steel + ' ' + n.cargo.tons + 't' + (n.cargo.pieces ? ' · ' + n.cargo.pieces : '') + '</b></div><div><span>需要的车</span><b>' + H.reqLine(n) + '</b></div><div><span>预算</span><b>' + (n.budget == null ? '电话谈' : '¥' + n.budget + '/' + n.budgetUnit) + ' <small class="muted">市场 ¥' + H.refPrice(n.from, n.to[0]).join('-') + '/吨</small></b></div></div>' +
+      (n.cargo.note ? '<div class="small t2 mt8">备注：' + n.cargo.note + '</div>' : '') +
+      '<div class="notice gray mt12" style="font-style:italic"><span class="ic"></span><div>"' + n.desc + '"</div></div>' +
+      '<div class="divider"></div><div class="row"><div class="avatar" style="background:linear-gradient(135deg,#9fb4ff,#1f5eff)">' + sh.short + '</div><div class="col"><b class="small">' + sh.company + ' · ' + sh.contact + '</b><span class="xs muted">' + sh.tip + ' · 发过 ' + sh.needs + ' 次需求 · 找到车 ' + sh.found + ' 次 · 投诉 ' + sh.complaints + '</span></div></div>' +
+      '<div class="xs muted mt8">' + n.views + ' 位司机看过 · ' + n.calls + ' 位司机已联系 · 装车时间到自动下架 · 货主找到车后自动隐藏</div>',
+      footer: '<button class="btn ghost" data-rep style="flex:0 0 80px">举报</button><button class="btn wy" data-call>查看货主电话</button>',
+      onReady: function (root, close) { H.qs('[data-call]', root).onclick = function () { close(); H.unlockShipperPhone(n); }; H.qs('[data-rep]', root).onclick = function () { close(); H.report(n); }; } });
+  }
+  H.qs('#subSw').onclick = function () { this.classList.toggle('on'); H.toast(this.classList.contains('on') ? '已开启线路需求通知' : '已关闭'); };
+  H.qsa('.sub-card .r .chip').forEach(function (c) { c.onclick = function () { if (c.textContent.indexOf('添加') > -1) return H.toast('原型：选择常跑线路'); c.classList.toggle('on'); }; });
+
+  render();
+
+  H.notes('驾驶员端 · 沿线用车需求（设计说明）', [
+    '入口：悟运「运力」Tab 首页的"沿线用车需求 N 条"卡片、发布成功页的"N 条匹配需求"、微信服务通知 D7。',
+    '默认 Tab「<b>匹配我的运力</b>」按司机展示中的每条运力分组，卡片上直接给匹配理由（✓ 同城出发 / ✓ 有鞍座 / ! 车明天走），司机一眼判断值不值得打。',
+    '「附近出发」按当前运单位置（卸货地 + 出发地）取需求；「全部」给筛选 chips（今天 / 明天 / 整车 / 拼车 / 认证企业 / 品种）。',
+    '需求卡片与货主看到的运力卡片同构：线路、时间、货物、所需装备、预算与市场参考、货主认证与历史（发过 N 次 / 找到车 N 次）、已有几位司机联系。',
+    '「查看货主电话」与货主查看司机电话对称：风险提示（平台不派单、不确认成交、不收费；防保证金骗局）→ 号码留痕（货主端可见谁看了）→ 反馈（已谈成 / 在沟通 / 未接通 / 货主已找到车 / 不实）。',
+    '不做"抢单 / 报价 / 接单"按钮，只有电话；订阅常跑线路的需求通知有频控；底部给"发一条运力让货主来找您"的反向入口。',
+  ]);
+})();
+</script>
+</body>
+</html>

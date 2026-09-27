@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>货袋子 · 找特价车（PC 端）</title>
+<title>货袋子 · 找顺路车（PC 端）</title>
 <link rel="stylesheet" href="../shared/base.css">
 <style>
   .trust-strip { width: 1200px; margin: 16px auto 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
@@ -18,12 +18,12 @@
 <body class="pc-body">
 <nav class="pc-nav"><div class="in">
   <a class="logo"><i>货</i>货袋子</a>
-  <div class="menu"><a>首页</a><a>现货商城</a><a>求购大厅</a><a>钢市行情</a><a>加工服务</a><a class="on">找特价车<span class="new">NEW</span></a><a>资讯</a></div>
+  <div class="menu"><a>首页</a><a>现货商城</a><a>求购大厅</a><a>钢市行情</a><a>加工服务</a><a class="on">找顺路车<span class="new">NEW</span></a><a>资讯</a></div>
   <div class="right"><span>客服 400-xxx-xxxx</span><span class="u"><span class="avatar">沪</span>上海某钢贸有限公司 <span class="tag ok">已认证</span></span><a>卖家中心</a></div>
 </div></nav>
 
 <section class="hero"><div class="in">
-  <h1>找特价车 <span class="tj">返程车 · 闲置车</span></h1>
+  <h1>找顺路车 <span class="tj">返程车 · 闲置车</span></h1>
   <p class="sub">司机自己发布的回程车、空闲车，专装钢材，运费通常比市场价低 10%～20%。平台只做信息展示，您与司机直接联系、直接成交。</p>
   <div class="stats"><div><b>386</b><span>今日在展运力</span></div><div><b>42</b><span>覆盖城市</span></div><div><b>-14%</b><span>平均低于市场价</span></div><div><b>91%</b><span>信息有效率</span></div></div>
   <div class="searchbar">
@@ -35,7 +35,7 @@
     <div class="f" style="border-right:0"><label>货物</label><div class="v"><span class="ph">如：热卷 30t，需鞍座</span></div></div>
     <button class="btn go" id="searchBtn">找车</button>
   </div>
-  <div class="hot-routes">热门线路：<span id="hotRoutes"></span><span class="sp"></span><span style="color:#fff">从我的订单找车 → <a>订单 #HD2609270012 宝山仓 → 嘉兴</a></span></div>
+  <div class="hot-routes">热门线路：<span id="hotRoutes"></span><span class="sp"></span><span style="color:#fff">从我的订单找车 → <a>订单 #HD2609270012 宝山仓 → 嘉兴</a></span><a href="pc-need.html" style="background:rgba(255,255,255,.9);color:var(--brand);font-weight:600">发布用车需求 ›</a></div>
 </div></section>
 
 <div class="trust-strip">
@@ -64,10 +64,10 @@
       <span class="cnt" id="cnt"></span>
     </div>
     <div id="list"></div>
-    <div class="empty" id="emptyTip" style="display:none"><div class="ic"></div>该线路暂时没有合适的特价车<br><button class="btn line sm mt12" id="subBtn2">订阅这条线路，有车立即通知我</button></div>
+    <div class="empty" id="emptyTip" style="display:none"><div class="ic"></div>该线路暂时没有合适的顺路车<br><div class="row mt12" style="justify-content:center"><a class="btn sm" href="pc-need.html">发布用车需求，让车来找我</a><button class="btn line sm" id="subBtn2">订阅这条线路，有车立即通知我</button></div></div>
     <div class="aside-box mt16" style="display:flex;align-items:center;gap:14px">
-      <div class="sp"><b>没找到合适的车？</b><div class="small t2 mt4">发布一条「用车需求」，匹配线路的司机会看到并主动联系您。同样只是信息发布，平台不接单、不收费。</div></div>
-      <button class="btn line" id="needBtn">发布用车需求</button>
+      <div class="sp"><b>没找到合适的车？发一条「用车需求」，让顺路车来找您</b><div class="small t2 mt4">系统按线路 / 时间 / 装备实时推荐在展顺路车，您直接查看电话；常跑这条线的司机也会看到需求主动联系您。同样只是信息，平台不接单、不派单、不收费。</div></div>
+      <a class="btn" id="needBtn" href="pc-need.html">发布用车需求</a><a class="btn line" href="pc-need.html?tab=mine">我的需求 (2)</a>
     </div>
   </section>
 
@@ -85,7 +85,7 @@
       <a class="row mt12" href="pc-l2.html" style="gap:10px;background:#fff1e8;border-radius:10px;padding:10px 12px;font-size:12px;color:#7a2e0e"><span class="sp"><b>要发票、要有人对货负责？</b><br>走合作的持牌网络货运平台承运，价格约 +8~12%</span><span>›</span></a>
     </div>
     <div class="aside-box sub-form">
-      <h3>订阅线路 <small>有特价车立刻通知</small></h3>
+      <h3>订阅线路 <small>有顺路车立刻通知</small></h3>
       <div class="row"><input class="input" value="嘉兴 / 苏州 / 杭州"><span class="muted">→</span><input class="input" value="上海"></div>
       <div class="row"><span class="small t2">通知方式</span><span class="chip sm on">微信服务通知</span><span class="chip sm">短信</span></div>
       <button class="btn block sm mt12" id="subBtn">订阅 · 目前 12 家企业在等这条线路</button>
@@ -94,7 +94,7 @@
     <div class="aside-box" style="text-align:center">
       <h3 style="justify-content:center">手机找车更方便</h3>
       <div class="qr"></div>
-      <div class="small t2">微信扫码进入货袋子小程序<br>「找特价车」· 到货现场也能联系司机</div>
+      <div class="small t2">微信扫码进入货袋子小程序<br>「找顺路车」· 到货现场也能联系司机</div>
     </div>
     <div class="aside-box">
       <h3>常见问题</h3>
@@ -185,20 +185,20 @@
     else if (!e.target.closest('a')) location.href = 'pc-detail.html?id=' + p.id;
   });
   H.qs('#searchBtn').onclick = function () { H.toast('已按 嘉兴 → 上海 · 今天~明天 搜索', document.body); render(); };
-  var sub = function () { H.toast('已订阅「嘉兴/苏州/杭州 → 上海」，有新特价车将通过微信通知', document.body); };
+  var sub = function () { H.toast('已订阅「嘉兴/苏州/杭州 → 上海」，有新顺路车将通过微信通知', document.body); };
   H.qs('#subBtn').onclick = sub; H.qs('#subBtn2').onclick = sub;
   H.qs('#insBtn').onclick = function () { H.pcModal({ title: '货运险报价（合作保险经纪提供）', body: '<div class="kv"><div><span>货物</span><b>热卷 30t</b></div><div><span>货值</span><b>¥ 118,000</b></div><div><span>线路</span><b>嘉兴 → 上海</b></div></div><div class="divider"></div><div class="row between"><span>基本险（货损 / 盗抢 / 事故）</span><b class="hot-c" style="font-size:18px">¥ 59</b></div><div class="row between mt8"><span>综合险（+ 雨淋锈蚀 / 装卸损）</span><b class="hot-c" style="font-size:18px">¥ 89</b></div><div class="notice gray mt12"><span class="ic"></span><div>由 xx 保险经纪 / xx 保险公司承保出单，货袋子仅提供入口，不收取保费、不做保险代理。</div></div>', footer: '<button class="btn ghost" onclick="this.closest(\'.pc-mask\').remove()">稍后</button><button class="btn">去投保</button>' }); };
-  H.qs('#needBtn').onclick = function () { H.pcModal({ title: '发布用车需求（信息发布，平台不接单）', width: 520, body: '<div class="kv" style="grid-template-columns:1fr 1fr"><div><span>提货地</span><input class="input" value="上海宝山 · 宝钢大仓"></div><div><span>送货地</span><input class="input" value="嘉兴南湖"></div><div><span>货物 / 吨位</span><input class="input" value="热卷 31.6t，需鞍座"></div><div><span>装车时间</span><input class="input" value="明天 上午"></div><div><span>预算（选填）</span><input class="input" placeholder="如 ¥32/吨"></div><div><span>联系人</span><input class="input" value="张经理 138****"></div></div><div class="notice blue mt12"><span class="ic"></span><div>需求将推送给近 3 天在该线路发布过运力、或常跑该线路的司机；司机直接联系您。需求默认展示至装车时间结束。</div></div>', footer: '<button class="btn ghost" onclick="this.closest(\'.pc-mask\').remove()">取消</button><button class="btn">发布需求</button>' }); };
   H.qs('.swap').onclick = function () { var a = H.qs('#sFrom').innerHTML, b = H.qs('#sTo').innerHTML; H.qs('#sFrom').innerHTML = b; H.qs('#sTo').innerHTML = a; };
 
-  H.notes('PC 端 · 找特价车（设计说明）', [
-    '入口进入货袋子主导航「找特价车」，命名突出价格优势；副标题解释"为什么便宜、平台角色是什么"。',
+  H.notes('PC 端 · 找顺路车（设计说明）', [
+    '入口进入货袋子主导航「找顺路车」，命名突出价格优势；副标题解释"为什么便宜、平台角色是什么"。',
     '搜索条按找车人的思维排：<b>车在哪 → 送到哪 → 什么时候 → 车型 → 货物</b>；支持从现货订单一键带入线路。',
     '首屏 4 格信任条：真人真车 / 悟运履约 / 联系留痕 / 平台边界，先解决"敢不敢打电话"。信任标识只保留 实名 + 车辆认证 两枚，平台不做证件分级、不做承运。',
     '筛选把钢材特有维度放前面：<b>鞍座、篷布、12m 长材、多点装卸</b>；"可信度"筛选让货主自己选风险偏好。',
     '卡片信息密度高：线路、时间、车、装备、司机资质、价格与市场参考对比、发布时间与浏览数。',
     '「查看电话」需登录 → 风险提示确认 → 显示号码并留痕 → 联系结果反馈（反馈驱动信息真实性）。',
     '右侧：安全须知 + 协议模板 + 货运险入口（保险公司承保）、订阅线路（订阅量反向刺激司机发布）、小程序码、FAQ。',
+    '列表下方与空态都给「<b>发布用车需求</b>」入口（shipper/pc-need.html）：找不到车时反过来让车找人，仍然只是信息发布。',
   ]);
 })();
 </script>

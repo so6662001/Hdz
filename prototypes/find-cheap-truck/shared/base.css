@@ -1,4 +1,4 @@
-/* 货袋子 · 找特价车 / 悟运 · 发布运力 —— 高保真原型通用样式 */
+/* 货袋子 · 找顺路车 / 悟运 · 发布运力 —— 高保真原型通用样式 */
 :root {
   --brand: #1f5eff;          /* 货袋子主色 */
   --brand-dark: #1747c2;
@@ -230,7 +230,8 @@ textarea.input { height: auto; min-height: 80px; padding: 10px 12px; resize: non
 /* 运力卡片（手机） */
 .post-card { background: #fff; border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); position: relative; }
 .post-card + .post-card { margin-top: 10px; }
-.post-card .top { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.post-card .top { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; row-gap: 4px; }
+.post-card .top .xs { white-space: nowrap; }
 .post-card .time { font-size: 12px; color: var(--text-2); margin-top: 6px; }
 .post-card .veh { margin-top: 8px; font-size: 13px; color: var(--text); }
 .post-card .veh .eq { color: var(--text-2); }

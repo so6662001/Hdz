@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>货袋子 · 找特价车 / 悟运 · 发布运力 —— 高保真原型总览</title>
+<title>货袋子 · 找顺路车 / 悟运 · 发布运力 —— 高保真原型总览</title>
 <link rel="stylesheet" href="shared/base.css">
 <style>
   body { background: #f4f5f8; }
@@ -73,9 +73,9 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <h1>找特价车 <span class="tj">返程车 · 闲置车 · 专装钢材</span></h1>
-    <p>驾驶员在<b>悟运小程序</b>发布返程车、闲置车、顺路捎货信息；卖家、买家在<b>货袋子 PC 端、微信小程序、H5</b> 三端找车并直接联系司机。这是一个<b>双方信息互动板块</b>：平台只做信息展示与真人真车核验，<b>不参与交易、不派单、不收运费、不做承运人、不做网络货运平台</b>。本页为高保真 HTML 原型总览，所有页面可点击交互（纯前端、模拟数据）。</p>
-    <div class="pills"><span>驾驶员端 4 页（一键 / 语音发布）</span><span>PC 找车 2 页</span><span>小程序 / H5 找车 2 页 × 2 壳</span><span>运营后台 1 页 3 视图（轻量）</span><span>统一的"查看电话 → 风险提示 → 留痕 → 反馈"流程</span><span>5 条运力终止路径</span><span>v0.2 补充：服务通知 / 申诉 / 合作承运 / 语音校准</span></div>
+    <h1>找顺路车 <span class="tj">返程车 · 闲置车 · 专装钢材</span></h1>
+    <p>驾驶员在<b>悟运小程序</b>发布返程车、闲置车、顺路捎货信息；卖家、买家在<b>货袋子 PC 端、微信小程序、H5</b> 三端找车并直接联系司机；找车方也可以<b>发布用车需求</b>，系统推荐匹配的顺路车、司机在悟运看到需求主动联系。这是一个<b>双方信息互动板块</b>：平台只做信息展示与真人真车核验，<b>不参与交易、不派单、不收运费、不做承运人、不做网络货运平台</b>。本页为高保真 HTML 原型总览，所有页面可点击交互（纯前端、模拟数据）。</p>
+    <div class="pills"><span>驾驶员端 4 页（一键 / 语音发布）</span><span>PC 找车 2 页</span><span>小程序 / H5 找车 2 页 × 2 壳</span><span>运营后台 1 页 3 视图（轻量）</span><span>统一的"查看电话 → 风险提示 → 留痕 → 反馈"流程</span><span>5 条运力终止路径</span><span>v0.2 补充：服务通知 / 申诉 / 合作承运 / 语音校准</span><span>v0.3：用车需求（车找货）三端 + 司机端沿线需求</span></div>
   </div>
 
   <h2>原型页面 <small>点击卡片进入可交互页面；每页右上角有"设计说明"面板</small></h2>
@@ -89,14 +89,14 @@
 
   <div class="role-hd"><span class="ic bg-brand">货主</span><h3>找车端 · 货袋子 PC</h3><span>卖家、买家在网站找车</span></div>
   <div class="grid2">
-    <a class="pcard" href="shipper/pc-find.html"><div class="thumb pc"><span class="role tag brand">PC · 列表</span><iframe src="shipper/pc-find.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>找特价车 · 列表页</h3><p>主导航新增入口；搜索条（车在哪 → 送到哪 → 时间 → 车型 → 货物）；信任 4 格；钢材维度筛选；卡片含司机资质与市场价对比；查看电话弹窗；订阅线路；货运险入口；发布用车需求。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
+    <a class="pcard" href="shipper/pc-find.html"><div class="thumb pc"><span class="role tag brand">PC · 列表</span><iframe src="shipper/pc-find.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>找顺路车 · 列表页</h3><p>主导航新增入口；搜索条（车在哪 → 送到哪 → 时间 → 车型 → 货物）；信任 4 格；钢材维度筛选；卡片含司机资质与市场价对比；查看电话弹窗；订阅线路；货运险入口；发布用车需求。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
     <a class="pcard" href="shipper/pc-detail.html?id=p1001"><div class="thumb pc"><span class="role tag brand">PC · 详情</span><iframe src="shipper/pc-detail.html?id=p1001&embed=1" loading="lazy"></iframe></div><div class="body"><h3>运力详情页</h3><p>线路 / 时间 / 吨位 / 司机原话；车辆照片、参数、装钢材配置矩阵；司机履约与评价；信息状态轨迹；右侧吸顶价格与"查看电话"、联系前确认、平台边界声明。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
   </div>
 
   <div class="role-hd"><span class="ic bg-brand">货主</span><h3>找车端 · 货袋子微信小程序 / H5</h3><span>同一套页面，两种壳（小程序 / 浏览器 H5）</span></div>
   <div class="grid3">
-    <a class="pcard" href="shipper/m-find.html?shell=mp"><div class="thumb m"><span class="role tag brand">小程序 · 列表</span><iframe src="shipper/m-find.html?shell=mp&embed=1" loading="lazy"></iframe></div><div class="body"><h3>小程序 · 找特价车</h3><p>Tab 入口；搜索 + 快捷筛选 chips；信任 4 格；列表中插入订阅线路卡；底部弹层查看电话与反馈。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
-    <a class="pcard" href="shipper/m-find.html?shell=h5"><div class="thumb m"><span class="role tag gray">H5 · 列表</span><iframe src="shipper/m-find.html?shell=h5&embed=1" loading="lazy"></iframe></div><div class="body"><h3>H5 · 找特价车</h3><p>用于微信群 / 朋友圈分享、短信链接、PC 扫码；浏览器壳 + 打开小程序引导；手机号登录后查看电话。</p><div class="acts"><span class="btn ghost sm">打开</span></div></div></a>
+    <a class="pcard" href="shipper/m-find.html?shell=mp"><div class="thumb m"><span class="role tag brand">小程序 · 列表</span><iframe src="shipper/m-find.html?shell=mp&embed=1" loading="lazy"></iframe></div><div class="body"><h3>小程序 · 找顺路车</h3><p>Tab 入口；搜索 + 快捷筛选 chips；信任 4 格；列表中插入订阅线路卡；底部弹层查看电话与反馈。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
+    <a class="pcard" href="shipper/m-find.html?shell=h5"><div class="thumb m"><span class="role tag gray">H5 · 列表</span><iframe src="shipper/m-find.html?shell=h5&embed=1" loading="lazy"></iframe></div><div class="body"><h3>H5 · 找顺路车</h3><p>用于微信群 / 朋友圈分享、短信链接、PC 扫码；浏览器壳 + 打开小程序引导；手机号登录后查看电话。</p><div class="acts"><span class="btn ghost sm">打开</span></div></div></a>
     <a class="pcard" href="shipper/m-detail.html?id=p1001&shell=mp"><div class="thumb m"><span class="role tag brand">小程序 · 详情</span><iframe src="shipper/m-detail.html?id=p1001&shell=mp&embed=1" loading="lazy"></iframe></div><div class="body"><h3>运力详情（小程序 / H5）</h3><p>标签 → 线路 → 价格对比 → 车辆照片横滑与配置 → 司机卡 → 状态轨迹 → 联系前确认；底部收藏 / 举报 / 分享 / 查看电话。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
   </div>
 
@@ -108,16 +108,24 @@
 
   <div class="role-hd"><span class="ic bg-dark" style="background:#24345f">v0.2</span><h3>补充页面 · 把"后续"落成原型</h3><span>服务通知与一键确认、司机申诉、合作承运出口、语音解析校准</span></div>
   <div class="grid2">
-    <a class="pcard" href="driver/notify.html"><div class="thumb m"><span class="role tag wy">微信 · 服务通知</span><iframe src="driver/notify.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>服务通知模板 + 一键确认发布</h3><p>司机端 6 条（返程车已备好 / 即将到期 / 还闲着吗 / 已自动标记已接单 / 货主反馈 / 处置通知）与货主端 4 条（订阅有车 / 收藏已订走 / 联系反馈 / 举报结果）的<b>模板文案、字段、落地页、频控</b>；点 D1 进入小程序整卡预览"一键确认发布"；能在卡片上直接完成的（延长、还闲着、恢复展示）不进小程序。附<b>悟运接单联动规则</b>（同车牌 + 时间窗交集 + 同城 → 自动下架，1 小时可恢复）。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
+    <a class="pcard" href="driver/notify.html"><div class="thumb m"><span class="role tag wy">微信 · 服务通知</span><iframe src="driver/notify.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>服务通知模板 + 一键确认发布</h3><p>司机端 7 条（返程车已备好 / 即将到期 / 还闲着吗 / 已自动标记已接单 / 货主反馈 / 处置通知 / 沿线有新需求）与货主端 6 条（订阅有车 / 收藏已订走 / 联系反馈 / 举报结果 / 司机查看了您的电话 / 需求匹配到车）的<b>模板文案、字段、落地页、频控</b>；点 D1 进入小程序整卡预览"一键确认发布"；能在卡片上直接完成的（延长、还闲着、恢复展示）不进小程序。附<b>悟运接单联动规则</b>（同车牌 + 时间窗交集 + 同城 → 自动下架，1 小时可恢复）。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
     <a class="pcard" href="driver/appeal.html"><div class="thumb m"><span class="role tag wy">悟运 · 申诉</span><iframe src="driver/appeal.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>司机处置通知与申诉</h3><p>处置通知一次讲清举报方、原因、系统佐证、处置结果与 48 小时倒计时；申诉表单只有理由 chips、三类证据（至少 1 项）、一句话说明（可语音）；结果页两种示例（?case=off 成立 / ?case=ban 不成立）都给下一步。平台只核实信息与账号，不裁定运费争议、不转交证据。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
-    <a class="pcard" href="shipper/pc-l2.html?id=p1001"><div class="thumb pc"><span class="role tag brand">PC · 合作承运</span><iframe src="shipper/pc-l2.html?id=p1001&embed=1" loading="lazy"></iframe></div><div class="body"><h3>要发票 / 要有人负责 → 合作承运（PC；小程序 / H5 版见 shipper/m-l2.html）</h3><p>轻平台的出口：先选需求（发票 / 承运人负责 / 对公付款 / 都不需要）再给建议；两条路对照表；<b>"就用这台特价车"</b>由合作的持牌网络货运平台把司机纳入承运并开票（约 +8~12%）；每次跳转有离开声明与勾选确认；侧栏说明什么时候不必走合作承运。货袋子只引导跳转，不承运、不结算、不开票。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
+    <a class="pcard" href="shipper/pc-l2.html?id=p1001"><div class="thumb pc"><span class="role tag brand">PC · 合作承运</span><iframe src="shipper/pc-l2.html?id=p1001&embed=1" loading="lazy"></iframe></div><div class="body"><h3>要发票 / 要有人负责 → 合作承运（PC；小程序 / H5 版见 shipper/m-l2.html）</h3><p>轻平台的出口：先选需求（发票 / 承运人负责 / 对公付款 / 都不需要）再给建议；两条路对照表；<b>"就用这台顺路车"</b>由合作的持牌网络货运平台把司机纳入承运并开票（约 +8~12%）；每次跳转有离开声明与勾选确认；侧栏说明什么时候不必走合作承运。货袋子只引导跳转，不承运、不结算、不开票。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
     <a class="pcard" href="admin/asr-calibrate.html"><div class="thumb pc"><span class="role tag gray">产品工具 · 语音校准</span><iframe src="admin/asr-calibrate.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>语音发布解析校准工作台</h3><p>产品 / 研发内部工具，不增加运营人工：样本来自司机在语音结果卡片上<b>改过的字段</b>（自动收集，等于司机免费标注）；一次全对率、各字段准确率、待加词、口语词典（甬 → 宁波、大板 → 17.5m 平板、好说 → 面议、一口价 → 按车）；"加词典"当场生效并可自动重跑同类样本，"规则问题"进研发待办。</p><div class="acts"><span class="btn sm" style="background:#2b3040">打开</span></div></div></a>
   </div>
+
+  <div class="role-hd"><span class="ic bg-brand" style="background:#0aa35a">v0.3</span><h3>用车需求 · 车找货的另一半</h3><span>找车方发需求 → 系统推荐顺路车、司机看到需求主动联系 → 双方自己打电话；平台不接单、不派单、不确认成交</span></div>
+  <div class="grid3">
+    <a class="pcard" href="shipper/pc-need.html"><div class="thumb pc"><span class="role tag brand">PC · 用车需求</span><iframe src="shipper/pc-need.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>PC · 发布用车需求 + 实时匹配 + 我的需求</h3><p>从货袋子订单带入线路与货物，选品种自动勾装备；右侧<b>实时匹配</b>随填随变，在展顺路车现在就能查看电话，匹配理由（✓ 同城出发 / ✓ 有鞍座 / ! 只剩 12t）原样展示；发布后推送给常跑该线的司机。「我的需求」：谁查看了我的电话、匹配车数、已找到车 / 延长 / 下架 / 24h 确认 / 再发一次。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
+    <a class="pcard" href="shipper/m-need.html?shell=mp"><div class="thumb m"><span class="role tag brand">小程序 / H5 · 用车需求</span><iframe src="shipper/m-need.html?shell=mp&embed=1" loading="lazy"></iframe></div><div class="body"><h3>小程序 / H5 · 用车需求（?shell=mp|h5）</h3><p>三种填法：订单带入 / <b>按住说一句</b>自动填表 / chips；吸底的"N 台顺路车现在就匹配"点开即可查看电话；发布成功弹层同时给"现在能打的车"和"已推送给 N 位司机"；我的需求与司机端"我的运力"对称。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
+    <a class="pcard" href="driver/needs.html"><div class="thumb m"><span class="role tag wy">悟运 · 沿线用车需求</span><iframe src="driver/needs.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>司机端 · 沿线用车需求</h3><p>按司机展示中的每条运力分组给匹配的需求（带匹配理由）；附近出发 / 全部 + 筛选；需求卡片含货主认证与历史（发过 N 次、找到车 N 次）、货物与所需装备、预算与市场参考、已有几位司机联系；「<b>查看货主电话</b>」走与货主对称的 风险提示 → 留痕 → 反馈；只有电话，没有抢单 / 报价 / 接单按钮。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
+  </div>
+  <div class="pcard" style="padding:18px 22px;color:var(--text-2);font-size:13px;line-height:1.8;margin-top:14px"><div><b style="color:var(--text);font-size:15px;display:block;margin-bottom:6px">用车需求为什么不会把平台做重</b>需求和运力一样，<b>只是信息</b>。平台做的是按线路 / 时间 / 装备 / 吨位<b>推荐</b>，推荐理由透明展示，成不成由双方电话决定；平台不派单、不接单、不确认成交、不定价（预算是货主自填，旁边永远是市场参考而非平台指导价）、不收信息费。司机查看货主电话与货主查看司机电话完全对称：实名 + 车辆认证 → 风险提示 → 留痕 → 反馈。需求有自己的自动失效机制（装车时间到 / 已找到车 / 司机反馈"已找到车"≥2 / 24h 确认），不需要人工维护。红线：三端任何页面不出现"抢单 / 接单 / 平台确认成交 / 代收运费"。</div></div>
 
   <h2>轻平台原则 <small>只做双方信息互动；不做网络货运平台、不做承运人，但要把信任解决掉</small></h2>
   <table>
     <tr><th style="width:120px"></th><th>平台做</th><th>平台坚决不做</th></tr>
-    <tr><td><b>信息</b></td><td>司机发运力、货主看运力、查看电话、联系结果反馈；信息按出发时间自动失效。</td><td>不发布货源撮合成交、不派单、不确认成交、不做在线接单。</td></tr>
+    <tr><td><b>信息</b></td><td>司机发运力、货主发用车需求；双向浏览、按线路 / 时间 / 装备推荐（理由透明）、查看电话、联系结果反馈；信息按出发 / 装车时间自动失效。</td><td>不派单、不接单、不确认成交、不定价、不收信息费；推荐不等于平台担保。</td></tr>
     <tr><td><b>钱</b></td><td>永远不经手。</td><td>不收运费、不代收代付、不结算、不开运输发票、不收保费。</td></tr>
     <tr><td><b>身份</b></td><td>司机实名 + 人脸；车辆行驶证核验；一车一账号；复用悟运履约数据作为公开信用。</td><td>不做证件分级（"四证齐全"之类）、不做司机等级体系、不代替货主做尽调。</td></tr>
     <tr><td><b>工具</b></td><td>运输协议模板（双方自行签）、货运险入口（保险公司承保出单）、联系前风险提示。</td><td>不做平台担保、不做先行赔付、不做纠纷调解与责任认定。</td></tr>
@@ -130,7 +138,7 @@
   <div class="flow">
     <div class="st"><div class="n bg-wy">1</div><h4>司机发布运力</h4><p>悟运运单卸货后弹出预填卡片一键发布，或按住说一句话语音发布；定位校验出发地；价格按策略自动算。</p><div class="who">悟运小程序</div></div>
     <div class="st"><div class="n bg-dark">2</div><h4>自动核验与展示</h4><p>实名 + 人脸、行驶证 OCR 与车牌照片一致、一车一账号；自动通过打"实名 / 车辆认证"；按出发时间自动下架。</p><div class="who">第三方核验接口（人工只兜底）</div></div>
-    <div class="st"><div class="n bg-brand">3</div><h4>货主找车</h4><p>PC / 小程序 / H5 按线路时间车型筛选；看司机履约、评价、市场价对比；订阅线路。</p><div class="who">货袋子三端</div></div>
+    <div class="st"><div class="n bg-brand">3</div><h4>货主找车 / 发需求</h4><p>PC / 小程序 / H5 按线路时间车型筛选找车；或发一条用车需求，系统推荐匹配顺路车，司机也在悟运看到需求主动联系。</p><div class="who">货袋子三端</div></div>
     <div class="st"><div class="n bg-brand">4</div><h4>查看电话（留痕）</h4><p>登录 → 风险提示确认 → 显示号码并记录 → 联系结果反馈（谈成 / 未接通 / 已订走 / 不实）。</p><div class="who">货袋子三端</div></div>
     <div class="st"><div class="n bg-ok">5</div><h4>线下直联成交</h4><p>双方自行签协议、投货运险、装车核验人车证、运费直付；平台不接单不结算。</p><div class="who">司机 ⇄ 货主</div></div>
     <div class="st"><div class="n bg-wy">6</div><h4>终止与回流</h4><p>已接单 / 已出发 / 到期 / 下架 / 未确认自动隐藏；反馈驱动信息真实性与司机信用。</p><div class="who">悟运 + 后台规则</div></div>
@@ -166,9 +174,10 @@
     <tr><td><b>平台边界</b></td><td>不签运输合同、不收运费、不派单、不开运输发票 → 不构成网络货运承运人，不承担承运人责任；用户协议与页面声明反复明确。</td><td>每页脚部 / 弹层内的边界声明。</td></tr>
   </table>
 
-  <h2>命名 <small>建议主名 + 副标题，副标题解释"为什么便宜"</small></h2>
+  <h2>命名 <small>主名"找顺路车"点明来源与便宜的原因，副标题解释车从哪来</small></h2>
   <div class="names">
-    <div class="rec"><b>找特价车 <span class="tag brand" style="vertical-align:middle">推荐</span></b><span>直白、有价格钩子、与"找钢材"同构；副标题"返程车 · 闲置车 · 专装钢材"解释来源。原型采用此名。</span></div>
+    <div class="rec"><b>找顺路车 <span class="tag brand" style="vertical-align:middle">已采用</span></b><span>一个词说清"为什么便宜"（车本来就要走这条路），不承诺价格、不像交易，符合"只做信息互动"的定位；与"找钢材"同构；副标题"返程车 · 闲置车 · 专装钢材"解释来源。</span></div>
+    <div><b>找特价车（原方案）</b><span>价格钩子强，但"特价"像平台定价与促销，容易让人以为平台在卖运输服务，与不做承运人的定位不符，故弃用；卡片上保留"特价 -N%"的市场价对比标签。</span></div>
     <div><b>回头车</b><span>行业口语，司机和老货主一听就懂，但覆盖不了"闲置车"；可作为返程车类目名。</span></div>
     <div><b>顺路钢运</b><span>强调钢材专用与顺路属性，品牌感更强，但价格钩子弱。</span></div>
     <div><b>捡漏车 / 省钱车</b><span>更口语、传播性好，适合活动与朋友圈海报标题，不建议做正式功能名。</span></div>
@@ -197,7 +206,7 @@
     </div>
   </div>
 
-  <div class="foot">货袋子 · 找特价车 / 悟运 · 发布运力 高保真原型 v0.1 · 纯前端、无依赖、数据为模拟 · 与《物流板块介入路径分析》L1 运力撮合档对应</div>
+  <div class="foot">货袋子 · 找顺路车 / 悟运 · 发布运力 高保真原型 v0.3 · 纯前端、无依赖、数据为模拟 · 与《物流板块介入路径分析》L1 运力撮合档对应</div>
 </div>
 </body>
 </html>
