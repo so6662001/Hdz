@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>线索渠道目录</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  .famtabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .famtabs .chip b { margin-left: 4px; color: var(--text-4); font-weight: 600; }
+  .src-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .src-card .st { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--text-3); }
+  .src-card .st b { color: var(--text); font-size: 13px; }
+  .adp { display: grid; grid-template-columns: 150px 1fr 220px; gap: 0 14px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+  .adp code { font-size: 12px; }
+  .chain-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .chain-row .node { border: 1px solid var(--border-2); border-radius: var(--radius-sm); padding: 6px 10px; font-size: 12px; background: #fff; min-width: 150px; }
+  .chain-row .node.on { border-color: var(--success); background: var(--success-weak); }
+  .chain-row .node.plan { border-style: dashed; color: var(--text-4); }
+  .chain-row .node code { display: block; font-size: 11.5px; font-weight: 700; }
+  .chain-row .arr { color: var(--text-4); font-size: 14px; }
+  pre.json { background: #1c2430; color: #d6dee8; padding: 12px 14px; border-radius: var(--radius-sm); font-size: 11.5px; line-height: 1.55; overflow: auto; max-height: 360px; }
+  .vend { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .wz-type { border: 1px solid var(--border-2); border-radius: var(--radius-sm); padding: 10px 12px; cursor: pointer; } .wz-type:hover, .wz-type.on { border-color: var(--primary); background: var(--primary-weak); } .wz-type b { display: block; font-size: 13px; } .wz-type span { font-size: 11.5px; color: var(--text-3); }
+  @media (max-width: 1200px) { .src-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/app.js"></script>
+<script>
+const me = App.me(); let tab = qs('tab', 'catalog'); const root = App.mount({ active: 'sources', title: '线索渠道目录' });
+if (me.role !== 'admin') root.innerHTML = '<div class="empty">仅管理员可配置线索渠道（请切换为管理员视角）</div>';
+const FAM = { PROJECT: ['项目族', '在建 / 招标 / 许可 / 备案等公开项目留痕'], COMPANY: ['企业族', '工商 / 资质 / 许可 / 招聘等企业侧信号'], RELATION: ['关系族', '介绍人、异业联盟、老客户'], INTENT: ['意图族', '明确表达采购意向的行为'], CONTENT: ['内容族', '内容分发的效果回流'], FIELD: ['现场族', '线下扫街、展会、名片'] };
+const PHASE = { P1_DEFAULT: ['一期默认启用', 'success'], P1_OPTIONAL: ['一期可选', 'primary'], P2: ['二期', ''], NA: ['不提供', 'danger'] };
+const ADAPTERS = [
+  ['API_PULL', '定时拉取', '定时调用第三方 / 政务开放接口拉取；通用 HTTP 连接器，配置接口地址、鉴权、分页、请求模板、JSONPath 字段映射。', 'P1 / P2 / P5 / P9 / E1 / E2 / E3 / E5'],
+  ['API_PUSH', '推送接收', '接收第三方 Webhook 推送：回调地址、签名校验、字段映射。', 'P2 招标订阅推送、I2 店铺询盘、I3 投放线索'],
+  ['WEB_LIST', '公开页面列表', '抓公开政务页面列表 + 详情，正文交给 LLM 抽取；受 robots 与频率约束。', 'P1 补充 / P4 / P7 / P8 / E3 无接口地区'],
+  ['INTAKE', '投喂箱', '人上传 PDF / 链接 / 图片 / 语音 / 文本，AI 按 Schema 抽取为项目 / 企业 / 联系人待确认卡片。', 'P3 / P6 / P8 / E4 / E6 / R6 / F1 及任何临时来源'],
+  ['REFERRAL', '介绍人', '介绍人二维码 / 表单报线索，成交后按规则计算分成并生成对账单（线下结算，Q12）。', 'R1 / R2 / R3 / R4 / R7'],
+  ['MANUAL', '手工录入', '销售手工录入（含语音速记、名片 OCR）；表单模板与必填项可配。', 'E7 / R5 / F2 / F3'],
+  ['INTERNAL_EVENT', '内部事件', '订阅平台事件：站内行为、海报扫码、企微资料变更；可配触发阈值。', 'I4 / R5 / C1 效果回流'],
+  ['RPA_CAPTURE', '执行端抓取', '工作手机 App 按抓取规则采集社媒评论区（一期已有能力，见"触达账号与设备"）。', 'I5'],
+];
+let fam = qs('family', 'ALL'), st = 'ALL', kw = '';
+
+function counts() { const c = { ALL: ACQ.sources.length }; ACQ.sources.forEach(s => c[s.family] = (c[s.family] || 0) + 1); return c; }
+function chainHtml(s, big) { return `<div class="${big ? 'chain-row' : 'chain'}">${s.acquisition.map((a, i) => big ? `<div class="node ${a.active ? 'on' : ''} ${a.planned ? 'plan' : ''}"><code>${a.adapter}</code><span class="xs">${esc(a.provider)}${a.active ? ' · 当前主用' : a.planned ? ' · 规划中' : ' · 备用'}</span></div>${i < s.acquisition.length - 1 ? '<span class="arr">→</span>' : ''}` : `<span class="${a.active ? 'on' : ''}">${a.adapter}</span>${i < s.acquisition.length - 1 ? '<i>→</i>' : ''}`).join('')}</div>`; }
+
+function render() {
+  const on = ACQ.sources.filter(s => s.enabled); const pulled = ACQ.sources.reduce((a, s) => a + (s.stats.pulled7 || 0), 0), leads = ACQ.sources.reduce((a, s) => a + (s.stats.leads7 || 0), 0), cost = ACQ.sources.reduce((a, s) => a + (s.stats.cost30 || 0), 0);
+  root.innerHTML = App.pageHead('线索渠道目录', '渠道 = 平台级模板 + 商家级订阅：勾选、填参数即启用，新增同类渠道只加配置不发版；每条渠道可挂多个获取方式，拿不到自动降级（API → 公开页面 → 投喂箱 → 人工）。', `<button class="btn" onclick="tab='vendors';render()">${App.icon('coin')} 数据商与预算</button><button class="btn primary" onclick="addSource()">${App.icon('plus')} 新增渠道</button>`) +
+  `<div class="grid g4 mb16">${UI.kpi('已启用渠道', `${on.length}<small>/ ${ACQ.sources.length}</small>`, null, '')}${UI.kpi('近 7 天拉取 / 投喂', fmt.num(pulled), 12, '条')}${UI.kpi('近 7 天成线索', leads, 5, '条').replace('class="card kpi"', 'class="card kpi ok"')}${UI.kpi('近 30 天数据费用', fmt.money(cost), null, '').replace('class="card kpi"', 'class="card kpi hot"')}</div>
+  <div class="card"><div class="tabs">${[['catalog', `渠道目录 <span class="n">${ACQ.sources.length}</span>`], ['vendors', `数据商与预算 <span class="n">${ACQ.vendors.length}</span>`], ['adapters', '适配器类型 <span class="n">8</span>'], ['runs', '运行记录']].map(x => `<button class="${tab === x[0] ? 'on' : ''}" onclick="tab='${x[0]}';history.replaceState(null,'','?tab='+tab);render()">${x[1]}</button>`).join('')}</div><div id="tb"></div></div>`;
+  ({ catalog, vendors, adapters, runs })[tab]();
+}
+
+function catalog() {
+  const c = counts();
+  const list = ACQ.sources.filter(s => (fam === 'ALL' || s.family === fam) && (st === 'ALL' || (st === 'ON' ? s.enabled : st === 'OFF' ? !s.enabled && s.phase !== 'P2' : s.phase === 'P2')) && (!kw || (s.name + s.code + s.desc).includes(kw)));
+  $('#tb').innerHTML = `<div class="filters"><div class="famtabs">${[['ALL', '全部']].concat(Object.entries(FAM).map(([k, v]) => [k, v[0]])).map(x => `<span class="chip ${fam === x[0] ? 'on' : ''}" onclick="fam='${x[0]}';catalog()">${x[1]}<b>${c[x[0]] || 0}</b></span>`).join('')}</div><span class="sp"></span>
+    <div class="btn-group">${[['ALL', '全部'], ['ON', '已启用'], ['OFF', '未启用'], ['P2', '二期']].map(x => `<button class="btn sm ${st === x[0] ? 'on' : ''}" onclick="st='${x[0]}';catalog()">${x[1]}</button>`).join('')}</div>
+    <input class="input sm" placeholder="搜索名称 / 编码" style="width:180px" value="${esc(kw)}" oninput="kw=this.value;catalog()"></div>
+  ${fam !== 'ALL' ? `<div class="alert info small" style="margin:12px 16px 0">${UI.family(fam)} ${FAM[fam][1]}</div>` : ''}
+  <div class="card-b"><div class="src-grid">${list.map(card).join('') || '<div class="empty">无匹配渠道</div>'}</div>
+  <div class="alert warn small mt16">不提供：自爬招聘平台、灰色海关数据、抓取需登录 / 条款禁爬的行业站与竞品平台（合规底线不降级）。</div></div>`;
+}
+function card(s) {
+  const ph = PHASE[s.phase] || PHASE.NA; const cls = s.enabled ? 'on' : s.phase === 'P2' ? 'plan' : 'off';
+  return `<div class="src-card ${cls}" onclick="openSource('${s.code}')" style="cursor:pointer">
+    <div class="h">${UI.family(s.family)}<b>${esc(s.name)}</b><span class="code">${s.code}</span></div>
+    <div class="d">${esc(s.desc)}</div>
+    ${chainHtml(s)}
+    <div class="st">${UI.grade(s.grade)}<span class="tag ${ph[1]} xs">${ph[0]}</span><span class="sp"></span>${s.enabled ? `7 天 <b>${fmt.num(s.stats.pulled7)}</b> 条 → <b>${s.stats.leads7}</b> 线索` : s.stats.total ? `底表 <b>${fmt.num(s.stats.total)}</b> 条` : '<span class="muted">未启用</span>'}</div>
+    <div class="f">${s.lastRun ? `上次 ${fmt.ago(s.lastRun)}` : s.schedule ? esc(s.schedule) : '—'}${s.cost ? ` · ${esc(s.cost.text)}` : ''}<span class="sp"></span><span class="switch ${s.enabled ? 'on' : ''}" onclick="event.stopPropagation();toggle('${s.code}')"></span></div></div>`;
+}
+function toggle(code) {
+  const s = ACQ.source(code);
+  if (!s.enabled && s.acquisition.some(a => a.adapter === 'API_PULL' || a.adapter === 'API_PUSH') && !ACQ.vendors.some(v => v.covers.includes(code))) { openSource(code, true); toast('该渠道需要数据商密钥，请先在「订阅参数」中配置', 'warn'); return; }
+  s.enabled = !s.enabled; if (s.enabled && !s.acquisition.some(a => a.active)) s.acquisition[0].active = true; ACQ.save(); render(); toast(s.enabled ? `已启用「${s.name}」，按计划 ${s.schedule || '事件触发'} 运行` : `已停用「${s.name}」，历史线索保留`, s.enabled ? 'ok' : 'warn');
+}
+function openSource(code, focusParams) {
+  const s = ACQ.source(code); const ph = PHASE[s.phase] || PHASE.NA; const vend = ACQ.vendors.filter(v => v.covers.includes(code)); const scr = s.outreach && ACQ.script(s.outreach.script); const fl = s.outreach && ACQ.flow(s.outreach.flow);
+  const P = s.params || {}; const leadsFrom = ACQ.leads.filter(l => l.sourceCode === code);
+  Drawer.open({ title: `${esc(s.name)} <span class="mono muted small">${s.code}</span>`, sub: `${FAM[s.family][0]} · 实体 ${({ PROJECT: '项目', COMPANY: '企业', PERSON: '个人' })[s.entity]} · 可得性 ${s.grade} 级 · ${ph[0]}`, wide: true, body: `
+    <div class="tabs" style="margin:-16px -18px 14px;padding:0 18px">${[['ov', '概览与获取方式'], ['params', '订阅参数'], ['json', '配置 JSON（平台模板）']].map((x, i) => `<button class="${(focusParams ? x[0] === 'params' : i === 0) ? 'on' : ''}" onclick="$$('.tabs button',this.closest('.drawer')).forEach(b=>b.classList.remove('on'));this.classList.add('on');$$('.sp-tab',this.closest('.drawer')).forEach(d=>d.style.display='none');$('#sp-${x[0]}',this.closest('.drawer')).style.display=''">${x[1]}</button>`).join('')}</div>
+    <div class="sp-tab" id="sp-ov" style="${focusParams ? 'display:none' : ''}">
+      <p class="small" style="line-height:1.7">${esc(s.desc)}</p>
+      <h5 class="small b mt12 mb8">获取方式（按优先级，运行态自动回退）</h5>${chainHtml(s, true)}
+      <div class="grid g3 mt12"><div class="stat-mini"><div><b>${fmt.num(s.stats.pulled7)}</b><span>近 7 天拉取 / 投喂</span></div></div><div class="stat-mini"><div><b>${s.stats.leads7}</b><span>近 7 天成线索</span></div></div><div class="stat-mini"><div><b>${fmt.money(s.stats.cost30)}</b><span>近 30 天费用</span></div></div></div>
+      <dl class="kv mt12"><dt>调度</dt><dd>${esc(s.schedule || '事件触发 / 人工')}</dd><dt>去重键</dt><dd class="mono">${(s.dedupe || ['name+org']).join(' | ')}</dd><dt>评分</dt><dd>基础分 ${s.scoring.base}${s.scoring.stage ? ` · 阶段 ${s.scoring.stage}` : ''}${s.scoring.leadTime ? ` · 前置期 ${s.scoring.leadTime[0]}–${s.scoring.leadTime[1]} 天` : ''}${s.scoring.estimator ? ` · 吨位估算：${esc(s.scoring.estimator)}` : ''}</dd><dt>默认话术 / SOP</dt><dd>${scr ? `<a href="scripts.html?open=${scr.id}">${esc(scr.name)}</a>` : '—'}${fl ? ` · <a href="flows.html?id=${fl.id}">${esc(fl.name)}</a>` : ''}</dd><dt>合规属性</dt><dd>${({ PUBLIC_GOV: '政务公开数据 · 注明来源 · 保留 365 天 · 不含个人数据', ACCOUNT_BOUND: '商家自有账号可见数据 · 仅手工粘贴，不自动抓取', CONSENT: '介绍人 / 本人授权 · 首触告知来源与拒绝方式', INTERNAL: '平台内部数据', PUBLIC_UGC: '公开 UGC · 受抓取总开关与风险告知约束', PUBLIC_SIGN: '公开铭牌信息 · 不含个人数据', THIRD_PARTY: '数据商合规字段 · 不自爬' })[s.compliance] || s.compliance}</dd><dt>费用</dt><dd>${s.cost ? `${esc(s.cost.model)} · ${esc(s.cost.text)}` : '免费 / 人力成本'}</dd>${vend.length ? `<dt>数据商</dt><dd>${vend.map(v => `<a onclick="tab='vendors';render();this.closest('.drawer-mask').remove()">${esc(v.name)}</a>`).join('、')}</dd>` : ''}</dl>
+      <h5 class="small b mt16 mb8">本渠道产生的线索 <span class="muted">${leadsFrom.length}</span></h5>${leadsFrom.length ? UI.table([{ label: '线索', render: l => `${UI.leadType(l.leadType)} <a href="leads.html?open=${l.id}">${esc(l.nickname || '（无昵称）')}</a>` }, { label: '来源摘要', render: l => `<span class="ell" style="display:inline-block;max-width:320px">${esc(l.sourceExcerpt)}</span>` }, { label: '分', render: l => UI.score(l.score), w: '60px' }, { label: '阶段', render: l => UI.stage(l.stage), w: '80px' }], leadsFrom.slice(0, 6)) : '<div class="muted small">暂无</div>'}
+    </div>
+    <div class="sp-tab" id="sp-params" style="${focusParams ? '' : 'display:none'}">
+      <div class="alert info small mb12">商家订阅只保存：是否启用、密钥（加密）、参数覆盖（地区 / 关键词 / 账号）、调度覆盖、分配规则、每日上限。平台模板参数不可改。</div>
+      <div class="grid g2">
+        <div><div class="field"><label>目标地区</label><div class="chips">${(P.regions || ['江苏省/苏州市']).map(r => `<span class="chip on">${esc(r)} ×</span>`).join('')}<span class="chip" onclick="toast('地区选择器（省 / 市 / 区县多选）')">＋ 添加</span></div></div>
+        <div class="field"><label>关键词包</label><textarea class="input" rows="3">${esc((P.keywords || []).join('、'))}</textarea><span class="hint">按行业习惯用词；招标类建议同时配置排除词（监理 / 设计 / 咨询）</span></div>
+        ${P.exclude ? `<div class="field"><label>排除词</label><input class="input" value="${esc(P.exclude.join('、'))}"></div>` : ''}
+        ${P.minCapital != null ? `<div class="field"><label>过滤器</label><div class="row small"><span>注册资本 ≥</span><input class="input sm" style="width:80px" value="${P.minCapital}"><span>万元</span><label class="checkbox"><input type="checkbox" ${P.excludeShell ? 'checked' : ''}> 排除疑似空壳（无社保 / 无网站 / 无招聘）</label></div></div>` : ''}
+        ${P.minArea != null ? `<div class="field"><label>最小建筑面积</label><div class="row small"><input class="input sm" style="width:100px" value="${P.minArea}"><span>㎡（低于阈值仅入库不触达）</span></div></div>` : ''}
+        ${P.industries ? `<div class="field"><label>目标行业</label><div class="chips">${P.industries.map(r => `<span class="chip on">${esc(r)}</span>`).join('')}</div></div>` : ''}
+        ${P.jobs ? `<div class="field"><label>岗位关键词</label><input class="input" value="${esc(P.jobs.join('、'))}"></div>` : ''}
+        ${P.platforms ? `<div class="field"><label>商家自有账号平台</label><div class="chips">${P.platforms.map(r => `<span class="chip on">${esc(r)}</span>`).join('')}</div><span class="hint">仅手工粘贴到投喂箱，系统不代登录抓取</span></div>` : ''}
+        ${P.rule ? `<div class="field"><label>分成规则</label><select class="select">${ACQ.referralRules.map(r => `<option ${r.id === P.rule ? 'selected' : ''}>${esc(r.name)} · ${esc(r.text)}</option>`).join('')}</select></div>` : ''}
+        ${P.events ? `<div class="field"><label>订阅事件</label><div class="chips">${P.events.map(r => `<span class="chip on">${r}</span>`).join('')}</div></div>` : ''}
+        ${P.rules ? `<div class="field"><label>抓取规则</label><div class="small">${P.rules.map(r => { const cr = ACQ.captureRules.find(x => x.id === r); return cr ? `<div>${UI.platform(cr.platform)}${esc(cr.name)}</div>` : ''; }).join('')}<a href="channels.html?tab=rules" class="small">管理抓取规则 →</a></div></div>` : ''}
+        </div>
+        <div>${s.acquisition.some(a => a.adapter === 'API_PULL' || a.adapter === 'API_PUSH') ? `<div class="field"><label>数据商密钥</label>${vend.length ? vend.map(v => `<div class="row small"><span class="tag success xs">已配置</span><b>${esc(v.name)}</b><code>${v.keyMasked}</code><a onclick="toast('密钥更换后立即生效，旧密钥保留 24h')">更换</a></div>`).join('') : `<input class="input" placeholder="粘贴数据商 API Key（加密存储）"><span class="hint">未配置密钥时，本渠道自动回退到下一获取方式</span>`}</div>` : ''}
+        <div class="field"><label>调度覆盖</label><select class="select"><option>${esc(s.schedule || '事件触发 / 人工')}（平台默认）</option><option>每天 08:00</option><option>每 4 小时</option><option>每周一 08:00</option></select></div>
+        <div class="field"><label>分配规则</label><select class="select"><option>按地区分给负责该地区的销售</option><option>轮询分配</option><option>指定：张三</option><option>不分配（进公共池）</option></select></div>
+        <div class="field"><label>每日上限</label><div class="row small"><input class="input sm" style="width:80px" value="${s.family === 'INTENT' ? 200 : 50}"><span>条 / 天 · 超出部分次日继续</span></div></div>
+        <div class="field"><label>首触与 SOP</label><select class="select">${ACQ.scripts.filter(x => x.scene === 'OUTREACH' && x.enabled).map(x => `<option ${scr && scr.id === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select><select class="select mt8">${ACQ.flows.filter(f => f.status === 'PUBLISHED').map(f => `<option ${fl && fl.id === f.id ? 'selected' : ''}>${esc(f.name)}</option>`).join('')}<option>不自动进入 SOP</option></select></div>
+        </div>
+      </div>
+    </div>
+    <div class="sp-tab" id="sp-json" style="display:none"><div class="small muted mb8">平台维护的渠道模板（<code>hdz_acq_lead_source.config</code>），新增同类渠道只需新增一条此配置。</div><pre class="json">${esc(JSON.stringify({ code: s.code, family: s.family, name: s.name, entityType: s.entity, tier: s.grade, phase: s.phase, acquisition: s.acquisition.map(a => ({ adapter: a.adapter, provider: a.provider, params: a.adapter === 'API_PULL' ? { regions: P.regions, keywords: P.keywords } : undefined, schedule: a.adapter === 'API_PULL' ? s.schedule : undefined, extractSchema: a.adapter === 'INTAKE' || a.adapter === 'WEB_LIST' ? s.entity.toLowerCase() + '.v1' : undefined })), dedupe: { keys: s.dedupe || ['name+org'], fuzzy: 0.9 }, scoring: s.scoring, outreach: s.outreach ? { defaultScript: scr && scr.name, defaultFlow: fl && fl.name } : undefined, compliance: { dataClass: s.compliance, retentionDays: 365, requireSourceNotice: true, personalDataAllowed: s.entity === 'PERSON' }, cost: s.cost || { model: 'FREE' }, status: s.phase === 'P2' ? 'PLANNED' : 'GA' }, null, 2))}</pre></div>`,
+    footer: `<button class="btn" onclick="testPull('${s.code}')">${App.icon('play')} 试拉取 5 条</button><span class="sp"></span><button class="btn" data-close>关闭</button><button class="btn primary" onclick="ACQ.save();toast('订阅参数已保存，下次调度生效','ok');this.closest('.drawer-mask').remove()">保存订阅参数</button>` });
+}
+function testPull(code) {
+  const s = ACQ.source(code); const a = s.acquisition.find(x => x.active) || s.acquisition[0];
+  if (a.adapter === 'INTAKE' || a.adapter === 'MANUAL' || a.adapter === 'REFERRAL') { toast(`${a.adapter} 类型渠道无主动拉取，请到「线索投喂箱 / 介绍人」录入`, 'warn'); return; }
+  Modal.open({ title: `试拉取 · ${esc(s.name)}`, width: 640, body: `<div class="small muted mb8">${a.adapter} · ${esc(a.provider)} · 仅预览，不入库</div>${UI.table([{ label: '#', render: (r, i) => r.i, w: '30px' }, { label: '原始记录', render: r => `<b>${esc(r.t)}</b><span class="sub">${esc(r.s)}</span>` }, { label: 'AI 抽取', render: r => `<span class="tag ${r.ok ? 'success' : 'warning'} xs">${r.ok ? '可入库' : '需确认'}</span> <span class="xs muted">${esc(r.n)}</span>` }], [
+    { i: 1, t: '苏州高新区某新能源汽车零部件厂房', s: '施工许可 · 建筑面积 52,000 ㎡ · 总包 江苏某建设', ok: true, n: '重型厂房 · 估 4,200–7,800 t' }, { i: 2, t: '昆山某物流中心二期', s: '中标公示 · 1.9 亿 · 中标人 上海某建工', ok: true, n: '估 2,600 t（按合同价）' }, { i: 3, t: '太仓某学校改扩建', s: '招标公告 · 监理', ok: false, n: '命中排除词「监理」→ 忽略' }, { i: 4, t: '吴江某住宅项目 3 期', s: '施工许可 · 96,000 ㎡', ok: true, n: '住宅 · 估 3,800–5,300 t' }, { i: 5, t: '（重复）苏州工业园区智能装备产业园二期', s: '与 PJ1 去重键相同', ok: false, n: '合并到已有项目，新增来源引用' }])}` });
+}
+function vendors() {
+  $('#tb').innerHTML = `<div class="card-b"><div class="alert info small mb12">Q11 已确认采购三家数据源：招标聚合、工商数据、建筑工程数据。密钥加密存储，按渠道引用；预算用尽自动回退到免费获取方式并通知管理员。</div>
+  <div class="vend">${ACQ.vendors.map(v => `<div class="card"><div class="card-h"><h3>${esc(v.name)}</h3>${UI.status(v.status === 'ACTIVE' ? 'ONLINE' : 'DISABLED')}</div><div class="card-b small">
+    <dl class="kv"><dt>套餐</dt><dd>${esc(v.plan)}</dd><dt>费用</dt><dd>${v.period === '条' ? `¥${v.fee} / 条` : `${fmt.money(v.fee)} / ${v.period}`}</dd>${v.monthBudget ? `<dt>本月预算</dt><dd>${UI.bar(v.monthUsed / v.monthBudget * 100, v.monthUsed / v.monthBudget > .8 ? 'hot' : '')}<span class="xs">${fmt.money(v.monthUsed)} / ${fmt.money(v.monthBudget)}</span></dd>` : `<dt>配额</dt><dd>${esc(v.quotaText)}</dd>`}${v.expireAt ? `<dt>到期</dt><dd>${fmt.date(v.expireAt)}（${fmt.left(v.expireAt).replace('后', '')}）</dd>` : ''}<dt>密钥</dt><dd><code>${v.keyMasked}</code></dd><dt>覆盖渠道</dt><dd>${v.covers.map(c => { const s = ACQ.source(c); return `<a onclick="openSource('${c}')">${esc(s.name)}</a>`; }).join('、')}</dd></dl>
+    <div class="row mt12"><button class="btn xs" onclick="toast('已发送测试请求：200 OK · 3 条样例','ok')">测试连通</button><button class="btn xs" onclick="toast('新密钥已保存，旧密钥 24h 后失效')">更换密钥</button><span class="sp"></span><button class="btn xs" onclick="toast('已生成续费申请单（演示）')">续费</button></div></div></div>`).join('')}
+  <div class="card" style="border-style:dashed;display:grid;place-items:center;min-height:180px;cursor:pointer" onclick="toast('新增数据商：填写名称、接入方式（HTTP 连接器 / 专用连接器）、密钥、计费模式')"><div class="center muted"><div style="font-size:26px">＋</div>接入新数据商<div class="xs">通用 HTTP 连接器 · 无需发版</div></div></div></div>
+  <h5 class="small b mt16 mb8">近 30 天费用</h5><canvas id="cost" style="width:100%;height:160px"></canvas></div>`;
+  Chart.bars($('#cost'), ACQ.vendors.map(v => ({ label: v.name, value: v.period === '年' ? Math.round(v.fee / 12) : v.monthUsed, text: fmt.money(v.period === '年' ? Math.round(v.fee / 12) : v.monthUsed) + (v.period === '年' ? '（年费折月）' : '') })));
+}
+function adapters() {
+  $('#tb').innerHTML = `<div class="card-b"><div class="small muted mb8">代码层只实现 8 个适配器类型（<code>LeadSourceAdapter SPI</code>），渠道差异全部落在配置里。</div>
+  ${ADAPTERS.map(a => `<div class="adp"><div><code>${a[0]}</code><div class="b">${a[1]}</div></div><div>${a[2]}</div><div class="muted">覆盖：${a[3]}<div class="mt8">${ACQ.sources.filter(s => s.acquisition.some(x => x.adapter === a[0])).map(s => `<span class="tag xs ${s.enabled ? 'success' : ''}" style="margin:0 4px 4px 0" onclick="openSource('${s.code}')" title="${esc(s.name)}">${s.code}</span>`).join('')}</div></div></div>`).join('')}</div>`;
+}
+function runs() {
+  const rows = ACQ.sources.filter(s => s.enabled && s.lastRun).sort((a, b) => b.lastRun - a.lastRun).map(s => { const a = s.acquisition.find(x => x.active) || s.acquisition[0]; const ok = s.stats.pulled7 > 0; return { s, a, ok, t: s.lastRun, raw: Math.round(s.stats.pulled7 / 7) || s.stats.total || 0, leads: Math.round(s.stats.leads7 / 7), status: s.code === 'P4_EIA_PLAN' ? 'PARTIAL' : ok ? 'SUCCESS' : 'SUCCESS' }; });
+  $('#tb').innerHTML = UI.table([{ label: '时间', render: r => fmt.time(r.t), w: '110px' }, { label: '渠道', render: r => `${UI.family(r.s.family)} <a onclick="openSource('${r.s.code}')">${esc(r.s.name)}</a>` }, { label: '获取方式', render: r => `<code>${r.a.adapter}</code> <span class="muted xs">${esc(r.a.provider)}</span>` }, { label: '结果', render: r => UI.status(r.status), w: '90px' }, { label: '拉取 → 去重 → 成线索', render: r => `${r.raw} → ${Math.max(0, r.raw - Math.round(r.raw * .3))} → <b>${r.leads}</b>` }, { label: '备注', render: r => r.status === 'PARTIAL' ? '<span class="small" style="color:var(--warning)">无锡生态环境局页面结构变化，5 条正文抽取失败 → 已转投喂箱人工确认</span>' : '<span class="muted small">—</span>' }], rows);
+}
+function addSource() {
+  let type = null;
+  const m = Modal.open({ title: '新增渠道（不发版）', width: 720, body: `<div class="steps mb12"><div class="step on"><i>1</i>选择适配器类型</div><div class="ln"></div><div class="step"><i>2</i>填写渠道信息与参数</div><div class="ln"></div><div class="step"><i>3</i>试拉取并保存</div></div>
+    <div id="ns1"><div class="grid g4">${ADAPTERS.map(a => `<div class="wz-type" onclick="$$('.wz-type').forEach(x=>x.classList.remove('on'));this.classList.add('on');window.__nsType='${a[0]}'"><b>${a[0]}</b><span>${a[1]}</span></div>`).join('')}</div><div class="alert info small mt12">选择后进入第 2 步：渠道名称、所属族、实体类型、目标地区 / 关键词、字段映射（API 类）或抽取 Schema（页面 / 投喂类）。</div></div>
+    <div id="ns2" style="display:none"><div class="grid g2"><div class="field"><label>渠道名称</label><input class="input" id="ns_name" placeholder="如：浙江省公共资源交易中心 · 中标公示"></div><div class="field"><label>编码</label><input class="input" id="ns_code" placeholder="P2_BID_ZJ"></div><div class="field"><label>所属族</label><select class="select" id="ns_fam">${Object.entries(FAM).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join('')}</select></div><div class="field"><label>实体类型</label><select class="select" id="ns_ent"><option value="PROJECT">项目</option><option value="COMPANY">企业</option><option value="PERSON">个人</option></select></div><div class="field"><label>接口 / 起始地址</label><input class="input" id="ns_url" placeholder="https://…"></div><div class="field"><label>调度</label><select class="select"><option>每天 08:00</option><option>每 2 小时</option><option>事件触发</option></select></div></div>
+      <div class="field"><label>字段映射（JSONPath）/ 抽取 Schema</label><textarea class="input" rows="4">{ "project_name": "$.title", "contractor_org": "$.winner", "contract_amount": "$.amount", "published_at": "$.publishTime" }</textarea></div></div>`,
+    footer: `<button class="btn" data-close>取消</button><button class="btn primary" id="ns_next">下一步</button>`, onMount(el, close) {
+      $('#ns_next', el).onclick = () => {
+        if ($('#ns1', el).style.display !== 'none') { type = window.__nsType; if (!type) return toast('请先选择适配器类型', 'warn'); $('#ns1', el).style.display = 'none'; $('#ns2', el).style.display = ''; $$('.step', el)[0].className = 'step done'; $$('.step', el)[1].className = 'step on'; $('#ns_next', el).textContent = '试拉取并保存'; return; }
+        const name = $('#ns_name', el).value.trim() || '新渠道（未命名）'; const code = ($('#ns_code', el).value.trim() || 'X_' + Date.now().toString(36)).toUpperCase();
+        ACQ.sources.push({ code, family: $('#ns_fam', el).value, entity: $('#ns_ent', el).value, name, desc: `由管理员新增的 ${type} 渠道${$('#ns_url', el).value ? ' · ' + $('#ns_url', el).value : ''}`, grade: 'B', phase: 'P1_OPTIONAL', acquisition: [{ adapter: type, provider: '自定义', active: true }, { adapter: 'INTAKE', provider: '投喂箱' }], enabled: true, params: {}, schedule: '每天 08:00', stats: { pulled7: 5, leads7: 0, cost30: 0 }, lastRun: Date.now(), scoring: { base: 50 }, compliance: 'PUBLIC_GOV', custom: true });
+        ACQ.save(); close(); render(); toast(`已新增渠道「${name}」并试拉取 5 条 · 无需发版`, 'ok');
+      };
+    } });
+}
+if (me.role === 'admin') { render(); if (qs('open')) openSource(qs('open')); App.note('<b>演示提示</b>：点渠道卡片看获取方式链与订阅参数；右上角「新增渠道」体验"配置即渠道、不发版"。'); }
+</script>
+</body>
+</html>
