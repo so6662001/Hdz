@@ -29,6 +29,7 @@
     { key: 'form', label: '手动表单', href: 'publish-form.html' },
     { key: 'vehicle', label: '添加车辆', href: 'vehicle-add.html' },
     { key: 'needs', label: '沿线需求', href: 'needs.html' },
+    { key: 'landing', label: '群分享落地', href: 'need-landing.html?state=new' },
     { key: 'notify', label: '服务通知', href: 'notify.html' },
     { key: 'appeal', label: '申诉', href: 'appeal.html' },
     { key: 'pc', label: 'PC找车', href: '../shipper/pc-find.html' },
@@ -530,6 +531,110 @@
   H.addrSrcTag = function (src) {
     var t = { company: '我司位置', book: '常用地址', recent: '最近用过', here: '当前位置', search: '已定位', map: '地图选点', order: '订单地址' }[src];
     return t ? '<span class="tag ' + (src === 'company' ? 'ok' : 'gray') + '" style="height:18px;font-size:10px">📍 ' + t + '</span>' : '';
+  };
+
+  /* ---------- 分享闭环：海报（跨小程序码）/ 小程序卡片 / H5 链接 ----------
+     kind: 'need'（货主把需求发到司机群 → 悟运码） | 'post'（司机把运力发到货主群 → 货袋子码）
+     微信只允许分享"本小程序"的卡片，所以跨小程序一律用海报 + 对方小程序的小程序码（scene 带 需求ID_分享人）。 */
+  H.posterHtml = function (kind, o, opts) {
+    opts = opts || {};
+    var wy = kind === 'need';  // 需求海报进悟运（司机端），运力海报进货袋子（货主端）
+    var by = opts.by || (wy ? (H.SHIPPERS[o.shipper] || {}).contact : (H.DRIVERS[o.driver] || {}).name);
+    var codeCls = 'mpcode' + (wy ? '' : ' hdz') + (opts.codeSize ? ' ' + opts.codeSize : '') + (opts.dead ? ' dead' : '');
+    var body, who, price;
+    if (wy) {
+      var sh = H.SHIPPERS[o.shipper], ref = H.refPrice(o.from, o.to[0]);
+      body = '<div class="p-route"><span>' + o.from + '<small>' + (o.fromDetail || '').split(' · ')[0] + '</small></span><span class="ar">→</span><span>' + o.to.join('/') + '<small>' + (o.toDetail || '').split(' · ')[0] + '</small></span></div>' +
+        '<div class="p-facts"><b>' + o.when + '</b> · ' + o.cargo.steel + ' <b>' + o.cargo.tons + 't</b>' + (o.cargo.pieces ? ' · ' + o.cargo.pieces : '') + '<br>需 <b>' + H.reqLine(o) + '</b> · ' + (o.req.whole === false ? '可拼车' : '整车') + '</div>';
+      price = o.budget == null ? '<div class="p-price"><span class="n" style="font-size:18px">价格电话谈</span><span class="ref">市场参考 ¥' + ref.join('-') + '/吨</span></div>' : '<div class="p-price"><span class="n">¥' + o.budget + '<small>/' + o.budgetUnit + '</small></span><span class="ref">货主预算 · 市场参考 ¥' + ref.join('-') + ' · 以电话为准</span></div>';
+      who = '<div class="p-who">' + sh.company + (sh.certified ? '<span class="badge">认证企业</span>' : '<span class="badge pending">未企业认证</span>') + '<span class="muted">发过 ' + sh.needs + ' 次需求 · 找到车 ' + sh.found + ' 次</span></div>';
+    } else {
+      var v = H.VEHICLES[o.vehicle], d = H.DRIVERS[o.driver];
+      body = '<div class="p-route"><span>' + o.from + '<small>' + (o.fromDetail || '').split(' · ')[0] + '</small></span><span class="ar">→</span><span>' + o.to.join('/') + '<small>' + (o.toDetail || '') + '</small></span></div>' +
+        '<div class="p-facts"><b>' + H.KIND[o.kind].name + '</b> · 出发 <b>' + o.depart + '</b><br>' + H.vehicleLine(v) + ' · ' + H.equipLine(v) + '</div>';
+      price = o.price == null ? '<div class="p-price"><span class="n" style="font-size:18px">面议</span><span class="ref">市场参考 ¥' + H.refPrice(o.from, o.to[0]).join('-') + '/吨</span></div>' : '<div class="p-price"><span class="n">¥' + o.price + '<small>/' + o.priceUnit + '</small></span><span class="ref">市场参考 ¥' + H.refPrice(o.from, o.to[0]).join('-') + '/吨 · 以电话为准</span></div>';
+      who = '<div class="p-who">' + d.name + ' · ' + v.plate + '<span class="badge">实名</span>' + (v.verified ? '<span class="badge">车辆认证</span>' : '') + '<span class="muted">悟运履约 ' + d.wyOrders + ' 单 · 好评 ' + d.good + '%</span></div>';
+    }
+    return '<div class="poster' + (wy ? ' wy' : '') + '">' +
+      '<div class="p-hd"><i>货</i>' + (wy ? '货袋子 · 用车需求' : '货袋子 · 找顺路车') + '<span class="by">' + by + ' 分享</span></div>' +
+      '<div class="p-bd">' + body + price + who + '</div>' +
+      '<div class="p-ft"><span class="' + codeCls + '" data-lb="' + (wy ? '悟运' : '货袋子') + '" data-code title="原型：点一下模拟扫码"></span><div class="txt"><b>' + (opts.dead ? '该需求已找到车' : (wy ? '长按识别 · 打开悟运小程序' : '长按识别 · 打开货袋子小程序')) + '</b>' +
+        (wy ? '<span class="wy-c">看货主电话 · 一键「有意向」</span><br>需实名 + 车辆认证 · 平台不收费、不派单' : '<span class="brand-c">看司机电话 · 直接谈价</span><br>货主登录即可看 · 平台不收运费、不派单') +
+        '<br><span class="muted">码参数 ' + H.SHARE_SCENE(kind, o.id, by) + '</span></div></div></div>';
+  };
+  /* 群里发的文字（司机群习惯"文字 + 图"，文字里不放电话，电话只在小程序里看） */
+  H.shareText = function (kind, o) {
+    if (kind === 'need') return '【找车】' + o.from + '→' + o.to.join('/') + ' ' + o.cargo.steel + o.cargo.tons + 't ' + o.when.replace(' 装车', '装') + '，需' + H.reqLine(o) + '，' + (o.budget == null ? '价格电话谈' : '预算' + o.budget + '/' + o.budgetUnit + '可议') + '。扫图上码进悟运看货主电话，能接的点「有意向」。';
+    return '【顺路车】' + o.from + '→' + o.to.join('/') + ' ' + o.depart + '出发，' + H.vehicleLine(H.VEHICLES[o.vehicle]) + '，' + (o.price == null ? '价格面议' : o.price + '/' + o.priceUnit) + '。有货的老板扫图上码进货袋子看电话。';
+  };
+  H.shareStatLine = function (id, kind) {
+    var s = H.SHARE_STATS[id]; if (!s) return '';
+    return '<div class="share-stat"><span class="tag brand">群分享</span><span>' + s.at + ' 发到 <b>' + s.groups + '</b> 个群</span><span>· 被打开 <b>' + s.opens + '</b> 次</span><span>· <b>' + s.calls + '</b> 位' + (kind === 'need' ? '司机' : '货主') + '查看电话来自分享</span>' + (kind === 'need' && s.intents ? '<span>· <b>' + s.intents + '</b> 位有意向</span>' : '') + (s.newUsers ? '<span>· 新注册 <b>' + s.newUsers + '</b> 人</span>' : '') + '</div>';
+  };
+  H.shareSheet = function (kind, o, mode) {
+    var wy = kind === 'need', by = wy ? H.SHIPPERS[o.shipper].contact : H.DRIVERS[o.driver].name;
+    var landing = wy ? H.rel('driver/need-landing.html?state=new&from=share&id=' + o.id) : H.rel('shipper/m-detail.html?id=' + o.id + '&shell=h5');
+    var short = (wy ? 'm.huodaizi.com/n/' : 'm.huodaizi.com/s/') + o.id.slice(1) + '?s=' + (wy ? 'zj' : 'wsf');
+    var segs = wy ? [['poster', mode === 'pc' ? '发到司机群 · 海报' : '司机群 · 海报'], ['card', mode === 'pc' ? '发给同事 · 小程序卡片' : '同事 · 卡片'], ['link', 'H5 链接']] : [['poster', mode === 'pc' ? '发到货主群 · 海报' : '货主群 · 海报'], ['link', mode === 'pc' ? '朋友圈 / 短信 · 链接' : '朋友圈 · 链接']];
+    var cur = 'poster';
+    function chatHtml(noImg) {
+      return '<div class="wxchat"><div class="sys">' + (wy ? '钢材回程车互助群（238）' : '宝山钢材市场货主群（156）') + '</div>' +
+        '<div class="who">' + by + (wy ? '（上海某钢贸）' : '') + '</div>' + (noImg ? '' : '<div class="ln"><div class="av' + (wy ? '' : ' drv') + '">' + by.charAt(0) + '</div><div class="bub img">' + H.posterHtml(kind, o, { by: by }) + '</div></div>') +
+        '<div class="ln"><div class="av' + (wy ? '' : ' drv') + '">' + by.charAt(0) + '</div><div class="bub">' + H.shareText(kind, o) + (noImg ? ' https://' + short : '') + '</div></div>' +
+        '<div class="ln"><div class="av drv">李</div><div class="bub">' + (wy ? '我明天张家港卸完顺路，点了有意向' : '17米5有鞍座？我这有3卷热卷明天走') + '</div></div>' +
+        '<div class="sys">' + (wy ? '司机长按图片识别码 → 悟运「需求落地页」' : '货主长按图片识别码 → 货袋子「运力详情」') + '</div></div>';
+    }
+    function loopHtml() {
+      var steps = wy ? [
+        '您<b>保存海报 / 复制文案</b>，发到司机微信群（可多个群）。海报上没有电话，电话只在小程序里看。',
+        '司机长按识别悟运小程序码 → <b>需求落地页</b>：已认证司机直接「有意向」/ 看电话；没装过悟运的先微信一键注册 → 实名 + 加车（约 3 分钟）才能看电话。',
+        '司机打您电话 / 点「有意向」→ 您在「我的需求」看到，标注 <b>来自群分享</b>；分享带来的打开 / 查看电话 / 新注册在这条需求下统计。',
+        '谈定后点<b>「已找到车」</b> → 群里那张海报的码再扫就是"已找到车 + 附近其他需求"，不会再有人打给您。',
+      ] : [
+        '您<b>保存海报 / 复制文案</b>，发到货主群、老客户群或朋友圈。',
+        '货主长按识别货袋子小程序码 → <b>运力详情</b>：手机号登录 → 风险提示 → 看您电话（留痕）。',
+        '货主打您电话 → 您在「我的运力」看到"来自群分享"的来电与查看数。',
+        '您点<b>「已接单 / 已出发」</b>或到期后，海报码再扫显示"该车已有活 + 同线路其他车"。',
+      ];
+      return '<ul class="loop mt8">' + steps.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul>';
+    }
+    function cardHtml() {
+      return '<div class="wxchat"><div class="sys">同事 · 王采购</div><div class="who">' + by + '</div><div class="ln"><div class="av">' + by.charAt(0) + '</div><div class="bub" style="width:200px;padding:8px"><div class="small b">' + o.from + ' → ' + o.to.join('/') + ' ' + o.cargo.steel + ' ' + o.cargo.tons + 't · 帮看下有没有车</div><div class="ph-img mt8" style="height:90px;font-size:11px">需求卡片 · 有意向 ' + H.intentCount(o) + ' 位 · 匹配车 ' + H.matchPosts(o).length + ' 台</div><div class="xs muted mt4" style="display:flex;align-items:center;gap:4px"><i style="width:12px;height:12px;border-radius:3px;background:var(--brand);display:inline-block"></i>货袋子</div></div></div></div>' +
+        '<div class="notice gray mt12"><span class="ic"></span><div>小程序卡片只能打开<b>货袋子</b>自己的页面，适合发给同事一起盯需求、帮打电话；发给司机没用（司机要进的是悟运），所以司机群一律用海报。</div></div>';
+    }
+    function linkHtml() {
+      return '<div class="input-row"><input class="input" readonly value="https://' + short + '" style="font-size:13px"><button class="btn sm" data-copy-link>复制</button></div>' +
+        '<div class="xs muted mt8">H5 页 = 同一套小程序页面套浏览器壳（' + (wy ? '司机没装悟运也能先看内容，看电话时引导注册悟运' : '货主直接手机号登录看电话，顶部引导打开小程序') + '）。链接带分享人参数用于归因。</div>' +
+        '<div class="mt12">' + chatHtml(true) + '</div>';
+    }
+    function bodyHtml() {
+      var seg = '<div class="share-seg">' + segs.map(function (s) { return '<span data-seg="' + s[0] + '"' + (s[0] === cur ? ' class="on"' : '') + '>' + s[1] + '</span>'; }).join('') + '</div>';
+      if (cur === 'card') return seg + cardHtml();
+      if (cur === 'link') return seg + linkHtml();
+      if (mode === 'pc') return seg + '<div class="share-grid"><div>' + H.posterHtml(kind, o, { by: by }) + '<div class="xs muted mt8" style="text-align:center">海报 1080×1440 · 小程序码 scene 带需求 ID 与分享人 · 点码可模拟司机扫码</div></div><div><div class="small b">对方在群里看到的</div><div class="mt8">' + chatHtml() + '</div><div class="small b mt12">怎么形成闭环</div>' + loopHtml() + H.shareStatLine(o.id, kind) + '</div></div>';
+      return seg + H.posterHtml(kind, o, { by: by }) + '<div class="xs muted mt8" style="text-align:center">点小程序码可模拟司机扫码</div>' +
+        '<details class="mt12"><summary class="small b" style="cursor:pointer">对方在群里看到的</summary><div class="mt8">' + chatHtml() + '</div></details>' +
+        '<details class="mt8" open><summary class="small b" style="cursor:pointer">怎么形成闭环</summary>' + loopHtml() + '</details>' + H.shareStatLine(o.id, kind);
+    }
+    var footer = '<button class="btn ghost" data-txt>复制群文案</button><button class="btn" style="background:#07c160" data-send>' + (mode === 'pc' ? '下载海报 · 发到微信群' : '保存海报 · 发到微信群') + '</button>';
+    var onReady = function (root, close) {
+      var host = mode === 'pc' ? qs('.mb', root) : qs('.sh-bd', root);
+      function bind() {
+        qsa('.share-seg span', host).forEach(function (s) { s.onclick = function () { cur = s.dataset.seg; host.innerHTML = bodyHtml(); bind(); }; });
+        qsa('[data-code]', host).forEach(function (c) { c.onclick = function () { location.href = landing; }; });
+        var cl = qs('[data-copy-link]', host); if (cl) cl.onclick = function () { H.toast('链接已复制', mode === 'pc' ? document.body : null); };
+      }
+      bind();
+      qs('[data-txt]', root).onclick = function () { H.toast('群文案已复制（不含电话）', mode === 'pc' ? document.body : null); };
+      qs('[data-send]', root).onclick = function () {
+        var s = H.SHARE_STATS[o.id] = H.SHARE_STATS[o.id] || { groups: 0, opens: 0, calls: 0, intents: 0, newUsers: 0, at: '刚刚', by: by };
+        s.groups += 1; close();
+        H.toast(mode === 'pc' ? '海报已下载 · 微信里发到群即可，打开 / 查看电话 / 新注册会统计到这条' + (wy ? '需求' : '运力') : '已发到微信群 · 打开 / 查看电话会统计到这条' + (wy ? '需求' : '运力'), mode === 'pc' ? document.body : null);
+        if (H.onShared) H.onShared(o);
+      };
+    };
+    var title = wy ? '分享用车需求 · 让司机来找您' : '分享运力 · 让货主来找您';
+    mode === 'pc' ? H.pcModal({ title: title, width: 820, body: bodyHtml(), footer: footer, onReady: onReady }) : H.sheet({ title: title, body: bodyHtml(), footer: footer, onReady: onReady });
   };
 
   /* ---------- 举报 ---------- */

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>悟运小程序 · 群分享需求落地页（司机扫码后看到的）</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  .from-strip { margin: 12px 14px 0; background: #fff; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow); font-size: 12px; color: var(--text-2); }
+  .from-strip .av { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #9fb4ff, #1f5eff); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; flex: none; }
+  .from-strip b { color: var(--text); display: block; font-size: 13px; }
+  .list { padding: 12px 14px 0; }
+  .need-card .price .n { color: var(--wy); }
+  .need-card .btn { background: var(--wy); }
+  .need-card .btn.ghost { background: transparent; color: var(--wy); border-color: var(--wy); }
+  .kvbox { margin: 12px 14px 0; background: #fff; border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); }
+  .kvbox .kv { grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+  .gate { margin: 12px 14px 0; background: #fff; border-radius: 14px; padding: 14px; box-shadow: var(--shadow); }
+  .gate h4 { font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .gate h4 .tag { margin-left: auto; }
+  .gate p { font-size: 12px; color: var(--text-2); margin-top: 4px; line-height: 1.55; }
+  .gsteps { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .gs { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: #f7f8fa; border: 1px solid transparent; }
+  .gs .n { width: 26px; height: 26px; border-radius: 50%; background: #e6e8ee; color: #fff; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; flex: none; }
+  .gs .t { flex: 1; font-size: 13px; }
+  .gs .t small { display: block; font-size: 11px; color: var(--muted); }
+  .gs .btn { height: 30px; font-size: 12px; padding: 0 10px; }
+  .gs.on { background: var(--wy-soft); border-color: #ffd0b5; }
+  .gs.on .n { background: var(--wy); }
+  .gs.done .n { background: var(--ok); }
+  .gs.done .t { color: var(--muted); }
+  .gs.done .t small { color: var(--ok); }
+  .ended { margin: 12px 14px 0; background: linear-gradient(120deg, #f0f1f4, #f7f8fa); border-radius: 14px; padding: 14px; display: flex; gap: 12px; align-items: center; }
+  .ended .ic { width: 42px; height: 42px; border-radius: 50%; background: #c5c9d3; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; flex: none; }
+  .ended b { display: block; font-size: 15px; }
+  .ended span { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+  .sec-t { margin: 14px 14px 0; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .sec-t .xs { font-weight: 400; }
+  .intent-ok { margin: 12px 14px 0; background: var(--ok-soft); border-radius: 12px; padding: 10px 12px; font-size: 12px; color: var(--ok); display: flex; gap: 8px; align-items: center; }
+  /* 右侧说明 */
+  .doc { width: 460px; background: #fff; border-radius: 16px; box-shadow: var(--shadow); padding: 18px 20px; align-self: flex-start; font-size: 13px; }
+  .doc h3 { font-size: 16px; }
+  .doc h3 small { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 6px; }
+  .doc .states { display: flex; gap: 8px; margin-top: 12px; }
+  .doc .states a { flex: 1; text-align: center; padding: 10px 8px; border-radius: 10px; background: #f2f3f5; font-size: 12px; color: var(--text-2); line-height: 1.4; }
+  .doc .states a b { display: block; color: var(--text); font-size: 13px; }
+  .doc .states a.on { background: var(--wy-soft); color: var(--wy); outline: 1px solid #ffc7a8; }
+  .doc .states a.on b { color: var(--wy); }
+  .doc table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+  .doc th, .doc td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; line-height: 1.5; }
+  .doc th { color: var(--muted); font-weight: 600; background: #fafbfc; white-space: nowrap; }
+  .doc code { font-family: ui-monospace, Menlo, monospace; font-size: 11px; background: #f2f3f5; padding: 1px 5px; border-radius: 4px; }
+  body.embed .doc { display: none; }
+</style>
+</head>
+<body class="wy-theme">
+<div class="m-stage">
+  <div class="phone dark-nav" id="phone">
+    <div class="statusbar" style="background:#ff6b1a"><span>9:24</span><span>●●● ᯤ 100%</span></div>
+    <div class="navbar" style="background:#ff6b1a"><a class="back" href="needs.html">‹</a><div class="title">用车需求</div><div class="capsule"><span>···</span><i></i><span>◉</span></div></div>
+    <div class="screen" id="screen"></div>
+    <div class="bottom-cta" id="cta"></div>
+    <div class="home-indicator"></div>
+  </div>
+
+  <div class="doc" id="doc">
+    <h3>群分享 → 司机扫码后的落地页 <small>悟运小程序 · <code>pages/need/landing?scene=n2001_zj</code></small></h3>
+    <div class="small t2 mt8">货主把需求海报发到司机微信群，司机长按识别的是<b>悟运</b>的小程序码。落地页必须处理三种状态，否则闭环断在这一步。</div>
+    <div class="states">
+      <a href="?state=new" data-st="new"><b>① 没装过悟运</b>先看内容，看电话要注册 + 实名 + 加车</a>
+      <a href="?state=ok" data-st="ok"><b>② 已认证司机</b>直接「有意向」/ 看电话</a>
+      <a href="?state=ended" data-st="ended"><b>③ 需求已结束</b>已找到车 + 附近其他需求</a>
+    </div>
+    <table>
+      <tr><th style="width:110px">环节</th><th>处理</th></tr>
+      <tr><td><b>scene 解析</b></td><td><code>需求ID_分享人</code>（≤32 字符）。分享人只用于归因（"来自 张经理 群分享"），不影响任何排序或价格。</td></tr>
+      <tr><td><b>未注册</b></td><td>需求内容、市场参考、货主认证状态<b>都能看</b>（让司机觉得值得注册），只有电话和「有意向」被挡；三步都在本页完成：微信手机号一键注册 → 实名 + 人脸 → 拍行驶证加车（约 3 分钟），做完回到这条需求。</td></tr>
+      <tr><td><b>已认证</b></td><td>与 <a href="needs.html" style="color:var(--wy)">沿线用车需求</a> 里的卡片同一套：「有意向」（可带参考价）、「查看货主电话」（风险提示 → 留痕 → 反馈）。</td></tr>
+      <tr><td><b>需求已结束</b></td><td>海报还在群里传，扫进来看到"已找到车"，不再显示电话；顺手给附近 / 沿线其他需求与"发一条运力"入口，流量不浪费。</td></tr>
+      <tr><td><b>归因统计</b></td><td>打开 / 查看电话 / 有意向 / 新注册 计到需求下（货主「我的需求」可见），司机侧不显示"谁分享的"之外的任何分享数据；<b>不分成、不奖励现金</b>。</td></tr>
+      <tr><td><b>防骚扰</b></td><td>海报上没有货主电话；被挡住的电话只能在认证后看，并留痕。群里冒充货主发假需求 → 需求本身必须是货袋子实名用户发布，扫码进来的都是平台内的真实需求。</td></tr>
+    </table>
+  </div>
+</div>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+(function () {
+  var H = window.HDZ;
+  H.protoBar('landing', H.DRIVER_LINKS);
+  var state = H.param('state', 'new'), id = H.param('id', 'n2001');
+  H.ME_DRIVER = 'd_scan';  // 扫码进来的是另一位司机（演示数据里 d1 已对 n2001 表过意向）
+  var n = H.NEEDS.filter(function (x) { return x.id === id; })[0] || H.NEEDS[0];
+  var sh = H.SHIPPERS[n.shipper];
+  var by = sh.contact;
+  var gate = { reg: false, real: false, veh: false };
+  H.qsa('.doc .states a').forEach(function (a) { a.classList.toggle('on', a.dataset.st === state); });
+
+  function fromStrip() {
+    return '<div class="from-strip"><div class="av">' + by.charAt(0) + '</div><div class="sp"><b>' + by + '（' + sh.company + '）通过微信群分享给您</b>来自货袋子 · 钢材买卖方自己发的用车需求 · ' + H.fmtAgo(n.posted) + '发布</div><span class="tag brand">群分享</span></div>';
+  }
+  function needBlock() {
+    return '<div class="list">' + H.needCard(n, { noBtn: true }) + '</div>' +
+      '<div class="kvbox"><div class="kv"><div><span>装车时间</span><b>' + n.when + '</b></div><div><span>货物</span><b>' + n.cargo.steel + ' ' + n.cargo.tons + 't' + (n.cargo.pieces ? ' · ' + n.cargo.pieces : '') + '</b></div><div><span>需要的车</span><b>' + H.reqLine(n) + '</b></div><div><span>预算</span><b>' + (n.budget == null ? '电话谈' : '¥' + n.budget + '/' + n.budgetUnit) + ' <small class="muted">市场 ¥' + H.refPrice(n.from, n.to[0]).join('-') + '</small></b></div></div>' +
+      (n.cargo.note ? '<div class="small t2 mt8">备注：' + n.cargo.note + '</div>' : '') + '<div class="notice gray mt8" style="font-style:italic"><span class="ic"></span><div>"' + n.desc + '"</div></div></div>';
+  }
+  function gateBlock() {
+    var steps = [
+      ['reg', '微信手机号一键注册悟运', '不用填资料，点一下授权手机号', '一键注册'],
+      ['real', '实名 + 人脸', '身份证拍照 + 刷脸，约 1 分钟', '去实名'],
+      ['veh', '添加车辆', '拍行驶证自动识别车牌 / 车型 / 板长', '拍行驶证'],
+    ];
+    var doneN = steps.filter(function (s) { return gate[s[0]]; }).length;
+    return '<div class="gate"><h4>看货主电话前，先完成 3 步<span class="tag ' + (doneN ? 'ok' : 'wy') + '">' + doneN + ' / 3</span></h4><p>货主只把电话给<b>实名 + 有认证车辆</b>的司机——这也是货主敢把需求发到群里的原因。全程约 3 分钟，做完回到这条需求。</p><div class="gsteps">' +
+      steps.map(function (s, i) { var done = gate[s[0]], on = !done && (i === 0 || gate[steps[i - 1][0]]); return '<div class="gs' + (done ? ' done' : on ? ' on' : '') + '"><span class="n">' + (done ? '✓' : i + 1) + '</span><div class="t">' + s[1] + '<small>' + (done ? '已完成' : s[2]) + '</small></div>' + (done ? '' : '<button class="btn wy" data-g="' + s[0] + '"' + (on ? '' : ' disabled') + '>' + s[3] + '</button>') + '</div>'; }).join('') +
+      '</div><div class="xs muted mt8">注册后这条需求会出现在您的「沿线用车需求」里；您发布一条运力，以后匹配的需求会直接推给您。</div></div>';
+  }
+  function endedBlock() {
+    var others = H.NEEDS.filter(function (x) { return x.id !== n.id && x.status === 'active' && (x.from === n.from || x.to[0] === n.to[0] || (H.NEAR[n.from] || []).indexOf(x.from) > -1); }).slice(0, 3);
+    return '<div class="ended"><div class="ic">✓</div><div><b>这条需求已找到车</b><span>' + by + ' 今天 09:40 标记「已找到车」，电话不再显示。海报可能还在群里传，扫进来看到的都是这个页面，不会有人再打扰货主。</span></div></div>' +
+      '<div class="list">' + H.needCard(n, { noBtn: true }).replace('class="post-card need-card', 'style="opacity:.6" class="post-card need-card') + '</div>' +
+      '<div class="sec-t">' + n.from + ' / ' + n.to[0] + ' 附近还有 ' + others.length + ' 条需求 <span class="xs muted">货主等电话</span></div>' +
+      '<div class="list" style="padding-top:8px">' + (others.length ? others.map(function (x) { return H.needCard(x); }).join('') : '<div class="empty">附近暂无其他需求</div>') + '</div>' +
+      '<div class="px14 mt12"><div class="pub-tip" style="margin:0;background:#fff;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);font-size:12px;color:var(--text-2)"><div class="sp"><b style="display:block;color:var(--text);font-size:13px">发一条运力，让货主来找您</b>发布后匹配的需求会直接推给您。</div><a class="btn wy sm" href="publish.html">一键发布</a></div></div>';
+  }
+  function render() {
+    var mine = H.myIntent(n.id), html = fromStrip();
+    if (state === 'ended') html += endedBlock();
+    else {
+      html += needBlock();
+      if (state === 'new') html += gateBlock();
+      else if (mine) html += '<div class="intent-ok">✓ 您 ' + H.fmtAgo(mine.at) + ' 表达了意向' + (mine.ref != null ? ' · 参考 ¥' + mine.ref + '/' + mine.refUnit : ' · 价格电话谈') + '<span class="sp"></span><span class="muted">等货主回电 · 24h 后自动过期</span></div>';
+      else html += '<div class="px14 mt12"><div class="notice gray"><span class="ic"></span><div><b>能接这单？</b>点「有意向」让货主先联系您（可带参考价，以电话为准），或直接打货主电话。货主会看到您的姓氏、车牌与悟运履约。平台不派单、不比价、不收费。</div></div></div>';
+    }
+    html += '<div class="px14 mt12"><div class="notice gray"><span class="ic"></span><div><b>防骗：</b>任何要您先交保证金、信息费的都不是货袋子 / 悟运，请举报。需求由货袋子实名用户发布，装车时间一到自动消失。</div></div></div><div style="height:30px"></div>';
+    H.qs('#screen').innerHTML = html;
+    var cta = H.qs('#cta');
+    if (state === 'ended') cta.innerHTML = '<a class="btn ghost" href="needs.html">看沿线全部需求</a><a class="btn wy" href="publish.html">发一条运力</a>';
+    else if (state === 'new') { var all = gate.reg && gate.real && gate.veh; cta.innerHTML = '<button class="btn ghost" data-later>先看看，稍后再说</button><button class="btn wy" data-gate-next>' + (all ? '完成 · 查看货主电话' : (gate.reg ? '继续认证（' + (gate.real ? 3 : 2) + '/3）' : '注册后查看电话')) + '</button>'; }
+    else cta.innerHTML = (mine ? '<span class="tag ok" style="flex:1;height:44px;display:inline-flex;align-items:center;justify-content:center;font-size:13px">✓ 已有意向 · 等货主回电</span>' : (H.intentCount(n) >= H.INTENT_CAP ? '<span class="tag gray" style="flex:1;height:44px;display:inline-flex;align-items:center;justify-content:center">意向已满 · 可直接打</span>' : '<button class="btn ghost" data-intent style="color:var(--wy)">有意向</button>')) + '<button class="btn wy" data-call>查看货主电话</button>';
+  }
+  function doGate(k) {
+    var msg = { reg: '已用微信手机号 138****6210 注册悟运', real: '实名 + 人脸通过', veh: '沪D·8K3** 行驶证识别成功，车辆认证通过' }[k];
+    gate[k] = true; render(); H.toast(msg);
+    if (gate.reg && gate.real && gate.veh) setTimeout(function () { state = 'ok'; render(); H.toast('认证完成，回到这条需求 · 现在可以看电话了'); }, 900);
+  }
+  H.qs('#phone').addEventListener('click', function (e) {
+    var g = e.target.closest('[data-g]'); if (g && !g.disabled) return doGate(g.dataset.g);
+    if (e.target.closest('[data-gate-next]')) { var k = !gate.reg ? 'reg' : !gate.real ? 'real' : !gate.veh ? 'veh' : null; if (k) doGate(k); else { state = 'ok'; render(); } return; }
+    if (e.target.closest('[data-later]')) return H.toast('已保存到「沿线用车需求」· 注册后随时可看');
+    if (e.target.closest('[data-intent]')) return H.intentSheet(n, null, render);
+    if (e.target.closest('[data-call]')) return H.unlockShipperPhone(n);
+    var c = e.target.closest('[data-call-need]'); if (c) return H.unlockShipperPhone(H.NEEDS.filter(function (x) { return x.id === c.dataset.callNeed; })[0]);
+    var it = e.target.closest('[data-intent]'); if (it) return H.intentSheet(H.NEEDS.filter(function (x) { return x.id === it.dataset.intent; })[0], null, render);
+  });
+  render();
+
+  H.notes('群分享落地页（设计说明）', [
+    '这是分享闭环里<b>最容易断的一环</b>：货主发到司机群的是海报 + 悟运小程序码，司机扫进来落到本页，而不是悟运首页。',
+    '<b>三种状态</b>用 <code>?state=new|ok|ended</code> 切换：没装过悟运 → 内容都能看、电话要注册 + 实名 + 加车（三步在本页完成，做完自动回到这条需求）；已认证 → 有意向 / 看电话；需求已结束 → 已找到车 + 附近其他需求。',
+    '顶部"<b>张经理 通过微信群分享给您</b>"条既是信任线索（是货袋子实名货主发的），也是归因标记；不显示分享统计、不做分成。',
+    '海报上<b>没有电话</b>，电话只在认证后的小程序里看并留痕；这保证了"发到群里"不会把货主号码泄露给黄牛。',
+    '未注册司机"先看看，稍后再说"会把这条需求存到注册后的「沿线用车需求」，不逼着当场注册。',
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -377,8 +377,8 @@
       (live ? '<div class="small b row" style="gap:6px">有意向的司机 <span class="tag ok">' + its.length + '</span><span class="xs muted" style="font-weight:400;margin-left:auto">您决定先打给谁</span></div><div class="ilist">' + H.intentList(n, { pc: true }) + '</div>' : '') +
       (live && its.length ? '<div class="xs muted">参考价是司机自填、以电话为准；不排序、不比价。谈定后点「已找到车」，其余司机会收到通知。</div>' : '') +
       '<details class="who-wrap"' + (live ? '' : ' open') + '><summary class="small b">谁查看了我的电话 (' + drv.length + ')</summary><ul class="who">' + (drv.length ? drv.map(function (c) { return '<li><span>' + c.who + ' · ' + c.what + '</span><span class="muted">' + c.when + '</span></li>'; }).join('') : '<li><span class="muted">还没有司机查看电话' + (live ? '，匹配的车您可以先打' : '') + '</span></li>') + '</ul></details>' +
-      '<div class="acts">' + (live ? '<button class="btn sm" data-act="match">看匹配车 (' + matched + ')</button><button class="btn sm line" data-act="found">已找到车</button><button class="btn sm ghost" data-act="extend">延长</button><button class="btn sm ghost" data-act="off">下架</button>' : '<button class="btn sm" data-act="again">再发一次</button>') + '</div>' +
-      '</div>';
+      '<div class="acts">' + (live ? '<button class="btn sm" data-act="match">看匹配车 (' + matched + ')</button><button class="btn sm line" data-act="found">已找到车</button><button class="btn sm ghost" data-act="share" style="background:#e8f8ee;color:#07a050">分享到司机群</button><button class="btn sm ghost" data-act="extend">延长</button><button class="btn sm ghost" data-act="off">下架</button>' : '<button class="btn sm" data-act="again">再发一次</button>') + '</div>' +
+      '</div>' + (H.SHARE_STATS[n.id] ? '<div style="grid-column:span 2">' + H.shareStatLine(n.id, 'need').replace('class="share-stat"', 'class="share-stat" style="margin-top:0"') + '</div>' : '');
     if (n.status === 'confirming') h += '<div class="confirm"><span class="sp"><b>发布已满 24 小时，还需要车吗？</b> 未确认将于 2 小时后自动隐藏，避免司机打到已经不需要车的您。</span><button class="btn hot" data-act="still">还需要，继续展示</button><button class="btn ghost" data-act="found">已找到车</button></div>';
     if (!live) h += '<div class="end">' + n.endReason + ' · ' + n.endAt + '</div>';
     if (n.status === 'found' && chosen) {
@@ -418,6 +418,8 @@
       var ms = H.matchPosts(n);
       H.pcModal({ title: '匹配这条需求的顺路车 · ' + n.from + ' → ' + n.to[0], width: 560, body: ms.length ? ms.map(mrow).join('') : '<div class="empty">暂无在展车辆匹配，司机看到需求会主动联系您</div>', footer: '<button class="btn ghost" data-cancel>关闭</button>',
         onReady: function (root, close) { H.qs('[data-cancel]', root).onclick = close; root.addEventListener('click', function (ev) { var r = ev.target.closest('.mrow'); if (r && ev.target.closest('[data-call]')) H.unlockPhone(H.POSTS.filter(function (x) { return x.id === r.dataset.id; })[0], 'pc'); }); } });
+    } else if (act === 'share') {
+      H.shareSheet('need', n, 'pc');
     } else if (act === 'found') {
       H.foundDialog(n, 'pc', function (reason, it) { endNeed(n, 'found', reason); H.toast(it ? '已隐藏需求并通知其余司机。装车后可在这条记录下反馈联系结果' : '已隐藏需求，祝顺利。装车时记得核对人车证', document.body); });
     } else if (act === 'extend') {
@@ -436,6 +438,7 @@
   }
   H.qsa('.ntabs a').forEach(function (a) { a.onclick = function () { switchTab(a.dataset.tab); }; });
 
+  H.onShared = function () { renderMine(); };
   applyOrder(0);
   renderMine();
   if (H.param('tab') === 'mine') switchTab('mine');

@@ -217,6 +217,16 @@ HDZ.INTENTS = [
 HDZ.INTENT_COUNT = { n2001: 3, n2002: 1, n2003: 0, n2004: 5, n2005: 1, n2006: 0 };
 HDZ.ME_DRIVER = 'd1';
 
+/* ---------- 分享闭环 ----------
+   微信规则：小程序卡片只能分享"本小程序"的页面。货主要把需求发到司机微信群，司机要打开的是悟运，
+   所以跨小程序只能走 海报 + 另一小程序的小程序码（getUnlimited，scene = 需求ID + 分享人）。
+   分享统计只做归因展示（谁的分享带来多少打开 / 查看电话 / 新注册），不分成、不发现金。 */
+HDZ.SHARE_STATS = {
+  n2001: { groups: 2, opens: 12, calls: 2, intents: 1, newUsers: 1, at: '09:08', by: '张经理' },
+  p1001: { groups: 3, opens: 31, calls: 3, intents: 0, newUsers: 2, at: '09:00', by: '王师傅' },
+};
+HDZ.SHARE_SCENE = function (kind, id, who) { return 'scene=' + id + '_' + (who || 'me') + '&t=' + (kind === 'need' ? 'n' : 'p'); };
+
 /* ---------- 联系结果反馈（替代互评） ----------
    只在真实联系过的双方之间发生；是几个结构化选项，不是打分，不公开展示。
    负面项累计触发现有的核验 / 黑名单流程，不需要平台判定"完成"。 */

@@ -184,7 +184,7 @@
     var c = cards.filter(function (x) { return x.id === card.dataset.id; })[0];
     if (e.target.closest('[data-pub]')) { publish(c); }
     else if (e.target.closest('[data-undo]')) { c.state = 'ready'; renderOc(); H.toast('已撤销，信息未展示'); }
-    else if (e.target.closest('[data-share]')) { H.toast('已生成带小程序码的卡片'); }
+    else if (e.target.closest('[data-share]')) { H.shareSheet('post', Object.assign({}, c, { id: 'p' + (1100 + cards.indexOf(c)), driver: 'd1', spareTons: H.VEHICLES[c.vehicle].load, status: 'active' })); }
     else if (e.target.closest('[data-ed]')) { quickEdit(c, e.target.closest('[data-ed]').dataset.ed); }
   });
 

@@ -124,7 +124,8 @@
       '<div class="small t2 mt4">出发 <b>' + p.depart + '</b></div>' +
       '<div class="stat-line mt8"><span><b>' + p.views + '</b>浏览</span><span><b>' + p.calls + '</b>来电</span><span><b>' + p.favs + '</b>收藏</span><span class="sp"></span>' +
         (active ? '<span class="xs ' + (ttlCls ? 'hot-c' : 'muted') + '">' + H.fmtLeft(p.validUntil) + '后自动下架</span>' : '') + '</div>' +
-      (active ? '<div class="ttl"><i class="' + ttlCls + '" style="width:' + Math.round(ratio * 100) + '%"></i></div>' : '');
+      (active ? '<div class="ttl"><i class="' + ttlCls + '" style="width:' + Math.round(ratio * 100) + '%"></i></div>' : '') +
+      (active ? H.shareStatLine(p.id, 'post') : '');
     if (p.status === 'confirming') {
       h += '<div class="confirm"><b>发布已满 24 小时，这台车还闲着吗？</b><div class="small" style="opacity:.85;margin-top:2px">未确认将于 11:00 自动隐藏，避免货主打到"已经有活"的车。</div>' +
         '<div class="row"><button class="btn hot" data-act="still">还闲着，继续展示</button><button class="btn ghost" data-act="booked">已接到活</button></div></div>';
@@ -208,15 +209,9 @@
     }
   });
 
-  function shareSheet(p) {
-    var v = H.VEHICLES[p.vehicle];
-    H.sheet({ title: '分享运力卡片', body:
-      '<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden">' +
-        '<div style="background:linear-gradient(120deg,#1f5eff,#3b7bff);color:#fff;padding:10px 12px;font-size:12px;display:flex;justify-content:space-between"><span>货袋子 · 找顺路车</span><span>' + H.KIND[p.kind].name + '</span></div>' +
-        '<div style="padding:12px"><div class="route" style="font-size:18px"><div class="city">' + p.from + '</div><div class="arrow"><div class="ln"></div></div><div class="city">' + p.to.join('/') + '</div></div><div class="small t2 mt8">出发 ' + p.depart + ' · ' + H.vehicleLine(v) + '</div><div class="small t2">' + H.equipLine(v) + '</div><div class="row between mt8"><span class="hot-c b" style="font-size:16px">' + (p.price == null ? '面议' : '¥' + p.price + '/' + p.priceUnit) + '</span><span class="xs muted">小程序内查看电话 · 平台仅展示信息</span></div></div></div>' +
-      '<div class="xs muted mt8" style="text-align:center">卡片带小程序码，货主点开即进入货袋子小程序「找顺路车」详情页</div>',
-      footer: '<button class="btn ghost">保存图片</button><button class="btn" style="background:#07c160">发给微信好友 / 群</button>' });
-  }
+  /* 分享 = 海报 + 货袋子小程序码（司机的群里是货主，要进的是货袋子，不能用悟运的小程序卡片） */
+  function shareSheet(p) { H.shareSheet('post', Object.assign({ driver: 'd1', spareTons: H.VEHICLES[p.vehicle].load }, p)); }
+  H.onShared = function () { render(); };
 
   function detailSheet(p) {
     var fb = (p.feedback || []);
