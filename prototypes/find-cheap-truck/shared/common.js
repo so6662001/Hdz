@@ -25,6 +25,7 @@
   H.DRIVER_LINKS = [
     { key: 'home', label: '悟运·运力', href: 'home.html' },
     { key: 'publish', label: '发布运力', href: 'publish.html' },
+    { key: 'form', label: '手动表单', href: 'publish-form.html' },
     { key: 'vehicle', label: '添加车辆', href: 'vehicle-add.html' },
     { key: 'pc', label: 'PC找车', href: '../shipper/pc-find.html' },
     { key: 'm', label: '小程序找车', href: '../shipper/m-find.html?shell=mp' },
