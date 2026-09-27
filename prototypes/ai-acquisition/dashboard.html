@@ -62,7 +62,7 @@ function render() {
     <div class="card"><div class="card-h"><h3>14 天趋势</h3><div class="row small muted">触达 / 回复 / 新线索</div></div><div class="card-b"><canvas id="trend" style="width:100%;height:230px"></canvas></div></div>
   </div>
   <div class="grid g2 mb16">
-    <div class="card"><div class="card-h"><h3>渠道健康 <span class="sub">今日</span></h3><a href="channels.html" class="small">渠道与设备 →</a></div>
+    <div class="card"><div class="card-h"><h3>渠道健康 <span class="sub">今日</span></h3><a href="channels.html" class="small">触达账号与设备 →</a></div>
       ${UI.table([{ label: '渠道', render: r => UI.platform(r.platform, true) }, { label: '抓取', key: 'captured', cls: 'right' }, { label: '成线索', key: 'leads', cls: 'right' }, { label: '触达', key: 'sent', cls: 'right' }, { label: '回复率', render: r => `<div class="row" style="gap:6px"><div style="width:70px">${UI.bar(r.replyRate * 100, r.replyRate > .35 ? 'ok' : '')}</div>${(r.replyRate * 100).toFixed(0)}%</div>` }, { label: '状态', render: r => UI.status(r.health) }], ACQ.byChannel)}
     </div>
     <div class="card"><div class="card-h"><h3>话术效果排行 <span class="sub">近 7 天回复率</span></h3><a href="scripts.html" class="small">话术库 →</a></div><div class="card-b"><canvas id="scriptBars" style="width:100%;height:230px"></canvas><div class="alert warn small mt8">⚠ 「首触 · 通用模板」无个性化变量，回复率 4.6%，已自动停用；带来源变量的首触回复率 32.8%。</div></div></div>

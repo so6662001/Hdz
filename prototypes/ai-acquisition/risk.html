@@ -32,7 +32,7 @@ function incidents() {
   $('#tb').innerHTML = UI.table([
     { label: '时间', render: i => `<span class="small">${fmt.time(i.t)}</span>` }, { label: '账号', render: i => { const a = ACQ.account(i.account); return `${UI.platform(a.platform)}<span class="small">${esc(a.name)}</span><span class="sub">${UI.status(a.status)}</span>`; } },
     { label: '信号', render: i => `<span class="tag ${i.level} xs">${i.signal}</span>` }, { label: '说明', render: i => `<span class="small">${esc(i.text)}</span>` },
-    { label: '存证', render: i => i.evidence ? `<a onclick="toast('设备截图（含平台提示弹窗），保留 30 天')">📷</a>` : '—' },
+    { label: '存证', render: i => i.evidence ? `<a onclick="toast('设备截图（含平台提示弹窗），保留 30 天')"></a>` : '—' },
     { label: '处理', render: i => i.handled ? `<span class="tag success">已处理</span><span class="sub">${esc(i.handledBy || '系统')}</span>` : `<button class="btn xs" onclick="handle('${i.id}')">标记处理</button>` },
   ], ACQ.incidents.slice().sort((a, b) => b.t - a.t)) + `<div class="small muted mt12">信号来源：设备 UI 检测（验证码 / 频繁提示 / 控件缺失 / 退出登录）、API 错误码、发送失败率突增。连续 2 次同类信号 → 熔断；1 天内 3 次熔断 → 停用并通知管理员。</div>`;
 }

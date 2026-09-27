@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="shared/base.css">
 <style>
   .nl { display: flex; gap: 10px; align-items: stretch; } .nl textarea { flex: 1; height: 56px; font-size: 14px; }
-  .parse { border: 1px solid #d7d2f0; background: linear-gradient(180deg, #f7f6fc, #fff); border-radius: 6px; padding: 14px 16px; margin-top: 12px; }
+  .parse { border: 1px solid #d7d2f0; background: var(--ai-weak); border-radius: 6px; padding: 14px 16px; margin-top: 12px; }
   .parse .kv { grid-template-columns: 110px 1fr; }
   .pre { background: #1c2430; color: #c3ccd6; border-radius: 6px; padding: 10px 12px; font-size: 11.5px; line-height: 1.6; overflow: auto; max-height: 260px; white-space: pre; }
   .dry td { vertical-align: top; } .dry .txt { font-size: 12.5px; line-height: 1.6; }
@@ -24,7 +24,7 @@ const EXAMPLES = ['每天早上 9 点抓取线索', '每天 10 点给意图分 6
 function render() {
   root.innerHTML = App.pageHead('自动化任务', '用一句话描述任务，AI 解析为可执行任务；保存前可试运行 5 条样本，缺变量会在此拦截而不是发到客户那里。', `<button class="btn" onclick="location.href='wizard.html?step=2'">开通向导中配置 →</button>`) +
   `<div class="card mb16"><div class="card-b">
-    <div class="nl"><textarea class="input" id="nl" placeholder="例如：每天早上 9 点抓取线索；每天 10 点给意图分 60 以上的新线索发送首触话术…">${esc(nlText)}</textarea><button class="btn ai" style="padding:0 18px;font-size:14px" onclick="parse()">✨ 解析为任务</button></div>
+    <div class="nl"><textarea class="input" id="nl" placeholder="例如：每天早上 9 点抓取线索；每天 10 点给意图分 60 以上的新线索发送首触话术…">${esc(nlText)}</textarea><button class="btn ai" style="padding:0 18px;font-size:14px" onclick="parse()">解析为任务</button></div>
     <div class="chips mt8">${EXAMPLES.map(e => `<span class="chip" onclick="$('#nl').value='${e}';parse()">${e}</span>`).join('')}</div>
     <div id="parse"></div>
   </div></div>
@@ -42,11 +42,11 @@ function render() {
   if (spec) renderParse();
 }
 function paramsBrief(j) { const p = j.spec || {}; const parts = []; if (p.platforms) parts.push(p.platforms.map(x => UI.platform(x)).join('')); if (p.filter) { if (p.filter.minScore) parts.push(`意图分 ≥${p.filter.minScore}`); if (p.filter.stage) parts.push(`阶段 ${p.filter.stage.join('/')}`); if (p.filter.noReplyDays) parts.push(`${p.filter.noReplyDays} 天未回复`); } if (p.scriptId) parts.push(`话术「${(ACQ.script(p.scriptId) || {}).name || p.scriptId}」`); if (p.maxCount) parts.push(`上限 ${p.maxCount}`); return `<span class="small">${parts.join(' · ') || '—'}</span>`; }
-function parse() { nlText = $('#nl').value.trim(); if (!nlText) return toast('请输入一句话描述', 'warn'); const el = $('#parse'); el.innerHTML = '<div class="alert ai mt12">✨ Qwen3.5-Plus 正在解析（JSON Schema 约束输出）…</div>'; setTimeout(() => { spec = Engine.parseJob(nlText); renderParse(); }, 600); }
+function parse() { nlText = $('#nl').value.trim(); if (!nlText) return toast('请输入一句话描述', 'warn'); const el = $('#parse'); el.innerHTML = '<div class="alert ai mt12">Qwen3.5-Plus 正在解析（JSON Schema 约束输出）…</div>'; setTimeout(() => { spec = Engine.parseJob(nlText); renderParse(); }, 600); }
 function renderParse() {
   const s = spec; const el = $('#parse'); const p = s.params;
   el.innerHTML = `<div class="parse">
-    <div class="row mb8"><span class="ai-badge">✨ 解析结果</span><b style="font-size:14px">${esc(s.name)}</b>${UI.tag(ACTION[s.action][0], ACTION[s.action][1])}<span class="sp"></span><span class="small muted">置信度 ${s.confidence} · ${s.model}</span></div>
+    <div class="row mb8"><span class="ai-badge">解析结果</span><b style="font-size:14px">${esc(s.name)}</b>${UI.tag(ACTION[s.action][0], ACTION[s.action][1])}<span class="sp"></span><span class="small muted">置信度 ${s.confidence} · ${s.model}</span></div>
     ${s.ambiguities.length ? `<div class="alert warn small mb8">⚠ 需要确认（AI 已按默认值填充，请检查）：<ul style="margin:4px 0 0 16px">${s.ambiguities.map(a => `<li>${a}</li>`).join('')}</ul></div>` : '<div class="alert ok small mb8">✓ 描述完整，无歧义</div>'}
     <div class="split">
       <div>
@@ -63,7 +63,7 @@ function renderParse() {
       </div>
       <div><div class="small b mb8">JobSpec（正式实现由大模型按 JSON Schema 输出，存入 hdz_acq_automation_job.spec_json）</div><div class="pre">${esc(JSON.stringify({ name: s.name, action: s.action, cron: s.cron, timezone: s.timezone, params: s.params, guardrails: s.guardrails }, null, 2))}</div></div>
     </div>
-    <div class="row mt12"><span class="sp"></span>${s.action === 'OUTREACH' || s.action === 'FOLLOW_UP' ? `<button class="btn" onclick="dryRun(null)">🧪 试运行 5 条样本</button>` : ''}<button class="btn" onclick="saveJob(false)">仅保存</button><button class="btn primary" onclick="saveJob(true)">保存并启用</button></div>
+    <div class="row mt12"><span class="sp"></span>${s.action === 'OUTREACH' || s.action === 'FOLLOW_UP' ? `<button class="btn" onclick="dryRun(null)">试运行 5 条样本</button>` : ''}<button class="btn" onclick="saveJob(false)">仅保存</button><button class="btn primary" onclick="saveJob(true)">保存并启用</button></div>
   </div>`;
 }
 function togglePlat(x) { const a = spec.params.platforms; const i = a.indexOf(x); i >= 0 ? a.splice(i, 1) : a.push(x); spec.params.captureRuleIds = ACQ.captureRules.filter(r => r.enabled && a.includes(r.platform)).map(r => r.id); renderParse(); }
@@ -85,7 +85,7 @@ function dryRun(jobId) {
   let sample = ACQ.leads.filter(l => !l.isTest && (j.action === 'FOLLOW_UP' ? ['CONTACTED', 'REPLIED'].includes(l.stage) : l.stage === 'NEW')).slice(0, 5);
   if (j.action !== 'FOLLOW_UP' && !sample.find(l => !l.nickname)) { const anon = ACQ.leads.find(l => !l.nickname); if (anon) sample[sample.length - 1] = anon; }
   const fixes = {};
-  const d = Drawer.open({ title: `🧪 试运行 · ${esc(j.name)}`, sub: `话术「${esc(script.name)}」 · 样本 ${sample.length} 条 · 不会真实发送`, wide: true, body: '<div id="dry"></div>', footer: `<span class="small muted sp" id="drysum"></span><button class="btn" data-close>关闭</button><button class="btn ai" id="sendTest">发到测试号（${ACQ.merchant.testPeers.join(' / ')}）</button><button class="btn primary" id="go" disabled>确认，按计划执行</button>`, onMount(m) {
+  const d = Drawer.open({ title: `试运行 · ${esc(j.name)}`, sub: `话术「${esc(script.name)}」 · 样本 ${sample.length} 条 · 不会真实发送`, wide: true, body: '<div id="dry"></div>', footer: `<span class="small muted sp" id="drysum"></span><button class="btn" data-close>关闭</button><button class="btn ai" id="sendTest">发到测试号（${ACQ.merchant.testPeers.join(' / ')}）</button><button class="btn primary" id="go" disabled>确认，按计划执行</button>`, onMount(m) {
     const draw = () => {
       const rows = sample.map(l => { const lead = fixes[l.id] ? Object.assign({}, l, { nickname: fixes[l.id] }) : l; const r = Engine.render(script, lead); const acc = ACQ.accounts.find(a => a.platform === l.platform && a.caps.includes('SEND_DM') && (j.spec.channelAccountIds || [a.id]).includes(a.id)) || ACQ.accounts.find(a => a.platform === l.platform); return { l, lead, r, acc }; });
       const bad = rows.filter(x => !x.r.ok).length;
