@@ -20,7 +20,7 @@
     document.body.appendChild(bar);
     document.body.classList.add('has-proto-bar');
   };
-  H.rel = function (p) { return (location.pathname.indexOf('/driver/') > -1 || location.pathname.indexOf('/shipper/') > -1 ? '../' : '') + p; };
+  H.rel = function (p) { return (/\/(driver|shipper|admin)\//.test(location.pathname) ? '../' : '') + p; };
 
   H.DRIVER_LINKS = [
     { key: 'home', label: '悟运·运力', href: 'home.html' },
@@ -29,6 +29,7 @@
     { key: 'pc', label: 'PC找车', href: '../shipper/pc-find.html' },
     { key: 'm', label: '小程序找车', href: '../shipper/m-find.html?shell=mp' },
     { key: 'h5', label: 'H5找车', href: '../shipper/m-find.html?shell=h5' },
+    { key: 'admin', label: '运营后台', href: '../admin/console.html' },
   ];
   H.SHIPPER_LINKS = [
     { key: 'pc', label: 'PC找车', href: 'pc-find.html' },
@@ -37,6 +38,7 @@
     { key: 'h5', label: 'H5找车', href: 'm-find.html?shell=h5' },
     { key: 'home', label: '悟运·运力', href: '../driver/home.html' },
     { key: 'publish', label: '发布运力', href: '../driver/publish.html' },
+    { key: 'admin', label: '运营后台', href: '../admin/console.html' },
   ];
 
   /* ---------- 说明面板 ---------- */

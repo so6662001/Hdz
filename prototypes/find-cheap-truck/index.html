@@ -75,7 +75,7 @@
   <div class="top">
     <h1>找特价车 <span class="tj">返程车 · 闲置车 · 专装钢材</span></h1>
     <p>驾驶员在<b>悟运小程序</b>发布返程车、闲置车、顺路捎货信息；卖家、买家在<b>货袋子 PC 端、微信小程序、H5</b> 三端找车并直接联系司机。平台只做信息展示与身份核验，<b>不参与交易、不接单、不收运费</b>。本页为高保真 HTML 原型总览，所有页面可点击交互（纯前端、模拟数据）。</p>
-    <div class="pills"><span>驾驶员端 3 页</span><span>PC 找车 2 页</span><span>小程序 / H5 找车 2 页 × 2 壳</span><span>统一的"查看电话 → 风险提示 → 留痕 → 反馈"流程</span><span>5 条运力终止路径</span></div>
+    <div class="pills"><span>驾驶员端 3 页</span><span>PC 找车 2 页</span><span>小程序 / H5 找车 2 页 × 2 壳</span><span>运营后台 1 页 7 视图</span><span>统一的"查看电话 → 风险提示 → 留痕 → 反馈"流程</span><span>5 条运力终止路径</span></div>
   </div>
 
   <h2>原型页面 <small>点击卡片进入可交互页面；每页右上角有"设计说明"面板</small></h2>
@@ -98,6 +98,12 @@
     <a class="pcard" href="shipper/m-find.html?shell=mp"><div class="thumb m"><span class="role tag brand">小程序 · 列表</span><iframe src="shipper/m-find.html?shell=mp&embed=1" loading="lazy"></iframe></div><div class="body"><h3>小程序 · 找特价车</h3><p>Tab 入口；搜索 + 快捷筛选 chips；信任 4 格；列表中插入订阅线路卡；底部弹层查看电话与反馈。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
     <a class="pcard" href="shipper/m-find.html?shell=h5"><div class="thumb m"><span class="role tag gray">H5 · 列表</span><iframe src="shipper/m-find.html?shell=h5&embed=1" loading="lazy"></iframe></div><div class="body"><h3>H5 · 找特价车</h3><p>用于微信群 / 朋友圈分享、短信链接、PC 扫码；浏览器壳 + 打开小程序引导；手机号登录后查看电话。</p><div class="acts"><span class="btn ghost sm">打开</span></div></div></a>
     <a class="pcard" href="shipper/m-detail.html?id=p1001&shell=mp"><div class="thumb m"><span class="role tag brand">小程序 · 详情</span><iframe src="shipper/m-detail.html?id=p1001&shell=mp&embed=1" loading="lazy"></iframe></div><div class="body"><h3>运力详情（小程序 / H5）</h3><p>标签 → 线路 → 价格对比 → 车辆照片横滑与配置 → 司机卡 → 状态轨迹 → 联系前确认；底部收藏 / 举报 / 分享 / 查看电话。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
+  </div>
+
+  <div class="role-hd"><span class="ic bg-dark">运营</span><h3>运营后台 · 货袋子</h3><span>信任生产线：核验、举报、监控、信用、参考价、规则</span></div>
+  <div class="grid2">
+    <a class="pcard" href="admin/console.html"><div class="thumb pc"><span class="role tag gray">后台 · 概览</span><iframe src="admin/console.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>运营后台（单页多视图）</h3><p>概览（KPI、发布 / 查看电话趋势、漏斗、终止原因分布、线路供需）；核验队列（自动核验兜底人工、通过 / 驳回补件）；举报处置（2h SLA、五级处置、协助取证包）；运力监控；司机信用五级；线路参考价；生命周期与反作弊规则开关。</p><div class="acts"><span class="btn sm" style="background:#2b3040">打开</span></div></div></a>
+    <div class="pcard" style="justify-content:center;padding:22px 24px;color:var(--text-2);font-size:13px;line-height:1.8"><b style="color:var(--text);font-size:15px">后台为什么重要</b>平台不做交易，能给找车方的"安全感"全部来自后台的生产能力：证件核验多快、举报处理多快、失效信息能否及时消失、坏司机能否被识别并限制。这些指标（人工复核 ≤ 10 分钟、举报 2 小时响应、信息有效率 ≥ 90%）应作为板块的运营 OKR。</div>
   </div>
 
   <h2>业务流程 <small>平台居中做信息与信任，不碰交易</small></h2>

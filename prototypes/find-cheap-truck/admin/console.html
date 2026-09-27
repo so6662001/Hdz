@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>货袋子运营后台 · 找特价车</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  body { background: #f0f2f5; min-width: 1280px; }
+  .adm { display: grid; grid-template-columns: 200px 1fr; min-height: calc(100vh - 40px); }
+  .side { background: #1f2430; color: #c5cad6; padding: 18px 0; }
+  .side .logo { padding: 0 20px 18px; color: #fff; font-weight: 800; font-size: 17px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .side .logo i { width: 26px; height: 26px; border-radius: 7px; background: var(--brand); font-style: normal; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+  .side .grp { padding: 14px 20px 6px; font-size: 11px; color: #7a8194; }
+  .side a { display: flex; align-items: center; justify-content: space-between; padding: 9px 20px; font-size: 13px; cursor: pointer; }
+  .side a:hover { background: rgba(255,255,255,.05); color: #fff; }
+  .side a.on { background: var(--brand); color: #fff; }
+  .side a .n { font-size: 11px; background: var(--hot); color: #fff; padding: 1px 6px; border-radius: 8px; }
+  .main { padding: 18px 24px 40px; }
+  .topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .topbar h2 { font-size: 20px; white-space: nowrap; }
+  .topbar .crumb { color: var(--muted); font-size: 12px; }
+  .topbar .u { margin-left: auto; font-size: 13px; color: var(--text-2); display: flex; align-items: center; gap: 8px; }
+  .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .kpi { background: #fff; border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .kpi span { font-size: 12px; color: var(--muted); display: block; }
+  .kpi b { font-size: 26px; font-weight: 800; display: block; margin-top: 4px; letter-spacing: -.5px; }
+  .kpi small { font-size: 11px; }
+  .panel { background: #fff; border-radius: 12px; box-shadow: var(--shadow); margin-top: 16px; }
+  .panel .ph { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .panel .ph h3 { font-size: 15px; }
+  .panel .ph .tabs { display: flex; gap: 4px; }
+  .panel .ph .tabs span { padding: 5px 12px; border-radius: 8px; font-size: 13px; color: var(--text-2); cursor: pointer; }
+  .panel .ph .tabs span.on { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+  .panel .ph .r { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .panel .ph .input { height: 32px; font-size: 13px; width: 220px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 10px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; background: #fafbfc; }
+  tr:hover td { background: #fafbff; }
+  td .sub { font-size: 11px; color: var(--muted); display: block; }
+  td .acts { display: flex; gap: 6px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .bars2 { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 16px 16px 0; }
+  .bars2 div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; color: var(--muted); height: 100%; justify-content: flex-end; }
+  .bars2 i { width: 100%; border-radius: 4px 4px 0 0; background: var(--brand-soft); position: relative; }
+  .bars2 i b { position: absolute; top: -16px; left: 0; right: 0; text-align: center; font-size: 10px; color: var(--text-2); }
+  .bars2 i.hi { background: var(--brand); }
+  .funnel { padding: 14px 16px; }
+  .funnel .f { display: flex; align-items: center; gap: 10px; font-size: 13px; margin: 8px 0; }
+  .funnel .f .bar { height: 22px; border-radius: 6px; background: linear-gradient(90deg, var(--brand), #6d8cff); color: #fff; font-size: 12px; display: flex; align-items: center; padding: 0 8px; font-weight: 600; }
+  .funnel .f .lb { width: 110px; color: var(--text-2); }
+  .funnel .f .pct { color: var(--muted); font-size: 12px; }
+  .rules li { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .rules li:last-child { border-bottom: 0; }
+  .rules li .t { flex: 1; }
+  .rules li .t small { display: block; color: var(--muted); font-size: 11px; }
+  .rules li .switch { width: 38px; height: 22px; }
+  .rules li .switch::after { width: 16px; height: 16px; }
+  .rules li .switch.on::after { left: 19px; }
+  .doc-thumb { width: 64px; height: 42px; border-radius: 6px; background: linear-gradient(135deg, #dfe4f0, #b9c3d9); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: #4b5060; margin-right: 6px; }
+  .ocr-cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; font-size: 12px; }
+  .ocr-cmp span { color: var(--muted); }
+  .ocr-cmp .ok { color: var(--ok); font-weight: 600; }
+  .ocr-cmp .bad { color: var(--hot); font-weight: 600; }
+  .view { display: none; }
+  .view.on { display: block; }
+</style>
+</head>
+<body>
+<div class="adm">
+  <aside class="side">
+    <div class="logo"><i>货</i>货袋子运营后台</div>
+    <div class="grp">找特价车</div>
+    <a class="on" data-v="dash">概览</a>
+    <a data-v="verify">核验队列 <span class="n">14</span></a>
+    <a data-v="report">举报处置 <span class="n">5</span></a>
+    <a data-v="posts">运力监控</a>
+    <a data-v="credit">司机信用</a>
+    <a data-v="price">线路参考价</a>
+    <a data-v="rules">规则配置</a>
+    <div class="grp">其他模块</div>
+    <a>现货商城</a><a>求购大厅</a><a>加工服务</a><a>用户与企业认证</a>
+  </aside>
+  <main class="main">
+    <div class="topbar"><h2 id="vTitle">概览</h2><span class="crumb">找特价车 › <span id="vCrumb">概览</span></span><span class="u"><span class="avatar" style="width:28px;height:28px;font-size:12px">运</span>运营 · 李</span></div>
+
+    <!-- 概览 -->
+    <section class="view on" id="v-dash">
+      <div class="kpis">
+        <div class="kpi"><span>在展运力</span><b>386</b><small class="ok-c">↑ 12% 较昨日</small></div>
+        <div class="kpi"><span>今日新发布</span><b>142</b><small class="muted">返程 96 · 闲置 31 · 顺路 15</small></div>
+        <div class="kpi"><span>今日查看电话</span><b>317</b><small class="muted">来自 128 家企业</small></div>
+        <div class="kpi"><span>信息有效率</span><b>91.2%</b><small class="ok-c">目标 ≥ 90%</small></div>
+        <div class="kpi"><span>反馈"已谈成"</span><b>46</b><small class="muted">占反馈 22%</small></div>
+        <div class="kpi"><span>待处理</span><b class="hot-c">19</b><small class="muted">核验 14 · 举报 5</small></div>
+      </div>
+      <div class="three">
+        <div class="panel"><div class="ph"><h3>近 14 天发布趋势</h3><div class="r"><span class="tag brand">发布条数</span><span class="xs muted">今日查看电话 317</span></div></div><div class="bars2" id="trend"></div></div>
+        <div class="panel"><div class="ph"><h3>今日漏斗</h3></div><div class="funnel">
+          <div class="f"><span class="lb">列表曝光</span><span class="bar" style="width:100%">4,820</span></div>
+          <div class="f"><span class="lb">进入详情</span><span class="bar" style="width:52%">1,430</span><span class="pct">30%</span></div>
+          <div class="f"><span class="lb">查看电话</span><span class="bar" style="width:22%">317</span><span class="pct">22%</span></div>
+          <div class="f"><span class="lb">反馈已谈成</span><span class="bar" style="width:8%">46</span><span class="pct">15%</span></div>
+        </div></div>
+      </div>
+      <div class="two">
+        <div class="panel"><div class="ph"><h3>终止原因分布（近 7 天，1,036 条）</h3></div>
+          <table><tr><th>终止方式</th><th>条数</th><th>占比</th><th>说明</th></tr>
+          <tr><td>到期自动下架</td><td>498</td><td>48%</td><td class="muted">健康：出发时间窗结束</td></tr>
+          <tr><td>司机标记已接单</td><td>244</td><td>24%</td><td class="muted">其中货袋子用户 131 · 熟客 89 · 其他平台 24</td></tr>
+          <tr><td>司机标记已出发</td><td>118</td><td>11%</td><td class="muted">27 条转为顺路捎货</td></tr>
+          <tr><td>24h 未确认自动隐藏</td><td>97</td><td>9%</td><td class="muted">需关注：可优化提醒时机</td></tr>
+          <tr><td>反馈驱动隐藏</td><td>51</td><td>5%</td><td class="muted">"已被订走"≥2 或"未接通"≥3</td></tr>
+          <tr><td>举报下架</td><td>28</td><td>3%</td><td class="hot-c">见举报处置</td></tr></table></div>
+        <div class="panel"><div class="ph"><h3>热门线路供需（今日）</h3><div class="r"><span class="xs muted">订阅数会展示给司机端</span></div></div>
+          <table><tr><th>线路</th><th>在展运力</th><th>订阅企业</th><th>参考价</th><th>供需</th></tr>
+          <tr><td>嘉兴 → 上海</td><td>23</td><td>12</td><td>¥30-34</td><td><span class="tag ok">平衡</span></td></tr>
+          <tr><td>上海 → 杭州</td><td>9</td><td>26</td><td>¥40-46</td><td><span class="tag hot">缺车</span></td></tr>
+          <tr><td>苏州 → 上海</td><td>31</td><td>8</td><td>¥28-33</td><td><span class="tag brand">车多</span></td></tr>
+          <tr><td>上海 → 南京</td><td>6</td><td>19</td><td>¥60-68</td><td><span class="tag hot">缺车</span></td></tr>
+          <tr><td>宁波 → 上海</td><td>11</td><td>7</td><td>¥58-66</td><td><span class="tag ok">平衡</span></td></tr></table></div>
+      </div>
+    </section>
+
+    <!-- 核验队列 -->
+    <section class="view" id="v-verify">
+      <div class="panel"><div class="ph"><h3>核验队列</h3><div class="tabs"><span class="on">待人工复核 (14)</span><span>自动通过 (今日 88)</span><span>已驳回 (今日 6)</span></div><div class="r"><input class="input" placeholder="车牌 / 手机号 / 司机"><button class="btn sm line gray">导出</button></div></div>
+        <table id="verifyTbl"><tr><th>提交时间</th><th>司机 / 车辆</th><th>核验项</th><th>自动核验结果</th><th>风险提示</th><th>操作</th></tr></table>
+      </div>
+      <div class="notice blue mt16"><span class="ic"></span><div>自动核验：行驶证 / 道路运输证 OCR 字段与第三方接口比对一致、车牌与照片一致、人脸与身份证一致 → 直接通过并打标识；任一不一致或命中风险规则进入人工复核。人工复核目标时长 ≤ 10 分钟。</div></div>
+    </section>
+
+    <!-- 举报处置 -->
+    <section class="view" id="v-report">
+      <div class="panel"><div class="ph"><h3>举报处置</h3><div class="tabs"><span class="on">待处理 (5)</span><span>核实中 (3)</span><span>已处理 (本周 41)</span></div><div class="r"><span class="xs muted">SLA：2 小时内首次响应</span></div></div>
+        <table id="reportTbl"><tr><th>举报时间</th><th>被举报信息</th><th>举报人</th><th>原因</th><th>系统佐证</th><th>操作</th></tr></table>
+      </div>
+      <div class="two">
+        <div class="panel"><div class="ph"><h3>处置动作与后果</h3></div>
+          <table><tr><th>动作</th><th>触发</th><th>后果</th></tr>
+          <tr><td>标记核实中</td><td>收到举报即自动</td><td>信息在找车端显示"核实中"，仍可见</td></tr>
+          <tr><td>下架信息</td><td>核实为过期 / 已接单</td><td>司机收到提醒，不计违规</td></tr>
+          <tr><td>下架 + 警告</td><td>首次坐地起价 / 放鸽子</td><td>信用扣分，限制 3 天发布 1 条</td></tr>
+          <tr><td>封禁发布 30 天</td><td>二次违规或信息不实</td><td>找车端不再展示其任何信息</td></tr>
+          <tr><td>永久封禁 + 联动悟运</td><td>冒充司机、证件造假、骗货线索</td><td>身份证 / 车牌进黑名单，悟运账号同步冻结，配合报案</td></tr></table></div>
+        <div class="panel"><div class="ph"><h3>协助取证包（纠纷时向举报人提供）</h3></div>
+          <ul class="list-check" style="padding:14px 16px"><li>信息发布时间、内容快照与发布位置</li><li>司机实名核验结论、车辆核验结论（不含证件原件）</li><li>双方查看电话 / 联系反馈记录（时间戳）</li><li>司机历史投诉与处置记录</li><li>平台运输协议模板与风险提示确认记录</li></ul>
+          <div class="notice gray" style="margin:0 16px 16px"><span class="ic"></span><div>平台不做责任认定与赔付，取证包用于双方协商、保险理赔或司法程序。</div></div></div>
+      </div>
+    </section>
+
+    <!-- 运力监控 -->
+    <section class="view" id="v-posts">
+      <div class="kpis" style="grid-template-columns:repeat(5,1fr)">
+        <div class="kpi"><span>展示中</span><b>386</b></div><div class="kpi"><span>待确认（24h）</span><b class="hot-c">37</b><small class="muted">2h 内未确认将隐藏</small></div><div class="kpi"><span>2h 内到期</span><b>52</b><small class="muted">已推送延长提醒</small></div><div class="kpi"><span>核实中</span><b>3</b></div><div class="kpi"><span>待核验车辆发布</span><b>21</b><small class="muted">展示为"车辆待核验"</small></div>
+      </div>
+      <div class="panel"><div class="ph"><h3>运力信息</h3><div class="tabs"><span class="on">全部</span><span>展示中</span><span>待确认</span><span>核实中</span><span>已结束</span></div><div class="r"><input class="input" placeholder="线路 / 车牌 / 编号"></div></div>
+        <table id="postsTbl"><tr><th>编号</th><th>类型</th><th>线路 / 出发</th><th>司机 / 车辆</th><th>价格</th><th>浏览 / 来电 / 反馈</th><th>状态</th><th>操作</th></tr></table>
+      </div>
+    </section>
+
+    <!-- 司机信用 -->
+    <section class="view" id="v-credit">
+      <div class="panel"><div class="ph"><h3>司机信用</h3><div class="tabs"><span class="on">全部 (1,284)</span><span>优质 (312)</span><span>观察 (58)</span><span>受限 (11)</span><span>黑名单 (4)</span></div><div class="r"><input class="input" placeholder="姓名 / 手机 / 车牌"></div></div>
+        <table id="creditTbl"><tr><th>司机</th><th>认证</th><th>悟运履约</th><th>发布 / 有效联系</th><th>信息有效率</th><th>好评</th><th>投诉</th><th>等级</th><th>操作</th></tr></table>
+      </div>
+      <div class="panel"><div class="ph"><h3>信用等级规则</h3></div>
+        <table><tr><th>等级</th><th>条件</th><th>展示与权益</th></tr>
+        <tr><td><span class="tag ok">优质</span></td><td>信息有效率 ≥ 95% 且悟运履约 ≥ 50 单 且近 90 天无有效投诉</td><td>列表加权、"优质司机"标识、同时在展上限 5 条</td></tr>
+        <tr><td><span class="tag gray">普通</span></td><td>默认</td><td>正常展示，同时在展上限 3 条</td></tr>
+        <tr><td><span class="tag warn">观察</span></td><td>信息有效率 80%~90% 或近 30 天 1 次有效投诉</td><td>降权、24h 确认改为 12h、上限 2 条</td></tr>
+        <tr><td><span class="tag hot">受限</span></td><td>信息有效率 &lt; 80% 或近 30 天 ≥ 2 次有效投诉</td><td>上限 1 条，每条需人工审核后展示</td></tr>
+        <tr><td><span class="tag hot solid">黑名单</span></td><td>证件造假 / 冒充 / 骗货线索</td><td>禁止发布，身份证与车牌联动悟运冻结</td></tr></table></div>
+    </section>
+
+    <!-- 线路参考价 -->
+    <section class="view" id="v-price">
+      <div class="panel"><div class="ph"><h3>线路参考价（元/吨）</h3><div class="r"><span class="xs muted">来源：近 7 天司机报价中位数 × 权重 + 货主反馈"已谈成"价 + 人工校准</span><button class="btn sm">新增线路</button></div></div>
+        <table id="priceTbl"><tr><th>线路</th><th>近 7 天报价中位数</th><th>已谈成反馈均价</th><th>当前参考区间</th><th>样本</th><th>更新</th><th>操作</th></tr></table>
+      </div>
+      <div class="notice mt16"><span class="ic"></span><div>参考价只用于司机发布时的"市场价 -10% / -15%"快捷键与找车端"市场参考"展示，不构成平台定价，页面需注明"参考"。样本 &lt; 10 的线路使用区域默认区间并标注"样本不足"。</div></div>
+    </section>
+
+    <!-- 规则配置 -->
+    <section class="view" id="v-rules">
+      <div class="two">
+        <div class="panel"><div class="ph"><h3>信息生命周期规则</h3></div><ul class="rules">
+          <li><div class="t">展示期默认 = 出发时间窗结束<small>司机可选 12 / 24 / 48h，累计延长 &gt; 48h 需再次确认</small></div><span class="switch on"></span></li>
+          <li><div class="t">到期前 2 小时推送延长提醒<small>微信服务通知 + 小程序内横幅</small></div><span class="switch on"></span></li>
+          <li><div class="t">展示满 24 小时要求确认<small>未确认 2 小时后自动隐藏；观察级司机改为 12 小时</small></div><span class="switch on"></span></li>
+          <li><div class="t">悟运派单自动标记"已接单"<small>司机在悟运接到运单且时间冲突时自动下架并通知</small></div><span class="switch on"></span></li>
+          <li><div class="t">"已被订走"反馈 ≥ 2 次自动隐藏<small>同时通知司机确认</small></div><span class="switch on"></span></li>
+          <li><div class="t">"未接通"反馈 ≥ 3 次提醒司机<small>4 小时未响应则隐藏</small></div><span class="switch on"></span></li>
+        </ul></div>
+        <div class="panel"><div class="ph"><h3>准入与反作弊规则</h3></div><ul class="rules">
+          <li><div class="t">一车一账号<small>同一车牌只能绑定一个司机账号；车队账号需企业认证并逐车绑定司机</small></div><span class="switch on"></span></li>
+          <li><div class="t">发布位置与出发地一致性校验<small>偏差 &gt; 50km 不打"定位一致"标签；&gt; 300km 进入人工复核</small></div><span class="switch on"></span></li>
+          <li><div class="t">同一账号同时在展上限<small>按信用等级 1 / 2 / 3 / 5 条</small></div><span class="switch on"></span></li>
+          <li><div class="t">查看电话需登录，个人用户需实名<small>司机可限制"仅认证企业可见"</small></div><span class="switch on"></span></li>
+          <li><div class="t">单账号每日查看电话上限 30 次<small>防止信息部批量抓取司机号码</small></div><span class="switch on"></span></li>
+          <li><div class="t">核验前允许发布（展示"车辆待核验"）<small>关闭后需核验通过才可展示</small></div><span class="switch on"></span></li>
+        </ul></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+(function () {
+  var H = window.HDZ;
+  H.protoBar('admin', [
+    { key: 'admin', label: '运营后台', href: 'console.html' },
+    { key: 'pc', label: 'PC找车', href: '../shipper/pc-find.html' },
+    { key: 'm', label: '小程序找车', href: '../shipper/m-find.html?shell=mp' },
+    { key: 'home', label: '悟运·运力', href: '../driver/home.html' },
+    { key: 'publish', label: '发布运力', href: '../driver/publish.html' },
+  ]);
+
+  /* 视图切换 */
+  H.qsa('.side a[data-v]').forEach(function (a) { a.onclick = function () {
+    H.qsa('.side a').forEach(function (x) { x.classList.remove('on'); }); a.classList.add('on');
+    H.qsa('.view').forEach(function (v) { v.classList.toggle('on', v.id === 'v-' + a.dataset.v); });
+    var t = a.textContent.replace(/\s*\d+$/, '').trim(); H.qs('#vTitle').textContent = t; H.qs('#vCrumb').textContent = t;
+  }; });
+  H.qsa('.panel .tabs span').forEach(function (s) { s.onclick = function () { H.qsa('span', s.parentNode).forEach(function (x) { x.classList.remove('on'); }); s.classList.add('on'); }; });
+  H.qsa('.rules .switch').forEach(function (s) { s.onclick = function () { s.classList.toggle('on'); H.toast(s.classList.contains('on') ? '规则已启用' : '规则已停用', document.body); }; });
+
+  /* 趋势 */
+  var pub = [88, 96, 102, 110, 97, 74, 69, 118, 126, 131, 140, 122, 99, 142];
+  H.qs('#trend').innerHTML = pub.map(function (n, i) { return '<div><i class="' + (i === 13 ? 'hi' : '') + '" style="height:' + Math.round(n / 150 * 80) + 'px"><b>' + n + '</b></i><span>' + (i === 13 ? '今天' : (14 + i) + '日') + '</span></div>'; }).join('');
+
+  /* 核验队列 */
+  var verify = [
+    { t: '09:12', drv: '赵师傅 150****4412', veh: '皖A·2T5** 13m 高栏', item: '道路运输证', auto: '<div class="ocr-cmp"><span>证号</span><b class="ok">一致</b><span>车牌</span><b class="ok">一致</b><span>有效期</span><b class="bad">已过期 2026-08</b></div>', risk: '<span class="tag hot">证件过期</span>' },
+    { t: '09:05', drv: '孙师傅 187****2201', veh: '苏K·7H8** 17.5m 平板', item: '行驶证 + 车辆照片', auto: '<div class="ocr-cmp"><span>OCR 车牌</span><b class="ok">苏K7H8**</b><span>照片车牌</span><b class="bad">苏K7H3**</b><span>所有人</span><b class="ok">与实名一致</b></div>', risk: '<span class="tag hot">车牌与照片不一致</span>' },
+    { t: '08:58', drv: '钱师傅 139****7781', veh: '沪D·1Q2** 13m 平板', item: '人脸 + 身份证', auto: '<div class="ocr-cmp"><span>人脸比对</span><b class="bad">相似度 71%</b><span>身份证</span><b class="ok">真实有效</b></div>', risk: '<span class="tag warn">人脸相似度低</span>' },
+    { t: '08:40', drv: '周车队（企业）', veh: '批量 6 台', item: '车队逐车绑定司机', auto: '<div class="ocr-cmp"><span>营业执照</span><b class="ok">有效</b><span>道路运输经营许可</span><b class="ok">有效</b><span>绑定司机</span><b class="bad">2 台未绑定</b></div>', risk: '<span class="tag warn">一车一账号未满足</span>' },
+    { t: '08:31', drv: '吴师傅 135****2098', veh: '沪C·5M2** 9.6m 单桥', item: '道路运输证', auto: '<div class="ocr-cmp"><span>证号</span><b class="ok">一致</b><span>车牌</span><b class="ok">一致</b><span>接口</span><b class="bad">查询超时</b></div>', risk: '<span class="tag gray">接口超时，需重试</span>' },
+  ];
+  H.qs('#verifyTbl').insertAdjacentHTML('beforeend', verify.map(function (v) { return '<tr><td>今天 ' + v.t + '</td><td><b>' + v.drv + '</b><span class="sub">' + v.veh + '</span></td><td><span class="doc-thumb">证件</span>' + v.item + '</td><td>' + v.auto + '</td><td>' + v.risk + '</td><td><div class="acts"><button class="btn xs" data-ok>通过</button><button class="btn xs line gray" data-back>驳回补件</button><button class="btn xs line gray">查看原件</button></div></td></tr>'; }).join(''));
+
+  /* 举报 */
+  var reports = [
+    { t: '09:10', post: 'P1008 宁波 → 上海 · 皖A·2T5**', who: '上海某钢贸 · 认证企业', why: '联系后坐地起价', proof: '该司机近 7 天被 2 家企业反馈"坐地起价"；发布价 ¥54，反馈实际报价 ¥68' },
+    { t: '08:52', post: 'P0997 无锡 → 上海 · 苏B·3X1**', who: '无锡某机械 · 认证企业', why: '车已接单仍在展示', proof: '悟运运单显示该车 08:20 已接单在途；系统未自动标记（时间不冲突）' },
+    { t: '08:15', post: 'P0990 上海 → 杭州 · 浙A·9K0**', who: '个人用户 138****', why: '冒充司机的信息部/黄牛', proof: '同一手机号 3 天内在 4 个不同车牌下发布；发布位置与出发地偏差 260km' },
+    { t: '昨天 21:40', post: 'P0981 南京 → 上海 · 苏A·6D2**', who: '南京某贸易 · 认证企业', why: '电话打不通', proof: '近 24h 5 次"未接通"反馈，已自动隐藏并提醒司机，司机未响应' },
+    { t: '昨天 18:05', post: 'P0975 上海 → 苏州 · 沪D·8K3**', who: '苏州某钢构 · 认证企业', why: '其他：说好的时间没来', proof: '司机信息有效率 96%，历史无投诉；司机回复"货主临时改时间"' },
+  ];
+  H.qs('#reportTbl').insertAdjacentHTML('beforeend', reports.map(function (r) { return '<tr><td>' + r.t + '</td><td><b>' + r.post + '</b><span class="sub"><span class="tag warn">核实中</span></span></td><td>' + r.who + '</td><td><span class="tag hot">' + r.why + '</span></td><td style="max-width:300px" class="small t2">' + r.proof + '</td><td><div class="acts"><button class="btn xs" data-handle>处置</button><button class="btn xs line gray">联系双方</button></div></td></tr>'; }).join(''));
+
+  /* 运力监控 */
+  var st = { active: '展示中', confirming: '待确认', booked: '已接单', expired: '已到期', departed: '已出发', withdrawn: '已下架' };
+  var rows = H.POSTS.map(function (p) { var d = H.DRIVERS[p.driver], v = H.VEHICLES[p.vehicle]; return '<tr><td>' + p.id.toUpperCase() + '<span class="sub">' + H.fmtAgo(p.posted) + '</span></td><td><span class="tag ' + (p.kind === 'return' ? 'hot' : p.kind === 'idle' ? 'brand' : 'ok') + '">' + H.KIND[p.kind].name + '</span></td><td><b>' + p.from + ' → ' + p.to.join('/') + '</b><span class="sub">' + p.depart + (p.locOK ? ' · 定位一致' : ' · <span class="hot-c">定位未校验</span>') + '</span></td><td>' + d.name + '<span class="sub">' + v.plate + ' ' + H.vehicleLine(v) + '</span></td><td>' + (p.price == null ? '面议' : '¥' + p.price + '/' + p.priceUnit) + '</td><td>' + p.views + ' / ' + p.calls + ' / ' + Math.max(0, p.calls - 2) + '</td><td><span class="tag st-active">展示中</span><span class="sub">' + H.fmtLeft(p.validUntil) + '后到期</span></td><td><div class="acts"><button class="btn xs line gray">详情</button><button class="btn xs line gray" data-off>下架</button></div></td></tr>'; });
+  rows.push('<tr><td>P1000<span class="sub">昨天 09:00</span></td><td><span class="tag brand">闲置车</span></td><td><b>上海 → 上海市内/苏州/嘉兴</b><span class="sub">随时 · 定位一致</span></td><td>王师傅<span class="sub">沪C·5M2** 9.6m 单桥 · 核载 15t</span></td><td>¥850/车</td><td>55 / 2 / 0</td><td><span class="tag st-confirming">待确认</span><span class="sub">1 小时 40 分后隐藏</span></td><td><div class="acts"><button class="btn xs line gray">详情</button><button class="btn xs line gray" data-off>下架</button></div></td></tr>');
+  H.qs('#postsTbl').insertAdjacentHTML('beforeend', rows.join(''));
+
+  /* 司机信用 */
+  var lv = function (d) { return d.valid >= 95 && d.wyOrders >= 50 && !d.complaints ? '<span class="tag ok">优质</span>' : d.valid < 90 ? '<span class="tag warn">观察</span>' : '<span class="tag gray">普通</span>'; };
+  H.qs('#creditTbl').insertAdjacentHTML('beforeend', Object.keys(H.DRIVERS).map(function (k) { var d = H.DRIVERS[k]; var pubN = Math.round(d.wyOrders / 3) + 4, cN = Math.round(pubN * 2.4); return '<tr><td><b>' + d.name + '</b><span class="sub">' + d.phone + ' · ' + d.joined + ' 加入</span></td><td>' + (d.certs.length >= 5 ? '<span class="badge">四证齐全</span>' : '<span class="badge pending">' + d.certs.length + '/5</span>') + '</td><td>' + d.wyOrders + ' 单</td><td>' + pubN + ' / ' + cN + '</td><td><b class="' + (d.valid >= 95 ? 'ok-c' : d.valid < 90 ? 'hot-c' : '') + '">' + d.valid + '%</b></td><td>' + d.good + '%</td><td>' + d.complaints + '</td><td>' + lv(d) + '</td><td><div class="acts"><button class="btn xs line gray">档案</button><button class="btn xs line gray" data-adj>调级</button></div></td></tr>'; }).join(''));
+
+  /* 参考价 */
+  H.qs('#priceTbl').insertAdjacentHTML('beforeend', Object.keys(H.REF_PRICE).slice(0, 12).map(function (k) { var r = H.REF_PRICE[k]; var mid = (r[0] + r[1]) / 2; var n = 8 + Math.round(mid) % 30; return '<tr><td><b>' + k.replace('-', ' → ') + '</b></td><td>¥' + Math.round(mid * .92) + '</td><td>¥' + Math.round(mid * .9) + '</td><td><b>¥' + r[0] + ' - ' + r[1] + '</b></td><td>' + n + (n < 10 ? ' <span class="tag warn">样本不足</span>' : '') + '</td><td>今天 06:00 自动</td><td><div class="acts"><button class="btn xs line gray" data-edit>校准</button></div></td></tr>'; }).join(''));
+
+  /* 操作 */
+  document.body.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var tr = b.closest('tr');
+    if (b.dataset.ok !== undefined) { tr.remove(); H.toast('已通过，司机端认证标识已更新', document.body); }
+    else if (b.dataset.back !== undefined) { H.pcModal({ title: '驳回并要求补件', body: '<div class="chips"><span class="chip sm on">证件已过期，请上传最新证件</span><span class="chip sm">照片车牌不清晰 / 不一致</span><span class="chip sm">人脸比对未通过，请重新采集</span><span class="chip sm">缺少挂车行驶证</span></div><textarea class="input mt12" placeholder="补充说明（司机可见）"></textarea>', footer: '<button class="btn ghost" onclick="this.closest(\'.pc-mask\').remove()">取消</button><button class="btn hot" data-back-ok>驳回</button>', onReady: function (root, close) { H.qs('[data-back-ok]', root).onclick = function () { close(); tr.remove(); H.toast('已驳回，司机端收到补件提醒', document.body); }; } }); }
+    else if (b.dataset.handle !== undefined) { H.pcModal({ title: '举报处置', width: 520, body: '<div class="small b mb8">处置动作</div><div class="chips"><span class="chip sm" data-a>核实不成立，恢复展示</span><span class="chip sm on" data-a>下架信息</span><span class="chip sm" data-a>下架 + 警告（信用扣分）</span><span class="chip sm" data-a>封禁发布 30 天</span><span class="chip sm" data-a>永久封禁 + 联动悟运</span></div><div class="small b mb8 mt12">通知</div><label class="checkline"><input type="checkbox" checked> 通知举报人处理结果</label><label class="checkline mt8"><input type="checkbox" checked> 通知被举报司机并告知申诉入口（48 小时）</label><label class="checkline mt8"><input type="checkbox"> 生成协助取证包发送举报人</label><textarea class="input mt12" placeholder="处置说明（内部）"></textarea>', footer: '<button class="btn ghost" onclick="this.closest(\'.pc-mask\').remove()">取消</button><button class="btn" data-h-ok>确认处置</button>', onReady: function (root, close) { H.qsa('[data-a]', root).forEach(function (c) { c.onclick = function () { H.qsa('[data-a]', root).forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on'); }; }); H.qs('[data-h-ok]', root).onclick = function () { var a = H.qs('[data-a].on', root).textContent; close(); tr.remove(); H.toast('已处置：' + a, document.body); }; } }); }
+    else if (b.dataset.off !== undefined) { tr.remove(); H.toast('已下架并通知司机', document.body); }
+    else if (b.dataset.adj !== undefined) { H.toast('调级需填写理由并二人复核（原型省略）', document.body); }
+    else if (b.dataset.edit !== undefined) { H.toast('人工校准会记录操作人，并在找车端标注"人工校准"', document.body); }
+  });
+
+  H.notes('运营后台（设计说明）', [
+    '后台是这个板块的"信任生产线"：<b>核验队列</b>（自动核验兜底人工）、<b>举报处置</b>（2h SLA、分级处置、协助取证包）、<b>运力监控</b>（待确认 / 即将到期 / 核实中）。',
+    '<b>司机信用</b>以信息有效率、悟运履约、投诉为核心，五级（优质 / 普通 / 观察 / 受限 / 黑名单）直接决定在展上限、降权与是否需人工审核。',
+    '<b>线路参考价</b>由司机报价中位数 + 已谈成反馈价自动生成，人工可校准；只作"参考"不构成平台定价。',
+    '<b>规则配置</b>把生命周期与反作弊规则做成开关，便于上线后按数据调参（如 24h 确认改 12h、每日查看电话上限）。',
+    '概览页的"终止原因分布"和"线路供需"是运营两大抓手：前者看信息健康度，后者决定向哪些线路的司机推送"这条线路缺车"。',
+  ]);
+})();
+</script>
+</body>
+</html>
