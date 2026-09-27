@@ -334,8 +334,8 @@
     return '<div class="intent-row' + (it.called ? ' called' : '') + '" data-it="' + it.id + '">' +
       '<div class="avatar" style="width:32px;height:32px;font-size:12px">' + d.surname + '</div>' +
       '<div class="col" style="min-width:0;flex:1">' +
-        '<div class="row" style="gap:6px"><b class="small">' + d.name + ' · ' + v.plate + '</b><span class="xs muted">' + v.len + ' ' + v.type + '</span></div>' +
-        '<div class="xs muted">悟运履约 ' + d.wyOrders + ' 单 · 好评 ' + d.good + '% · 投诉 ' + d.complaints + '</div>' +
+        '<div><b class="small" style="white-space:nowrap">' + d.name + ' · ' + v.plate + '</b></div>' +
+        '<div class="xs muted">' + v.len + ' ' + v.type + ' · 悟运履约 ' + d.wyOrders + ' 单 · 好评 ' + d.good + '% · 投诉 ' + d.complaints + '</div>' +
         '<div class="small mt4">' + H.intentRefHtml(it) + (it.note ? ' <span class="t2">· "' + it.note + '"</span>' : '') + '</div>' +
       '</div>' +
       '<div class="col" style="align-items:flex-end;gap:4px;flex:none">' +
@@ -386,9 +386,9 @@
       '<div class="time">装车 <b>' + need.when + '</b></div>' +
       '<div class="veh"><b>' + H.cargoLine(need) + '</b> <span class="eq">· 需 ' + H.reqLine(need) + '</span></div>' +
       (opts.match ? '<div class="chips mt8" style="gap:4px">' + H.matchTags(opts.match, 3) + '</div>' : '') +
-      '<div class="drv"><div class="avatar" style="width:30px;height:30px;font-size:12px;background:linear-gradient(135deg,#9fb4ff,#1f5eff)">' + sh.short + '</div><div class="col"><span class="nm">' + sh.company + '</span><div class="badges" style="margin-top:3px">' + H.shipperBadges(sh) + '</div></div><span class="sp"></span>' +
-        (opts.noBtn ? '' : (mine ? '<span class="tag ok" style="height:26px;display:inline-flex;align-items:center">✓ 已有意向</span>' : (icnt >= H.INTENT_CAP ? '<span class="tag gray" style="height:26px;display:inline-flex;align-items:center">意向已满</span>' : '<button class="btn sm ghost" data-intent="' + need.id + '">有意向</button>')) + '<button class="btn sm" data-call-need="' + need.id + '">查看货主电话</button>') + '</div>' +
-      (mine ? '<div class="intent-bar"><span>您 ' + H.fmtAgo(mine.at) + ' 表达了意向' + (mine.ref != null ? ' · 参考 ¥' + mine.ref + '/' + mine.refUnit : ' · 价格电话谈') + '</span><span class="sp"></span><span class="muted">等货主回电 · 24h 后自动过期</span></div>' : '') +
+      '<div class="drv"><div class="avatar" style="width:30px;height:30px;font-size:12px;background:linear-gradient(135deg,#9fb4ff,#1f5eff)">' + sh.short + '</div><div class="col" style="min-width:0"><span class="nm">' + sh.company + '</span><div class="badges" style="margin-top:3px">' + H.shipperBadges(sh) + '</div></div></div>' +
+      (mine ? '<div class="intent-bar"><span>✓ 您 ' + H.fmtAgo(mine.at) + ' 表达了意向' + (mine.ref != null ? ' · 参考 ¥' + mine.ref + '/' + mine.refUnit : ' · 价格电话谈') + '</span><span class="sp"></span><span class="muted">等货主回电 · 24h 后自动过期</span></div>' : '') +
+      (opts.noBtn ? '' : '<div class="nact">' + (mine ? '' : (icnt >= H.INTENT_CAP ? '<span class="tag gray full">意向已满 · 可直接打</span>' : '<button class="btn sm ghost" data-intent="' + need.id + '">有意向</button>')) + '<button class="btn sm" data-call-need="' + need.id + '">查看货主电话</button></div>') +
       '<div class="meta"><span>' + need.views + ' 位司机看过</span><span>' + icnt + ' 位有意向</span><span>' + need.calls + ' 位已联系</span>' + (icnt >= H.INTENT_CAP ? '<span class="hot-c">名额已满，可直接打</span>' : (need.calls >= 3 ? '<span class="hot-c">联系的人多，尽快打</span>' : '')) + '</div>' +
       '</div>';
   };

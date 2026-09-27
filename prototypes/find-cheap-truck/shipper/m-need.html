@@ -287,14 +287,15 @@
       '<div class="stat-line mt8"><span><b>' + n.views + '</b>司机看过</span><span><b>' + its.length + '</b>有意向</span><span><b>' + (n.contacts ? drv.length : n.calls) + '</b>查看电话</span><span><b>' + matched + '</b>匹配车</span></div>' +
       (live ? '<div class="ibox"><div class="row" style="gap:6px"><b class="small">有意向的司机</b><span class="tag ok">' + its.length + '</span><span class="xs muted" style="margin-left:auto">您决定先打给谁</span></div>' + H.intentList(n) + '</div>' : '') +
       (drv.length ? '<details class="who-wrap"><summary class="xs muted">谁查看了我的电话 (' + drv.length + ')</summary><ul class="who">' + drv.map(function (c) { return '<li><span>' + c.who.split(' · 悟运')[0] + ' · ' + c.what + '</span><span class="muted">' + c.when + '</span></li>'; }).join('') + '</ul></details>' : '');
+    var resultHtml = '';
     if (n.status === 'found' && chosen) {
       var cd = H.DRIVERS[chosen.driver], cv = H.VEHICLES[chosen.vehicle];
-      h += '<div class="result"><div class="row" style="gap:8px"><div class="avatar" style="width:26px;height:26px;font-size:11px">' + cd.surname + '</div><span class="small b">' + cd.name + ' · ' + cv.plate + '</span></div><div class="xs muted mt4">装车后反馈联系结果 · 只在您与司机之间，不公开评分</div>' +
+      resultHtml = '<div class="result"><div class="row" style="gap:8px"><div class="avatar" style="width:26px;height:26px;font-size:11px">' + cd.surname + '</div><span class="small b">' + cd.name + ' · ' + cv.plate + '</span></div><div class="xs muted mt4">装车后反馈联系结果 · 只在您与司机之间，不公开评分</div>' +
         (chosen.result ? '<div class="mt8"><span class="tag ok">已反馈 · ' + chosen.result + '</span></div>' : H.fbChips('shipper')) + '</div>';
     }
     if (n.status === 'confirming') h += '<div class="confirm"><b>发布已满 24 小时，还需要车吗？</b><div class="small" style="opacity:.85;margin-top:2px">未确认将于 2 小时后自动隐藏，避免司机打到已经不需要车的您。</div><div class="row"><button class="btn hot" data-act="still">还需要，继续展示</button><button class="btn ghost" data-act="found">已找到车</button></div></div>';
     if (live) h += '<div class="acts"><button class="btn" data-act="match">看匹配车 (' + matched + ')</button><button class="btn line" data-act="found">已找到车</button><button class="btn ghost" data-act="more">更多</button></div>';
-    else h += '<div class="end">' + n.endReason + ' · ' + n.endAt + '</div><div class="acts"><button class="btn" data-act="again">再发一次</button></div>';
+    else h += '<div class="end">' + n.endReason + ' · ' + n.endAt + '</div>' + resultHtml + '<div class="acts"><button class="btn" data-act="again">再发一次</button></div>';
     return h + '</div>';
   }
   function renderMine() {

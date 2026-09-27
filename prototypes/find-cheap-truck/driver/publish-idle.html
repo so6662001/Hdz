@@ -54,6 +54,7 @@
   .list { padding: 8px 14px 0; }
   .need-card .price .n { color: var(--wy); }
   .need-card .btn { background: var(--wy); }
+  .need-card .btn.ghost { background: transparent; color: var(--wy); border-color: var(--wy); }
 </style>
 </head>
 <body class="wy-theme">
@@ -163,7 +164,9 @@
   H.qs('#needs').addEventListener('click', function (e) {
     var c = e.target.closest('.need-card'); if (!c) return;
     var n = H.NEEDS.filter(function (x) { return x.id === c.dataset.id; })[0];
-    if (e.target.closest('[data-call-need]')) H.unlockShipperPhone(n); else location.href = 'needs.html';
+    if (e.target.closest('[data-call-need]')) H.unlockShipperPhone(n);
+    else if (e.target.closest('[data-intent]')) H.intentSheet(n, null, function () { renderNeeds(toPost()); });
+    else location.href = 'needs.html';
   });
 
   function single(id, key) { H.qsa('#' + id + ' .chip').forEach(function (c) { c.onclick = function () { H.qsa('#' + id + ' .chip').forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on'); f[key] = c.dataset.v; state = 'ready'; after(id); renderCard(); }; }); }
