@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>货袋子 · 语音发布解析校准工作台（产品 / 研发内部工具）</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  body { background: #f0f2f5; min-width: 1280px; }
+  .adm { display: grid; grid-template-columns: 200px 1fr; min-height: calc(100vh - 40px); }
+  .side { background: #1f2430; color: #c5cad6; padding: 18px 0; }
+  .side .logo { padding: 0 20px 18px; color: #fff; font-weight: 800; font-size: 17px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .side .logo i { width: 26px; height: 26px; border-radius: 7px; background: var(--brand); font-style: normal; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+  .side .grp { padding: 14px 20px 6px; font-size: 11px; color: #7a8194; }
+  .side a { display: flex; align-items: center; justify-content: space-between; padding: 9px 20px; font-size: 13px; cursor: pointer; }
+  .side a:hover { background: rgba(255,255,255,.05); color: #fff; }
+  .side a.on { background: var(--brand); color: #fff; }
+  .side .hint { margin: 14px 16px 0; padding: 10px 12px; border-radius: 8px; background: rgba(255,255,255,.05); font-size: 11px; line-height: 1.6; color: #9aa2b5; }
+  .side .hint b { color: #fff; }
+  .main { padding: 18px 24px 40px; }
+  .topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .topbar h2 { font-size: 20px; white-space: nowrap; }
+  .topbar .crumb { color: var(--muted); font-size: 12px; }
+  .topbar .u { margin-left: auto; font-size: 13px; color: var(--text-2); display: flex; align-items: center; gap: 8px; }
+  .kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .kpi { background: #fff; border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .kpi span { font-size: 12px; color: var(--muted); display: block; }
+  .kpi b { font-size: 26px; font-weight: 800; display: block; margin-top: 4px; letter-spacing: -.5px; }
+  .kpi small { font-size: 11px; }
+  .panel { background: #fff; border-radius: 12px; box-shadow: var(--shadow); margin-top: 16px; }
+  .panel .ph { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .panel .ph h3 { font-size: 15px; white-space: nowrap; }
+  .panel .ph .tabs { display: flex; gap: 4px; }
+  .panel .ph .tabs span { padding: 5px 12px; border-radius: 8px; font-size: 13px; color: var(--text-2); cursor: pointer; white-space: nowrap; }
+  .panel .ph .tabs span.on { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+  .panel .ph .r { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .grid { display: grid; grid-template-columns: 1fr 340px; gap: 16px; align-items: start; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 10px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; background: #fafbfc; white-space: nowrap; }
+  tr:hover td { background: #fafbff; }
+  td .utt { font-size: 13px; line-height: 1.6; color: var(--text); }
+  td .utt mark { background: var(--warn-soft); color: #7a5200; border-radius: 3px; padding: 0 2px; }
+  td .meta { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .fld { display: flex; flex-wrap: wrap; gap: 4px; }
+  .fld span { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: var(--ok-soft); color: var(--ok); white-space: nowrap; }
+  .fld span.miss { background: var(--hot-soft); color: var(--hot); }
+  .fld span.wrong { background: var(--warn-soft); color: #b47600; }
+  .fld span.fixed { background: var(--brand-soft); color: var(--brand); }
+  .fld span b { font-weight: 600; }
+  td .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .bars { padding: 14px 16px; }
+  .bars .b { display: flex; align-items: center; gap: 10px; font-size: 12px; margin: 7px 0; }
+  .bars .b .lb { width: 56px; color: var(--text-2); }
+  .bars .b .tr { flex: 1; height: 14px; background: #f0f1f4; border-radius: 7px; overflow: hidden; }
+  .bars .b .tr i { display: block; height: 100%; background: var(--ok); border-radius: 7px; }
+  .bars .b .tr i.w { background: var(--warn); }
+  .bars .b .tr i.h { background: var(--hot); }
+  .bars .b .v { width: 40px; text-align: right; font-weight: 600; }
+  .dict li { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--line); font-size: 12px; }
+  .dict li:last-child { border-bottom: 0; }
+  .dict li .k { font-weight: 600; min-width: 70px; }
+  .dict li .ar { color: var(--muted); }
+  .dict li .v { flex: 1; color: var(--text-2); }
+  .dict li .n { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .dict li.new { background: #fbfcff; }
+  .dict li.new .k { color: var(--brand); }
+  .pending { padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .pending .chip { height: 26px; font-size: 12px; }
+  .pending .chip small { color: var(--muted); margin-left: 4px; }
+</style>
+</head>
+<body>
+<div class="adm">
+  <aside class="side">
+    <div class="logo"><i>货</i>货袋子运营后台</div>
+    <div class="grp">找特价车（信息板块）</div>
+    <a href="console.html">举报处置</a>
+    <a href="console.html">核验兜底</a>
+    <a href="console.html">黑名单</a>
+    <div class="grp">产品 / 研发工具</div>
+    <a class="on">语音解析校准</a>
+    <div class="hint"><b>不是运营工作</b>：样本来自司机语音发布后<b>自己改过的字段</b>，系统自动收集；产品每周看一次，加几个词、调几条规则即可。</div>
+    <div class="grp">其他模块</div>
+    <a>现货商城</a><a>求购大厅</a><a>加工服务</a>
+  </aside>
+  <main class="main">
+    <div class="topbar"><h2>语音发布 · 解析校准</h2><span class="crumb">找特价车 › 产品工具 › 语音解析校准</span><span class="u"><span class="avatar" style="width:28px;height:28px;font-size:12px">产</span>产品 · 张</span></div>
+
+    <div class="kpis">
+      <div class="kpi"><span>近 7 天语音发布</span><b>412</b><small class="muted">占全部发布 31%</small></div>
+      <div class="kpi"><span>一次解析全对</span><b>78%</b><small class="ok-c">↑ 6pt 较上周（加词典后）</small></div>
+      <div class="kpi"><span>平均需补齐字段</span><b>0.6</b><small class="muted">目标 ≤ 0.5</small></div>
+      <div class="kpi"><span>司机改过解析结果</span><b>91</b><small class="hot-c">这就是校准样本</small></div>
+      <div class="kpi"><span>ASR 识别置信度</span><b>0.93</b><small class="muted">微信同声传译 · 普通话 + 吴语</small></div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <div class="panel"><div class="ph"><h3>司机改过的样本</h3><div class="tabs"><span class="on" data-f="all">全部 (91)</span><span data-f="miss">漏识别 (38)</span><span data-f="wrong">识别错 (29)</span><span data-f="fixed">已修复 (24)</span></div><div class="r"><label class="checkline small"><input type="checkbox" id="replay"> 加词后自动重跑</label></div></div>
+          <table id="tbl"><tr><th style="width:38%">司机原话（ASR 文本）</th><th>解析结果 → 司机改成</th><th>问题</th><th>操作</th></tr></table>
+        </div>
+        <div class="notice blue mt16"><span class="ic"></span><div>校准闭环：司机在语音结果卡片上改了任何字段 → 自动进入这里 → 产品判断是<b>加词</b>（地名别名、车辆口语、方向词）还是<b>改规则</b>（时间、价格表达）→ 勾选"自动重跑"验证同类样本 → 下一版规则生效。<b>不需要标注人员</b>。</div></div>
+      </div>
+
+      <div>
+        <div class="panel"><div class="ph"><h3>各字段一次识别准确率</h3><div class="r"><span class="xs muted">近 7 天</span></div></div>
+          <div class="bars" id="bars"></div>
+        </div>
+        <div class="panel"><div class="ph"><h3>待加词</h3><div class="r"><span class="xs muted">从样本自动提取</span></div></div>
+          <div class="pending" id="pending"></div>
+        </div>
+        <div class="panel"><div class="ph"><h3>口语词典</h3><div class="tabs"><span class="on">地名</span><span>车辆</span><span>方向</span><span>价格 / 时间</span></div></div>
+          <ul class="dict" id="dict"></ul>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+(function () {
+  var H = window.HDZ;
+  H.protoBar('asr', [
+    { key: 'admin', label: '运营后台', href: 'console.html' },
+    { key: 'asr', label: '语音校准', href: 'asr-calibrate.html' },
+    { key: 'publish', label: '发布运力', href: '../driver/publish.html' },
+    { key: 'pc', label: 'PC找车', href: '../shipper/pc-find.html' },
+  ]);
+
+  var S = [
+    { u: '明天一早从<mark>甬</mark>回沪，大板一台，四十块一吨', meta: '宁波 · 陈师傅 · 置信度 0.91', got: [['出发地', '未识别', 'miss', '宁波'], ['目的地', '上海', 'ok'], ['时间', '明天 上午', 'ok'], ['车辆', '17.5m 平板', 'ok'], ['价格', '¥40/吨', 'ok']], type: 'miss', fix: '甬 → 宁波', tag: '地名别名' },
+    { u: '车在<mark>张家港大仓</mark>卸完了，回上海嘉定，<mark>高低板</mark>，三十五', meta: '苏州 · 周师傅 · 置信度 0.94', got: [['出发地', '张家港', 'ok'], ['目的地', '上海 嘉定', 'ok'], ['时间', '未识别', 'miss', '今天 下午'], ['车辆', '未识别', 'miss', '13m 低平板'], ['价格', '¥35/吨', 'ok']], type: 'miss', fix: '高低板 → 低平板；"卸完了" → 今天 下午', tag: '车辆口语 + 时间' },
+    { u: '<mark>后天</mark>杭州到<mark>苏南</mark>哪都行，十三米高栏，价格<mark>好说</mark>', meta: '杭州 · 赵师傅 · 置信度 0.89', got: [['出发地', '杭州', 'ok'], ['目的地', '未识别', 'miss', '苏州 / 无锡 / 常州'], ['时间', '后天', 'ok'], ['车辆', '13m 高栏', 'ok'], ['价格', '未识别', 'miss', '面议']], type: 'miss', fix: '苏南 → 苏州/无锡/常州；好说 → 面议', tag: '区域词 + 价格口语' },
+    { u: '明天上午嘉兴回上海，<mark>十七米五</mark>，有鞍座，<mark>三十</mark>', meta: '嘉兴 · 王师傅 · 置信度 0.96', got: [['出发地', '嘉兴', 'ok'], ['目的地', '上海', 'ok'], ['时间', '明天 上午', 'ok'], ['车辆', '17.5m 平板', 'ok'], ['价格', '¥30/吨', 'ok']], type: 'fixed', fix: '中文数字 → 17.5m / ¥30（上周修复）', tag: '已修复' },
+    { u: '南京<mark>回</mark>上海，<mark>一口价</mark>两千八', meta: '南京 · 吴师傅 · 置信度 0.92', got: [['出发地', '南京', 'ok'], ['目的地', '上海', 'ok'], ['时间', '未识别', 'miss', '今天 晚上'], ['车辆', '9.6m 单桥', 'ok'], ['价格', '¥2800/吨', 'wrong', '¥2800/车']], type: 'wrong', fix: '"一口价 / 包车 / 一车" → 按车计价', tag: '价格单位' },
+    { u: '车<mark>空着</mark>在宝山，<mark>沪嘉杭</mark>都能跑，两三天内', meta: '上海 · 李师傅 · 置信度 0.90', got: [['类型', '返程车', 'wrong', '闲置车'], ['出发地', '上海 宝山', 'ok'], ['目的地', '上海', 'wrong', '上海 / 嘉兴 / 杭州'], ['时间', '3 天内', 'ok'], ['价格', '面议', 'ok']], type: 'wrong', fix: '空着 / 闲着 → 闲置车；沪嘉杭 → 拆三城', tag: '类型词 + 合并地名' },
+    { u: '<mark>下半夜</mark>走，无锡到上海，<mark>前四后八</mark>，二十五一吨', meta: '无锡 · 孙师傅 · 置信度 0.88', got: [['出发地', '无锡', 'ok'], ['目的地', '上海', 'ok'], ['时间', '未识别', 'miss', '今天 晚上'], ['车辆', '未识别', 'miss', '9.6m 单桥/前四后八'], ['价格', '¥25/吨', 'ok']], type: 'miss', fix: '下半夜 → 晚上 18-24 点 / 次日凌晨；前四后八 → 单桥/前四后八', tag: '时间口语 + 车型' },
+    { u: '明天嘉兴到上海，<mark>三十块</mark>，17米5', meta: '嘉兴 · 王师傅 · 置信度 0.95', got: [['出发地', '嘉兴', 'ok'], ['目的地', '上海', 'ok'], ['时间', '明天', 'ok'], ['车辆', '17.5m 平板', 'ok'], ['价格', '¥30/吨', 'ok']], type: 'fixed', fix: '"块" 默认按吨（上周修复）', tag: '已修复' },
+  ];
+  var filter = 'all';
+  function row(s, i) {
+    return '<tr data-i="' + i + '" data-type="' + s.type + '"><td><div class="utt">' + s.u + '</div><div class="meta">' + s.meta + '</div></td>' +
+      '<td><div class="fld">' + s.got.map(function (g) { return '<span class="' + (g[2] === 'ok' ? '' : g[2]) + '">' + g[0] + ' <b>' + g[1] + '</b>' + (g[3] ? ' → ' + g[3] : '') + '</span>'; }).join('') + '</div></td>' +
+      '<td><span class="tag ' + (s.type === 'fixed' ? 'ok' : s.type === 'wrong' ? 'warn' : 'hot') + '">' + s.tag + '</span><div class="xs muted mt4" style="max-width:180px">' + s.fix + '</div></td>' +
+      '<td><div class="acts">' + (s.type === 'fixed' ? '<span class="xs ok-c">已生效</span>' : '<button class="btn xs" data-add>加词典</button><button class="btn xs line gray" data-rule>标为规则问题</button><button class="btn xs line gray" data-ign>忽略</button>') + '</div></td></tr>';
+  }
+  function render() {
+    H.qs('#tbl').innerHTML = '<tr><th style="width:38%">司机原话（ASR 文本）</th><th>解析结果 → 司机改成</th><th>问题</th><th>操作</th></tr>' + S.map(row).filter(function (r, i) { return filter === 'all' || S[i].type === filter; }).join('');
+  }
+  H.qsa('.tabs [data-f]').forEach(function (t) { t.onclick = function () { H.qsa('.tabs [data-f]').forEach(function (x) { x.classList.remove('on'); }); t.classList.add('on'); filter = t.dataset.f; render(); }; });
+
+  H.qs('#tbl').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var tr = b.closest('tr'), s = S[+tr.dataset.i];
+    if (b.dataset.add !== undefined) {
+      s.type = 'fixed'; s.tag = '已修复'; s.got.forEach(function (g) { if (g[2] !== 'ok') { g[1] = g[3]; g[2] = 'fixed'; delete g[3]; } });
+      var li = document.createElement('li'); li.className = 'new'; li.innerHTML = '<span class="k">' + s.fix.split(' → ')[0].split('；')[0] + '</span><span class="ar">→</span><span class="v">' + (s.fix.split(' → ')[1] || '').split('；')[0] + '</span><span class="n">刚加入</span>';
+      H.qs('#dict').insertBefore(li, H.qs('#dict').firstChild);
+      render();
+      H.toast(H.qs('#replay').checked ? '已加入词典并重跑同类样本：3 条转为全对' : '已加入词典，下次解析生效', document.body);
+    } else if (b.dataset.rule !== undefined) { H.toast('已记入规则待办（研发本周迭代）', document.body); tr.style.opacity = .5; }
+    else if (b.dataset.ign !== undefined) { tr.remove(); }
+  });
+
+  /* 字段准确率 */
+  var acc = [['出发地', 94], ['目的地', 86], ['时间', 79], ['车辆', 83], ['价格', 88], ['类型', 91]];
+  H.qs('#bars').innerHTML = acc.map(function (a) { return '<div class="b"><span class="lb">' + a[0] + '</span><div class="tr"><i class="' + (a[1] < 80 ? 'h' : a[1] < 88 ? 'w' : '') + '" style="width:' + a[1] + '%"></i></div><span class="v">' + a[1] + '%</span></div>'; }).join('') + '<div class="xs muted mt8">时间最弱：司机口语里"卸完了 / 下半夜 / 一早"这类相对时间多，需要按运单状态推算。</div>';
+
+  /* 待加词 */
+  var pend = [['甬', 4], ['苏南', 3], ['高低板', 3], ['沪嘉杭', 2], ['好说', 5], ['一口价', 4], ['下半夜', 2], ['空着', 3], ['大仓', 2], ['苏北', 2]];
+  H.qs('#pending').innerHTML = pend.map(function (p) { return '<span class="chip" data-w="' + p[0] + '">' + p[0] + '<small>×' + p[1] + '</small></span>'; }).join('');
+  H.qsa('#pending .chip').forEach(function (c) { c.onclick = function () { c.classList.add('on'); H.toast('「' + c.dataset.w + '」已加入词典待映射', document.body); }; });
+
+  /* 词典 */
+  var dict = [['沪 / 申', '上海', 128], ['甬', '宁波', 4], ['苏北', '徐州 / 盐城 / 南通', 2], ['张家港大仓', '张家港（沙钢）', 9], ['大板', '17.5m 平板半挂', 61], ['高低板', '13m 低平板', 3], ['前四后八', '9.6m 单桥/前四后八', 12], ['回 / 回去', '目的地 = 常跑线路终点', 77], ['哪都去 / 方向不限', '目的地 = 方向不限', 25], ['好说 / 好谈 / 面谈', '价格 面议', 18], ['一口价 / 包车 / 一车', '按车计价', 4], ['一早 / 早上', '上午 6-12 点', 40], ['卸完了 / 卸完货', '今天 下午（按运单卸货时间 + 1h）', 21]];
+  H.qs('#dict').innerHTML = dict.map(function (d) { return '<li><span class="k">' + d[0] + '</span><span class="ar">→</span><span class="v">' + d[1] + '</span><span class="n">命中 ' + d[2] + '</span></li>'; }).join('');
+
+  H.notes('语音解析校准工作台（设计说明）', [
+    '这是<b>产品 / 研发的内部工具</b>，不是运营视图，不增加运营人工。样本来源：司机在语音结果卡片上"改过"的字段，系统自动收集，等于司机免费帮我们标注。',
+    '两类修复：<b>加词</b>（地名简称、区域词、车辆口语、方向词、价格口语）当场生效；<b>改规则</b>（相对时间、价格单位）记入研发待办。',
+    '"加词后自动重跑"把同类样本重新解析，立刻看到全对率变化，避免拍脑袋。',
+    '字段准确率条形图指出短板（时间最弱），指导优先级：相对时间要结合运单状态推算，而不是只靠词典。',
+    '实现建议：ASR 用微信小程序同声传译插件（支持方言）；解析层规则 + 词典即可覆盖 90%，剩余交给轻量 NLU 或大模型抽取并回填同一套字段。',
+    '目标指标：一次解析全对 ≥ 85%、平均补齐字段 ≤ 0.5；达到后本页每月看一次即可。',
+  ]);
+  render();
+})();
+</script>
+</body>
+</html>

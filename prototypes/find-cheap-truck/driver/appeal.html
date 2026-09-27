@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>悟运小程序 · 处置通知与申诉（驾驶员端）</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  .res { margin: 14px; background: #fff; border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+  .res .hd { padding: 14px; display: flex; gap: 12px; align-items: center; background: var(--hot-soft); }
+  .res .hd i { width: 40px; height: 40px; border-radius: 50%; background: var(--hot); color: #fff; font-style: normal; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 18px; flex: none; }
+  .res .hd b { font-size: 16px; display: block; }
+  .res .hd span { font-size: 12px; color: #8f1f1a; }
+  .res .hd.ban { background: #2b3040; }
+  .res .hd.ban i { background: #fff; color: #2b3040; }
+  .res .hd.ban b, .res .hd.ban span { color: #fff; }
+  .res .bd { padding: 12px 14px; }
+  .kvl div { display: flex; font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .kvl div:last-child { border-bottom: 0; }
+  .kvl div span { width: 84px; color: var(--muted); flex: none; }
+  .kvl div b { font-weight: 500; flex: 1; line-height: 1.5; }
+  .cd { margin-top: 12px; background: var(--warn-soft); border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: #6b4a00; }
+  .cd b { font-size: 18px; font-variant-numeric: tabular-nums; }
+  .blk { margin: 0 14px 12px; background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 12px 14px; }
+  .blk h4 { font-size: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .blk h4 small { font-size: 11px; color: var(--muted); font-weight: 400; }
+  .evi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .evi div { aspect-ratio: 1; border-radius: 10px; background: #f2f3f5; border: 1px dashed #cfd3dc; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); gap: 4px; cursor: pointer; text-align: center; padding: 6px; }
+  .evi div.has { border-style: solid; background: linear-gradient(135deg, #dfe4f0, #b9c3d9); color: #2b3040; font-weight: 600; }
+  .evi div i { font-style: normal; font-size: 20px; line-height: 1; }
+  .voice { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .voice .mic { width: 44px; height: 44px; border-radius: 50%; background: var(--wy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex: none; cursor: pointer; }
+  .voice textarea { flex: 1; min-height: 64px; }
+  .status { margin: 14px; background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 18px 14px; text-align: center; }
+  .status i { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 26px; font-weight: 800; color: #fff; }
+  .status b { font-size: 17px; display: block; }
+  .status .tl { text-align: left; margin-top: 14px; }
+  .case-sw { display: flex; gap: 6px; padding: 10px 14px 0; }
+  .case-sw span { font-size: 11px; padding: 3px 8px; border-radius: 10px; background: #fff; color: var(--text-2); border: 1px solid var(--line); cursor: pointer; }
+  .case-sw span.on { background: var(--wy-soft); color: var(--wy); border-color: var(--wy); }
+</style>
+</head>
+<body class="wy-theme">
+<div class="m-stage">
+  <div class="phone dark-nav" id="phone">
+    <div class="statusbar" style="background:#ff6b1a"><span>9:21</span><span>●●● ᯤ 100%</span></div>
+    <div class="navbar" style="background:#ff6b1a"><a class="back" href="home.html">‹</a><div class="title" id="navTitle">处置通知</div><div class="capsule"><span>···</span><i></i><span>◉</span></div></div>
+    <div class="screen" id="screen"></div>
+    <div class="bottom-cta" id="cta"></div>
+    <div class="home-indicator"></div>
+  </div>
+</div>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+(function () {
+  var H = window.HDZ;
+  H.protoBar('appeal', H.DRIVER_LINKS);
+
+  var CASES = {
+    off: { kind: 'off', title: '运力信息已下架', sub: '举报核实：报价与发布不符', post: '宁波北仑 → 上海 · 9月20日 08:00-14:00 · ¥54/吨', who: '上海某钢贸有限公司（认证企业）', reason: '联系后坐地起价：发布 ¥54/吨，电话报价 ¥68/吨', proof: '该信息 9月20日 另有 1 家企业反馈"信息不实（报价不符）"', effect: '信息已下架；30 天内再被下架 1 次将自动封禁发布 30 天', deadline: '9月23日 09:10' },
+    ban: { kind: 'ban', title: '账号已封禁发布 30 天', sub: '30 天内第 2 次被核实下架', post: '南京 → 上海 · 9月19日 · ¥60/吨', who: '南京某贸易公司（认证企业）', reason: '车已接单仍在展示，货主到现场无车', proof: '悟运运单显示该车 9月19日 07:40 已接单在途；货主查看电话 09:12，反馈"已被订走"', effect: '30 天内不能在货袋子发布运力；悟运接单不受影响；到期自动恢复', deadline: '9月23日 18:05' },
+  };
+  var CHIPS = ['货主临时改时间 / 改地点，我没有违约', '报价是含装卸 / 等待费，不是坐地起价', '车确实在现场，有照片 / 定位', '运单是接的另一单，时间不冲突', '不是我本人操作 / 账号被冒用', '其他'];
+
+  var c = CASES[H.param('case', 'off')];
+  var step = H.param('step', 'notice'); // notice | form | submitted | result
+  var picked = [], evi = { chat: false, call: false, photo: false }, text = '';
+
+  function caseSwitch() {
+    return '<div class="case-sw"><span class="' + (c.kind === 'off' ? 'on' : '') + '" data-case="off">场景：信息下架</span><span class="' + (c.kind === 'ban' ? 'on' : '') + '" data-case="ban">场景：封禁 30 天</span><span class="xs muted" style="border:0;background:none">← 原型切换</span></div>';
+  }
+
+  function viewNotice() {
+    H.qs('#navTitle').textContent = '处置通知';
+    return caseSwitch() +
+      '<div class="res"><div class="hd ' + (c.kind === 'ban' ? 'ban' : '') + '"><i>!</i><div><b>' + c.title + '</b><span>' + c.sub + '</span></div></div>' +
+      '<div class="bd"><div class="kvl">' +
+        '<div><span>涉及信息</span><b>' + c.post + '</b></div>' +
+        '<div><span>举报方</span><b>' + c.who + '</b></div>' +
+        '<div><span>举报原因</span><b>' + c.reason + '</b></div>' +
+        '<div><span>系统佐证</span><b>' + c.proof + '</b></div>' +
+        '<div><span>处置结果</span><b class="hot-c">' + c.effect + '</b></div>' +
+      '</div>' +
+      '<div class="cd"><span>申诉截止</span><b id="cd">47:38:12</b><span class="xs">' + c.deadline + ' 前，逾期视为接受处置</span></div></div></div>' +
+      '<div class="blk"><h4>申诉须知 <small>平台只核实信息与账号，不裁定运费纠纷</small></h4><ul class="list-check">' +
+        '<li>申诉一次，48 小时内出结果，期间处置维持</li>' +
+        '<li>请提供与货主的<b>聊天截图 / 通话记录 / 现场照片</b>，只看事实不听解释</li>' +
+        '<li>申诉成立：撤销处置、恢复展示、不计入违规次数</li>' +
+        '<li>申诉不成立：维持处置；恶意申诉 2 次以上封禁申诉功能</li>' +
+        '<li>与货主的运费、货损争议不在申诉范围，请自行协商或通过合同、保险解决</li></ul></div>' +
+      '<div class="blk"><h4>我的违规记录 <small>近 90 天</small></h4><div class="kvl">' +
+        '<div><span>核实下架</span><b>' + (c.kind === 'ban' ? '2 次（9月19日、9月2日）' : '1 次（本次）') + '</b></div>' +
+        '<div><span>信息有效率</span><b>93% · 高于平均</b></div>' +
+        '<div><span>悟运履约</span><b>64 单 · 好评 96%</b></div></div>' +
+      '<div class="xs muted mt8">履约记录好不能抵消违规，但会作为申诉时的参考。</div></div><div style="height:90px"></div>';
+  }
+
+  function viewForm() {
+    H.qs('#navTitle').textContent = '提交申诉';
+    return '<div class="blk" style="margin-top:14px"><h4>申诉理由 <small>可多选</small></h4><div class="chips">' + CHIPS.map(function (x) { return '<span class="chip sm ' + (picked.indexOf(x) >= 0 ? 'on' : '') + '" data-r="' + x + '">' + x + '</span>'; }).join('') + '</div></div>' +
+      '<div class="blk"><h4>证据 <small>至少 1 项</small></h4><div class="evi">' +
+        '<div class="' + (evi.chat ? 'has' : '') + '" data-e="chat"><i>' + (evi.chat ? '✓' : '+') + '</i>' + (evi.chat ? '微信聊天 2 张' : '与货主的聊天截图') + '</div>' +
+        '<div class="' + (evi.call ? 'has' : '') + '" data-e="call"><i>' + (evi.call ? '✓' : '+') + '</i>' + (evi.call ? '通话记录 1 张' : '通话记录截图') + '</div>' +
+        '<div class="' + (evi.photo ? 'has' : '') + '" data-e="photo"><i>' + (evi.photo ? '✓' : '+') + '</i>' + (evi.photo ? '现场照片 1 张' : '现场 / 定位照片') + '</div></div>' +
+        '<div class="xs muted mt8">证据只给处理人员看，不会展示给货主或其他用户。</div></div>' +
+      '<div class="blk"><h4>说明 <small>说一句或写一句</small></h4><div class="voice"><span class="mic" data-mic>按住说</span><textarea class="input" id="txt" placeholder="例：货主当天上午临时把提货地从北仑改到镇海，我说要加 100 块路费，他说这是坐地起价……">' + text + '</textarea></div>' +
+        '<div class="notice gray mt12"><span class="ic"></span><div>平台会把您的申诉理由和证据与货主反馈、系统记录一起核对，<b>不会把您的证据转给货主</b>，也不会代您与货主协商。</div></div></div><div style="height:90px"></div>';
+  }
+
+  function viewSubmitted() {
+    H.qs('#navTitle').textContent = '申诉已提交';
+    return '<div class="status"><i style="background:var(--warn)">…</i><b>申诉已提交，48 小时内出结果</b><div class="small t2 mt4">申诉编号 AP20260927006 · 结果将通过服务通知告知</div>' +
+      '<ul class="tl"><li class="on">今天 09:21 提交申诉（理由 ' + picked.length + ' 项 · 证据 ' + Object.keys(evi).filter(function (k) { return evi[k]; }).length + ' 项）</li><li>运营核对货主反馈与系统记录</li><li>必要时电话联系您或货主核实（不会透露对方证据）</li><li>最迟 9月29日 09:21 前给出结果</li></ul></div>' +
+      '<div class="blk"><h4>期间您可以</h4><ul class="list-check"><li>' + (c.kind === 'ban' ? '正常在悟运接单，不受影响' : '继续发布其他运力信息') + '</li><li>补充证据（在本页"补充"）</li><li>撤回申诉（视为接受处置）</li></ul></div>' +
+      '<div class="blk" style="text-align:center"><a class="small" style="color:var(--brand)" href="appeal.html?case=' + c.kind + '&step=result">原型：查看结果示例 ›</a></div><div style="height:90px"></div>';
+  }
+
+  function viewResult() {
+    H.qs('#navTitle').textContent = '申诉结果';
+    var ok = c.kind === 'off';
+    return caseSwitch() + '<div class="status"><i style="background:' + (ok ? 'var(--ok)' : 'var(--hot)') + '">' + (ok ? '✓' : '×') + '</i><b>' + (ok ? '申诉成立，处置已撤销' : '申诉不成立，维持处置') + '</b>' +
+      '<div class="small t2 mt4">' + (ok ? '核实：货主当日变更提货地，加价属合理路费，不构成坐地起价' : '核实：悟运运单显示接单时间早于货主查看电话 1.5 小时，信息应已下架') + '</div>' +
+      '<ul class="tl"><li class="on">9月27日 09:21 提交申诉</li><li class="on">9月27日 14:05 运营核对：' + (ok ? '聊天截图显示货主先提出改地点' : '运单时间与系统记录一致，司机未及时标记"已接单"') + '</li><li class="on">9月27日 14:20 结果：' + (ok ? '撤销下架、恢复展示、不计违规' : '维持封禁至 10月19日；到期自动恢复') + '</li></ul></div>' +
+      (ok ? '<div class="blk"><h4>已为您恢复</h4><div class="kvl"><div><span>信息</span><b>宁波北仑 → 上海 · 已重新展示（出发时间已过的信息可"再发一次"）</b></div><div><span>违规记录</span><b>本次不计入</b></div></div></div>' :
+        '<div class="blk"><h4>避免再次发生</h4><ul class="list-check"><li>在悟运接到单后运力会自动下架；如果是线下接的活，请及时点「已接单」</li><li>开启「悟运接单自动标记」后不需要手动操作</li></ul><div class="xs muted mt8">对结果仍有异议？申诉仅一次；如涉及货主违约，请通过合同或保险途径解决，平台可提供联系记录。</div></div>') + '<div style="height:90px"></div>';
+  }
+
+  function cta() {
+    var el = H.qs('#cta');
+    if (step === 'notice') el.innerHTML = '<button class="btn ghost" data-accept>接受处置</button><button class="btn wy" data-go="form">我要申诉</button>';
+    else if (step === 'form') el.innerHTML = '<button class="btn ghost" data-go="notice">上一步</button><button class="btn wy" data-submit ' + (picked.length && (evi.chat || evi.call || evi.photo) ? '' : 'disabled') + '>提交申诉</button>';
+    else if (step === 'submitted') el.innerHTML = '<button class="btn ghost" data-go="form">补充证据</button><a class="btn wy" href="home.html">返回我的运力</a>';
+    else el.innerHTML = '<a class="btn wy block" href="home.html">返回我的运力</a>';
+  }
+
+  function render() {
+    var s = H.qs('#screen');
+    s.innerHTML = step === 'notice' ? viewNotice() : step === 'form' ? viewForm() : step === 'submitted' ? viewSubmitted() : viewResult();
+    s.scrollTop = 0; cta();
+    if (step === 'form') { var t = H.qs('#txt'); t.oninput = function () { text = t.value; }; }
+  }
+
+  document.body.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-go],[data-accept],[data-submit],[data-r],[data-e],[data-mic],[data-case]'); if (!t) return;
+    if (t.dataset.go) { step = t.dataset.go; render(); }
+    else if (t.dataset.accept !== undefined) { H.toast('已接受处置'); setTimeout(function () { location.href = 'home.html'; }, 900); }
+    else if (t.dataset.submit !== undefined) { step = 'submitted'; render(); H.toast('申诉已提交'); }
+    else if (t.dataset.r) { var i = picked.indexOf(t.dataset.r); i >= 0 ? picked.splice(i, 1) : picked.push(t.dataset.r); t.classList.toggle('on'); cta(); }
+    else if (t.dataset.e) { evi[t.dataset.e] = !evi[t.dataset.e]; render(); H.toast(evi[t.dataset.e] ? '已添加（模拟上传）' : '已移除'); }
+    else if (t.dataset.mic !== undefined) { text = '货主当天上午临时把提货地从北仑改到镇海，多跑 40 公里，我说要加 100 块路费，他就说我坐地起价。'; H.qs('#txt').value = text; H.toast('识别完成，可修改'); }
+    else if (t.dataset.case) { location.href = 'appeal.html?case=' + t.dataset.case + (step === 'result' ? '&step=result' : ''); }
+  });
+
+  /* 倒计时 */
+  var secs = 47 * 3600 + 38 * 60 + 12;
+  setInterval(function () { var el = H.qs('#cd'); if (!el) return; secs--; var h = Math.floor(secs / 3600), m = Math.floor(secs % 3600 / 60), s = secs % 60; el.textContent = [h, m, s].map(function (n) { return (n < 10 ? '0' : '') + n; }).join(':'); }, 1000);
+
+  render();
+
+  H.notes('驾驶员端 · 处置通知与申诉（设计说明）', [
+    '申诉是"封号 / 下架"这类硬处置的<b>必要配套</b>，没有它，轻平台的"只处理账号"就会显得武断，司机会流失到微信群。',
+    '通知页把<b>举报方、原因、系统佐证、处置结果、48 小时倒计时</b>一次讲清；佐证来自系统记录（悟运运单、多货主反馈、定位），不是运营主观判断。',
+    '申诉表单只有三块：理由 chips、三类证据、一句话说明（可语音）。<b>至少 1 项证据</b>才能提交，把"只讲道理"的申诉挡在前面。',
+    '边界一致：平台只核实"信息是否属实、账号是否违规"，<b>不裁定运费争议</b>、不把证据转给对方、不代为协商。',
+    '结果页两种示例（?case=off 成立 / ?case=ban 不成立）都给出<b>下一步</b>：成立则恢复且不计违规；不成立则告诉司机怎样避免（开悟运接单自动标记）。',
+    '人工成本：一次申诉核对 ≈ 5 分钟，纳入后台"举报处置"同一队列，不新增角色与视图。',
+  ]);
+})();
+</script>
+</body>
+</html>

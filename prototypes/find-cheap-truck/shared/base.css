@@ -42,7 +42,9 @@ ul { list-style: none; }
   height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 14px;
   background: rgba(20, 24, 36, .92); color: #cfd3dc; font-size: 12px; backdrop-filter: blur(8px);
 }
-.proto-bar b { color: #fff; font-weight: 600; margin-right: 6px; }
+.proto-bar b { color: #fff; font-weight: 600; margin-right: 6px; white-space: nowrap; }
+.proto-bar .hint { white-space: nowrap; }
+@media (max-width: 1180px) { .proto-bar .hint { display: none; } .proto-bar { gap: 6px; } .proto-bar a, .proto-bar button { padding: 4px 8px; } }
 .proto-bar a, .proto-bar button {
   white-space: nowrap; padding: 4px 10px; border-radius: 6px; color: #cfd3dc; background: rgba(255,255,255,.08);
 }

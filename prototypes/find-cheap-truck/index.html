@@ -75,7 +75,7 @@
   <div class="top">
     <h1>找特价车 <span class="tj">返程车 · 闲置车 · 专装钢材</span></h1>
     <p>驾驶员在<b>悟运小程序</b>发布返程车、闲置车、顺路捎货信息；卖家、买家在<b>货袋子 PC 端、微信小程序、H5</b> 三端找车并直接联系司机。这是一个<b>双方信息互动板块</b>：平台只做信息展示与真人真车核验，<b>不参与交易、不派单、不收运费、不做承运人、不做网络货运平台</b>。本页为高保真 HTML 原型总览，所有页面可点击交互（纯前端、模拟数据）。</p>
-    <div class="pills"><span>驾驶员端 4 页（一键 / 语音发布）</span><span>PC 找车 2 页</span><span>小程序 / H5 找车 2 页 × 2 壳</span><span>运营后台 1 页 3 视图（轻量）</span><span>统一的"查看电话 → 风险提示 → 留痕 → 反馈"流程</span><span>5 条运力终止路径</span></div>
+    <div class="pills"><span>驾驶员端 4 页（一键 / 语音发布）</span><span>PC 找车 2 页</span><span>小程序 / H5 找车 2 页 × 2 壳</span><span>运营后台 1 页 3 视图（轻量）</span><span>统一的"查看电话 → 风险提示 → 留痕 → 反馈"流程</span><span>5 条运力终止路径</span><span>v0.2 补充：服务通知 / 申诉 / 合作承运 / 语音校准</span></div>
   </div>
 
   <h2>原型页面 <small>点击卡片进入可交互页面；每页右上角有"设计说明"面板</small></h2>
@@ -83,7 +83,7 @@
   <div class="role-hd"><span class="ic bg-wy">司机</span><h3>驾驶员端 · 悟运小程序</h3><span>发布运力、管理状态、添加车辆</span></div>
   <div class="grid3">
     <a class="pcard" href="driver/home.html"><div class="thumb m"><span class="role tag wy">悟运 · Tab「运力」</span><iframe src="driver/home.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>我的运力（状态管理）</h3><p>当前运单"卸货后一键发返程"；展示中 / 已结束列表；到期倒计时；已接单、已出发、延长、下架、24 小时未确认自动隐藏；曝光与来电数据。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
-    <a class="pcard" href="driver/publish.html"><div class="thumb m"><span class="role tag wy">悟运 · 发布</span><iframe src="driver/publish.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>发布运力（一键 / 语音 · 不填表）</h3><p><b>一键发布</b>：按当前运单 / 上次发布 / 常跑线路 / 闲置模板预填好整张卡片，点一下即发布，卡片上可局部改时间、换车、改价；<b>语音发布</b>：按住说一句"明天早上从嘉兴回上海，17 米 5 的板有鞍座，30 块一吨"，自动解析成结构化信息，缺的用 chips 补齐。卸货后自动准备返程车、可开自动发布。<a href="driver/publish-form.html" style="color:var(--brand)">手动表单</a>只作兜底。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
+    <a class="pcard" href="driver/publish.html"><div class="thumb m"><span class="role tag wy">悟运 · 发布</span><iframe src="driver/publish.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>发布运力（一键 / 语音 · 不填表）</h3><p><b>一键发布</b>：按当前运单 / 上次发布 / 常跑线路 / 闲置模板预填好整张卡片，点一下即发布，卡片上可局部改时间、换车、改价；<b>语音发布</b>：按住说一句"明天早上从嘉兴回上海，17 米 5 的板有鞍座，30 块一吨"，自动解析成结构化信息，缺的用 chips 补齐。卸货后自动准备返程车、可开自动发布。手动表单（driver/publish-form.html）只作兜底。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
     <a class="pcard" href="driver/vehicle-add.html"><div class="thumb m"><span class="role tag wy">悟运 · 车辆</span><iframe src="driver/vehicle-add.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>添加车辆（拍证自动填）</h3><p>行驶证 OCR 自动识别；车型图标、板长快捷；装钢材配置（鞍座、篷布、12m 长材、多点装卸、定位）；3 张车辆照片；证件核验；一键生成车辆说明。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
   </div>
 
@@ -104,6 +104,14 @@
   <div class="grid2">
     <a class="pcard" href="admin/console.html"><div class="thumb pc"><span class="role tag gray">后台 · 举报处置</span><iframe src="admin/console.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>运营后台（单页 3 视图）</h3><p><b>举报处置</b>（默认页；处置只有 恢复 / 下架 / 封号 三种，纠纷时向举报人提供联系记录 PDF）；<b>核验兜底</b>（自动核验不一致的少量人工看一眼；规则写死只读展示触发次数）；<b>黑名单</b>（手机号 / 身份证 / 车牌三要素，同步冻结悟运账号）。没有订单、结算、派单、信用评级、规则开关。</p><div class="acts"><span class="btn sm" style="background:#2b3040">打开</span></div></div></a>
     <div class="pcard" style="justify-content:center;padding:22px 24px;color:var(--text-2);font-size:13px;line-height:1.8"><div><b style="color:var(--text);font-size:15px;display:block;margin-bottom:6px">为什么这么轻</b>信任不是靠"平台管得多"来的，而是靠<b>真人真车核验 + 悟运真实履约数据 + 信息自动失效 + 联系留痕</b>四件系统自动完成的事。人工只兜底：有人举报就处理、自动核验没过的看一眼、坏人拉黑。按当前数据量一名兼职运营每周 3~4 小时即可维护——这是"不做重"的验证指标；一旦人工工时明显上升，说明规则要调，而不是加人加功能。</div></div>
+  </div>
+
+  <div class="role-hd"><span class="ic bg-dark" style="background:#24345f">v0.2</span><h3>补充页面 · 把"后续"落成原型</h3><span>服务通知与一键确认、司机申诉、合作承运出口、语音解析校准</span></div>
+  <div class="grid2">
+    <a class="pcard" href="driver/notify.html"><div class="thumb m"><span class="role tag wy">微信 · 服务通知</span><iframe src="driver/notify.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>服务通知模板 + 一键确认发布</h3><p>司机端 6 条（返程车已备好 / 即将到期 / 还闲着吗 / 已自动标记已接单 / 货主反馈 / 处置通知）与货主端 4 条（订阅有车 / 收藏已订走 / 联系反馈 / 举报结果）的<b>模板文案、字段、落地页、频控</b>；点 D1 进入小程序整卡预览"一键确认发布"；能在卡片上直接完成的（延长、还闲着、恢复展示）不进小程序。附<b>悟运接单联动规则</b>（同车牌 + 时间窗交集 + 同城 → 自动下架，1 小时可恢复）。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
+    <a class="pcard" href="driver/appeal.html"><div class="thumb m"><span class="role tag wy">悟运 · 申诉</span><iframe src="driver/appeal.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>司机处置通知与申诉</h3><p>处置通知一次讲清举报方、原因、系统佐证、处置结果与 48 小时倒计时；申诉表单只有理由 chips、三类证据（至少 1 项）、一句话说明（可语音）；结果页两种示例（?case=off 成立 / ?case=ban 不成立）都给下一步。平台只核实信息与账号，不裁定运费争议、不转交证据。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
+    <a class="pcard" href="shipper/pc-l2.html?id=p1001"><div class="thumb pc"><span class="role tag brand">PC · 合作承运</span><iframe src="shipper/pc-l2.html?id=p1001&embed=1" loading="lazy"></iframe></div><div class="body"><h3>要发票 / 要有人负责 → 合作承运（PC；小程序 / H5 版见 shipper/m-l2.html）</h3><p>轻平台的出口：先选需求（发票 / 承运人负责 / 对公付款 / 都不需要）再给建议；两条路对照表；<b>"就用这台特价车"</b>由合作的持牌网络货运平台把司机纳入承运并开票（约 +8~12%）；每次跳转有离开声明与勾选确认；侧栏说明什么时候不必走合作承运。货袋子只引导跳转，不承运、不结算、不开票。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
+    <a class="pcard" href="admin/asr-calibrate.html"><div class="thumb pc"><span class="role tag gray">产品工具 · 语音校准</span><iframe src="admin/asr-calibrate.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>语音发布解析校准工作台</h3><p>产品 / 研发内部工具，不增加运营人工：样本来自司机在语音结果卡片上<b>改过的字段</b>（自动收集，等于司机免费标注）；一次全对率、各字段准确率、待加词、口语词典（甬 → 宁波、大板 → 17.5m 平板、好说 → 面议、一口价 → 按车）；"加词典"当场生效并可自动重跑同类样本，"规则问题"进研发待办。</p><div class="acts"><span class="btn sm" style="background:#2b3040">打开</span></div></div></a>
   </div>
 
   <h2>轻平台原则 <small>只做双方信息互动；不做网络货运平台、不做承运人，但要把信任解决掉</small></h2>

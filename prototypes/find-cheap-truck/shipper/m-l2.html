@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>货袋子小程序 / H5 · 要发票 / 要有人负责（合作承运）</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  .l2-top { background: linear-gradient(135deg, #1a2440, #2b4a8f); color: #fff; padding: 14px 16px 18px; }
+  .l2-top h2 { font-size: 19px; }
+  .l2-top p { font-size: 12px; color: rgba(255,255,255,.8); margin-top: 6px; line-height: 1.6; }
+  .blk { background: #fff; margin: 10px 14px 0; border-radius: 12px; padding: 14px; box-shadow: var(--shadow); }
+  .blk h4 { font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+  .blk h4 small { font-size: 11px; color: var(--muted); font-weight: 400; }
+  .need { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .need div { border: 2px solid var(--line); border-radius: 10px; padding: 10px; font-size: 13px; cursor: pointer; }
+  .need div b { display: block; }
+  .need div span { font-size: 11px; color: var(--text-2); }
+  .need div.on { border-color: var(--brand); background: var(--brand-soft); }
+  .verdict { margin-top: 10px; border-radius: 10px; padding: 12px; font-size: 13px; line-height: 1.6; background: var(--brand-soft); }
+  .verdict.b { background: #fff1e8; }
+  .verdict b { display: block; font-size: 14px; }
+  .cmp { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .cmp th, .cmp td { padding: 7px 6px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; line-height: 1.5; }
+  .cmp th { font-size: 11px; color: var(--muted); font-weight: 600; }
+  .cmp td:first-child { color: var(--muted); width: 64px; }
+  .cmp .a { color: var(--brand); } .cmp .b { color: #c2410c; }
+  .car { border: 1px dashed #c9d6ff; border-radius: 10px; padding: 10px 12px; background: #fbfcff; }
+  .car .est { display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px; font-size: 12px; color: var(--text-2); }
+  .car .est b { font-size: 18px; color: #c2410c; }
+  .pt { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-top: 8px; display: flex; gap: 10px; align-items: center; }
+  .pt i { width: 36px; height: 36px; border-radius: 9px; background: #24345f; color: #fff; font-style: normal; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none; }
+  .pt .t { flex: 1; font-size: 12px; color: var(--text-2); line-height: 1.5; }
+  .pt .t b { display: block; color: var(--text); font-size: 14px; }
+  .steps2 li { display: flex; gap: 10px; font-size: 12px; color: var(--text-2); padding: 6px 0; line-height: 1.5; }
+  .steps2 li i { width: 20px; height: 20px; border-radius: 50%; background: #fff1e8; color: #c2410c; font-style: normal; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; flex: none; }
+  .steps2 li i.hdz { background: var(--brand-soft); color: var(--brand); }
+</style>
+</head>
+<body>
+<div class="m-stage">
+  <div class="phone" id="phone">
+    <div class="statusbar" style="background:#1a2440;color:#fff"><span>9:25</span><span>●●● ᯤ 100%</span></div>
+    <div class="h5bar"><span>‹</span><span>›</span><div class="url"><span class="lock">🔒</span><span>m.huodaizi.com/tejiache/l2</span></div><span>⟳</span></div>
+    <div class="navbar mp-only" style="background:#1a2440;color:#fff"><a class="back" id="backBtn">‹</a><div class="title">合作承运</div><div class="capsule" style="border-color:rgba(255,255,255,.35);background:rgba(0,0,0,.18);color:#fff"><span>···</span><i style="background:rgba(255,255,255,.35)"></i><span>◉</span></div></div>
+    <div class="screen" id="screen">
+      <div class="h5-guide h5-only"><div class="logo">货</div><div class="t">在货袋子小程序中查看<small>可保存找车记录</small></div><button>打开</button></div>
+      <div class="l2-top">
+        <h2>要发票、要有人对货负责？</h2>
+        <p>特价车是司机自己发的信息，您与司机直接成交，便宜但没发票、没平台责任。这一单需要 <b>9% 发票 / 对公付款 / 承运人赔货损</b>，就交给合作的持牌网络货运平台。货袋子不承运、不结算、不开票。</p>
+      </div>
+
+      <div class="blk"><h4>这一单您需要 <small>选完给建议</small></h4>
+        <div class="need" id="need">
+          <div data-n="invoice"><b>9% 运输发票</b><span>公司入账 / 抵扣</span></div>
+          <div data-n="liable"><b>有人对货损负责</b><span>承运人赔</span></div>
+          <div data-n="b2b"><b>对公付款 / 月结</b><span>不给个人转账</span></div>
+          <div data-n="none"><b>都不需要</b><span>就要便宜</span></div>
+        </div>
+        <div class="verdict" id="verdict"><b>还没选</b>两条路随时可以切换。</div>
+      </div>
+
+      <div class="blk" id="bringBlk"><h4>就用这台特价车 <small>合作方承运并开票</small></h4>
+        <div class="car" id="car"></div>
+        <ul class="steps2 mt8">
+          <li><i class="hdz">1</i><span><b>货袋子</b>把这台车和您的货物信息转给合作方，之后不再参与</span></li>
+          <li><i>2</i><span><b>合作方</b>联系司机入驻并承运（司机不愿意则改派同等车辆）</span></li>
+          <li><i>3</i><span><b>合作方</b>与您签电子合同、投保、对公收款、开 9% 发票、承担货损</span></li>
+        </ul>
+      </div>
+
+      <div class="blk"><h4>两条路的区别</h4>
+        <table class="cmp">
+          <tr><th></th><th class="a">找特价车</th><th class="b">合作承运</th></tr>
+          <tr><td>承运人</td><td>司机本人</td><td>持牌合作平台</td></tr>
+          <tr><td>货损</td><td>按协议找司机，建议投保</td><td>合作平台负责，自带保险</td></tr>
+          <tr><td>发票</td><td>无</td><td>9% 运输发票</td></tr>
+          <tr><td>付款</td><td>直付司机</td><td>对公，可月结</td></tr>
+          <tr><td>价格</td><td>低于市场 10~20%</td><td>直联价 +8~12%</td></tr>
+        </table>
+      </div>
+
+      <div class="blk"><h4>合作的持牌平台 <small>责任由其承担</small></h4>
+        <div class="pt"><i>运</i><div class="t"><b>某某网络货运平台</b>沪交运网货字〔20xx〕xxx 号 · 承运人责任险 200 万 · 长三角钢材专线</div><button class="btn xs line gray" data-cert>资质</button></div>
+        <div class="pt"><i>联</i><div class="t"><b>某某物流网络平台</b>浙交运网货字〔20xx〕xxx 号 · 承运人责任险 300 万 · 全国大件长材</div><button class="btn xs line gray" data-cert>资质</button></div>
+      </div>
+
+      <div class="blk"><h4>不一定要走合作承运</h4>
+        <ul class="list-check"><li>只要个凭证：协议模板 + 司机签字 + 回单，多数财务可入费用</li><li>司机是车队公司的，详情页标"可开票"，可直接联系</li><li>货值不高、熟车：直联更便宜，自己投份货运险</li></ul>
+      </div>
+      <div class="notice gray" style="margin:10px 14px 0"><span class="ic"></span><div>货袋子只做引导跳转；合作方按合作协议向货袋子支付推广费用，与您的运费无关。</div></div>
+      <div style="height:20px"></div>
+      <div class="bottom-cta" id="cta"><a class="btn ghost" id="backCar">回到这台车</a><button class="btn" style="background:#c2410c" id="go">提交给合作方</button></div>
+    </div>
+    <div class="home-indicator"></div>
+  </div>
+</div>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+(function () {
+  var H = window.HDZ;
+  var shell = H.initShell();
+  H.protoBar('ml2', H.SHIPPER_LINKS);
+  var bar = H.qs('.proto-bar'); if (bar) { var sw = document.createElement('span'); sw.innerHTML = '<button data-shell-switch="mp">壳：小程序</button> <button data-shell-switch="h5">壳：H5</button>'; bar.insertBefore(sw, H.qs('.proto-bar .sp')); }
+  H.initShell();
+  if (shell === 'h5') H.qs('.statusbar').style.cssText = 'background:#f7f7f7;color:#000';
+
+  var id = H.param('id', 'p1001');
+  var post = H.POSTS.filter(function (x) { return x.id === id; })[0] || H.POSTS[0];
+  var v = H.VEHICLES[post.vehicle], d = H.DRIVERS[post.driver];
+  H.qs('#backBtn').href = H.qs('#backCar').href = 'm-detail.html?id=' + post.id + '&shell=' + shell;
+  H.qs('#car').innerHTML = '<div class="row"><span class="tag hot">' + H.KIND[post.kind].name + '</span><span class="xs muted">' + d.name + ' · ' + v.plate + ' · ' + H.vehicleLine(v) + '</span></div>' +
+    '<div class="route mt8" style="font-size:18px"><div class="city">' + post.from + '</div><div class="arrow"><div class="ln"></div></div><div class="city to">' + post.to.join(' / ') + '</div></div>' +
+    '<div class="est"><span>直联报价 ' + (post.price ? '¥' + post.price + '/' + post.priceUnit : '面议') + '</span><span>合作承运预估 <b>' + (post.price ? '≈ ¥' + Math.round(post.price * 1.1) + '/吨' : '合作方报价') + '</b></span></div>';
+
+  var need = {};
+  H.qsa('#need div').forEach(function (l) { l.onclick = function () {
+    var k = l.dataset.n;
+    if (k === 'none') { need = need.none ? {} : { none: true }; } else { delete need.none; need[k] ? delete need[k] : need[k] = true; }
+    H.qsa('#need div').forEach(function (x) { x.classList.toggle('on', !!need[x.dataset.n]); });
+    var vd = H.qs('#verdict'), heavy = need.invoice || need.liable || need.b2b;
+    if (heavy) { vd.className = 'verdict b'; vd.innerHTML = '<b>建议：这一单走合作承运</b>您需要 ' + [need.invoice && '发票', need.liable && '承运人负责', need.b2b && '对公付款'].filter(Boolean).join('、') + '，只有持牌承运人能提供。可指定下面这台特价车由合作方承运，价格约 +8~12%。'; }
+    else if (need.none) { vd.className = 'verdict'; vd.innerHTML = '<b>建议：直接找特价车</b>回到详情页查看电话，用协议模板与司机直签，货值高投一份货运险即可。'; }
+    else { vd.className = 'verdict'; vd.innerHTML = '<b>还没选</b>两条路随时可以切换。'; }
+  }; });
+
+  H.qs('#go').onclick = function () {
+    H.sheet({ title: '提交给合作方', body:
+      '<div class="notice" style="background:#fff1e8;color:#7a2e0e"><span class="ic"></span><div><b>您即将离开货袋子。</b>后续合同、运费、发票、货损责任均由合作方与您约定并承担，货袋子不参与、不担保。</div></div>' +
+      '<div class="small b mt12 mb8">发送给合作方</div><div class="kv2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:12px"><div><span class="xs muted" style="display:block">指定车辆</span><b>' + d.name + ' · ' + v.plate + '</b></div><div><span class="xs muted" style="display:block">线路 / 时间</span><b>' + post.from + ' → ' + post.to.join('/') + ' · ' + post.depart + '</b></div><div><span class="xs muted" style="display:block">货物</span><b>热卷 31.6t · 需鞍座</b></div><div><span class="xs muted" style="display:block">需要</span><b>' + ([need.invoice && '发票', need.liable && '承运人负责', need.b2b && '对公付款'].filter(Boolean).join('、') || '发票 / 承运人负责') + '</b></div></div>' +
+      '<div class="row mt12" style="gap:8px"><span class="small t2">合作方</span><span class="chip sm on">某某网络货运</span><span class="chip sm">某某物流网络</span></div>' +
+      '<label class="checkline mt12"><input type="checkbox" id="agreeL2"> 我已知悉货袋子只做引导，承运关系在我与合作方之间</label>',
+      footer: '<button class="btn ghost" data-c>取消</button><button class="btn" style="background:#c2410c" data-ok disabled>确认提交</button>',
+      onReady: function (root, close) {
+        H.qs('#agreeL2', root).onchange = function () { H.qs('[data-ok]', root).disabled = !this.checked; };
+        H.qs('[data-c]', root).onclick = close;
+        H.qs('[data-ok]', root).onclick = function () { close(); H.sheet({ title: '已提交给合作方', center: true, body: '<div class="phone-reveal"><div class="num" style="font-size:18px">合作方 30 分钟内联系您</div><div class="sub">需求编号 L2-20260927-018 · 也会同时邀请司机入驻</div></div><div class="xs muted mt8" style="text-align:center">记录保存在「我的 › 找车记录」，货袋子不再介入</div>', footer: '<button class="btn" onclick="this.closest(\'.mask\').remove()">知道了</button>' }); };
+      } });
+  };
+  H.qsa('[data-cert]').forEach(function (b) { b.onclick = function () { H.sheet({ title: '合作方资质', body: '<ul class="list-check"><li>网络货运经营许可 · 沪交运网货字〔20xx〕xxx 号</li><li>营业执照 · 统一社会信用代码 9131…</li><li>承运人责任险 · 单车 200 万 · 至 2027-06</li><li>货袋子按季度复核许可有效性，不对服务质量担保</li></ul>' }); }; });
+
+  H.notes('小程序 / H5 · 合作承运分流页（设计说明）', [
+    '与 PC 版同一逻辑的手机版：从运力详情页「要发票 / 要有人负责」进入，带入当前这台车。',
+    '先选需求再给建议；"都不需要"直接劝回详情页直联司机，避免把用户往贵 10% 的路推。',
+    '"就用这台特价车"由合作方完成司机入驻与承运，货袋子只<b>转交信息</b>，底部提交前有离开声明与勾选确认。',
+    '货袋子在这里的收入是合作方的推广费用，与货主运费无关，页面如实说明。',
+  ]);
+})();
+</script>
+</body>
+</html>
