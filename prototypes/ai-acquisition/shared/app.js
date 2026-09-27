@@ -17,31 +17,93 @@
     num(n) { return Number(n || 0).toLocaleString('zh-CN'); },
   };
 
+  /* ---------- 图标（线性 SVG，扁平风格） ---------- */
+  const ICONS = {
+    grid: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+    chat: '<path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/>',
+    users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M17.5 14a5.5 5.5 0 0 1 4 5.5"/>',
+    building: '<rect x="4" y="3" width="16" height="18"/><path d="M9 21v-4h6v4"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2"/>',
+    crane: '<path d="M3 21h18"/><path d="M6 21V8l12-4"/><path d="M6 8h12"/><path d="M14 8v6"/><circle cx="14" cy="15.5" r="1.5"/><path d="M6 12h4M6 16h4"/>',
+    inbox: '<path d="M3 13h5l2 3h4l2-3h5"/><path d="M5 4h14l2 9v7H3v-7z"/>',
+    search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
+    send: '<path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/>',
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/>',
+    route: '<circle cx="6" cy="5" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M6 7.5V13a3 3 0 0 0 3 3h6a3 3 0 0 1 3 3"/>',
+    check: '<path d="M4 12.5l5 5L20 6.5"/>',
+    doc: '<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/>',
+    bot: '<rect x="4" y="8" width="16" height="12"/><path d="M12 4v4"/><circle cx="12" cy="3.5" r="1"/><path d="M9 13h.01M15 13h.01"/><path d="M9 17h6"/>',
+    image: '<rect x="3" y="4" width="18" height="16"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-9 9"/>',
+    radio: '<circle cx="12" cy="12" r="2.5"/><path d="M7.5 16.5a6.5 6.5 0 0 1 0-9"/><path d="M16.5 7.5a6.5 6.5 0 0 1 0 9"/><path d="M4.5 19.5a10.5 10.5 0 0 1 0-15"/><path d="M19.5 4.5a10.5 10.5 0 0 1 0 15"/>',
+    shield: '<path d="M12 2.5l8 3.5v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+    gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
+    rocket: '<path d="M5 15l-2 6 6-2"/><path d="M14 4c3-1 6 0 7 1s0 4-1 7c-2 4-6 7-9 8l-4-4c1-3 4-7 7-12z"/><circle cx="15" cy="9" r="1.5"/>',
+    home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v11h14V10"/><path d="M10 21v-6h4v6"/>',
+    database: '<ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+    handshake: '<path d="M2 10l4-4 5 3 4-3 7 6"/><path d="M6 6l-4 4 6 6 3-1 3 3 2-2 2 2 2-2 2 2"/><path d="M11 9l-4 4 2 2"/>',
+    phone: '<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z"/>',
+    smartphone: '<rect x="6" y="2.5" width="12" height="19" rx="1.5"/><path d="M11 18h2"/>',
+    tablet: '<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M12 17h.01"/>',
+    bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    upload: '<path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 17v3h16v-3"/>',
+    mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>',
+    camera: '<path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13.5" r="3.5"/>',
+    link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.5 1.5"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.5-1.5"/>',
+    qr: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM19 14h2M14 19h2M19 19h2v2"/>',
+    coin: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7v10M9.5 9.5h3.5a1.5 1.5 0 0 1 0 3H11a1.5 1.5 0 0 0 0 3h3.5"/>',
+    truck: '<path d="M2 6h12v10H2z"/><path d="M14 10h5l3 3v3h-8"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>',
+    file: '<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/>',
+    warn: '<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17.5h.01"/>',
+    info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>',
+    arrow: '<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>',
+    filter: '<path d="M3 5h18l-7 8v6l-4 2v-8z"/>',
+    star: '<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.3L12 17.4l-5.6 3 1.1-6.3L3 9.7l6.2-.9z"/>',
+    flame: '<path d="M12 22c-4 0-7-3-7-7 0-3 2-5 3-7 0 2 1 3 2 3 0-4 2-7 5-9 0 3 1 5 3 7s2 4 2 6c0 4-3 7-8 7z"/>',
+    map: '<path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/>',
+    calendar: '<rect x="3" y="5" width="18" height="16"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    eye: '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    play: '<path d="M7 4l13 8-13 8z"/>',
+    pause: '<path d="M7 4h4v16H7zM13 4h4v16h-4z"/>',
+    refresh: '<path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/>',
+    scale: '<path d="M12 3v18M4 21h16"/><path d="M6 7h12"/><path d="M6 7l-3 6h6zM18 7l-3 6h6z"/>',
+    pin: '<path d="M9 3h6l-1 6 3 3H7l3-3z"/><path d="M12 12v9"/>',
+  };
+  const icon = (name, cls) => `<svg class="i ${cls || ''}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ICONS.info}</svg>`;
+
   /* ---------- 导航 ---------- */
   const NAV = [
     { group: '总览' },
-    { id: 'dashboard', ic: '📊', label: '看板', href: 'dashboard.html' },
-    { id: 'workbench', ic: '💬', label: '会话工作台', href: 'workbench.html', badgeKey: 'needHuman' },
+    { id: 'dashboard', ic: 'grid', label: '看板', href: 'dashboard.html' },
+    { id: 'workbench', ic: 'chat', label: '会话工作台', href: 'workbench.html', badgeKey: 'needHuman' },
     { group: '线索' },
-    { id: 'leads', ic: '👥', label: '线索列表', href: 'leads.html' },
-    { id: 'capture', ic: '🔎', label: '抓取记录', href: 'channels.html?tab=raw' },
+    { id: 'leads', ic: 'users', label: '线索列表', href: 'leads.html' },
+    { id: 'projects', ic: 'crane', label: '项目线索', href: 'projects.html' },
+    { id: 'companies', ic: 'building', label: '企业档案', href: 'companies.html' },
+    { id: 'intake', ic: 'inbox', label: '线索投喂箱', href: 'intake.html', badgeKey: 'intake' },
+    { id: 'capture', ic: 'search', label: '抓取记录', href: 'channels.html?tab=raw' },
     { group: '触达与跟进' },
-    { id: 'outreach', ic: '📨', label: '触达记录', href: 'outreach.html' },
-    { id: 'follow-ups', ic: '⏰', label: '跟进待办', href: 'follow-ups.html', badgeKey: 'dueToday' },
-    { id: 'flows', ic: '🧭', label: '跟进流程（SOP）', href: 'flows.html' },
-    { id: 'approvals', ic: '✅', label: '审核', href: 'approvals.html', badgeKey: 'approvals' },
+    { id: 'outreach', ic: 'send', label: '触达记录', href: 'outreach.html' },
+    { id: 'follow-ups', ic: 'clock', label: '跟进待办', href: 'follow-ups.html', badgeKey: 'dueToday' },
+    { id: 'flows', ic: 'route', label: '跟进流程（SOP）', href: 'flows.html' },
+    { id: 'approvals', ic: 'check', label: '审核', href: 'approvals.html', badgeKey: 'approvals' },
+    { group: '渠道' },
+    { id: 'sources', ic: 'database', label: '线索渠道目录', href: 'sources.html' },
+    { id: 'referrals', ic: 'handshake', label: '介绍人与分成', href: 'referrals.html' },
+    { id: 'channels', ic: 'radio', label: '触达账号与设备', href: 'channels.html' },
+    { id: 'poster', ic: 'image', label: '海报分发', href: 'poster-dispatch.html' },
     { group: '配置' },
-    { id: 'scripts', ic: '📝', label: '话术库', href: 'scripts.html' },
-    { id: 'jobs', ic: '🤖', label: '自动化任务', href: 'jobs.html' },
-    { id: 'poster', ic: '🖼️', label: '海报分发', href: 'poster-dispatch.html' },
-    { id: 'channels', ic: '📡', label: '渠道与设备', href: 'channels.html' },
-    { id: 'risk', ic: '🛡️', label: '风控', href: 'risk.html' },
-    { id: 'settings', ic: '⚙️', label: '设置', href: 'risk.html?tab=settings' },
+    { id: 'scripts', ic: 'doc', label: '话术库', href: 'scripts.html' },
+    { id: 'jobs', ic: 'bot', label: '自动化任务', href: 'jobs.html' },
+    { id: 'risk', ic: 'shield', label: '风控', href: 'risk.html' },
+    { id: 'settings', ic: 'gear', label: '设置', href: 'risk.html?tab=settings' },
     { group: '' },
-    { id: 'wizard', ic: '🚀', label: '开通向导', href: 'wizard.html' },
-    { id: 'index', ic: '🏠', label: '原型总览', href: 'index.html' },
+    { id: 'wizard', ic: 'rocket', label: '开通向导', href: 'wizard.html' },
+    { id: 'mobile', ic: 'smartphone', label: '销售企微 H5', href: 'mobile.html' },
+    { id: 'app', ic: 'tablet', label: '执行端 App', href: 'app.html' },
+    { id: 'index', ic: 'home', label: '原型总览', href: 'index.html' },
   ];
-  const SALES_ONLY = new Set(['dashboard', 'workbench', 'leads', 'follow-ups', 'approvals', 'index']);
+  const SALES_ONLY = new Set(['dashboard', 'workbench', 'leads', 'projects', 'companies', 'intake', 'follow-ups', 'approvals', 'referrals', 'mobile', 'index']);
 
   const App = {
     role() { return localStorage.getItem('acq:role') || 'admin'; },
@@ -53,7 +115,7 @@
       const navHtml = NAV.filter(n => n.group !== undefined || me.role === 'admin' || SALES_ONLY.has(n.id)).map(n => {
         if (n.group !== undefined) return n.group ? `<div class="nav-group">${n.group}</div>` : '<div style="height:10px"></div>';
         const b = n.badgeKey && badges[n.badgeKey] ? `<span class="badge">${badges[n.badgeKey]}</span>` : '';
-        return `<a href="${n.href}" class="${n.id === opt.active ? 'active' : ''}"><span class="ic">${n.ic}</span>${n.label}${b}</a>`;
+        return `<a href="${n.href}" class="${n.id === opt.active ? 'active' : ''}"><span class="ic">${icon(n.ic)}</span>${n.label}${b}</a>`;
       }).join('');
       document.body.innerHTML = `
       <div class="layout">
@@ -67,7 +129,7 @@
             <div class="sp"></div>
             <span class="muted small">商家：华东钢贸（演示）</span>
             <div class="role-switch" title="切换视角"><button class="${me.role === 'admin' ? 'on' : ''}" onclick="App.setRole('admin')">管理员</button><button class="${me.role === 'sales' ? 'on' : ''}" onclick="App.setRole('sales')">销售·张三</button></div>
-            <span class="bell" title="企微通知" onclick="App.notices()">🔔<i></i></span>
+            <span class="bell" title="企微通知" onclick="App.notices()">${icon('bell')}<i></i></span>
             <button class="btn ghost sm" onclick="App.resetData()" title="清除 localStorage 中的演示数据并重载">重置演示数据</button>
             <div class="avatar">${me.short}</div>
           </div>
@@ -119,12 +181,15 @@
   const UI = {
     tag(text, type) { return `<span class="tag ${type || ''}">${text}</span>`; },
     stage(s) { const L = { NEW: '新线索', CONTACTED: '已触达', REPLIED: '已回复', HOT: '高意向', WON: '已成交', LOST: '已流失', SILENT: '静默', IGNORED: '已忽略' }; return `<span class="tag stage-${s}">${L[s] || s}</span>`; },
-    platform(p, withName) { const N = { WECOM: '企微', WECHAT_PERSONAL: '微信', DOUYIN: '抖音', XIAOHONGSHU: '小红书', FORUM: '论坛', HDZ_INTERNAL: '站内' }; const S = { WECOM: '企', WECHAT_PERSONAL: '微', DOUYIN: '抖', XIAOHONGSHU: '红', FORUM: '坛', HDZ_INTERNAL: '货' }; return `<span class="pf pf-${p}" title="${N[p]}">${S[p] || '?'}</span>${withName ? N[p] : ''}`; },
-    platformName(p) { return { WECOM: '企业微信', WECHAT_PERSONAL: '个人微信', DOUYIN: '抖音', XIAOHONGSHU: '小红书', FORUM: '行业论坛', HDZ_INTERNAL: '货袋子站内' }[p] || p; },
-    score(n) { return `<span class="score ${n >= 80 ? 'hot' : ''}">${n >= 80 ? '🔥' : ''}${n}</span>`; },
+    platform(p, withName) { const N = { WECOM: '企微', WECHAT_PERSONAL: '微信', DOUYIN: '抖音', XIAOHONGSHU: '小红书', FORUM: '论坛', HDZ_INTERNAL: '站内', GOV: '政务公开', DATA: '数据源', PHONE: '电话' }; const S = { WECOM: '企', WECHAT_PERSONAL: '微', DOUYIN: '抖', XIAOHONGSHU: '红', FORUM: '坛', HDZ_INTERNAL: '货', GOV: '政', DATA: '数', PHONE: '话' }; return `<span class="pf pf-${p}" title="${N[p]}">${S[p] || '?'}</span>${withName ? N[p] : ''}`; },
+    platformName(p) { return { WECOM: '企业微信', WECHAT_PERSONAL: '个人微信', DOUYIN: '抖音', XIAOHONGSHU: '小红书', FORUM: '行业论坛', HDZ_INTERNAL: '货袋子站内', GOV: '政务公开数据', DATA: '付费数据源', PHONE: '电话' }[p] || p; },
+    leadType(t) { const L = { PROJECT: '项目', COMPANY: '企业', PERSON: '个人' }; return `<span class="lt lt-${t || 'PERSON'}">${L[t] || '个人'}</span>`; },
+    family(f) { const L = { PROJECT: '项目族', COMPANY: '企业族', RELATION: '关系族', INTENT: '意图族', CONTENT: '内容族', FIELD: '现场族' }; return `<span class="fam fam-${f}">${L[f] || f}</span>`; },
+    grade(g) { return g === '✗' ? '<span class="grade" style="background:var(--danger)">✗</span>' : `<span class="grade grade-${g}" title="数据可得性 ${g} 级">${g}</span>`; },
+    score(n) { return `<span class="score ${n >= 80 ? 'hot' : ''}">${n >= 80 ? icon('flame') : ''}${n}</span>`; },
     intent(i) { const L = { INQUIRY: '询货', ASK_PRICE: '问价', ASK_MATERIAL: '求资料', ASK_RECOMMEND: '求推荐', SIGNUP: '报名', IRRELEVANT: '无关', UNKNOWN: '未知' }; return L[i] || i; },
     status(s) { const M = { QUEUED: ['排队中', 'primary'], SENDING: ['发送中', 'primary'], SENT: ['已发送', 'success'], FAILED: ['失败', 'danger'], BLOCKED: ['被限制', 'danger'], CANCELLED: ['已取消', ''], PENDING_APPROVAL: ['待审核', 'warning'], DRAFT: ['草稿', ''], PENDING: ['待处理', 'warning'], DONE: ['已完成', 'success'], SKIPPED: ['已跳过', ''], OVERDUE: ['已逾期', 'danger'], ONLINE: ['在线', 'success'], OFFLINE: ['离线', ''], RESTRICTED: ['熔断中', 'danger'], NEED_VERIFY: ['需验证', 'warning'], BANNED: ['已封禁', 'danger'], DISABLED: ['已停用', ''], ACTIVE: ['推进中', 'primary'], WAITING: ['等待中', 'warning'], PAUSED: ['已暂停', ''], COMPLETED: ['已完成', 'success'], TERMINATED: ['已终止', 'danger'], PREEMPTED: ['被抢占', ''], RUNNING: ['运行中', 'primary'], SUCCESS: ['成功', 'success'], PARTIAL: ['部分成功', 'warning'], PUBLISHED: ['已发布', 'success'], APPROVED_SENT: ['已批准发送', 'success'], REJECTED: ['已驳回', 'danger'], SCHEDULED: ['已定时', 'primary'], AUTO: ['机器处理', 'ai'], NEED_HUMAN: ['待人工', 'danger'], HUMAN: ['人工接管', 'primary'], CLOSED: ['已关闭', ''] }; const x = M[s] || [s, '']; return `<span class="tag ${x[1]}">${x[0]}</span>`; },
-    kpi(label, value, delta, unit, href) { const up = delta > 0; return `<div class="card kpi" ${href ? `onclick="location.href='${href}'"` : ''}><div class="l">${label}</div><div class="v">${value}${unit ? `<small>${unit}</small>` : ''}</div>${delta != null ? `<div class="d ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${Math.abs(delta)}${typeof delta === 'number' && Math.abs(delta) < 1 && delta !== 0 ? '' : ''} 较上期</div>` : '<div class="d muted">—</div>'}</div>`; },
+    kpi(label, value, delta, unit, href) { const up = delta > 0; return `<div class="card kpi" ${href ? `onclick="location.href='${href}'"` : ''}><div class="l">${label}</div><div class="v">${value}${unit ? `<small>${unit}</small>` : ''}</div>${delta != null ? `<div class="d ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${Math.abs(delta)} 较上期</div>` : '<div class="d muted">—</div>'}</div>`; },
     table(cols, rows, opt) { opt = opt || {}; if (!rows.length) return `<div class="empty">${opt.empty || '暂无数据'}</div>`; return `<table class="table"><thead><tr>${cols.map(c => `<th class="${c.sort ? 'sort' : ''}" style="${c.w ? 'width:' + c.w : ''}">${c.label}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr ${opt.rowAttr ? opt.rowAttr(r) : ''}>${cols.map(c => `<td class="${c.cls || ''}">${c.render ? c.render(r) : esc(r[c.key])}</td>`).join('')}</tr>`).join('')}</tbody>${opt.foot ? `<tfoot><tr>${opt.foot}</tr></tfoot>` : ''}</table>`; },
     vars(text, missing) { return esc(text).replace(/\{(\w+)\}/g, (m, k) => `<span class="var ${missing && missing.includes(k) ? 'miss' : ''}">{${k}}</span>`); },
     hlVars(text) { return esc(text).replace(/(张总|李工|王经理|赵老板|周总|孙经理|吴工|郑总|刘经理|陈老板|您好)/g, '<span class="hl">$1</span>'); },
@@ -139,7 +204,7 @@
       canvas.width = W * dpr; canvas.height = H * dpr; const c = canvas.getContext('2d'); c.scale(dpr, dpr); c.clearRect(0, 0, W, H);
       const P = { l: 36, r: 12, t: 14, b: 26 }; const n = series[0].data.length; const max = Math.max(1, ...series.flatMap(s => s.data)) * 1.15;
       const x = i => P.l + (W - P.l - P.r) * (n === 1 ? 0 : i / (n - 1)); const y = v => H - P.b - (H - P.t - P.b) * v / max;
-      c.strokeStyle = '#eef0f5'; c.lineWidth = 1; c.font = '11px sans-serif'; c.fillStyle = '#9ca3af'; c.textAlign = 'right';
+      c.strokeStyle = '#e6eaef'; c.lineWidth = 1; c.font = '11px sans-serif'; c.fillStyle = '#98a2ae'; c.textAlign = 'right';
       for (let g = 0; g <= 4; g++) { const v = max / 4 * g; c.beginPath(); c.moveTo(P.l, y(v)); c.lineTo(W - P.r, y(v)); c.stroke(); c.fillText(Math.round(v), P.l - 6, y(v) + 4); }
       c.textAlign = 'center'; (opt.labels || []).forEach((l, i) => { if (n <= 8 || i % Math.ceil(n / 8) === 0) c.fillText(l, x(i), H - 8); });
       series.forEach(s => {
@@ -147,24 +212,24 @@
         if (s.fill) { c.lineTo(x(n - 1), y(0)); c.lineTo(x(0), y(0)); c.closePath(); c.fillStyle = s.color + '22'; c.fill(); }
         c.fillStyle = s.color; s.data.forEach((v, i) => { c.beginPath(); c.arc(x(i), y(v), 2.5, 0, 7); c.fill(); });
       });
-      if (opt.legend !== false) { let lx = P.l; c.textAlign = 'left'; c.font = '11px sans-serif'; series.forEach(s => { c.fillStyle = s.color; c.fillRect(lx, 2, 10, 3); c.fillStyle = '#6b7280'; c.fillText(s.name, lx + 14, 7); lx += c.measureText(s.name).width + 30; }); }
+      if (opt.legend !== false) { let lx = P.l; c.textAlign = 'left'; c.font = '11px sans-serif'; series.forEach(s => { c.fillStyle = s.color; c.fillRect(lx, 2, 10, 3); c.fillStyle = '#6b7684'; c.fillText(s.name, lx + 14, 7); lx += c.measureText(s.name).width + 30; }); }
     },
     spark(canvas, data, color) {
       const dpr = w.devicePixelRatio || 1; const W = canvas.clientWidth || 80, H = canvas.clientHeight || 24; canvas.width = W * dpr; canvas.height = H * dpr; const c = canvas.getContext('2d'); c.scale(dpr, dpr);
       const max = Math.max(1, ...data); const x = i => 2 + (W - 4) * i / (data.length - 1); const y = v => H - 2 - (H - 4) * v / max;
-      c.strokeStyle = color || '#1f5eff'; c.lineWidth = 1.5; c.beginPath(); data.forEach((v, i) => i ? c.lineTo(x(i), y(v)) : c.moveTo(x(i), y(v))); c.stroke();
+      c.strokeStyle = color || '#1b4f8a'; c.lineWidth = 1.5; c.beginPath(); data.forEach((v, i) => i ? c.lineTo(x(i), y(v)) : c.moveTo(x(i), y(v))); c.stroke();
     },
     bars(canvas, items, opt) {
       opt = opt || {}; const dpr = w.devicePixelRatio || 1; const W = canvas.clientWidth || 400, H = canvas.clientHeight || 200; canvas.width = W * dpr; canvas.height = H * dpr; const c = canvas.getContext('2d'); c.scale(dpr, dpr);
       const P = { l: 90, r: 40, t: 8, b: 8 }; const max = Math.max(1, ...items.map(i => i.value)); const bh = Math.min(26, (H - P.t - P.b) / items.length - 6);
       c.font = '12px sans-serif';
-      items.forEach((it, i) => { const yy = P.t + i * ((H - P.t - P.b) / items.length); const wdt = (W - P.l - P.r) * it.value / max; c.fillStyle = '#6b7280'; c.textAlign = 'right'; c.fillText(it.label, P.l - 8, yy + bh / 2 + 4); c.fillStyle = it.color || '#1f5eff'; c.beginPath(); c.roundRect ? c.roundRect(P.l, yy, wdt, bh, 4) : c.rect(P.l, yy, wdt, bh); c.fill(); c.fillStyle = '#111827'; c.textAlign = 'left'; c.fillText(it.text || it.value, P.l + wdt + 6, yy + bh / 2 + 4); });
+      items.forEach((it, i) => { const yy = P.t + i * ((H - P.t - P.b) / items.length); const wdt = (W - P.l - P.r) * it.value / max; c.fillStyle = '#6b7684'; c.textAlign = 'right'; c.fillText(it.label, P.l - 8, yy + bh / 2 + 4); c.fillStyle = it.color || '#1b4f8a'; c.fillRect(P.l, yy, wdt, bh); c.fillStyle = '#1c2430'; c.textAlign = 'left'; c.fillText(it.text || it.value, P.l + wdt + 6, yy + bh / 2 + 4); });
     },
     funnel(el, stages) {
       const max = stages[0].value || 1;
-      el.innerHTML = stages.map((s, i) => { const wdt = 40 + 60 * s.value / max; const conv = i ? fmt.pct(s.value, stages[i - 1].value) : ''; return `<div style="display:flex;align-items:center;gap:10px;margin:6px 0"><div style="width:70px;font-size:12px;color:var(--text-3);text-align:right">${s.label}</div><div style="flex:1"><div style="width:${wdt}%;background:${s.color};color:#fff;border-radius:6px;padding:5px 10px;font-weight:700;font-size:13px">${s.value}</div></div><div style="width:64px;font-size:11.5px;color:var(--text-4)">${conv ? '转化 ' + conv : ''}</div></div>`; }).join('');
+      el.innerHTML = stages.map((s, i) => { const wdt = 40 + 60 * s.value / max; const conv = i ? fmt.pct(s.value, stages[i - 1].value) : ''; return `<div style="display:flex;align-items:center;gap:10px;margin:6px 0"><div style="width:70px;font-size:12px;color:var(--text-3);text-align:right">${s.label}</div><div style="flex:1"><div style="width:${wdt}%;background:${s.color};color:#fff;border-radius:3px;padding:5px 10px;font-weight:700;font-size:13px">${s.value}</div></div><div style="width:64px;font-size:11.5px;color:var(--text-4)">${conv ? '转化 ' + conv : ''}</div></div>`; }).join('');
     },
   };
 
-  w.App = App; w.UI = UI; w.Chart = Chart; w.Modal = Modal; w.Drawer = Drawer; w.toast = toast; w.fmt = fmt; w.esc = esc; w.qs = qs; w.$ = $; w.$$ = $$;
+  App.icon = icon; App.ICONS = ICONS; w.App = App; w.UI = UI; w.Chart = Chart; w.Modal = Modal; w.Drawer = Drawer; w.toast = toast; w.fmt = fmt; w.esc = esc; w.qs = qs; w.$ = $; w.$$ = $$;
 })(window);

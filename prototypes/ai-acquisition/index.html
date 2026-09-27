@@ -5,21 +5,21 @@
 <title>原型总览</title>
 <link rel="stylesheet" href="shared/base.css">
 <style>
-  .hero { background: linear-gradient(135deg, #0f1f4d 0%, #1f5eff 55%, #7c3aed 100%); color: #fff; border-radius: 14px; padding: 26px 28px; margin-bottom: 18px; position: relative; overflow: hidden; }
+  .hero { background: linear-gradient(135deg, #1c2430 0%, #1b4f8a 55%, #5a4bbf 100%); color: #fff; border-radius: 6px; padding: 26px 28px; margin-bottom: 18px; position: relative; overflow: hidden; }
   .hero h1 { color: #fff; font-size: 24px; margin: 0 0 6px; }
   .hero p { color: rgba(255,255,255,.85); margin: 0; max-width: 820px; line-height: 1.7; }
   .hero .chips-row { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
   .hero .chips-row span { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); border-radius: 999px; padding: 3px 10px; font-size: 12px; }
-  .pcard { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: #fff; transition: .15s; min-height: 150px; }
-  .pcard:hover { box-shadow: 0 8px 24px rgba(31,94,255,.12); transform: translateY(-1px); border-color: #c7d6ff; }
+  .pcard { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 6px; background: #fff; transition: .15s; min-height: 150px; }
+  .pcard:hover {   border-color: #c3ccd6; }
   .pcard .ph { display: flex; align-items: center; gap: 8px; }
-  .pcard .ph .ic { width: 34px; height: 34px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; background: #eef3ff; }
+  .pcard .ph .ic { width: 34px; height: 34px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; background: #e9f0f8; }
   .pcard .ph b { font-size: 15px; }
   .pcard .ph .pri { margin-left: auto; font-size: 11px; color: var(--text-3); }
   .pcard .desc { font-size: 12.5px; color: var(--text-3); line-height: 1.6; flex: 1; }
   .pcard .links { display: flex; flex-wrap: wrap; gap: 6px; }
-  .pcard .links a { font-size: 12px; padding: 3px 9px; border-radius: 999px; background: #f3f5fa; border: 1px solid var(--border); color: var(--text); text-decoration: none; }
-  .pcard .links a:hover { background: #eef3ff; border-color: #c7d6ff; color: var(--primary); }
+  .pcard .links a { font-size: 12px; padding: 3px 9px; border-radius: 999px; background: #f4f6f8; border: 1px solid var(--border); color: var(--text); text-decoration: none; }
+  .pcard .links a:hover { background: #e9f0f8; border-color: #c3ccd6; color: var(--primary); }
   .pcard .links a.main { background: var(--primary); border-color: var(--primary); color: #fff; }
   .story { counter-reset: s; }
   .story li { list-style: none; position: relative; padding: 10px 0 10px 40px; border-bottom: 1px dashed var(--border); font-size: 13px; line-height: 1.7; }
@@ -27,12 +27,12 @@
   .story li::before { counter-increment: s; content: counter(s); position: absolute; left: 0; top: 11px; width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
   .story li b { color: var(--text); }
   .story .who { font-size: 11px; padding: 1px 6px; border-radius: 4px; margin-right: 4px; }
-  .story .who.a { background: #fff1e6; color: var(--hot); }
-  .story .who.s { background: #e9f8ee; color: #1a7f3c; }
-  .story .who.d { background: #ede9fe; color: #6d28d9; }
+  .story .who.a { background: #fdeee4; color: var(--hot); }
+  .story .who.s { background: #e8f5ee; color: #1e8e5a; }
+  .story .who.d { background: #eeecf9; color: #4a3ca6; }
   .kvtab td { font-size: 12.5px; vertical-align: top; }
   .kvtab td:first-child { white-space: nowrap; font-weight: 600; width: 160px; }
-  .kvtab code { background: #f3f5fa; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+  .kvtab code { background: #f4f6f8; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
 </style>
 </head>
 <body>
