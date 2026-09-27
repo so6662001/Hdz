@@ -145,6 +145,31 @@
       const list = (w.ACQ && Array.isArray(ACQ.notices)) ? ACQ.notices : [];
       Drawer.open({ title: '企业微信通知（模拟）', narrow: true, body: `<div class="timeline">${list.map(n => `<div class="tl ${n.cls || 'sys'}"><div class="t">${fmt.time(n.t)}</div><div class="s">${n.text}</div>${n.link ? `<div class="d"><a href="${n.link}">打开 →</a></div>` : ''}</div>`).join('') || '<div class="empty">暂无通知</div>'}</div>` });
     },
+    /* 电话触达（Q13）：人工拨打 + 系统记录结果；可选带电话开场白话术与流程 Call 节点推进 */
+    recordCall(leadId, opt) {
+      opt = opt || {}; const l = w.ACQ.lead(leadId); if (!l) return; const E = w.Engine; const scr = w.ACQ.script(opt.scriptId || (l.leadType === 'COMPANY' || (l.companyId && !l.projectId) ? 125 : 124)); const r = scr ? E.render(scr, l) : null;
+      const inst = w.ACQ.instanceOf(leadId); const def = inst && w.ACQ.flow(inst.flowId); const atCall = inst && def && def.nodes[inst.currentNode] && def.nodes[inst.currentNode].type === 'Call';
+      const RES = E.flow.CALL_RESULTS;
+      Modal.open({ title: `${icon('phone')} 电话 · ${esc(l.nickname || l.company || l.id)}${l.phone ? ` <span class="mono muted small">${esc(l.phone)}</span>` : ''}`, width: 680, body: `
+        ${atCall ? `<div class="alert info small mb12">流程「${esc(def.name)}」当前在电话节点：${esc(E.flow.label(def, inst.currentNode))}。记录结果后自动按分支推进。</div>` : ''}
+        ${r ? `<div class="card mb12"><div class="card-h" style="padding:8px 12px"><h3 class="small">开场白 · ${esc(scr.name)}</h3><a class="small" href="scripts.html?open=${scr.id}">编辑</a></div><div class="card-b small" style="line-height:1.8">${UI.hlVars(r.text)}${scr.callTips ? `<ul class="xs muted mt8" style="margin-left:16px">${scr.callTips.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</div></div>` : ''}
+        <div class="grid g2"><div class="field"><label>通话结果</label><select class="select" id="cl_res">${Object.entries(RES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div><div class="field"><label>时长</label><div class="row"><input class="input" id="cl_dur" type="number" value="180" style="width:100px"><span class="small muted">秒</span></div></div></div>
+        <div class="field"><label>要点 / 下一步</label><textarea class="input" id="cl_note" rows="3" placeholder="对方关注点、规格与吨位、决策人、约定时间…（语音输入可自动转写）"></textarea></div>
+        <div class="row small"><label class="checkbox"><input type="checkbox" id="cl_fu" checked> 创建跟进待办</label><select class="select sm" id="cl_fuh"><option value="24">明天</option><option value="48">2 天后</option><option value="168">下周</option></select><span class="sp"></span><label class="checkbox"><input type="checkbox" id="cl_wx" checked> 通话后发企微 / 微信资料</label></div>`,
+        footer: `<button class="btn" data-close>取消</button><button class="btn primary" id="cl_ok">${icon('check')} 记录并推进</button>`, onMount(m, close) {
+          $('#cl_ok', m).onclick = () => {
+            const res = $('#cl_res', m).value, dur = +$('#cl_dur', m).value || 0, note = $('#cl_note', m).value.trim();
+            l.calls = l.calls || []; l.calls.unshift({ t: Date.now(), by: App.me().id, dur: res === 'CONNECTED' ? dur : 0, result: res, note }); l.lastContactedAt = Date.now(); l.outreachCount = (l.outreachCount || 0) + 1;
+            w.ACQ.addEvent(l, { cls: 'user', text: `电话 · ${RES[res]}${dur && res === 'CONNECTED' ? ` · ${Math.round(dur / 60)} 分钟` : ''}${note ? ' · ' + note : ''}` });
+            let trace = [];
+            if (atCall) { trace = E.flow.advance(inst, def, { type: 'CALL', result: res }); inst.log = (inst.log || []).concat(trace.map(t => Object.assign({ t: Date.now() }, t))); trace.forEach(t => { if (t.setStage) l.stage = t.setStage; }); }
+            else if (res === 'CONNECTED' && l.stage === 'NEW') l.stage = 'CONTACTED';
+            if (res === 'REFUSED') { l.stage = 'LOST'; l.lostReason = 'REFUSED'; }
+            if ($('#cl_fu', m).checked && res !== 'REFUSED') w.ACQ.followUps.unshift({ id: 'FU' + Date.now().toString(36), leadId: l.id, owner: App.me().id, type: res === 'CONNECTED' ? 'MANUAL' : 'CALL', reason: 'HUMAN_SET', dueAt: Date.now() + (+$('#cl_fuh', m).value) * 3600e3, status: 'PENDING', note: note || (res === 'CONNECTED' ? '电话后跟进' : '再次电话') });
+            w.ACQ.save(); close(); toast(`已记录通话：${RES[res]}${trace.length ? ` · 流程推进 ${trace.map(t => t.outcome).join(' → ')}` : ''}`, 'ok'); if (opt.onDone) opt.onDone(res, trace);
+          };
+        } });
+    },
     pageHead(title, desc, actions) { return `<div class="page-head"><div><h1>${title}</h1>${desc ? `<p>${desc}</p>` : ''}</div><div class="actions">${actions || ''}</div></div>`; },
     note(html) { if (sessionStorage.getItem('acq:note:' + location.pathname)) return; const d = document.createElement('div'); d.className = 'demo-note'; d.innerHTML = html + ' <span style="opacity:.7;cursor:pointer;margin-left:6px">✕</span>'; d.title = '点击关闭'; d.onclick = () => { d.remove(); sessionStorage.setItem('acq:note:' + location.pathname, '1'); }; document.body.appendChild(d); setTimeout(() => d.remove(), 15000); },
   };

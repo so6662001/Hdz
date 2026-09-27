@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>企业档案</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  .ct { display: inline-flex; align-items: center; padding: 0 7px; border-radius: 3px; font-size: 11px; line-height: 18px; font-weight: 600; background: var(--steel-weak); color: var(--text-2); }
+  .ct-CONTRACTOR { background: #e6eef7; color: var(--primary); } .ct-MANUFACTURER { background: var(--success-weak); color: var(--success); } .ct-DISTRIBUTOR, .ct-PROCESSING_CENTER { background: var(--hot-weak); color: var(--hot); } .ct-DEVELOPER { background: var(--ai-weak); color: var(--ai); } .ct-PROCESSING { background: var(--warning-weak); color: var(--warning); }
+  .cred { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; } .cred i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; } .cred.OK i { background: var(--success); } .cred.WARN i { background: var(--warning); } .cred.BAD i { background: var(--danger); }
+  .sig { font-size: 12px; } .sig .tag { margin-right: 4px; }
+  .typebar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; } .typebar .s { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 12px; cursor: pointer; font-size: 12.5px; } .typebar .s b { margin-left: 6px; } .typebar .s.on, .typebar .s:hover { border-color: var(--primary); color: var(--primary); }
+</style>
+</head>
+<body>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/app.js"></script>
+<script>
+const me = App.me(); const root = App.mount({ active: 'companies', title: '企业档案' });
+const TYPE = { CONTRACTOR: '施工 / 钢结构企业', MANUFACTURER: '制造企业', DISTRIBUTOR: '二级配送商', PROCESSING_CENTER: '钢筋加工配送中心', PROCESSING: '小型加工厂', DEVELOPER: '开发 / 业主单位' };
+const STATUS = { NEW: '新企业', CONTACTED: '已触达', HOT: '高意向', WON: '已成交', LOST: '已流失', IGNORED: '已忽略（低分）' };
+let type = qs('type', 'ALL'), kw = '', hideIgnored = true;
+const mine = () => me.role === 'admin' ? ACQ.companies : ACQ.companies.filter(c => c.owner === me.id);
+const ctag = t => `<span class="ct ct-${t}">${TYPE[t] || t}</span>`;
+const cred = c => `<span class="cred ${c.credit.level}" title="${esc(c.credit.text)}"><i></i>${{ OK: '正常', WARN: '预警', BAD: '高风险' }[c.credit.level]}</span>`;
+function render() {
+  const all = mine(); const list = all.filter(c => (type === 'ALL' || c.type === type) && (!hideIgnored || c.stage !== 'IGNORED') && (!kw || (c.name + c.region + c.scope).includes(kw))).sort((a, b) => b.score - a.score);
+  const newly = all.filter(c => c.signals.some(s => s.code === 'E1_BIZ_REG' && ACQ.NOW - s.t < 30 * ACQ.D)).length, warn = all.filter(c => c.credit.level !== 'OK').length, dist = all.filter(c => c.type === 'DISTRIBUTOR' || c.type === 'PROCESSING_CENTER').length;
+  root.innerHTML = App.pageHead('企业档案', '来自工商注册 / 变更、资质变化、招聘信号、名录、介绍人与手工录入的企业级线索；同一企业的多个信号叠加评分，并做信用风险提示。二级配送 / 加工中心按 Q14 作为独立客户类型。', `<a class="btn" href="sources.html?family=COMPANY">${App.icon('database')} 企业族渠道</a><button class="btn primary" onclick="newCompany()">${App.icon('plus')} 录入企业</button>`) +
+  `<div class="grid g4 mb16">${UI.kpi('企业档案', all.length, 3, '家')}${UI.kpi('30 天新设 / 变更', newly, null, '家')}${UI.kpi('信用风险预警', warn, null, '家').replace('card kpi', 'card kpi hot')}${UI.kpi('二级配送 / 加工中心', dist, null, '家').replace('card kpi', 'card kpi ok')}</div>
+  <div class="typebar">${[['ALL', '全部']].concat(Object.entries(TYPE)).map(x => `<span class="s ${type === x[0] ? 'on' : ''}" onclick="type='${x[0]}';render()">${x[1]}<b>${x[0] === 'ALL' ? all.length : all.filter(c => c.type === x[0]).length}</b></span>`).join('')}</div>
+  <div class="card"><div class="filters"><input class="input sm" placeholder="搜索企业 / 地区 / 经营范围" style="width:260px" value="${esc(kw)}" oninput="kw=this.value;render()"><label class="checkbox small"><input type="checkbox" ${hideIgnored ? 'checked' : ''} onchange="hideIgnored=this.checked;render()"> 隐藏低分忽略（过滤器拦下）</label><span class="sp"></span><span class="xs muted">过滤器：注册资本 ≥ 500 万 · 排除空壳 · <a href="sources.html?open=E1_BIZ_REG">调整 →</a></span></div>
+  ${UI.table([
+    { label: '企业', render: c => `<a onclick="openCompany('${c.id}')"><b>${esc(c.name)}</b></a><span class="sub">${ctag(c.type)} ${esc(c.region)} · ${c.distanceKm} km</span>` },
+    { label: '注册资本 / 成立', render: c => `${fmt.num(c.regCapital)} 万<span class="sub">${c.established}${c.established >= '2026' ? ' <span class="tag success xs">新设</span>' : ''}</span>`, w: '120px' },
+    { label: '最新信号', render: c => { const s = c.signals[0]; const src = ACQ.source(s.code); return `<div class="sig"><span class="tag xs">${src ? esc(src.name.split('（')[0]) : s.code}</span>${esc(s.text)}<span class="sub">${fmt.ago(s.t)} · 共 ${c.signals.length} 个信号</span></div>`; } },
+    { label: '信用', render: cred, w: '70px' },
+    { label: '估月用量', render: c => c.estMonthlyTon ? `<b>${fmt.num(c.estMonthlyTon)}</b> t` : '—', w: '90px' },
+    { label: '关联', render: c => `${c.leadIds.length ? `<span class="tag xs">${c.leadIds.length} 线索</span>` : ''}${c.projectIds.length ? `<span class="tag primary xs">${c.projectIds.length} 项目</span>` : ''}` || '<span class="muted">—</span>', w: '110px' },
+    { label: '评分', render: c => UI.score(c.score), w: '70px' },
+    { label: '状态', render: c => `<span class="tag stage-${c.stage}">${STATUS[c.stage]}</span>`, w: '110px' },
+    { label: '负责人', render: c => ACQ.user(c.owner).name, w: '70px' },
+    { label: '', cls: 'ops', render: c => `${c.leadIds[0] ? `<a onclick="App.recordCall('${c.leadIds[0]}',{scriptId:125,onDone:render})">${App.icon('phone')} 电话</a>` : ''}<a onclick="openCompany('${c.id}')">档案</a>`, w: '110px' },
+  ], list, { empty: '无匹配企业' })}</div>`;
+}
+function openCompany(id) {
+  const c = ACQ.company(id); const leads = c.leadIds.map(ACQ.lead).filter(Boolean); const pjs = c.projectIds.map(ACQ.project).filter(Boolean); const l0 = leads[0];
+  const scr = ACQ.script(122); const r = l0 ? Engine.render(scr, l0) : null;
+  Drawer.open({ title: `${esc(c.name)} ${ctag(c.type)}`, sub: `${c.id} · ${esc(c.region)} · ${c.distanceKm} km · 负责人 ${ACQ.user(c.owner).name}`, wide: true, body: `
+    ${c.credit.level !== 'OK' ? `<div class="alert warn small mb12"><b>信用风险：</b>${esc(c.credit.text)}</div>` : ''}
+    ${c.stage === 'IGNORED' ? `<div class="alert info small mb12">该企业被 E1 过滤器判为低分（${esc(c.signals[0].text)}），仅入库不触达。可手工「恢复」。</div>` : ''}
+    <div class="grid g2">
+      <div class="card"><div class="card-h" style="padding:10px 14px"><h3>工商与经营</h3>${cred(c)}</div><div class="card-b small"><dl class="kv"><dt>注册资本</dt><dd>${fmt.num(c.regCapital)} 万元</dd><dt>成立时间</dt><dd>${c.established}</dd><dt>经营范围</dt><dd>${esc(c.scope)}</dd><dt>客户类型</dt><dd>${ctag(c.type)}${c.type === 'PROCESSING_CENTER' || c.type === 'DISTRIBUTOR' ? ' <span class="xs muted">Q14：吨位大、现款多，独立客户类型</span>' : ''}</dd><dt>估月用量</dt><dd>${c.estMonthlyTon ? fmt.num(c.estMonthlyTon) + ' 吨 / 月' : '—'}</dd><dt>信用</dt><dd>${esc(c.credit.text)}</dd></dl></div></div>
+      <div class="card"><div class="card-h" style="padding:10px 14px"><h3>信号 <span class="muted small">${c.signals.length} 个 · 叠加加权</span></h3><span class="score ${c.score >= 80 ? 'hot' : ''}">${c.score}</span></div><div class="card-b"><div class="timeline">${c.signals.slice().sort((a, b) => b.t - a.t).map(s => { const src = ACQ.source(s.code); return `<div class="tl sys"><div class="t">${fmt.time(s.t)} · ${src ? UI.family(src.family) : ''} <a href="sources.html?open=${s.code}" class="xs">${src ? esc(src.name) : s.code}</a></div><div class="s">${esc(s.text)}</div></div>`; }).join('')}</div><div class="xs muted mt8">推断规则：新注册钢结构 + 招聘焊工 = 新厂投产期；经营范围新增总承包 = 即将承接项目。</div></div></div>
+    </div>
+    <div class="card mt12"><div class="card-h" style="padding:10px 14px"><h3>联系人与关联</h3><button class="btn xs" onclick="toast('添加联系人（同项目档案）')">＋ 联系人</button></div><div class="card-b">
+      ${leads.length ? UI.table([{ label: '联系人 / 线索', render: l => `${UI.leadType(l.leadType)} <a href="leads.html?open=${l.id}">${esc(l.nickname)}</a>${l.role ? ` <span class="muted xs">${esc(l.role)}</span>` : ''}` }, { label: '来源', render: l => `${UI.platform(l.platform)}${esc(l.sourceChannel)}` }, { label: '最近', render: l => (l.calls && l.calls[0]) ? `电话 · ${Engine.flow.CALL_RESULTS[l.calls[0].result]} · ${fmt.ago(l.calls[0].t)}` : l.lastContactedAt ? `触达 · ${fmt.ago(l.lastContactedAt)}` : '未触达' }, { label: '阶段', render: l => UI.stage(l.stage), w: '80px' }, { label: '', cls: 'ops', render: l => `<a onclick="App.recordCall('${l.id}',{scriptId:125,onDone:()=>{openCompany('${c.id}');render()}})">电话</a><a href="workbench.html?c=${(ACQ.convOf(l.id) || {}).id || ''}">会话</a>`, w: '90px' }], leads) : '<div class="muted small">暂无联系人。工商登记电话通常是前台，建议：企微搜索法人 / 企业名 → 加好友；或电话前台"找负责采购钢材的同事"。</div>'}
+      ${pjs.length ? `<h5 class="small b mt12 mb8">关联项目</h5>${pjs.map(p => `<div class="small">${UI.leadType('PROJECT')} <a href="projects.html?open=${p.id}">${esc(p.name)}</a> · ${esc(p.stageText)} · 估 ${p.estTon ? fmt.num(p.estTon[0]) + '–' + fmt.num(p.estTon[1]) : '—'} t</div>`).join('')}` : ''}
+    </div></div>
+    <div class="card mt12"><div class="card-h" style="padding:10px 14px"><h3>首触预览 · 按来源换话术</h3><a class="small" href="scripts.html?open=122">编辑话术</a></div><div class="card-b small">${r ? `<div class="bubble" style="display:inline-block">${UI.hlVars(r.text)}</div><div class="xs muted mt8">话术「${esc(scr.name)}」· 命中 ${r.hits.join(', ') || '—'}${r.problems.length ? ` · <span style="color:var(--danger)">${r.problems.map(p => esc(p.text)).join('；')}</span>` : ''}</div>` : '<span class="muted">需先添加联系人</span>'}</div></div>`,
+    footer: `${c.stage === 'IGNORED' ? `<button class="btn" onclick="ACQ.company('${c.id}').stage='NEW';ACQ.save();render();this.closest('.drawer-mask').remove();toast('已恢复为新企业','ok')">恢复</button>` : `<button class="btn danger" onclick="ACQ.company('${c.id}').stage='IGNORED';ACQ.save();render();this.closest('.drawer-mask').remove();toast('已忽略','warn')">忽略</button>`}<span class="sp"></span><button class="btn" data-close>关闭</button>${l0 ? `<button class="btn hot" onclick="App.recordCall('${l0.id}',{scriptId:125,onDone:()=>{openCompany('${c.id}');render()}})">${App.icon('phone')} 打电话</button><a class="btn primary" href="leads.html?open=${l0.id}">立即触达</a>` : ''}` });
+}
+function newCompany() {
+  Modal.open({ title: '录入企业', width: 620, body: `<div class="alert info small mb12">名片 / 名录 / 语音建议直接 <a href="intake.html">投喂</a>；这里为纯手工录入（E7 二级配送等 D 级渠道）。</div><div class="grid g2"><div class="field"><label>企业名称</label><input class="input" id="nc_n"></div><div class="field"><label>客户类型</label><select class="select" id="nc_t">${Object.entries(TYPE).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div><div class="field"><label>地区</label><input class="input" id="nc_r" value="江苏 苏州"></div><div class="field"><label>估月用量（吨）</label><input class="input" id="nc_m" type="number"></div><div class="field"><label>联系人</label><input class="input" id="nc_c" placeholder="姓名 / 职务"></div><div class="field"><label>电话</label><input class="input" id="nc_p"></div></div>`, footer: `<button class="btn" data-close>取消</button><button class="btn primary" id="nc_ok">保存</button>`, onMount(m, close) { $('#nc_ok', m).onclick = () => { const n = $('#nc_n', m).value.trim(); if (!n) return toast('请填写企业名称', 'warn'); const id = 'CO' + (ACQ.companies.length + 1); const ton = +$('#nc_m', m).value || null; const lid = $('#nc_c', m).value ? 'L' + String(ACQ.leads.length + 1).padStart(3, '0') : null; if (lid) ACQ.leads.push({ id: lid, nickname: $('#nc_c', m).value.split(/[\s\/]/)[0], leadType: 'PERSON', role: $('#nc_c', m).value.split(/[\s\/]/)[1] || '', companyId: id, platform: 'PHONE', sourceType: 'MANUAL', sourceCode: 'E7_DISTRIBUTOR', sourceChannel: '手工录入-企业联系人', sourceExcerpt: n, intent: 'UNKNOWN', score: ton ? Math.min(85, 50 + Math.round(ton / 60)) : 50, stage: 'NEW', owner: me.id, region: $('#nc_r', m).value, phone: $('#nc_p', m).value, company: n, tags: [], events: [], createdAt: Date.now(), lastActiveAt: Date.now() }); ACQ.companies.unshift({ id, name: n, type: $('#nc_t', m).value, region: $('#nc_r', m).value, distanceKm: 50, regCapital: 0, established: '—', scope: TYPE[$('#nc_t', m).value], credit: { level: 'OK', text: '未查询（保存后自动查工商 / 信用）' }, signals: [{ code: 'E7_DISTRIBUTOR', t: Date.now(), text: `${me.name} 手工录入` }], estMonthlyTon: ton, score: ton ? Math.min(85, 50 + Math.round(ton / 60)) : 50, stage: 'NEW', owner: me.id, leadIds: lid ? [lid] : [], projectIds: [], contacts: [], createdAt: Date.now(), updatedAt: Date.now() }); ACQ.save(); close(); render(); openCompany(id); toast('企业已录入', 'ok'); }; } });
+}
+render(); if (qs('open')) openCompany(qs('open'));
+App.note('<b>演示提示</b>：「苏州某建工集团」有被执行记录 → 信用预警；「无锡某精密五金」被注册资本过滤器拦为低分忽略；勾掉"隐藏低分忽略"可见。');
+</script>
+</body>
+</html>
