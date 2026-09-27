@@ -75,7 +75,7 @@
   <div class="top">
     <h1>找顺路车 <span class="tj">返程车 · 闲置车 · 专装钢材</span></h1>
     <p>驾驶员在<b>悟运小程序</b>发布返程车、闲置车、顺路捎货信息；卖家、买家在<b>货袋子 PC 端、微信小程序、H5</b> 三端找车并直接联系司机；找车方也可以<b>发布用车需求</b>，系统推荐匹配的顺路车、司机在悟运看到需求主动联系。这是一个<b>双方信息互动板块</b>：平台只做信息展示与真人真车核验，<b>不参与交易、不派单、不收运费、不做承运人、不做网络货运平台</b>。本页为高保真 HTML 原型总览，所有页面可点击交互（纯前端、模拟数据）。</p>
-    <div class="pills"><span>驾驶员端 4 页（一键 / 语音发布）</span><span>PC 找车 2 页</span><span>小程序 / H5 找车 2 页 × 2 壳</span><span>运营后台 1 页 3 视图（轻量）</span><span>统一的"查看电话 → 风险提示 → 留痕 → 反馈"流程</span><span>5 条运力终止路径</span><span>v0.2 补充：服务通知 / 申诉 / 合作承运 / 语音校准</span><span>v0.3：用车需求（车找货）三端 + 司机端沿线需求</span></div>
+    <div class="pills"><span>驾驶员端 5 页（一键 / 语音发布 · 返程 / 闲置 / 顺路）</span><span>PC 找车 2 页</span><span>小程序 / H5 找车 2 页 × 2 壳</span><span>运营后台 1 页 3 视图（轻量）</span><span>统一的"查看电话 → 风险提示 → 留痕 → 反馈"流程</span><span>5 条运力终止路径</span><span>v0.2 补充：服务通知 / 申诉 / 合作承运 / 语音校准</span><span>v0.3：用车需求（车找货）三端 + 司机端沿线需求</span></div>
   </div>
 
   <h2>原型页面 <small>点击卡片进入可交互页面；每页右上角有"设计说明"面板</small></h2>
@@ -84,6 +84,7 @@
   <div class="grid3">
     <a class="pcard" href="driver/home.html"><div class="thumb m"><span class="role tag wy">悟运 · Tab「运力」</span><iframe src="driver/home.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>我的运力（状态管理）</h3><p>当前运单"卸货后一键发返程"；展示中 / 已结束列表；到期倒计时；已接单、已出发、延长、下架、24 小时未确认自动隐藏；曝光与来电数据。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
     <a class="pcard" href="driver/publish.html"><div class="thumb m"><span class="role tag wy">悟运 · 发布</span><iframe src="driver/publish.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>发布运力（一键 / 语音 · 不填表）</h3><p><b>一键发布</b>：按当前运单 / 上次发布 / 常跑线路 / 闲置模板预填好整张卡片，点一下即发布，卡片上可局部改时间、换车、改价；<b>语音发布</b>：按住说一句"明天早上从嘉兴回上海，17 米 5 的板有鞍座，30 块一吨"，自动解析成结构化信息，缺的用 chips 补齐。卸货后自动准备返程车、可开自动发布。手动表单（driver/publish-form.html）只作兜底。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
+    <a class="pcard" href="driver/publish-idle.html"><div class="thumb m"><span class="role tag wy">悟运 · 闲置车</span><iframe src="driver/publish-idle.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>发布闲置车（一键 / 语音 · 字段与返程车不同）</h3><p>闲置车没有确定线路与时间，字段是 <b>车在哪（定位）/ 闲到什么时候 / 想去哪（方向不限 · 300km · 选方向）/ 接什么活 / 价格（默认面议）</b>，全部 chips 并按定位与常跑习惯预填，一键发布或按住说一句；长期闲置每天早 8 点问一次"还闲着吗"；卡片下方直接给附近可接的用车需求。顶部可切换 返程车 / 闲置车 / 顺路捎货。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
     <a class="pcard" href="driver/vehicle-add.html"><div class="thumb m"><span class="role tag wy">悟运 · 车辆</span><iframe src="driver/vehicle-add.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>添加车辆（拍证自动填）</h3><p>行驶证 OCR 自动识别；车型图标、板长快捷；装钢材配置（鞍座、篷布、12m 长材、多点装卸、定位）；3 张车辆照片；证件核验；一键生成车辆说明。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
   </div>
 

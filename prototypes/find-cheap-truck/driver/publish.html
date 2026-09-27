@@ -85,6 +85,7 @@
     <div class="navbar" style="background:#ff6b1a"><a class="back" href="home.html">‹</a><div class="title">发布运力</div><div class="capsule"><span>···</span><i></i><span>◉</span></div></div>
     <div class="screen" id="screen">
 
+      <div style="display:flex;gap:6px;padding:12px 14px 0"><a class="on" style="flex:1;text-align:center;padding:8px 0;border-radius:10px;background:var(--wy);color:#fff;font-size:13px;font-weight:700">返程车</a><a href="publish-idle.html" style="flex:1;text-align:center;padding:8px 0;border-radius:10px;background:#fff;font-size:13px;color:var(--text-2);box-shadow:var(--shadow)">闲置车</a><a href="publish-form.html?kind=share" style="flex:1;text-align:center;padding:8px 0;border-radius:10px;background:#fff;font-size:13px;color:var(--text-2);box-shadow:var(--shadow)">顺路捎货</a></div>
       <div class="sec-hd"><h3>一键发布</h3><span class="tip">都替您填好了，点一下就发</span><span class="rt" id="ocCount"></span></div>
       <div class="flow-strip"><span>线路：运单 / 上次 / 常跑</span><span>时间：按卸货点</span><span>价格：市场价 -15%</span><span>车辆：默认车</span></div>
       <div id="ocList"></div>
@@ -312,7 +313,7 @@
   if (reuse) setTimeout(function () { H.toast(reuse === 'order' ? '已按当前运单准备好返程车，点「一键发布」即可' : '已按上次信息准备好，点「一键发布」即可'); }, 300);
 
   H.notes('驾驶员端 · 发布运力（一键 / 语音，设计说明）', [
-    '<b>发布 = 一次点击或一句话</b>，表单只是兜底。页面只有两个主动作：一键发布、按住说话。',
+    '<b>发布 = 一次点击或一句话</b>，表单只是兜底。页面只有两个主动作：一键发布、按住说话。顶部切换三种运力：返程车（本页）、<b>闲置车</b>（publish-idle.html，字段不同：车在哪 / 闲多久 / 愿去哪 / 接什么活）、顺路捎货。',
     '<b>一键卡片</b>全部字段预填：线路来自运单 / 上次 / 常跑；时间按卸货点推算；价格按默认策略（市场价 -15%）；车辆用默认车；说明由车辆配置自动生成。卡片上可"改 / 换 / 改价"局部微调，不进表单。',
     '发布后卡片原地变为"已发布"，可 <b>撤销</b>、分享；不跳页，方便连发多条。',
     '<b>语音发布</b>：司机像打电话一样说，识别文字后按规则解析出类型 / 出发地 / 目的地 / 时间 / 车辆 / 价格；识别到的打 ✓，缺的用 chips 一下补齐；原话直接作为"司机说明"展示给货主，比模板更真实。',

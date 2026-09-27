@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>悟运小程序 · 发布闲置车（驾驶员端）</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  .kinds { display: flex; gap: 6px; padding: 12px 14px 0; }
+  .kinds a { flex: 1; text-align: center; padding: 8px 0; border-radius: 10px; background: #fff; font-size: 13px; color: var(--text-2); box-shadow: var(--shadow); }
+  .kinds a.on { background: var(--wy); color: #fff; font-weight: 700; }
+  .idle-card { margin: 12px 14px 0; background: #fff; border-radius: 16px; box-shadow: 0 8px 24px rgba(255,107,26,.14); border: 2px solid var(--wy); overflow: hidden; }
+  .idle-card .hd { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--wy-soft); color: var(--wy-dark); font-size: 12px; }
+  .idle-card .bd { padding: 12px; }
+  .idle-card .big { display: flex; align-items: center; gap: 12px; }
+  .idle-card .big .ico { width: 54px; height: 54px; border-radius: 14px; background: linear-gradient(135deg, #7d8aa8, #47536e); display: flex; align-items: center; justify-content: center; flex: none; }
+  .idle-card .big .ico svg { width: 42px; }
+  .idle-card .big h3 { font-size: 15px; }
+  .idle-card .big p { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .facts div { background: #fafbfc; border-radius: 10px; padding: 8px 10px; font-size: 12px; color: var(--muted); }
+  .facts div b { display: block; color: var(--text); font-size: 13px; margin-top: 1px; }
+  .facts div.w { grid-column: span 2; }
+  .idle-card .acts { display: flex; gap: 8px; padding: 0 12px 12px; }
+  .idle-card .acts .btn { flex: 1; height: 46px; font-size: 15px; }
+  .idle-card .acts .btn.ghost { flex: 0 0 96px; }
+  .idle-card .done { padding: 14px 12px; display: flex; align-items: center; gap: 10px; background: var(--ok-soft); }
+  .idle-card .done .ok { width: 32px; height: 32px; border-radius: 50%; background: var(--ok); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; flex: none; }
+  .idle-card .done .t { flex: 1; font-size: 13px; }
+  .idle-card .done .t b { display: block; font-size: 14px; }
+  .idle-card .done .undo { font-size: 12px; color: var(--text-2); text-decoration: underline; }
+  .edit { margin: 12px 14px 0; background: #fff; border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+  .edit .field .chip { height: 28px; font-size: 12px; }
+  .voice { margin: 12px 14px 0; background: linear-gradient(160deg, #fff7f1, #fff); border: 1px solid #ffd9c2; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+  .voice .mic { width: 56px; height: 56px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff9a5c, #ff6b1a 60%, #e85a10); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; box-shadow: 0 8px 20px rgba(255,107,26,.35); cursor: pointer; position: relative; }
+  .voice .mic i { width: 14px; height: 20px; border-radius: 7px; background: #fff; display: block; position: relative; }
+  .voice .mic i::after { content: ""; position: absolute; left: -5px; right: -5px; bottom: -6px; height: 9px; border: 2px solid #fff; border-top: 0; border-radius: 0 0 12px 12px; }
+  .voice .mic.rec::before { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 2px solid rgba(255,107,26,.5); animation: pulse 1.2s ease-out infinite; }
+  @keyframes pulse { from { transform: scale(.9); opacity: 1; } to { transform: scale(1.35); opacity: 0; } }
+  .voice .t { flex: 1; font-size: 12px; color: var(--text-2); line-height: 1.5; }
+  .voice .t b { display: block; color: var(--text); font-size: 13px; }
+  .voice .t .ex { color: var(--wy); }
+  .asr { margin: 8px 14px 0; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 13px; display: none; }
+  .asr.on { display: block; }
+  .asr .lbl { font-size: 11px; color: var(--muted); display: block; }
+  .rules { margin: 12px 14px 0; background: #fff; border-radius: 14px; box-shadow: var(--shadow); padding: 12px 14px; }
+  .rules h4 { font-size: 13px; margin-bottom: 6px; }
+  .rules li { display: flex; gap: 8px; font-size: 12px; color: var(--text-2); padding: 5px 0; border-bottom: 1px solid var(--line); line-height: 1.5; }
+  .rules li:last-child { border-bottom: 0; }
+  .rules li i { flex: none; width: 34px; height: 20px; border-radius: 5px; background: var(--wy-soft); color: var(--wy); font-size: 10px; font-weight: 700; font-style: normal; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+  .grp { margin: 14px 14px 0; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .grp b { font-size: 15px; }
+  .grp .tag { margin-left: auto; }
+  .list { padding: 8px 14px 0; }
+  .need-card .price .n { color: var(--wy); }
+  .need-card .btn { background: var(--wy); }
+</style>
+</head>
+<body class="wy-theme">
+<div class="m-stage">
+  <div class="phone dark-nav" id="phone">
+    <div class="statusbar" style="background:#ff6b1a"><span>9:21</span><span>●●● ᯤ 100%</span></div>
+    <div class="navbar" style="background:#ff6b1a"><a class="back" href="home.html">‹</a><div class="title">发布闲置车</div><div class="capsule"><span>···</span><i></i><span>◉</span></div></div>
+    <div class="screen" id="screen">
+      <div class="kinds"><a href="publish.html">返程车</a><a class="on">闲置车</a><a href="publish-form.html?kind=share">顺路捎货</a></div>
+
+      <div class="idle-card" id="card">
+        <div class="hd"><span class="tag wy">闲置车</span>都替您填好了，点一下就发<span class="sp"></span><span id="locTag" class="tag ok">定位一致</span></div>
+        <div id="cardBody"></div>
+      </div>
+
+      <div class="voice"><div class="mic" id="mic"><i></i></div><div class="t"><b>或者按住说一句</b>例如 <span class="ex" id="ex">"车在宝山闲两三天，江浙沪哪都去，价格面议"</span></div></div>
+      <div class="asr" id="asr"><span class="lbl">识别到</span><span id="asrText"></span></div>
+
+      <div class="edit" id="edit">
+        <div class="field">
+          <div class="lb"><span class="req">车现在在哪</span><span class="tip">已按当前定位</span></div>
+          <div class="chips" id="fWhere"><span class="chip on" data-v="嘉兴">◎ 嘉兴 · 南湖区（定位）</span><span class="chip" data-v="上海">上海 · 宝山（常停）</span><span class="chip" data-v="苏州">苏州 · 张家港（常停）</span><span class="chip" data-v="其他">其他</span></div>
+        </div>
+        <div class="field">
+          <div class="lb"><span class="req">闲到什么时候</span><span class="tip">到点自动下架；长期的每天早 8 点问一次</span></div>
+          <div class="chips" id="fUntil"><span class="chip" data-v="今天">今天</span><span class="chip" data-v="明天">明天</span><span class="chip on" data-v="3 天内">3 天内</span><span class="chip" data-v="一周内">一周内</span><span class="chip" data-v="长期">长期（每天确认）</span></div>
+        </div>
+        <div class="field">
+          <div class="lb"><span class="req">想去哪</span><span class="tip">哪都去就选「方向不限」</span></div>
+          <div class="chips" id="fDir"><span class="chip on" data-v="方向不限">方向不限</span><span class="chip" data-v="300km">300km 内</span><span class="chip" data-v="150km">150km 内（短驳）</span><span class="chip" data-v="pick">选几个方向</span></div>
+          <div class="chips mt8" id="fCities" style="display:none"></div>
+        </div>
+        <div class="field">
+          <div class="lb"><span>接什么活</span><span class="tip">可多选</span></div>
+          <div class="chips" id="fJobs"><span class="chip on" data-v="整车长途">整车长途</span><span class="chip on" data-v="市内短驳">市内短驳</span><span class="chip" data-v="拼车也行">拼车也行</span><span class="chip" data-v="可等一两天">可等一两天装</span></div>
+        </div>
+        <div class="field">
+          <div class="lb"><span>价格</span><span class="tip">闲置车多为面议，货主看到"通常低于市场"</span></div>
+          <div class="chips" id="fPrice"><span class="chip on" data-v="面议">面议</span><span class="chip" data-v="吨">按吨报</span><span class="chip" data-v="车">按车报</span><span class="chip" data-v="公里">按公里报</span></div>
+          <div class="input-row mt8" id="priceRow" style="display:none"><input class="input" id="fPriceN" placeholder="填个数"><span class="unit" id="fPriceU">元/吨</span></div>
+        </div>
+        <div class="field">
+          <div class="lb"><span>用哪台车</span><span class="tip">默认车辆</span></div>
+          <div class="chips" id="fVeh"></div>
+        </div>
+      </div>
+
+      <div class="rules">
+        <h4>闲置车信息怎么维护 <span class="muted small" style="font-weight:400">· 都是自动的</span></h4>
+        <ul>
+          <li><i>到期</i>选的时间一到自动下架；到期前 2 小时提醒可延长。</li>
+          <li><i>确认</i>展示满 24 小时问一句"还闲着吗"（微信服务通知，卡片上直接点），未确认 2 小时后自动隐藏，货主不会打到已经有活的车。</li>
+          <li><i>接单</i>悟运派单成功自动下架；线下接了活点一下「已接单」；货主反馈"车已被订走"≥2 也会隐藏。</li>
+          <li><i>需求</i>发布后，车所在城市及周边的用车需求会推给您（每 2 小时最多 1 条），您自己给货主打电话。</li>
+        </ul>
+      </div>
+
+      <div class="grp"><b>附近用车需求</b><span class="small t2">这台车现在就能接的</span><span class="tag ok" id="needCnt"></span></div>
+      <div class="list" id="needs"></div>
+      <div class="px14 mt8"><a class="small wy-c b" href="needs.html">看全部沿线用车需求 ›</a></div>
+      <div style="height:30px"></div>
+    </div>
+    <div class="home-indicator"></div>
+  </div>
+</div>
+
+<script src="../shared/data.js"></script>
+<script src="../shared/common.js"></script>
+<script>
+(function () {
+  var H = window.HDZ;
+  H.protoBar('idle', H.DRIVER_LINKS);
+  var f = { where: '嘉兴', until: '3 天内', dir: '方向不限', cities: [], jobs: ['整车长途', '市内短驳'], price: '面议', priceN: '', vehicle: 'v1', text: '' };
+  var state = 'ready';
+  var UNTIL = { '今天': '2026-09-27T23:00:00', '明天': '2026-09-28T23:00:00', '3 天内': '2026-09-30T00:00:00', '一周内': '2026-10-04T00:00:00', '长期': '2026-09-28T09:20:00' };
+
+  H.qs('#fCities').innerHTML = H.CITIES.filter(function (c) { return c !== '方向不限'; }).map(function (c) { return '<span class="chip" data-c="' + c + '">' + c + '</span>'; }).join('');
+  H.qs('#fVeh').innerHTML = H.MY_VEHICLES.map(function (v) { return '<span class="chip" data-v="' + v.id + '">' + v.plate + ' · ' + v.len + ' ' + v.type + '</span>'; }).join('');
+
+  function toPost() {
+    var to = f.dir === '方向不限' ? ['方向不限'] : f.dir === 'pick' ? (f.cities.length ? f.cities : ['方向不限']) : [f.dir === '300km' ? '方向不限' : f.where + '市内'].concat(f.dir === '150km' ? (H.NEAR[f.where] || []) : []);
+    var toDetail = f.dir === '方向不限' ? '江浙沪 300km 内均可' : f.dir === '300km' ? '300km 内' : f.dir === '150km' ? '短驳 150km 内' : f.cities.join(' / ') + ' 方向';
+    var price = f.price === '面议' || !f.priceN ? null : +f.priceN;
+    var v = H.VEHICLES[f.vehicle];
+    return { id: 'idle-new', kind: 'idle', from: f.where, fromDetail: f.where === '嘉兴' ? '南湖区 · 当前定位' : '', to: to, toDetail: toDetail, depart: f.until === '长期' ? '随时' : '今天起 ' + f.until.replace(' 内', '内'), validUntil: UNTIL[f.until], price: price, priceUnit: f.price === '面议' ? '吨' : f.price === '公里' ? '公里' : f.price, spareTons: v.load, driver: 'd1', vehicle: f.vehicle, posted: H.now.toISOString().slice(0, 19), views: 0, calls: 0, favs: 0, desc: f.text || ('车在' + f.where + '闲着，' + (f.dir === '方向不限' ? '哪都去，' : '') + f.jobs.join('、') + '都行，' + (price ? '价格' + price + '一' + f.price : '价格面议，肯定比市场便宜。')), locOK: f.where === '嘉兴', status: 'active' };
+  }
+  function truck() { return H.truckSvg(); }
+  function renderCard() {
+    var p = toPost(), v = H.VEHICLES[p.vehicle];
+    var body = '<div class="bd"><div class="big"><div class="ico">' + truck() + '</div><div><h3>' + v.plate + ' · ' + H.vehicleLine(v) + '</h3><p>' + H.equipLine(v, 4) + '</p></div></div>' +
+      '<div class="facts"><div>车在哪<b>' + p.from + (p.fromDetail ? ' · ' + p.fromDetail.split(' · ')[0] : '') + '</b></div><div>闲到<b>' + f.until + (f.until === '长期' ? '（每天确认）' : '') + '</b></div><div>想去哪<b>' + p.to.join(' / ') + '</b></div><div>接什么活<b>' + f.jobs.join(' · ') + '</b></div><div class="w">价格<b>' + (p.price == null ? '面议 <span class="muted" style="font-weight:400;font-size:11px">· 货主看到"价格面议 · 通常低于市场"</span>' : '¥' + p.price + '/' + p.priceUnit) + '</b></div></div>' +
+      '<div class="xs muted mt8" style="font-style:italic">"' + p.desc + '"</div></div>';
+    if (state === 'done') body += '<div class="done"><span class="ok">✓</span><div class="t"><b>已发布 · 闲置车 · ' + p.from + ' → ' + p.to.join('/') + '</b>展示至 ' + p.validUntil.slice(5, 16).replace('T', ' ') + (f.until === '长期' ? '（明早 8 点问一次还闲着吗）' : ' 自动下架') + ' · 已推送给 ' + (23 + H.matchNeeds(p).length * 4) + ' 位找车的货主' + (H.matchNeeds(p).filter(function (m) { return m.level === 'good'; }).length ? ' · <a href="needs.html" style="color:var(--wy);font-weight:600;text-decoration:underline">' + H.matchNeeds(p).filter(function (m) { return m.level === 'good'; }).length + ' 条需求匹配，去联系货主 ›</a>' : '') + '</div><span class="undo" data-undo>撤销</span></div>';
+    else body += '<div class="acts"><button class="btn ghost" id="preview">预览</button><button class="btn wy" id="pub">一键发布闲置车</button></div>';
+    H.qs('#cardBody').innerHTML = body;
+    H.qs('#locTag').style.display = p.locOK ? '' : 'none';
+    var pb = H.qs('#pub'); if (pb) pb.onclick = function () { state = 'done'; renderCard(); H.toast('已发布，接到活点一下「已接单」即可'); H.qs('#screen').scrollTop = 0; };
+    var pv = H.qs('#preview'); if (pv) pv.onclick = function () { H.sheet({ title: '货主看到的样子', body: H.mobileCard(p, { noBtn: true }) + '<div class="xs muted mt8" style="text-align:center">闲置车在货袋子三端按"车在哪 + 想去哪"匹配货主的搜索与用车需求</div>' }); };
+    var un = H.qs('[data-undo]'); if (un) un.onclick = function () { state = 'ready'; renderCard(); H.toast('已撤销'); };
+    renderNeeds(p);
+  }
+  function renderNeeds(p) {
+    var ms = H.matchNeeds(p);
+    H.qs('#needCnt').textContent = ms.filter(function (m) { return m.level === 'good'; }).length + ' 条匹配';
+    H.qs('#needs').innerHTML = ms.length ? ms.slice(0, 3).map(function (m) { return H.needCard(m.need, { match: m }); }).join('') : '<div class="empty" style="padding:16px 0">附近暂无匹配需求，发布后货主发需求会推给您</div>';
+  }
+  H.qs('#needs').addEventListener('click', function (e) {
+    var c = e.target.closest('.need-card'); if (!c) return;
+    var n = H.NEEDS.filter(function (x) { return x.id === c.dataset.id; })[0];
+    if (e.target.closest('[data-call-need]')) H.unlockShipperPhone(n); else location.href = 'needs.html';
+  });
+
+  function single(id, key) { H.qsa('#' + id + ' .chip').forEach(function (c) { c.onclick = function () { H.qsa('#' + id + ' .chip').forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on'); f[key] = c.dataset.v; state = 'ready'; after(id); renderCard(); }; }); }
+  function after(id) {
+    if (id === 'fDir') H.qs('#fCities').style.display = f.dir === 'pick' ? '' : 'none';
+    if (id === 'fPrice') { H.qs('#priceRow').style.display = f.price === '面议' ? 'none' : ''; H.qs('#fPriceU').textContent = '元/' + f.price; if (f.price !== '面议' && !f.priceN) { var r = H.refPrice(f.where, '上海'); f.priceN = f.price === '吨' ? Math.round((r[0] + r[1]) / 2 * .85) : f.price === '车' ? 850 : 7; H.qs('#fPriceN').value = f.priceN; } }
+    if (id === 'fWhere' && f.where === '其他') { H.toast('原型：地址选择器'); f.where = '嘉兴'; }
+  }
+  single('fWhere', 'where'); single('fUntil', 'until'); single('fDir', 'dir'); single('fPrice', 'price'); single('fVeh', 'vehicle');
+  H.qsa('#fVeh .chip')[0].classList.add('on');
+  H.qsa('#fJobs .chip').forEach(function (c) { c.onclick = function () { c.classList.toggle('on'); f.jobs = H.qsa('#fJobs .chip.on').map(function (x) { return x.dataset.v; }); state = 'ready'; renderCard(); }; });
+  H.qsa('#fCities .chip').forEach(function (c) { c.onclick = function () { c.classList.toggle('on'); f.cities = H.qsa('#fCities .chip.on').map(function (x) { return x.dataset.c; }); state = 'ready'; renderCard(); }; });
+  H.qs('#fPriceN').oninput = function () { f.priceN = this.value; renderCard(); };
+
+  /* 语音 */
+  var SAMPLES = ['车在宝山闲两三天，江浙沪哪都去，价格面议', '车在嘉兴闲一个礼拜，上海苏州方向，短驳也行，一车八百', '张家港有台 17 米 5 的板闲着，长期找活，价格好说'];
+  var si = 0, mic = H.qs('#mic');
+  function parse(t) {
+    var alias = { '宝山': '上海', '张家港': '苏州', '萧山': '杭州', '松江': '上海' }; var cities = H.CITIES.filter(function (c) { return c !== '方向不限'; });
+    var where = null; Object.keys(alias).forEach(function (a) { if (!where && t.indexOf(a) > -1) where = alias[a]; }); if (!where) cities.forEach(function (c) { if (!where && t.indexOf(c) > -1) where = c; });
+    f.where = where || f.where;
+    f.until = /长期|一直/.test(t) ? '长期' : /礼拜|一周|七天/.test(t) ? '一周内' : /两三天|三天|3 天/.test(t) ? '3 天内' : /明天/.test(t) ? '明天' : /今天/.test(t) ? '今天' : f.until;
+    var dirs = cities.filter(function (c) { return c !== f.where && t.indexOf(c) > -1; });
+    if (/哪都去|方向不限|都行/.test(t) && !dirs.length) f.dir = '方向不限'; else if (dirs.length) { f.dir = 'pick'; f.cities = dirs; } 
+    f.jobs = ['整车长途']; if (/短驳|市内/.test(t)) f.jobs.push('市内短驳'); if (/拼/.test(t)) f.jobs.push('拼车也行'); if (/长期|等/.test(t)) f.jobs.push('可等一两天');
+    var car = /一车\s*(\d+|八百|一千)/.exec(t), ton = /(\d+)\s*(一吨|块一吨)/.exec(t);
+    if (car) { f.price = '车'; f.priceN = ({ '八百': 800, '一千': 1000 })[car[1]] || +car[1]; } else if (ton) { f.price = '吨'; f.priceN = +ton[1]; } else { f.price = '面议'; f.priceN = ''; }
+    f.text = t;
+    H.qsa('#fWhere .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === f.where); });
+    H.qsa('#fUntil .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === f.until); });
+    H.qsa('#fDir .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === f.dir); }); H.qs('#fCities').style.display = f.dir === 'pick' ? '' : 'none';
+    H.qsa('#fCities .chip').forEach(function (c) { c.classList.toggle('on', f.cities.indexOf(c.dataset.c) > -1); });
+    H.qsa('#fJobs .chip').forEach(function (c) { c.classList.toggle('on', f.jobs.indexOf(c.dataset.v) > -1); });
+    H.qsa('#fPrice .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === f.price); }); H.qs('#priceRow').style.display = f.price === '面议' ? 'none' : ''; H.qs('#fPriceU').textContent = '元/' + f.price; H.qs('#fPriceN').value = f.priceN;
+  }
+  function say(text) {
+    H.qs('#asr').classList.add('on'); H.qs('#asrText').textContent = ''; mic.classList.add('rec');
+    var i = 0; var tm = setInterval(function () { H.qs('#asrText').textContent = text.slice(0, ++i); if (i >= text.length) { clearInterval(tm); mic.classList.remove('rec'); parse(text); state = 'ready'; renderCard(); H.qs('#screen').scrollTop = 0; H.toast('已填到上面的卡片，看一眼不对就改，对了就发'); } }, 40);
+  }
+  mic.onclick = function () { say(SAMPLES[si++ % SAMPLES.length]); };
+  H.qs('#ex').onclick = function () { say(SAMPLES[0]); };
+
+  renderCard();
+
+  H.notes('驾驶员端 · 发布闲置车（设计说明）', [
+    '闲置车与返程车的区别：<b>没有确定线路和时间</b>，有的是"车在哪、闲多久、愿意去哪、接什么活"。所以单独一页，字段全部是 chips，默认值按定位与常跑习惯填好，仍然是<b>一键发布</b>。',
+    '"闲到什么时候"决定自动失效：短期到点下架；<b>长期</b>的每天早 8 点问一次"还闲着吗"（服务通知 D3，卡片上直接点），未确认自动隐藏。这是闲置车信息不变成"僵尸信息"的关键。',
+    '价格默认<b>面议</b>：闲置车司机通常"有活就行"，货主端显示"价格面议 · 通常低于市场"；也可按吨 / 按车 / 按公里报一个数。',
+    '发布卡片下方直接给<b>附近用车需求</b>：闲置车"方向不限"天然匹配范围大，司机不用等货主打来，自己就能挑需求打电话。',
+    '三种运力类型统一在顶部切换：返程车（publish.html 一键 / 语音）、闲置车（本页）、顺路捎货（手动表单 ?kind=share，需填剩余吨位）。',
+  ]);
+})();
+</script>
+</body>
+</html>

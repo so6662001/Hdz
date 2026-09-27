@@ -25,6 +25,7 @@
   H.DRIVER_LINKS = [
     { key: 'home', label: '悟运·运力', href: 'home.html' },
     { key: 'publish', label: '发布运力', href: 'publish.html' },
+    { key: 'idle', label: '闲置车', href: 'publish-idle.html' },
     { key: 'form', label: '手动表单', href: 'publish-form.html' },
     { key: 'vehicle', label: '添加车辆', href: 'vehicle-add.html' },
     { key: 'needs', label: '沿线需求', href: 'needs.html' },
