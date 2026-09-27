@@ -133,10 +133,9 @@
   H.vehicleLine = function (v) { return v.len + ' ' + v.type + ' · 核载 ' + v.load + 't'; };
   H.equipLine = function (v, n) { return v.equip.slice(0, n || 3).join(' · ') + (v.equip.length > (n || 3) ? ' 等' : ''); };
   H.certBadges = function (drv, veh) {
-    var full = drv.certs.length >= 5;
+    // 轻平台：只保留两枚"真人真车"标识 + 一枚悟运履约数据标，不做证件分级
     var h = '<span class="badge">实名</span>';
     h += veh.verified ? '<span class="badge">车辆认证</span>' : '<span class="badge pending">车辆待核验</span>';
-    h += full ? '<span class="badge">四证齐全</span>' : '';
     if (drv.wyOrders >= 50) h += '<span class="badge brand">悟运履约 ' + drv.wyOrders + ' 单</span>';
     return h;
   };
@@ -163,14 +162,13 @@
   /* ---------- 查看电话（三端统一的风险提示 → 号码 → 联系结果反馈） ---------- */
   H.unlockPhone = function (post, mode) {
     var d = H.DRIVERS[post.driver], v = H.VEHICLES[post.vehicle];
-    var step1 = '<div class="notice red"><span class="ic"></span><div><b>货袋子只提供信息展示，不参与运输交易、不收取运费、不做担保。</b>请自行核验证件、签订运输合同并投保货运险。</div></div>' +
+    var step1 = '<div class="notice red"><span class="ic"></span><div><b>货袋子只做信息展示，运费、合同、承运责任都在你和司机之间。</b>平台不收运费、不派单、不做担保。</div></div>' +
       '<ul class="list-check mt12">' +
-      '<li>该司机已通过 <b>实名 + 人脸</b> 核验，证件：' + d.certs.join('、') + '</li>' +
-      '<li>车辆 ' + v.plate + '（完整车牌联系后核对） ' + (v.verified ? '行驶证与道路运输证已核验' : '<span class="hot-c">证件核验中</span>') + '</li>' +
-      '<li>装车时请核对 <b>人、车、证</b> 一致，提货凭证只交给核对无误的车辆</li>' +
-      '<li>建议使用平台 <b>运输协议模板</b>，货值高请一键购买货运险（保险公司承保）</li>' +
-      '<li>遇到问题请在平台 <b>举报</b>，我们会核实并处理该账号</li></ul>' +
-      '<label class="checkline mt12"><input type="checkbox" id="agreeRisk"> 我已知悉：平台不参与交易，运输风险由我与承运方自行约定与承担</label>';
+      '<li>司机已 <b>实名 + 人脸</b>；车辆 ' + v.plate + ' ' + (v.verified ? '<b>行驶证已核验</b>' : '<span class="hot-c">车辆待核验</span>') + '（完整车牌联系后核对）</li>' +
+      '<li>装车时核对 <b>人、车、证</b> 一致，提货凭证只交给核对无误的车辆</li>' +
+      '<li>可用 <b>运输协议模板</b>；货值高建议投保货运险（保险公司承保，平台不收保费）</li>' +
+      '<li>有问题请 <b>举报</b>，平台提供联系记录并处理该账号</li></ul>' +
+      '<label class="checkline mt12"><input type="checkbox" id="agreeRisk"> 我已知悉：平台不参与交易，运输风险由我与司机自行约定与承担</label>';
     var step2 = '<div class="phone-reveal"><div class="sub">' + d.name + ' · ' + v.plate + ' · ' + H.vehicleLine(v) + '</div><div class="num">' + d.phoneFull + '</div><div class="sub">本次查看已记录，便于纠纷时追溯 · 该运力已有 <b>' + (post.calls + 1) + '</b> 位货主查看</div></div>' +
       '<div class="divider"></div><div class="small t2" style="text-align:center">联系后请反馈结果，帮助信息保持真实</div>' +
       '<div class="feedback-chips"><span class="chip sm" data-fb="deal">已谈成</span><span class="chip sm" data-fb="talk">在沟通</span><span class="chip sm" data-fb="noanswer">未接通</span><span class="chip sm" data-fb="gone">车已被订走</span><span class="chip sm" data-fb="fake">信息不实</span></div>';

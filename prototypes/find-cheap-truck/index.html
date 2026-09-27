@@ -74,8 +74,8 @@
 <div class="wrap">
   <div class="top">
     <h1>找特价车 <span class="tj">返程车 · 闲置车 · 专装钢材</span></h1>
-    <p>驾驶员在<b>悟运小程序</b>发布返程车、闲置车、顺路捎货信息；卖家、买家在<b>货袋子 PC 端、微信小程序、H5</b> 三端找车并直接联系司机。平台只做信息展示与身份核验，<b>不参与交易、不接单、不收运费</b>。本页为高保真 HTML 原型总览，所有页面可点击交互（纯前端、模拟数据）。</p>
-    <div class="pills"><span>驾驶员端 3 页</span><span>PC 找车 2 页</span><span>小程序 / H5 找车 2 页 × 2 壳</span><span>运营后台 1 页 7 视图</span><span>统一的"查看电话 → 风险提示 → 留痕 → 反馈"流程</span><span>5 条运力终止路径</span></div>
+    <p>驾驶员在<b>悟运小程序</b>发布返程车、闲置车、顺路捎货信息；卖家、买家在<b>货袋子 PC 端、微信小程序、H5</b> 三端找车并直接联系司机。这是一个<b>双方信息互动板块</b>：平台只做信息展示与真人真车核验，<b>不参与交易、不派单、不收运费、不做承运人、不做网络货运平台</b>。本页为高保真 HTML 原型总览，所有页面可点击交互（纯前端、模拟数据）。</p>
+    <div class="pills"><span>驾驶员端 4 页（一键 / 语音发布）</span><span>PC 找车 2 页</span><span>小程序 / H5 找车 2 页 × 2 壳</span><span>运营后台 1 页 3 视图（轻量）</span><span>统一的"查看电话 → 风险提示 → 留痕 → 反馈"流程</span><span>5 条运力终止路径</span></div>
   </div>
 
   <h2>原型页面 <small>点击卡片进入可交互页面；每页右上角有"设计说明"面板</small></h2>
@@ -83,7 +83,7 @@
   <div class="role-hd"><span class="ic bg-wy">司机</span><h3>驾驶员端 · 悟运小程序</h3><span>发布运力、管理状态、添加车辆</span></div>
   <div class="grid3">
     <a class="pcard" href="driver/home.html"><div class="thumb m"><span class="role tag wy">悟运 · Tab「运力」</span><iframe src="driver/home.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>我的运力（状态管理）</h3><p>当前运单"卸货后一键发返程"；展示中 / 已结束列表；到期倒计时；已接单、已出发、延长、下架、24 小时未确认自动隐藏；曝光与来电数据。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
-    <a class="pcard" href="driver/publish.html"><div class="thumb m"><span class="role tag wy">悟运 · 发布</span><iframe src="driver/publish.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>发布运力（3 步 · 30 秒）</h3><p>选场景（返程 / 闲置 / 顺路）→ 线路时间（定位、多选目的地、快捷时间、自动到期）→ 车辆价格（车辆卡选择、市场参考价 + 折扣快捷键、短句 + 语音说明）→ 预览发布 → 分享卡片。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
+    <a class="pcard" href="driver/publish.html"><div class="thumb m"><span class="role tag wy">悟运 · 发布</span><iframe src="driver/publish.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>发布运力（一键 / 语音 · 不填表）</h3><p><b>一键发布</b>：按当前运单 / 上次发布 / 常跑线路 / 闲置模板预填好整张卡片，点一下即发布，卡片上可局部改时间、换车、改价；<b>语音发布</b>：按住说一句"明天早上从嘉兴回上海，17 米 5 的板有鞍座，30 块一吨"，自动解析成结构化信息，缺的用 chips 补齐。卸货后自动准备返程车、可开自动发布。<a href="driver/publish-form.html" style="color:var(--brand)">手动表单</a>只作兜底。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
     <a class="pcard" href="driver/vehicle-add.html"><div class="thumb m"><span class="role tag wy">悟运 · 车辆</span><iframe src="driver/vehicle-add.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>添加车辆（拍证自动填）</h3><p>行驶证 OCR 自动识别；车型图标、板长快捷；装钢材配置（鞍座、篷布、12m 长材、多点装卸、定位）；3 张车辆照片；证件核验；一键生成车辆说明。</p><div class="acts"><span class="btn wy sm">打开</span></div></div></a>
   </div>
 
@@ -100,16 +100,28 @@
     <a class="pcard" href="shipper/m-detail.html?id=p1001&shell=mp"><div class="thumb m"><span class="role tag brand">小程序 · 详情</span><iframe src="shipper/m-detail.html?id=p1001&shell=mp&embed=1" loading="lazy"></iframe></div><div class="body"><h3>运力详情（小程序 / H5）</h3><p>标签 → 线路 → 价格对比 → 车辆照片横滑与配置 → 司机卡 → 状态轨迹 → 联系前确认；底部收藏 / 举报 / 分享 / 查看电话。</p><div class="acts"><span class="btn sm">打开</span></div></div></a>
   </div>
 
-  <div class="role-hd"><span class="ic bg-dark">运营</span><h3>运营后台 · 货袋子</h3><span>信任生产线：核验、举报、监控、信用、参考价、规则</span></div>
+  <div class="role-hd"><span class="ic bg-dark">运营</span><h3>运营后台 · 货袋子（轻量）</h3><span>只做三件事：举报处置、核验兜底、黑名单</span></div>
   <div class="grid2">
-    <a class="pcard" href="admin/console.html"><div class="thumb pc"><span class="role tag gray">后台 · 概览</span><iframe src="admin/console.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>运营后台（单页多视图）</h3><p>概览（KPI、发布 / 查看电话趋势、漏斗、终止原因分布、线路供需）；核验队列（自动核验兜底人工、通过 / 驳回补件）；举报处置（2h SLA、五级处置、协助取证包）；运力监控；司机信用五级；线路参考价；生命周期与反作弊规则开关。</p><div class="acts"><span class="btn sm" style="background:#2b3040">打开</span></div></div></a>
-    <div class="pcard" style="justify-content:center;padding:22px 24px;color:var(--text-2);font-size:13px;line-height:1.8"><b style="color:var(--text);font-size:15px">后台为什么重要</b>平台不做交易，能给找车方的"安全感"全部来自后台的生产能力：证件核验多快、举报处理多快、失效信息能否及时消失、坏司机能否被识别并限制。这些指标（人工复核 ≤ 10 分钟、举报 2 小时响应、信息有效率 ≥ 90%）应作为板块的运营 OKR。</div>
+    <a class="pcard" href="admin/console.html"><div class="thumb pc"><span class="role tag gray">后台 · 举报处置</span><iframe src="admin/console.html?embed=1" loading="lazy"></iframe></div><div class="body"><h3>运营后台（单页 3 视图）</h3><p><b>举报处置</b>（默认页；处置只有 恢复 / 下架 / 封号 三种，纠纷时向举报人提供联系记录 PDF）；<b>核验兜底</b>（自动核验不一致的少量人工看一眼；规则写死只读展示触发次数）；<b>黑名单</b>（手机号 / 身份证 / 车牌三要素，同步冻结悟运账号）。没有订单、结算、派单、信用评级、规则开关。</p><div class="acts"><span class="btn sm" style="background:#2b3040">打开</span></div></div></a>
+    <div class="pcard" style="justify-content:center;padding:22px 24px;color:var(--text-2);font-size:13px;line-height:1.8"><div><b style="color:var(--text);font-size:15px;display:block;margin-bottom:6px">为什么这么轻</b>信任不是靠"平台管得多"来的，而是靠<b>真人真车核验 + 悟运真实履约数据 + 信息自动失效 + 联系留痕</b>四件系统自动完成的事。人工只兜底：有人举报就处理、自动核验没过的看一眼、坏人拉黑。按当前数据量一名兼职运营每周 3~4 小时即可维护——这是"不做重"的验证指标；一旦人工工时明显上升，说明规则要调，而不是加人加功能。</div></div>
   </div>
+
+  <h2>轻平台原则 <small>只做双方信息互动；不做网络货运平台、不做承运人，但要把信任解决掉</small></h2>
+  <table>
+    <tr><th style="width:120px"></th><th>平台做</th><th>平台坚决不做</th></tr>
+    <tr><td><b>信息</b></td><td>司机发运力、货主看运力、查看电话、联系结果反馈；信息按出发时间自动失效。</td><td>不发布货源撮合成交、不派单、不确认成交、不做在线接单。</td></tr>
+    <tr><td><b>钱</b></td><td>永远不经手。</td><td>不收运费、不代收代付、不结算、不开运输发票、不收保费。</td></tr>
+    <tr><td><b>身份</b></td><td>司机实名 + 人脸；车辆行驶证核验；一车一账号；复用悟运履约数据作为公开信用。</td><td>不做证件分级（"四证齐全"之类）、不做司机等级体系、不代替货主做尽调。</td></tr>
+    <tr><td><b>工具</b></td><td>运输协议模板（双方自行签）、货运险入口（保险公司承保出单）、联系前风险提示。</td><td>不做平台担保、不做先行赔付、不做纠纷调解与责任认定。</td></tr>
+    <tr><td><b>人工</b></td><td>举报处置（恢复 / 下架 / 封号）、自动核验不一致的兜底复核、黑名单。</td><td>不做运力监控大盘、不做规则开关面板、不做参考价人工校准、不做客服介入交易。</td></tr>
+    <tr><td><b>出口</b></td><td>货主明确要"有人负责、要发票"时，跳转到合作的持牌网络货运平台（既有规划 L2 档）。</td><td>货袋子自己不持牌、不承接。</td></tr>
+  </table>
+  <p style="margin-top:10px;font-size:13px;color:var(--text-2);line-height:1.8">信任由四件<b>系统自动完成</b>的事解决：真人真车核验、悟运真实履约数据、信息自动失效（到期 / 24h 确认 / 反馈隐藏）、联系留痕。任何一项需要人工持续投入的设计，都视为"做重"的信号。</p>
 
   <h2>业务流程 <small>平台居中做信息与信任，不碰交易</small></h2>
   <div class="flow">
-    <div class="st"><div class="n bg-wy">1</div><h4>司机发布运力</h4><p>悟运运单卸货后一键发返程 / 手动发布；定位校验出发地；选车、定价（参考市场价）、说明。</p><div class="who">悟运小程序</div></div>
-    <div class="st"><div class="n bg-dark">2</div><h4>平台核验与展示</h4><p>实名 + 人脸、四证、一车一账号、车牌 OCR；核验通过打认证标识；按出发时间设置自动下架。</p><div class="who">后台 / 第三方核验接口</div></div>
+    <div class="st"><div class="n bg-wy">1</div><h4>司机发布运力</h4><p>悟运运单卸货后弹出预填卡片一键发布，或按住说一句话语音发布；定位校验出发地；价格按策略自动算。</p><div class="who">悟运小程序</div></div>
+    <div class="st"><div class="n bg-dark">2</div><h4>自动核验与展示</h4><p>实名 + 人脸、行驶证 OCR 与车牌照片一致、一车一账号；自动通过打"实名 / 车辆认证"；按出发时间自动下架。</p><div class="who">第三方核验接口（人工只兜底）</div></div>
     <div class="st"><div class="n bg-brand">3</div><h4>货主找车</h4><p>PC / 小程序 / H5 按线路时间车型筛选；看司机履约、评价、市场价对比；订阅线路。</p><div class="who">货袋子三端</div></div>
     <div class="st"><div class="n bg-brand">4</div><h4>查看电话（留痕）</h4><p>登录 → 风险提示确认 → 显示号码并记录 → 联系结果反馈（谈成 / 未接通 / 已订走 / 不实）。</p><div class="who">货袋子三端</div></div>
     <div class="st"><div class="n bg-ok">5</div><h4>线下直联成交</h4><p>双方自行签协议、投货运险、装车核验人车证、运费直付；平台不接单不结算。</p><div class="who">司机 ⇄ 货主</div></div>
@@ -137,12 +149,12 @@
   <h2>信任与风控设计 <small>平台不做交易，但要把"敢不敢打这个电话"解决掉</small></h2>
   <table>
     <tr><th style="width:150px">层</th><th>做法</th><th style="width:300px">在原型中的体现</th></tr>
-    <tr><td><b>身份真实</b></td><td>司机实名 + 人脸；驾驶证、从业资格证、行驶证、道路运输证四证核验（第三方接口）；一车一账号；车牌 OCR 与照片一致性。</td><td>徽章：实名 / 车辆认证 / 四证齐全；车辆照片 3 张（车头含车牌）。</td></tr>
+    <tr><td><b>身份真实</b></td><td>司机实名 + 人脸（第三方接口）；车辆行驶证 OCR 与车牌照片一致；一车一账号。只核"真人真车"，不做证件分级。</td><td>徽章只有两枚：实名 / 车辆认证；车辆照片 3 张（车头含车牌）。</td></tr>
     <tr><td><b>信息真实</b></td><td>发布时 GPS 与出发地一致性校验；自动到期；24h 确认；反馈驱动隐藏；信息有效率指标。</td><td>"定位一致"标签、倒计时、状态轨迹、信息有效率。</td></tr>
     <tr><td><b>履约信用</b></td><td>复用悟运运单履约数据（真实完成的运输）；找车用户联系后评价；投诉次数公示。</td><td>悟运履约 N 单 / 好评率 / 被投诉次数 / 评价列表。</td></tr>
     <tr><td><b>联系留痕</b></td><td>查看电话需登录（企业认证优先）；每次查看记录时间、双方身份；司机可选择"只对认证企业展示电话"。</td><td>查看电话弹层第二步提示"本次查看已记录"。</td></tr>
     <tr><td><b>风险前置</b></td><td>联系前强制阅读并勾选风险提示；详情页固定"联系前请确认"；提供运输协议模板与货运险入口（保险公司承保，平台不收保费）。</td><td>红色边界声明、协议模板、货运险报价弹窗。</td></tr>
-    <tr><td><b>事后处置</b></td><td>举报通道（7 类原因）；核实中标记；封号 / 黑名单 / 关联悟运账号处置；协助提供联系记录等凭证。</td><td>举报弹层；FAQ"车出了问题找谁"。</td></tr>
+    <tr><td><b>事后处置</b></td><td>举报通道；核实中标记；处置只有 恢复 / 下架 / 封号（同步悟运）三种；纠纷时向举报人提供联系记录。</td><td>举报弹层；FAQ"车出了问题找谁"；后台举报处置。</td></tr>
     <tr><td><b>平台边界</b></td><td>不签运输合同、不收运费、不派单、不开运输发票 → 不构成网络货运承运人，不承担承运人责任；用户协议与页面声明反复明确。</td><td>每页脚部 / 弹层内的边界声明。</td></tr>
   </table>
 
@@ -165,8 +177,8 @@
   <div class="qa">
     <h3><span class="q">Q2</span>找车方会不会担心有问题？</h3>
     <div class="ans">一定会，而且这种担心是合理的：一车钢材货值 10～15 万元，行业经典风险是骗货、放鸽子、坐地起价、货损。找车方真正在问的是三件事：<b>这个人是真的吗、这条信息还有效吗、出事有没有人管</b>。
-      <ul><li>真人真车：实名人脸 + 四证核验 + 车辆照片 + 一车一账号 + 定位一致，做到"比微信群里陌生司机可信得多"。</li><li>信息有效：自动到期、24h 确认、反馈驱动隐藏、信息有效率，做到"打过去基本有人接、车基本还在"。</li><li>有人管：联系留痕、举报处置、黑名单、协助取证；同时把风险动作前置为"三件事"——核人车证、签协议模板、投货运险。</li></ul>
-      <div class="verdict">结论：找车方的担心不能靠"平台担保"解决（那会把货袋子变成承运人），而要靠<b>核验 + 透明 + 留痕 + 工具</b>，把陌生交易的风险降到与"熟车"相当，同时明确边界。</div>
+      <ul><li>真人真车：实名人脸 + 行驶证核验 + 车辆照片 + 一车一账号 + 定位一致，做到"比微信群里陌生司机可信得多"。</li><li>信息有效：自动到期、24h 确认、反馈驱动隐藏、信息有效率，做到"打过去基本有人接、车基本还在"。</li><li>有人管：联系留痕、举报处置、黑名单、提供联系记录；同时把风险动作前置为"三件事"——核人车证、签协议模板、投货运险。</li></ul>
+      <div class="verdict">结论：找车方的担心不能靠"平台担保"解决（那会把货袋子变成承运人），而要靠<b>核验 + 透明 + 留痕 + 工具</b>四件系统自动完成的事，把陌生交易的风险降到与"熟车"相当，同时明确边界。这四件事都不需要平台碰钱、碰单，所以能在"轻"的前提下解决信任。</div>
     </div>
   </div>
   <div class="qa">
