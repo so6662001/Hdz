@@ -436,6 +436,47 @@ textarea.input { height: auto; min-height: 80px; padding: 10px 12px; resize: non
 .phone-reveal .sub { font-size: 12px; color: var(--muted); }
 .feedback-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
 .chip.warn.on { background: var(--warn-soft); color: #b47600; border-color: #e0a800; }
+.sheet .sh-ft { position: sticky; bottom: 0; background: #fff; }
+
+/* 选址（我司位置 / 常用 / 最近 / 搜索 / 地图选点） */
+.ap-search { height: 40px; font-size: 14px; }
+.ap-sug { background: #fff; border: 1px solid var(--line); border-radius: 10px; margin-top: 6px; box-shadow: var(--shadow); overflow: hidden; }
+.ap-sug .ap-s { padding: 8px 12px; border-bottom: 1px solid var(--line); cursor: pointer; display: flex; flex-direction: column; gap: 1px; font-size: 13px; }
+.ap-sug .ap-s:last-child { border-bottom: 0; }
+.ap-sug .ap-s:hover { background: var(--brand-soft); }
+.ap-quick { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.ap-me, .ap-here { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; cursor: pointer; font-size: 13px; }
+.ap-me { background: linear-gradient(120deg, #eef3ff, #f6f9ff); border: 1px solid #c9d6ff; }
+.ap-me b { color: var(--brand); display: block; }
+.ap-here { background: #f7f8fa; border: 1px solid var(--line); }
+.ap-me .ic, .ap-here .ic { width: 34px; height: 34px; border-radius: 10px; background: var(--brand); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none; }
+.ap-here .ic { background: var(--ok); }
+.ap-me .col, .ap-here .col { flex: 1; }
+.ap-me .xs, .ap-here .xs { white-space: normal; }
+.ap-sec { display: flex; align-items: center; gap: 8px; margin-top: 14px; margin-bottom: 6px; }
+.ap-sec .brand-c { cursor: pointer; }
+.ap-book .chip { height: 30px; font-size: 12px; }
+.ap-book .chip small { color: var(--muted); margin-left: 4px; }
+.ap-tag { font-style: normal; font-size: 10px; background: #e9ebf0; color: var(--text-2); border-radius: 3px; padding: 0 4px; margin-right: 5px; }
+.ap-tag.my { background: var(--brand-soft); color: var(--brand); }
+.ap-cities { margin-bottom: 8px; }
+.mapbox { position: relative; height: 210px; border-radius: 12px; overflow: hidden; background: linear-gradient(160deg, #eef4e9, #f4f1e6 60%, #e9eef4); border: 1px solid var(--line); cursor: crosshair; user-select: none; }
+.mapbox svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mapbox .road { fill: none; stroke: #fff; stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.mapbox .river { fill: none; stroke: #b9d6f2; stroke-width: 6; vector-effect: non-scaling-stroke; opacity: .8; }
+.mapbox .dist { position: absolute; transform: translate(-50%, -50%); font-size: 11px; color: #8a8f99; pointer-events: none; letter-spacing: 1px; }
+.mapbox .poi { position: absolute; transform: translate(-50%, -100%); pointer-events: none; display: flex; flex-direction: column; align-items: center; }
+.mapbox .poi i { width: 9px; height: 9px; border-radius: 50%; background: #fff; border: 2px solid var(--text-2); order: 2; }
+.mapbox .poi em { font-style: normal; font-size: 10px; color: var(--text); background: rgba(255,255,255,.85); padding: 1px 5px; border-radius: 4px; white-space: nowrap; margin-bottom: 2px; order: 1; }
+.mapbox .poi.my i { border-color: var(--brand); background: var(--brand); }
+.mapbox .poi.my em { color: var(--brand); font-weight: 700; }
+.mapbox .pin { position: absolute; width: 18px; height: 18px; transform: translate(-50%, -100%); background: var(--hot); border-radius: 50% 50% 50% 0; rotate: -45deg; box-shadow: 0 2px 6px rgba(0,0,0,.25); pointer-events: none; }
+.mapbox .pin::after { content: ''; position: absolute; inset: 5px; background: #fff; border-radius: 50%; }
+.mapbox .cityname { position: absolute; right: 8px; top: 6px; font-size: 11px; color: var(--muted); background: rgba(255,255,255,.8); padding: 1px 6px; border-radius: 4px; }
+.ap-picked { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; min-height: 22px; flex-wrap: wrap; }
+.addr-quick { margin-top: 6px; gap: 6px; }
+.addr-quick .chip.sm { height: 24px; font-size: 11px; padding: 0 8px; }
+.addr-quick .chip.my { border-color: #c9d6ff; color: var(--brand); background: #f3f6ff; }
 
 /* 意向（司机一键"有意向"，货主看到"谁有意向、先打给谁"） */
 .post-card .intent-bar { display: flex; gap: 6px; font-size: 11px; color: var(--ok); background: var(--ok-soft); border-radius: 6px; padding: 5px 8px; margin-top: 8px; flex-wrap: wrap; }

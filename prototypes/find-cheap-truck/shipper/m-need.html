@@ -92,8 +92,9 @@
 
         <div class="form" id="form">
           <div class="field">
-            <div class="lb"><span class="req">线路</span><span class="tip">车来哪装 → 送到哪</span></div>
-            <div class="rt"><div class="c"><label>提货地</label><b id="fFrom">嘉兴</b><input id="fFromD" placeholder="区县 / 仓库"></div><span class="sw">⇄</span><div class="c"><label>送货地</label><b id="fTo">上海</b><input id="fToD" placeholder="区县 / 工地"></div></div>
+            <div class="lb"><span class="req">线路</span><span class="tip">点城市名可搜地址 / 地图选点</span></div>
+            <div class="rt" id="routeRt"><div class="c" data-c="from"><label>提货地 <span id="fFromTag"></span></label><b id="fFrom">嘉兴</b><input id="fFromD" placeholder="区县 / 仓库"></div><span class="sw">⇄</span><div class="c" data-c="to"><label>送货地 <span id="fToTag"></span></label><b id="fTo">上海</b><input id="fToD" placeholder="区县 / 工地"></div></div>
+            <div id="routeQ"><div class="xs muted mt8">提货地快捷</div><div id="fFromQ"></div><div class="xs muted mt8">送货地快捷</div><div id="fToQ"></div></div>
           </div>
           <div class="field">
             <div class="lb"><span class="req">装车时间</span><span class="tip">时间到自动下架</span></div>
@@ -171,7 +172,7 @@
   H.qs('#fEquip').innerHTML = H.EQUIP.slice(0, 6).map(function (e) { return '<span class="chip" data-v="' + e.name + '">' + e.name + '</span>'; }).join('');
 
   function syncUI() {
-    H.qs('#fFrom').textContent = f.from; H.qs('#fTo').textContent = f.to; H.qs('#fFromD').value = f.fromD; H.qs('#fToD').value = f.toD;
+    H.qs('#fFrom').textContent = f.from; H.qs('#fTo').textContent = f.to; H.qs('#fFromD').value = f.fromD; H.qs('#fToD').value = f.toD; syncTags();
     H.qsa('#fDay .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === f.day); });
     H.qsa('#fSlot .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === f.slot || (c.dataset.v === '具体' && /\d/.test(f.slot) && !/上午|下午/.test(f.slot))); });
     H.qsa('#fSteel .chip').forEach(function (c) { c.classList.toggle('on', c.dataset.v === f.steel); });
@@ -203,20 +204,28 @@
   H.qs('#mstrip').onclick = function () { matchSheet(lastMatch); };
 
   function applyOrder(i) {
-    var o = ORDERS[i]; if (!o) { f.fromD = ''; f.toD = ''; f.pieces = ''; f.desc = ''; syncUI(); renderMatch(); return; }
+    var o = ORDERS[i]; if (!o) { f.fromD = ''; f.toD = ''; f.fromSrc = ''; f.toSrc = ''; f.pieces = ''; f.desc = ''; syncUI(); renderMatch(); return; }
     f.from = o.from; f.fromD = o.fromD; f.to = o.to; f.toD = o.toD; f.steel = o.steel; f.tons = o.tons; f.pieces = o.pieces; f.desc = o.desc;
+    f.fromSrc = 'order'; f.toSrc = (o.to === H.MY_COMPANY.city && /宝山/.test(o.toD)) ? 'company' : 'order';
     f.whole = +o.tons >= 20; f.type = +o.tons >= 20 ? '平板半挂' : ''; f.len = o.steel === '热卷' && +o.tons > 30 ? '17.5m' : ''; f.equip = (AUTO_EQUIP[o.steel] || []).slice();
     f.budget = o.steel === '螺纹钢' && +o.tons < 15 ? 1200 : H.refPrice(o.from, o.to)[0]; f.unit = o.steel === '螺纹钢' && +o.tons < 15 ? '车' : '吨';
     H.qs('#autoTip').style.display = ''; syncUI(); renderMatch();
   }
   H.qsa('#orders .oc').forEach(function (c) { c.onclick = function () { H.qsa('#orders .oc').forEach(function (x) { x.classList.remove('on'); }); c.classList.add('on'); applyOrder(+c.dataset.o); }; });
   H.qs('#fFrom').onclick = function () { cityPick('from'); }; H.qs('#fTo').onclick = function () { cityPick('to'); };
-  H.qs('.rt .sw').onclick = function () { var a = f.from, b = f.fromD; f.from = f.to; f.fromD = f.toD; f.to = a; f.toD = b; syncUI(); renderMatch(); };
-  function cityPick(k) {
-    H.sheet({ title: k === 'from' ? '提货地（车来哪装）' : '送货地', body: '<div class="chips">' + H.CITIES.filter(function (c) { return c !== '方向不限'; }).map(function (c) { return '<span class="chip' + (f[k] === c ? ' on' : '') + '" data-c="' + c + '">' + c + '</span>'; }).join('') + '</div>',
-      onReady: function (root, close) { H.qsa('[data-c]', root).forEach(function (c) { c.onclick = function () { f[k] = c.dataset.c; close(); syncUI(); renderMatch(); }; }); } });
+  H.qs('.rt .sw').onclick = function () { var a = f.from, b = f.fromD, c = f.fromSrc; f.from = f.to; f.fromD = f.toD; f.fromSrc = f.toSrc; f.to = a; f.toD = b; f.toSrc = c; syncUI(); renderMatch(); };
+  /* 选址：搜索 / 我司位置 / 当前位置 / 常用 / 最近 / 地图选点 */
+  function applyAddr(k, a) {
+    if (k === 'from') { f.from = a.city; f.fromD = a.detail; f.fromSrc = a.src; } else { f.to = a.city; f.toD = a.detail; f.toSrc = a.src; }
+    H.qsa('#orders .oc').forEach(function (x) { x.classList.toggle('on', x.dataset.o === '-1'); });
+    syncUI(); renderMatch();
+    H.toast((k === 'from' ? '提货地' : '送货地') + '：' + a.city + (a.detail ? ' · ' + a.detail : ''));
   }
-  H.qs('#fFromD').oninput = function () { f.fromD = this.value; }; H.qs('#fToD').oninput = function () { f.toD = this.value; };
+  function cityPick(k) { H.addrPicker({ kind: k, city: f[k], detail: k === 'from' ? f.fromD : f.toD, onPick: function (a) { applyAddr(k, a); } }); }
+  H.qs('#fFromQ').innerHTML = H.addrQuick('from'); H.qs('#fToQ').innerHTML = H.addrQuick('to');
+  H.bindAddrQuick(H.qs('#routeQ'), applyAddr);
+  function syncTags() { H.qs('#fFromTag').innerHTML = f.fromSrc ? H.addrSrcTag(f.fromSrc) : ''; H.qs('#fToTag').innerHTML = f.toSrc ? H.addrSrcTag(f.toSrc) : ''; }
+  H.qs('#fFromD').oninput = function () { f.fromD = this.value; f.fromSrc = ''; syncTags(); }; H.qs('#fToD').oninput = function () { f.toD = this.value; f.toSrc = ''; syncTags(); };
   H.qs('#fTons').oninput = function () { f.tons = this.value; renderMatch(); }; H.qs('#fPieces').oninput = function () { f.pieces = this.value; };
   H.qs('#fDesc').oninput = function () { f.desc = this.value; }; H.qs('#fBudget').oninput = function () { f.budget = this.value; };
   H.qsa('#fDay .chip').forEach(function (c) { c.onclick = function () { f.day = c.dataset.v; if (f.day === '日期') H.toast('原型：日期选择器'); syncUI(); renderMatch(); }; });
@@ -237,8 +246,8 @@
     var scan = t; cities.forEach(function (c) { var i = scan.indexOf(c); if (i > -1) found.push({ c: c, i: i }); });
     Object.keys(alias).forEach(function (a) { var i = scan.indexOf(a); if (i > -1 && !found.some(function (x) { return x.c === alias[a] && Math.abs(x.i - i) < 4; })) found.push({ c: alias[a], i: i, d: a }); });
     found.sort(function (a, b) { return a.i - b.i; });
-    if (found[0]) { f.from = found[0].c; f.fromD = found[0].d || ''; }
-    if (found[1]) { f.to = found[1].c; f.toD = found[1].d || ''; }
+    if (found[0]) { f.from = found[0].c; f.fromD = found[0].d || ''; f.fromSrc = ''; }
+    if (found[1]) { f.to = found[1].c; f.toD = found[1].d || ''; f.toSrc = /宝山/.test(f.toD) && f.to === '上海' ? 'company' : ''; }
     f.day = /明天/.test(t) ? '明天' : /后天/.test(t) ? '后天' : '今天';
     f.slot = /早上|上午/.test(t) ? '上午 8:00-12:00' : /下午/.test(t) ? '下午 13:00-18:00' : /晚上|傍晚/.test(t) ? '17:00-21:00' : '全天';
     var st = H.STEELS.filter(function (s) { return s.split('/').some(function (k) { return t.indexOf(k.replace(/（.*）/, '')) > -1; }); })[0] || (/镀锌|冷轧/.test(t) ? '冷轧/镀锌' : /卷/.test(t) ? '热卷' : f.steel);
@@ -344,6 +353,7 @@
   H.notes((shell === 'h5' ? 'H5 端' : '小程序端') + ' · 用车需求（设计说明）', [
     '入口：找顺路车列表页"没找到合适的车？发布用车需求"、订单详情"找车"、小程序消息通知。与 PC 同一套数据与匹配规则。',
     '<b>三种填法</b>：从订单带入（线路、货物、装备自动填）/ 按住说一句（规则解析填表）/ 手动 chips。目标是到货现场 30 秒发完。',
+    '<b>线路不用手打（v0.5）</b>：提货地 / 送货地各一排快捷 chips——「在我司装 / 送到我司」「◎ 当前位置」、常用仓库、「地图选点 / 更多」；点城市名打开选址弹层：搜索、我司位置（已认证）、当前位置、常用 / 最近、城市切换 + 示意地图点选（吸附仓库 / 市场）。选完字段上方出现来源标签（我司位置 / 当前位置 / 订单地址…）。',
     '底部吸底的"<b>N 台顺路车现在就匹配</b>"随填随变，点开就是带匹配理由的车卡片，可直接查看电话，不必等发布。',
     '发布成功弹层同时给两条路：现在能打的车 + 已推送给 N 位司机（他们会主动打来）；提醒接电话时核对车牌。',
     '「我的需求」：<b>有意向的司机</b>（姓氏 + 车牌 + 悟运履约 + 参考价 + 一句话，「先打给他」只是联系顺序）、谁查看了我的电话、匹配车数、24h 确认、已找到车、延长、下架、再发一次，与司机端"我的运力"对称。',

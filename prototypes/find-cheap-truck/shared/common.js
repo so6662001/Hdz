@@ -431,6 +431,107 @@
     }
   };
 
+  /* ---------- 选址：我司位置 / 常用 / 最近 / 搜索 / 地图选点 ----------
+     opts: { kind: 'from'|'to', city, detail, mode: 'pc'|null, onPick(addr) }
+     addr: { city, detail, name, x, y, src }  src: company|book|recent|here|search|map|city */
+  H.addrLabel = function (kind) { return kind === 'from' ? '提货地（车来哪装）' : '送货地'; };
+  H.addrPicker = function (opts) {
+    var mode = opts.mode, kind = opts.kind, cities = H.CITIES.filter(function (c) { return c !== '方向不限'; });
+    var city = opts.city && cities.indexOf(opts.city) > -1 ? opts.city : '上海';
+    var sel = null;  // 当前在地图上选中的点
+    var me = H.MY_COMPANY;
+    var body =
+      '<input class="input ap-search" id="apQ" placeholder="搜仓库 / 市场 / 工地 / 路名，如「宝钢大仓」">' +
+      '<div class="ap-sug" id="apSug" style="display:none"></div>' +
+      '<div class="ap-picked" id="apPicked"><span class="muted">还没有选点 · 下面点一下就行</span></div>' +
+      '<div class="ap-quick">' +
+        '<div class="ap-me" data-pick="company"><span class="ic">司</span><div class="col" style="min-width:0"><b>' + (kind === 'to' ? '送到我司' : '在我司装货') + ' · ' + me.name + '</b><span class="xs muted">' + me.addr + ' · ' + me.hours + '</span></div><span class="tag ok">已认证</span></div>' +
+        (mode === 'pc' ? '' : '<div class="ap-here" data-pick="here"><span class="ic">◎</span><div class="col"><b>当前位置</b><span class="xs muted">' + H.HERE.city + ' · ' + H.HERE.detail + '</span></div><span class="xs brand-c">使用 ›</span></div>') +
+      '</div>' +
+      '<div class="ap-sec"><span class="small b">常用地址</span><span class="xs muted">按使用次数</span><span class="sp"></span><span class="xs brand-c" data-manage>管理</span></div>' +
+      '<div class="chips ap-book">' + H.ADDR_BOOK.filter(function (a) { return a.tag !== '最近'; }).map(function (a) { return '<span class="chip" data-book="' + a.id + '"><i class="ap-tag ' + (a.tag === '我司' ? 'my' : '') + '">' + a.tag + '</i>' + a.name + ' <small>' + a.city + '</small></span>'; }).join('') + '</div>' +
+      '<div class="ap-sec mt8"><span class="small b">最近用过</span></div>' +
+      '<div class="chips ap-book">' + H.ADDR_BOOK.filter(function (a) { return a.tag === '最近'; }).map(function (a) { return '<span class="chip" data-book="' + a.id + '">' + a.name + ' <small>' + a.city + ' · ' + a.when + '</small></span>'; }).join('') + '</div>' +
+      '<div class="ap-sec mt12"><span class="small b">地图选点</span><span class="xs muted">点一下地图，就近吸附到仓库 / 市场，否则记为"××区附近"</span></div>' +
+      '<div class="chips ap-cities" id="apCities">' + cities.map(function (c) { return '<span class="chip sm' + (c === city ? ' on' : '') + '" data-city="' + c + '">' + c + '</span>'; }).join('') + '</div>' +
+      '<div class="mapbox" id="apMap"></div>';
+    var footer = '<button class="btn ghost" data-cancel>取消</button><button class="btn" data-ok disabled>使用这个地址</button>';
+
+    function renderMap(root) {
+      var m = H.MAP[city] || H.MAP._, box = qs('#apMap', root);
+      box.innerHTML = '<svg viewBox="0 0 100 100" preserveAspectRatio="none">' +
+        '<path d="' + m.river + '" class="river"/>' + m.roads.map(function (d) { return '<path d="' + d + '" class="road"/>'; }).join('') + '</svg>' +
+        m.districts.map(function (d) { return '<span class="dist" style="left:' + d.x + '%;top:' + d.y + '%">' + d.n + '</span>'; }).join('') +
+        m.pois.map(function (p) { return '<span class="poi' + (p.my ? ' my' : '') + '" style="left:' + p.x + '%;top:' + p.y + '%" title="' + p.n + '"><i></i><em>' + (p.my ? '我司 · ' : '') + p.n + '</em></span>'; }).join('') +
+        '<span class="pin" id="apPin" style="display:none"></span><span class="cityname">' + city + '</span>';
+    }
+    function setSel(root, a) {
+      sel = a; var ok = qs('[data-ok]', root); ok.disabled = !a;
+      var pin = qs('#apPin', root);
+      if (a && a.x != null && a.city === city) { pin.style.display = ''; pin.style.left = a.x + '%'; pin.style.top = a.y + '%'; } else pin.style.display = 'none';
+      qs('#apPicked', root).innerHTML = a ? '<span class="tag brand">' + ({ company: '我司位置', book: '常用地址', recent: '最近用过', here: '当前位置', search: '搜索结果', map: '地图选点', city: '仅城市' }[a.src] || '') + '</span><b>' + a.city + ' · ' + a.detail + '</b>' + (a.name && a.detail.indexOf(a.name) < 0 ? '<span class="xs muted">' + a.name + '</span>' : '') : '<span class="muted">还没有选点</span>';
+    }
+    function fromBook(a, src) { return { city: a.city, detail: a.detail, name: a.name, x: a.x, y: a.y, src: src || (a.tag === '最近' ? 'recent' : a.tag === '我司' ? 'company' : 'book') }; }
+
+    var onReady = function (root, close) {
+      renderMap(root);
+      qs('[data-cancel]', root).onclick = close;
+      qs('[data-ok]', root).onclick = function () { if (!sel) return; close(); opts.onPick(sel); };
+      qs('[data-pick=company]', root).onclick = function () { city = me.city; renderMap(root); markCity(root); setSel(root, { city: me.city, detail: me.detail, name: me.name, x: me.x, y: me.y, src: 'company' }); };
+      var here = qs('[data-pick=here]', root); if (here) here.onclick = function () { city = H.HERE.city; renderMap(root); markCity(root); setSel(root, { city: H.HERE.city, detail: H.HERE.detail, name: '当前位置', x: H.HERE.x, y: H.HERE.y, src: 'here' }); };
+      qsa('[data-book]', root).forEach(function (c) { c.onclick = function () { var a = H.ADDR_BOOK.filter(function (x) { return x.id === c.dataset.book; })[0]; city = a.city; renderMap(root); markCity(root); setSel(root, fromBook(a)); }; });
+      var mg = qs('[data-manage]', root); if (mg) mg.onclick = function () { H.toast('原型：地址簿管理（新增 / 编辑 / 设为默认收货地）', mode === 'pc' ? document.body : null); };
+      function markCity(root) { qsa('#apCities .chip', root).forEach(function (x) { x.classList.toggle('on', x.dataset.city === city); }); }
+      qsa('#apCities .chip', root).forEach(function (c) { c.onclick = function () { city = c.dataset.city; markCity(root); renderMap(root); setSel(root, { city: city, detail: '', name: '', src: 'city' }); }; });
+      /* 地图点击：吸附 POI，否则最近区县 */
+      qs('#apMap', root).onclick = function (e) {
+        var r = this.getBoundingClientRect(), x = Math.round((e.clientX - r.left) / r.width * 100), y = Math.round((e.clientY - r.top) / r.height * 100);
+        var m = H.MAP[city] || H.MAP._, best = null, bd = 1e9;
+        m.pois.forEach(function (p) { var d = Math.hypot(p.x - x, p.y - y); if (d < bd) { bd = d; best = p; } });
+        if (best && bd <= 7) return setSel(root, { city: city, detail: best.d + ' · ' + best.n, name: best.n, x: best.x, y: best.y, src: best.my ? 'company' : 'map' });
+        var dist = null, dd = 1e9; m.districts.forEach(function (d) { var v = Math.hypot(d.x - x, d.y - y); if (v < dd) { dd = v; dist = d; } });
+        setSel(root, { city: city, detail: dist.n + ' · 地图选点（' + (x < 50 ? '西' : '东') + (y < 50 ? '北' : '南') + '部，联系时报具体路名）', name: '', x: x, y: y, src: 'map' });
+      };
+      /* 搜索：地址簿 + 全部城市 POI */
+      var q = qs('#apQ', root), sug = qs('#apSug', root);
+      q.oninput = function () {
+        var t = q.value.trim(); if (!t) { sug.style.display = 'none'; return; }
+        var out = [];
+        H.ADDR_BOOK.forEach(function (a) { if ((a.name + a.detail + a.city).indexOf(t) > -1) out.push(fromBook(a)); });
+        Object.keys(H.MAP).forEach(function (c) { if (c === '_') return; H.MAP[c].pois.forEach(function (p) { if ((p.n + p.d + c).indexOf(t) > -1 && !out.some(function (o) { return o.name === p.n; })) out.push({ city: c, detail: p.d + ' · ' + p.n, name: p.n, x: p.x, y: p.y, src: 'search' }); }); });
+        cities.forEach(function (c) { if (c.indexOf(t) > -1 && !out.some(function (o) { return o.city === c && !o.name; })) out.push({ city: c, detail: '', name: '', src: 'city' }); });
+        sug.style.display = ''; sug.innerHTML = out.length ? out.slice(0, 6).map(function (o, i) { return '<div class="ap-s" data-i="' + i + '"><b>' + (o.name || o.city) + '</b><span class="xs muted">' + o.city + (o.detail ? ' · ' + o.detail : ' · 仅城市，具体地址电话说') + '</span></div>'; }).join('') : '<div class="ap-s muted">没找到，可以直接在下方地图上点，或只选城市</div>';
+        qsa('.ap-s[data-i]', sug).forEach(function (s) { s.onclick = function () { var o = out[+s.dataset.i]; city = o.city; markCity(root); renderMap(root); setSel(root, o); sug.style.display = 'none'; q.value = o.name || o.city; }; });
+      };
+      if (opts.detail) setSel(root, { city: city, detail: opts.detail, name: '', src: 'city' });
+    };
+    var title = H.addrLabel(kind);
+    mode === 'pc' ? H.pcModal({ title: title, width: 640, body: body, footer: footer, onReady: onReady }) : H.sheet({ title: title, body: body, footer: footer, onReady: onReady });
+  };
+  /* 字段旁的快捷 chips：我司位置 / 前两个常用 / 地图选点 */
+  H.addrQuick = function (kind, mode) {
+    var me = H.MY_COMPANY, book = H.ADDR_BOOK.filter(function (a) { return a.tag === '常用'; }).slice(0, 2);
+    return '<div class="chips addr-quick" data-kind="' + kind + '">' +
+      '<span class="chip sm my" data-aq="company">司 ' + (kind === 'to' ? '送到我司' : '在我司装') + '</span>' +
+      (mode === 'pc' ? '' : '<span class="chip sm" data-aq="here">◎ 当前位置</span>') +
+      book.map(function (a) { return '<span class="chip sm" data-aq="book" data-id="' + a.id + '">' + a.name + '</span>'; }).join('') +
+      '<span class="chip sm" data-aq="map">▣ 地图选点 / 更多</span></div>';
+  };
+  H.bindAddrQuick = function (root, apply, mode) {
+    root.addEventListener('click', function (e) {
+      var c = e.target.closest('[data-aq]'); if (!c) return;
+      var kind = c.closest('.addr-quick').dataset.kind, me = H.MY_COMPANY;
+      if (c.dataset.aq === 'company') apply(kind, { city: me.city, detail: me.detail, name: me.name, x: me.x, y: me.y, src: 'company' });
+      else if (c.dataset.aq === 'here') apply(kind, { city: H.HERE.city, detail: H.HERE.detail, name: '当前位置', x: H.HERE.x, y: H.HERE.y, src: 'here' });
+      else if (c.dataset.aq === 'book') { var a = H.ADDR_BOOK.filter(function (x) { return x.id === c.dataset.id; })[0]; apply(kind, { city: a.city, detail: a.detail, name: a.name, x: a.x, y: a.y, src: 'book' }); }
+      else H.addrPicker({ kind: kind, mode: mode, onPick: function (a) { apply(kind, a); } });
+    });
+  };
+  H.addrSrcTag = function (src) {
+    var t = { company: '我司位置', book: '常用地址', recent: '最近用过', here: '当前位置', search: '已定位', map: '地图选点', order: '订单地址' }[src];
+    return t ? '<span class="tag ' + (src === 'company' ? 'ok' : 'gray') + '" style="height:18px;font-size:10px">📍 ' + t + '</span>' : '';
+  };
+
   /* ---------- 举报 ---------- */
   H.report = function (post, mode) {
     var body = '<div class="small t2 mb8">请选择举报原因，平台将在 2 小时内核实处理：</div><div class="chips">' +
