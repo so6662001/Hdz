@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>线索投喂箱</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  .lay { display: grid; grid-template-columns: 380px 1fr; gap: 14px; align-items: start; }
+  .drop { border: 2px dashed var(--border-2); border-radius: var(--radius); padding: 14px; text-align: center; color: var(--text-3); background: #fff; cursor: pointer; } .drop:hover { border-color: var(--primary); color: var(--primary); }
+  .ways { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 10px 0; } .ways div { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 4px; text-align: center; font-size: 11.5px; cursor: pointer; background: #fff; } .ways div:hover, .ways div.on { border-color: var(--primary); color: var(--primary); background: var(--primary-weak); } .ways svg.i { display: block; margin: 0 auto 3px; width: 18px; height: 18px; }
+  .samples a { display: block; font-size: 12px; padding: 4px 0; border-bottom: 1px dashed var(--border); } .samples a:last-child { border: 0; }
+  .it { border: 1px solid var(--border); border-radius: var(--radius); background: #fff; margin-bottom: 12px; border-left: 4px solid var(--border-2); }
+  .it.PENDING { border-left-color: var(--warning); } .it.EXTRACTING { border-left-color: var(--ai); } .it.DONE { border-left-color: var(--success); } .it.REJECTED { border-left-color: var(--text-4); opacity: .85; }
+  .it .hd { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); } .it .hd b { font-size: 13.5px; } .it .hd .meta { font-size: 11.5px; color: var(--text-3); }
+  .it .bd { padding: 12px 14px; display: grid; grid-template-columns: 1fr 300px; gap: 14px; }
+  .ex { display: grid; grid-template-columns: 110px 1fr; gap: 6px 10px; font-size: 12.5px; align-items: center; } .ex label { color: var(--text-3); } .ex input { width: 100%; } .ex input.miss { border-color: var(--warning); background: var(--warning-weak); }
+  .raw { background: #f4f6f8; border-radius: var(--radius-sm); padding: 8px 10px; font-size: 11.5px; color: var(--text-2); line-height: 1.6; max-height: 150px; overflow: auto; white-space: pre-wrap; }
+  .conf { font-size: 11.5px; color: var(--text-3); display: flex; align-items: center; gap: 8px; } .conf .progress { flex: 1; }
+  .kind { width: 30px; height: 30px; border-radius: var(--radius-sm); display: grid; place-items: center; background: var(--steel-weak); color: var(--text-2); } .kind svg.i { width: 16px; height: 16px; }
+  .it .ft { display: flex; gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--border); background: #fafbfc; }
+  .thinking { display: inline-flex; gap: 3px; } .thinking i { width: 6px; height: 6px; border-radius: 50%; background: var(--ai); animation: bl 1s infinite; } .thinking i:nth-child(2) { animation-delay: .2s } .thinking i:nth-child(3) { animation-delay: .4s } @keyframes bl { 0%, 80%, 100% { opacity: .2 } 40% { opacity: 1 } }
+</style>
+</head>
+<body>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/app.js"></script>
+<script>
+const me = App.me(); const root = App.mount({ active: 'intake', title: '线索投喂箱' });
+const KIND = { TEXT: ['粘贴文本', 'doc'], LINK: ['链接', 'link'], PDF: ['PDF / Excel', 'file'], IMAGE: ['图片 / 照片', 'camera'], VOICE: ['语音', 'mic'] };
+const VIA = { WEB: '后台', APP_PHOTO: '执行端 App 拍照', MOBILE: '企微 H5', API: '接口' };
+const FIELDS = { PROJECT: [['project_name', '项目名称', 1], ['owner_org', '建设单位'], ['contractor_org', '施工总包'], ['supervisor_org', '监理'], ['area', '建筑面积'], ['contract_amount', '合同价'], ['period', '工期'], ['quantity', '吨位'], ['spec', '规格'], ['contact_name', '联系人'], ['published_at', '发布日期']], COMPANY: [['company_name', '企业名称', 1], ['company_type', '客户类型'], ['company_scope', '经营范围'], ['contact_name', '联系人'], ['phone', '电话'], ['need', '需求']], PERSON: [['name', '姓名', 1], ['org', '单位'], ['phone', '电话']] };
+let tab = qs('tab', 'PENDING'), kind = 'TEXT', srcCode = 'P2_BID';
+const SAMPLES = [
+  ['中标公示（文本）', 'P2_BID', 'TEXT', '南通开发区某学校新建工程 中标公示：中标人 江苏某建设工程有限公司，中标价 1.26亿，建设单位 南通经济技术开发区教育局，建筑面积 38,500㎡，工期 2026-11 至 2028-03，联系人 王工。'],
+  ['工地铭牌（OCR 结果）', 'F1_SITE_OCR', 'IMAGE', '建设单位：苏州某电子有限公司  施工单位：江苏某建设集团  监理单位：苏州某监理  建筑面积 32000㎡  开工 2026.08 竣工 2027.06  项目经理 周工 138****5566'],
+  ['语音速记（转写）', 'E7_DISTRIBUTOR', 'VOICE', '刚在张家港见了一个做钢结构加工的徐厂长，张家港某钢构有限公司，他们每个月大概要300吨 Q355B 中板，电话 150****6720，让我下周报个价'],
+  ['央企集采询价（粘贴）', 'P3_SOE_PROCURE', 'TEXT', '【询价公告】中建某局 苏州某项目 HRB400E Φ12–32 螺纹钢 约 1800 吨，报价截止 2026-09-30 17:00，联系人 赵工'],
+];
+const mine = () => me.role === 'admin' ? ACQ.intake : ACQ.intake.filter(i => i.by === me.id);
+function render() {
+  const all = mine(); const pend = all.filter(i => i.status === 'PENDING' || i.status === 'EXTRACTING'); const today = all.filter(i => ACQ.NOW - i.t < ACQ.D).length; const done = all.filter(i => i.status === 'DONE').length;
+  root.innerHTML = App.pageHead('线索投喂箱', '把任何材料——政府公示 PDF、网页链接、名录表格、工地铭牌照片、名片、聊天截图、一段语音——扔进来，AI 抽取为项目 / 企业 / 联系人待确认卡片，确认后入库并合并评分。这是 C 级渠道进入系统的统一入口（Q15）。', `<a class="btn" href="app.html">${App.icon('camera')} App 拍照投喂</a><a class="btn" href="mobile.html?tab=intake">${App.icon('smartphone')} 企微 H5 投喂</a>`) +
+  `<div class="grid g4 mb16">${UI.kpi('待确认', pend.length, null, '条').replace('card kpi', 'card kpi hot')}${UI.kpi('今日投喂', today, null, '条')}${UI.kpi('抽取字段准确率', '92.4<small>%</small>', 1.3, '').replace('card kpi', 'card kpi ai')}${UI.kpi('入库 / 拒绝', `${done}<small> / ${all.filter(i => i.status === 'REJECTED').length}</small>`, null, '').replace('card kpi', 'card kpi ok')}</div>
+  <div class="lay">
+    <div class="card"><div class="card-h"><h3>投喂</h3><span class="sub">抽取模型：Qwen3.5-Plus · JSON Schema 约束</span></div><div class="card-b">
+      <div class="ways">${Object.entries(KIND).map(([k, v]) => `<div class="${kind === k ? 'on' : ''}" onclick="kind='${k}';render()">${App.icon(v[1])}${v[0]}</div>`).join('')}</div>
+      ${kind === 'TEXT' || kind === 'LINK' ? `<textarea class="input" id="in_text" rows="6" placeholder="${kind === 'LINK' ? '粘贴公示 / 公告链接，系统抓取正文后抽取' : '粘贴公告正文、聊天记录、名录片段…'}"></textarea>` : `<div class="drop" onclick="fakeUpload()">${App.icon(KIND[kind][1])}<div class="mt8">${kind === 'VOICE' ? '点击开始录音（或上传录音文件）· 自动转写' : `点击或拖拽上传 ${KIND[kind][0]}`}</div><div class="xs mt8">${kind === 'IMAGE' ? '铭牌 / 名片 / 截图 → OCR → 抽取' : kind === 'PDF' ? '重点项目清单 / 名录 → 逐行抽取' : '≤ 60 秒'}</div></div><textarea class="input mt8" id="in_text" rows="3" placeholder="（可选）补充说明；上传后 OCR / 转写结果会显示在这里"></textarea>`}
+      <div class="field mt8"><label>渠道归属 <span class="hint" style="font-weight:400">决定去重键、评分参数与默认话术</span></label><select class="select" id="in_src" onchange="srcCode=this.value">${ACQ.sources.filter(s => s.acquisition.some(a => a.adapter === 'INTAKE' || a.adapter === 'MANUAL')).map(s => `<option value="${s.code}" ${s.code === srcCode ? 'selected' : ''}>${esc(s.name)}（${s.code}）</option>`).join('')}<option value="OTHER">其他 / 临时来源</option></select></div>
+      <button class="btn primary" style="width:100%;justify-content:center" onclick="feed()">${App.icon('bot')} 开始 AI 抽取</button>
+      <h5 class="small b mt16 mb8">试试样例</h5><div class="samples">${SAMPLES.map((s, i) => `<a onclick="useSample(${i})">${App.icon(KIND[s[2]][1])} ${s[0]} <span class="muted xs">→ ${s[1]}</span></a>`).join('')}</div>
+      <div class="alert info xs mt12">投喂内容按渠道合规属性保留；含个人电话的记录首触时告知来源并提供拒绝方式。</div>
+    </div></div>
+    <div class="card"><div class="tabs">${[['PENDING', `待确认 <span class="n">${pend.length}</span>`], ['DONE', `已入库 <span class="n">${done}</span>`], ['REJECTED', '已拒绝'], ['ALL', '全部']].map(x => `<button class="${tab === x[0] ? 'on' : ''}" onclick="tab='${x[0]}';history.replaceState(null,'','?tab='+tab);render()">${x[1]}</button>`).join('')}</div>
+      <div class="card-b" id="list">${(tab === 'ALL' ? all : tab === 'PENDING' ? pend : all.filter(i => i.status === tab)).sort((a, b) => b.t - a.t).map(item).join('') || '<div class="empty">暂无</div>'}</div></div>
+  </div>`;
+}
+function item(i) {
+  const src = ACQ.source(i.sourceCode); const ex = i.extracted; const ent = ex && ex.entity;
+  return `<div class="it ${i.status}" id="it_${i.id}"><div class="hd"><span class="kind">${App.icon(KIND[i.kind][1])}</span><div><b>${esc(i.title)}</b><div class="meta">${ACQ.user(i.by).name} · ${VIA[i.via]} · ${fmt.time(i.t)} · ${src ? `<a href="sources.html?open=${src.code}">${esc(src.name)}</a>` : '其他来源'}</div></div><span class="sp"></span>${ent ? UI.leadType(ent) : ''}${{ PENDING: '<span class="tag warning">待确认</span>', EXTRACTING: '<span class="tag ai">AI 抽取中 <span class="thinking"><i></i><i></i><i></i></span></span>', DONE: '<span class="tag success">已入库</span>', REJECTED: '<span class="tag">已拒绝</span>' }[i.status]}</div>
+  <div class="bd"><div>${i.status === 'EXTRACTING' ? '<div class="muted small">正在按 Schema 抽取项目 / 企业 / 联系人字段…</div>' : ex ? `<div class="ex">${(FIELDS[ent] || []).filter(f => i.status === 'PENDING' || ex[f[0]]).map(f => `<label>${f[1]}${f[2] ? ' *' : ''}</label>${i.status === 'PENDING' ? `<input class="input sm ${!ex[f[0]] && f[2] ? 'miss' : ''}" value="${esc(ex[f[0]] || '')}" oninput="ACQ.intake.find(x=>x.id==='${i.id}').extracted['${f[0]}']=this.value" placeholder="${!ex[f[0]] ? '（未识别）' : ''}">` : `<span>${esc(ex[f[0]])}</span>`}`).join('')}${ex.count ? `<label>记录数</label><span>${ex.count} 条 → 匹配目标地区 ${ex.matched} 条</span>` : ''}</div>
+    ${i.status === 'PENDING' && ent === 'PROJECT' && ex.area ? `<div class="xs muted mt8">按面积估算用钢量：<b>${(function () { const a = parseFloat(String(ex.area).replace(/[^\d.]/g, '')) * (/万/.test(ex.area) ? 10000 : 1); const t = Engine.estimateTon(a, 'COMMERCIAL'); return t ? `${fmt.num(t[0])}–${fmt.num(t[1])} 吨` : '—'; })()}</b>（商业 / 公建系数，确认时可改结构类型）</div>` : ''}
+    ${ex.problems && ex.problems.length && i.status === 'PENDING' ? `<div class="alert warn xs mt8">${ex.problems.map(esc).join('；')}</div>` : ''}${i.problems && i.problems.length && i.status === 'PENDING' ? `<div class="alert warn xs mt8">${i.problems.map(esc).join('；')}</div>` : ''}
+    ${i.status === 'PENDING' && ent === 'PROJECT' && dup(ex) ? `<div class="alert info xs mt8">疑似与已有项目「${esc(dup(ex).name)}」重复（去重键 project_name + owner_org 模糊 0.9）→ 建议「合并」，只新增来源引用。</div>` : ''}
+    ${i.status === 'DONE' ? `<div class="small mt8">${i.projectId ? `→ 项目 <a href="projects.html?open=${i.projectId}">${esc(ACQ.project(i.projectId).name)}</a>` : ''}${i.leadId ? `→ 线索 <a href="leads.html?open=${i.leadId}">${esc((ACQ.lead(i.leadId) || {}).nickname || i.leadId)}</a>` : ''}${i.companyId ? `→ 企业 <a href="companies.html?open=${i.companyId}">${esc(ACQ.company(i.companyId).name)}</a>` : ''}${!i.projectId && !i.leadId && !i.companyId ? '<span class="muted">已入项目库（批量）</span>' : ''}</div>` : ''}${i.status === 'REJECTED' ? `<div class="small muted mt8">拒绝原因：${esc(i.rejectReason)}</div>` : ''}` : ''}</div>
+    <div><div class="xs muted mb8">原始内容${i.kind === 'IMAGE' ? '（OCR）' : i.kind === 'VOICE' ? '（转写）' : ''}</div><div class="raw">${esc(i.raw)}</div>${ex && ex.confidence ? `<div class="conf mt8">置信度 ${UI.bar(ex.confidence * 100, ex.confidence < .7 ? 'hot' : ex.confidence < .85 ? '' : 'ok')}<b>${Math.round(ex.confidence * 100)}%</b></div>` : ''}${ex && ex.model ? `<div class="xs muted mt8">${esc(ex.model)}</div>` : ''}</div></div>
+  ${i.status === 'PENDING' ? `<div class="ft"><button class="btn sm" onclick="reExtract('${i.id}')">${App.icon('refresh')} 重新抽取</button><span class="sp"></span><button class="btn sm danger" onclick="reject('${i.id}')">拒绝</button>${ent === 'PROJECT' && dup(ex) ? `<button class="btn sm" onclick="confirmItem('${i.id}','${dup(ex).id}')">合并到已有项目</button>` : ''}<button class="btn sm primary" onclick="confirmItem('${i.id}')">${App.icon('check')} 确认入库</button></div>` : ''}</div>`;
+}
+function dup(ex) { if (!ex || !ex.project_name) return null; const key = ex.project_name.replace(/[（）()\s]/g, '').slice(0, 8); return ACQ.projects.find(p => p.name.replace(/[（）()\s]/g, '').includes(key)) || null; }
+function useSample(i) { const s = SAMPLES[i]; kind = s[2]; srcCode = s[1]; render(); $('#in_text').value = s[3]; toast('样例已填入，点「开始 AI 抽取」'); }
+function fakeUpload() { const s = SAMPLES[kind === 'VOICE' ? 2 : kind === 'IMAGE' ? 1 : 0]; $('#in_text').value = s[3]; srcCode = s[1]; $('#in_src').value = srcCode; toast(kind === 'VOICE' ? '录音 12 秒 · 转写完成' : kind === 'IMAGE' ? '上传 1 张 · OCR 完成' : '上传 1 个文件 · 已解析正文', 'ok'); }
+function feed() {
+  const raw = ($('#in_text').value || '').trim(); if (!raw) return toast(kind === 'TEXT' || kind === 'LINK' ? '请粘贴内容' : '请先上传 / 录音', 'warn');
+  const id = 'IN' + Date.now().toString(36); const title = kind === 'LINK' ? '链接 · ' + raw.slice(0, 40) : kind === 'VOICE' ? '语音速记 · ' + me.name : kind === 'IMAGE' ? '图片 OCR · ' + me.name : kind === 'PDF' ? '文件 · ' + me.name : '粘贴 · ' + raw.slice(0, 24);
+  const it = { id, t: Date.now(), by: me.id, via: 'WEB', kind, title, sourceCode: srcCode, status: 'EXTRACTING', extracted: null, raw }; ACQ.intake.unshift(it); ACQ.save(); tab = 'PENDING'; render(); $('#in_text').value = '';
+  setTimeout(() => { it.extracted = Engine.extractIntake(raw, kind); it.status = 'PENDING'; ACQ.save(); render(); toast(`抽取完成：${UI.leadType(it.extracted.entity).replace(/<[^>]+>/g, '')} · 置信度 ${Math.round(it.extracted.confidence * 100)}%${it.extracted.problems.length ? ' · ' + it.extracted.problems.length + ' 项待补' : ''}`, it.extracted.problems.length ? 'warn' : 'ok'); }, 1600);
+}
+function reExtract(id) { const it = ACQ.intake.find(x => x.id === id); it.status = 'EXTRACTING'; render(); setTimeout(() => { it.extracted = Engine.extractIntake(it.raw, it.kind); it.status = 'PENDING'; ACQ.save(); render(); toast('已重新抽取'); }, 1200); }
+function reject(id) { Modal.open({ title: '拒绝入库', body: `<div class="field"><label>原因</label><select class="select" id="rj"><option>同行 / 非目标客户</option><option>信息不实 / 无法核实</option><option>重复</option><option>超出服务范围</option></select></div>`, footer: `<button class="btn" data-close>取消</button><button class="btn danger" id="rj_ok">拒绝</button>`, onMount(m, close) { $('#rj_ok', m).onclick = () => { const it = ACQ.intake.find(x => x.id === id); it.status = 'REJECTED'; it.rejectReason = $('#rj', m).value; ACQ.save(); close(); render(); toast('已拒绝，样本用于优化抽取与过滤器'); }; } }); }
+function confirmItem(id, mergeTo) {
+  const it = ACQ.intake.find(x => x.id === id); const ex = it.extracted; const src = ACQ.source(it.sourceCode);
+  if (ex.entity === 'PROJECT') {
+    if (!ex.project_name && !mergeTo) return toast('项目名称为必填', 'warn');
+    if (mergeTo) { const p = ACQ.project(mergeTo); p.sources.push({ code: it.sourceCode, t: Date.now(), text: `投喂箱 · ${it.title}` }); p.signals++; p.score = Math.min(99, p.score + 3); it.projectId = p.id; }
+    else { const area = ex.area ? parseFloat(String(ex.area).replace(/[^\d.]/g, '')) * (/万/.test(ex.area) ? 10000 : 1) : null; const t = Engine.estimateTon(area, 'COMMERCIAL'); const pid = 'PJ' + (ACQ.projects.length + 1); ACQ.projects.unshift({ id: pid, name: ex.project_name, type: '待分类', region: '江苏', distanceKm: 60, stage: /中标/.test(it.raw) ? 'BID' : /许可|铭牌|开工/.test(it.raw + it.title) ? 'PERMIT' : 'PLAN', stageText: `投喂箱入库 · ${it.title}`, area, structure: 'COMMERCIAL', estTon: t || (ex.quantity ? [parseInt(ex.quantity.replace(/[^\d]/g, '')), parseInt(ex.quantity.replace(/[^\d]/g, ''))] : null), estTonBasis: t ? `${fmt.num(area)} ㎡ × 55–90 kg/㎡（默认商业 / 公建，可改）` : ex.quantity ? '公告工程量' : '待补充面积', window: {}, ownerOrg: ex.owner_org || '—', contractorOrg: ex.contractor_org || '（未知）', supervisorOrg: ex.supervisor_org || '', contractAmount: ex.contract_amount ? Math.round(parseFloat(ex.contract_amount.replace(/[^\d.]/g, '')) * (/亿/.test(ex.contract_amount) ? 10000 : 1)) : null, sources: [{ code: it.sourceCode, t: Date.now(), text: `投喂箱 · ${it.title}` }], signals: 1, score: src ? src.scoring.base + (t ? Math.min(20, Math.round(t[1] / 500)) : 5) : 50, scoreDims: { ton: t ? Math.min(30, Math.round(t[1] / 400)) : 8, window: 10, chain: ex.contact_name ? 6 : 2, credit: 10, logistics: 10 }, owner: me.id, status: 'NEW', companyIds: [], contacts: ex.contact_name ? [{ name: ex.contact_name, role: '项目经理', org: ex.contractor_org || '—', phone: ex.phone || '—', leadId: null }] : [], nextAction: ex.contact_name ? '电话首呼' : '查找项目部联系人', createdAt: Date.now(), updatedAt: Date.now() }); it.projectId = pid;
+      const lid = 'L' + String(ACQ.leads.length + 1).padStart(3, '0'); ACQ.leads.push({ id: lid, nickname: ex.contact_name || ex.project_name.slice(0, 12) + '项目部', leadType: ex.contact_name ? 'PERSON' : 'PROJECT', role: ex.contact_name ? '项目经理' : '', projectId: pid, platform: 'GOV', sourceType: 'INTAKE', sourceCode: it.sourceCode, sourceChannel: `投喂箱-${it.title}`, sourceExcerpt: it.raw.slice(0, 60), intent: 'UNKNOWN', score: ACQ.project(pid).score, stage: 'NEW', owner: me.id, product: ex.spec || '螺纹钢', region: '江苏', phone: ex.phone || '', company: ex.contractor_org || '', tags: [], events: [], createdAt: Date.now(), lastActiveAt: Date.now() }); it.leadId = lid; if (ex.contact_name) ACQ.project(pid).contacts[0].leadId = lid; }
+  } else if (ex.entity === 'COMPANY') {
+    if (!ex.company_name) return toast('企业名称为必填', 'warn');
+    const cid = 'CO' + (ACQ.companies.length + 1); const ton = ex.need ? parseInt((ex.need.match(/(\d+)\s*吨/) || [])[1]) || null : null;
+    ACQ.companies.unshift({ id: cid, name: ex.company_name, type: ex.company_type || 'MANUFACTURER', region: '江苏', distanceKm: 80, regCapital: 0, established: '—', scope: ex.company_scope || '—', credit: { level: 'OK', text: '入库后自动查询工商 / 信用' }, signals: [{ code: it.sourceCode, t: Date.now(), text: `投喂箱 · ${it.title}${ex.need ? ' · ' + ex.need : ''}` }], estMonthlyTon: ton, score: ton ? Math.min(85, 50 + Math.round(ton / 20)) : 50, stage: 'NEW', owner: me.id, leadIds: [], projectIds: [], contacts: [], createdAt: Date.now(), updatedAt: Date.now() }); it.companyId = cid;
+    if (ex.contact_name) { const lid = 'L' + String(ACQ.leads.length + 1).padStart(3, '0'); ACQ.leads.push({ id: lid, nickname: ex.contact_name, leadType: 'PERSON', companyId: cid, platform: 'PHONE', sourceType: 'INTAKE', sourceCode: it.sourceCode, sourceChannel: `投喂箱-${it.title}`, sourceExcerpt: it.raw.slice(0, 60), intent: ex.need ? 'INQUIRY' : 'UNKNOWN', score: ACQ.company(cid).score, stage: 'NEW', owner: me.id, product: ex.need || '', region: '江苏', phone: ex.phone || '', company: ex.company_name, tags: [], events: [], createdAt: Date.now(), lastActiveAt: Date.now() }); ACQ.company(cid).leadIds.push(lid); ACQ.company(cid).contacts.push({ name: ex.contact_name, role: '', leadId: lid }); it.leadId = lid; }
+  } else {
+    if (!ex.name && !ex.org) return toast('姓名或单位至少填一项', 'warn');
+    const lid = 'L' + String(ACQ.leads.length + 1).padStart(3, '0'); ACQ.leads.push({ id: lid, nickname: ex.name || ex.org, leadType: 'PERSON', platform: 'PHONE', sourceType: 'INTAKE', sourceCode: it.sourceCode, sourceChannel: `投喂箱-${it.title}`, sourceExcerpt: it.raw.slice(0, 60), intent: 'UNKNOWN', score: 50, stage: 'NEW', owner: me.id, region: '', phone: ex.phone || '', company: ex.org || '', tags: [], events: [], createdAt: Date.now(), lastActiveAt: Date.now() }); it.leadId = lid;
+  }
+  it.status = 'DONE'; it.confirmedBy = me.id; it.confirmedAt = Date.now(); ACQ.save(); render();
+  toast(`已入库${it.projectId ? ` · 项目 ${it.projectId}` : ''}${it.companyId ? ` · 企业 ${it.companyId}` : ''}${it.leadId ? ` · 线索 ${it.leadId}` : ''} · 已按渠道评分并分配`, 'ok');
+}
+render();
+App.note('<b>演示提示</b>：点左侧「试试样例」→「开始 AI 抽取」看待确认卡片；「中标公示」样例会提示与已有项目重复可合并。');
+</script>
+</body>
+</html>
