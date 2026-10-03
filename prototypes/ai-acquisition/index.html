@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>原型总览</title>
+<link rel="stylesheet" href="shared/base.css">
+<style>
+  .hero { background: #1c2430; color: #fff; border-radius: 6px; padding: 24px 28px; margin-bottom: 18px; border-left: 6px solid var(--hot); }
+  .hero h1 { color: #fff; font-size: 24px; margin: 0 0 6px; }
+  .hero p { color: rgba(255,255,255,.85); margin: 0; max-width: 820px; line-height: 1.7; }
+  .hero .chips-row { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .hero .chips-row span { background: #2a3441; border: 1px solid #3a4656; border-radius: 3px; padding: 3px 10px; font-size: 12px; color: #dbe1e8; } .hero .chips-row span b { color: #f4a261; }
+  .pcard { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 6px; background: #fff; transition: .15s; min-height: 150px; }
+  .pcard:hover {   border-color: #c3ccd6; }
+  .pcard .ph { display: flex; align-items: center; gap: 8px; }
+  .pcard .ph .ic { width: 34px; height: 34px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; background: var(--primary-weak); color: var(--primary); } .pcard .ph .ic svg.i { width: 18px; height: 18px; } .pcard.new .ph .ic { background: var(--hot-weak); color: var(--hot); } .pcard .ph .tagnew { font-size: 10px; background: var(--hot); color: #fff; border-radius: 3px; padding: 0 5px; font-weight: 700; }
+  .pcard .ph b { font-size: 15px; }
+  .pcard .ph .pri { margin-left: auto; font-size: 11px; color: var(--text-3); }
+  .pcard .desc { font-size: 12.5px; color: var(--text-3); line-height: 1.6; flex: 1; }
+  .pcard .links { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pcard .links a { font-size: 12px; padding: 3px 9px; border-radius: 3px; background: #f4f6f8; border: 1px solid var(--border); color: var(--text); text-decoration: none; }
+  .pcard .links a:hover { background: #e9f0f8; border-color: #c3ccd6; color: var(--primary); }
+  .pcard .links a.main { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .story { counter-reset: s; }
+  .story li { list-style: none; position: relative; padding: 10px 0 10px 40px; border-bottom: 1px dashed var(--border); font-size: 13px; line-height: 1.7; }
+  .story li:last-child { border-bottom: 0; }
+  .story li::before { counter-increment: s; content: counter(s); position: absolute; left: 0; top: 11px; width: 26px; height: 26px; border-radius: 4px; background: var(--primary); color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+  .story li b { color: var(--text); }
+  .story .who { font-size: 11px; padding: 1px 6px; border-radius: 4px; margin-right: 4px; }
+  .story .who.a { background: #fdeee4; color: var(--hot); }
+  .story .who.s { background: #e8f5ee; color: #1e8e5a; }
+  .story .who.d { background: #eeecf9; color: #4a3ca6; } .story .who.r { background: #e9f0f8; color: var(--primary); }
+  .kvtab td { font-size: 12.5px; vertical-align: top; }
+  .kvtab td:first-child { white-space: nowrap; font-weight: 600; width: 160px; }
+  .kvtab code { background: #f4f6f8; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<script src="shared/data.js"></script><script src="shared/engine.js"></script><script src="shared/quote-data.js"></script><script src="shared/app.js"></script>
+<script>
+const me = App.me(); const root = App.mount({ active: 'index', title: '原型总览' });
+const b = ACQ.badges();
+
+const PAGES = [
+  { id: 'dashboard', ic: 'grid', name: '看板', pri: 1, href: 'dashboard.html', admin: false,
+    desc: '今日 / 7 天 / 14 天：抓取→触达→回复→线索→成交漏斗、渠道健康、话术效果、销售效率；「谁该跟进 / 谁快成交 / 谁已流失」三张卡；销售时间分配<b>每日手工填报</b>卡片（Q8）。',
+    links: [['dashboard.html?range=7d', '7 天视角'], ['dashboard.html?range=14d', '14 天趋势']] },
+  { id: 'workbench', ic: 'chat', name: '会话工作台', pri: 2, href: 'workbench.html', admin: false,
+    desc: '左侧会话队列（待人工 / 机器处理 / 我接管），中间聊天 + AI 建议回复 + 插入话术 + 润色，右侧线索档案、待审核 AI 草稿、流程实例与机器处理记录。底部演示条可<b>模拟客户来消息</b>看引擎怎么接。',
+    links: [['workbench.html?c=C1', '张总 · 问价转人工'], ['workbench.html?c=C6', '周老板 · 拒绝→黑名单'], ['workbench.html?c=C8&tab=AUTO', '未命中话术']] },
+  { id: 'quote', ic: 'scale', name: '报价工作台（接单方案引擎）', pri: 1, href: 'quote.html', admin: false, isNew: true, tagText: '爆品',
+    desc: '客户一句话 / 语音 / 截图 → AI 识别规格数量 → 引擎按「自有库存 → 平台货源 → 上游」配货，算<b>到岸成本</b>（运费 / 账期 / 起订量 / 平台费）、找<b>拼车窗口</b>、给出 A–F 接单方案与<b>守门结论</b>（可自动发出 / 需确认 / 转人工）→ 一键发报价 → 自动生成出库 / 采购 / 拼车 / 跟单。这是「AI 销售 + AI 采购」焊在一起的动作。',
+    links: [['quote.html?rfq=Q1', '李工 13 吨零碎单'], ['quote.html?rfq=Q7', '赵老板 管型材 2 吨 · 支/个 → 整单一车'], ['quote.html?rfq=Q5', '5 吨 → 市区配送 vs 自提'], ['quote.html?rfq=Q4', '新客户 50 吨守门'], ['quote.html?tab=rules', '规则参数']] },
+  { id: 'jobs', ic: 'bot', name: '自然语言任务', pri: 3, href: 'jobs.html', admin: true,
+    desc: '一句话 → JobSpec（动作 / cron / 参数 / 歧义提示）→ 确认生效。<b>试运行</b>用 5 条样例线索逐条渲染，缺昵称的那条被 ACQ-2001 拦下并可就地补齐 / 跳过。',
+    links: [['jobs.html?nl=' + encodeURIComponent('每天早上9点抓取抖音评论区求推荐的线索并首触'), '解析示例'], ['jobs.html?run=J2', '看 J2 运行记录（含拦截）']] },
+  { id: 'flows', ic: 'route', name: '跟进流程（SOP）', pri: 4, href: 'flows.html', admin: true,
+    desc: '纵向树编辑器：Send / Wait / WaitForReply（未回复、拒绝、问价、考虑、含实体分支）/ <b>Call 电话节点</b>（人工拨打 + 记录结果，接通 / 未接通 / 拒绝分支，Q13）/ HumanTask / SetStage / Notify / GoTo / End；护栏；<b>模拟器</b>逐事件推进；实例可暂停 / 停止 / 迁移版本。',
+    links: [['flows.html?id=F4', '项目跟进 SOP（含电话）'], ['flows.html?id=F1&tab=sim', '模拟标准 SOP'], ['flows.html?inst=FI1', '实例 FI1']] },
+  { id: 'leads', ic: 'users', name: '线索列表 / 详情', pri: 5, href: 'leads.html', admin: false,
+    desc: '项目 / 企业 / 个人三类线索统一池：阶段条、类型与触点筛选、批量分配 / 加入 SOP / 忽略；行内关联所属项目 / 企业与渠道码；<b>记录通话</b>；详情抽屉四个页签：概览、<b>全链路时间线</b>（抓取→触达→电话→回复→流程→审核→跟进）、变量检查、触达记录。',
+    links: [['leads.html?open=L033', '李工（项目联系人）'], ['leads.html?type=PROJECT', '只看项目线索'], ['leads.html?open=L012', 'L012 无昵称']] },
+  { id: 'sources', ic: 'database', name: '线索渠道目录（配置式）', pri: 3, href: 'sources.html', admin: true, isNew: true,
+    desc: '六族 30 条线索渠道做成<b>配置项</b>：可得性 A/B/C/D、获取方式链（API 拉取 / 推送 / 网页列表 / 投喂 / 介绍人 / RPA）与自动降级、订阅参数、成本与近 7 天产出、去重键与评分参数、默认话术 / SOP、合规属性；数据商与预算；新增渠道向导不发版。',
+    links: [['sources.html?family=PROJECT', '项目族'], ['sources.html?open=P1_PERMIT', '施工许可（A 级）'], ['sources.html?tab=vendors', '数据商与预算'], ['sources.html?tab=adapters', '8 种适配器']] },
+  { id: 'projects', ic: 'crane', name: '项目线索', pri: 4, href: 'projects.html', admin: false, isNew: true,
+    desc: '三层线索模型的顶层（Q10）：立项 → 招标 → 中标 → 施工许可 → 桩基 → 主体 → 交付 7 阶段管道；按面积 × 结构系数<b>估算用钢量</b>、采购窗口、决策链（建设 / 总包 / 监理 / 项目经理）、多信号叠加评分（吨位 30 / 时间窗 25 / 决策链 15 / 信用 12 / 物流 10）、200 km 物流半径。',
+    links: [['projects.html?open=PJ1', '智能装备产业园二期（桩基已进场）'], ['projects.html?stage=BID', '只看中标阶段']] },
+  { id: 'companies', ic: 'building', name: '企业档案', pri: 4, href: 'companies.html', admin: false, isNew: true,
+    desc: '中间层：施工总包 / 制造企业 / 加工厂 / <b>二级配送与加工中心</b>（Q14）/ 开发商；新设 / 变更 / 招工 / 招标信号叠加、信用预警（被执行 / 欠税）、月用量估算；低分自动进过滤器不打扰销售。',
+    links: [['companies.html?open=CO6', '华东某钢构（二级配送）'], ['companies.html?type=PROCESSING_CENTER', '只看配送中心']] },
+  { id: 'intake', ic: 'inbox', name: '线索投喂箱', pri: 5, href: 'intake.html', admin: false, isNew: true,
+    desc: 'C 级渠道的统一入口（Q15）：粘贴公示 / 链接 / PDF 名录 / 工地铭牌与名片照片 / 语音速记 → AI 按 Schema 抽取项目 / 企业 / 联系人 → <b>待确认卡片</b>可编辑、合并到已有项目、拒绝 → 入库并按渠道评分分配。',
+    links: [['intake.html', '试试 4 个样例'], ['intake.html?tab=DONE', '已入库']] },
+  { id: 'referrals', ic: 'handshake', name: '介绍人与分成', pri: 6, href: 'referrals.html', admin: false, isNew: true,
+    desc: '商砼站 / 模板租赁 / 造价咨询 / 设计院等介绍人：专属<b>报线索二维码与表单</b>、报送记录、成交后按规则（按吨阶梯 / 按金额 / 首单固定）自动计提，对账单生成与<b>线下结算</b>标记（Q12），不做平台代付。',
+    links: [['referrals.html?open=RF1', '王站长（商砼站）'], ['referrals.html?tab=rules', '分成规则试算'], ['referrals.html?tab=settle', '对账与结算']] },
+  { id: 'mobile', ic: 'smartphone', name: '销售企微 H5', pri: 6, href: 'mobile.html', admin: false, isNew: true,
+    desc: '销售不装新 App（Q16）：企微工作台里的 H5——待办 / 待人工会话（接管、AI 建议、发送）/ AI 草拟报价审核 / <b>拍照与语音投喂</b> / 我的线索（一键<b>打电话</b>并记录结果推进 SOP，Q13）。右侧可模拟企微推送深链。',
+    links: [['mobile.html?tab=approve', '审核报价'], ['mobile.html?tab=feed', '拍照投喂'], ['mobile.html?lead=L033', '李工 · 打电话']] },
+  { id: 'scripts', ic: 'doc', name: '话术库', pri: 6, href: 'scripts.html', admin: true,
+    desc: '分类树 + 关键词 / 变量高亮 / 7 天效果；<b>测试匹配</b>输入客户话看命中哪条（规则 / LLM 兜底 / 拒绝词）；编辑抽屉带实时预览、AI 变体、平台适配、需人工审核开关、简易跟进链；新增<b>电话开场白</b>类（含通话要点，Q13）与中标恭贺 / 新设企业 / 介绍人转介话术。',
+    links: [['scripts.html?open=103', '报价话术（转人工）'], ['scripts.html?open=124', '电话开场白 · 项目'], ['scripts.html?open=121', '中标恭贺']] },
+  { id: 'wizard', ic: 'rocket', name: '开通向导', pri: 7, href: 'wizard.html', admin: true,
+    desc: '「当天下午跑通」四步：商家信息与线索表字段 → 用自然语言写 3 条任务 + 选 SOP → 绑渠道（企微扫码 / 工作手机配对 / OAuth / 公开评论抓取风险告知）→ <b>5 条测试线索跑全流程</b>，第 5 条缺昵称被拦下，补齐后重跑。',
+    links: [['wizard.html?step=2', '第 2 步：任务'], ['wizard.html?step=4', '第 4 步：测试跑通']] },
+  { id: 'poster', ic: 'image', name: '海报分发', pri: 8, href: 'poster-dispatch.html', admin: true,
+    desc: '从海报模块选图 → 勾选微信群 / 朋友圈 / 小红书 / 论坛目标（Q7 不含抖音）→ 每渠道<b>独立追踪码</b>（基码 + -G/-M/-O 后缀）→ 按账号队列拟人发送、截图存证；扫码归因复用 poster_session。',
+    links: [['poster-dispatch.html?new=PS2', '新建分发'], ['poster-dispatch.html', '分发记录']] },
+  { id: 'channels', ic: 'radio', name: '触达账号与设备', pri: 9, href: 'channels.html', admin: true,
+    desc: '账号卡片（额度 / 养号期 / 熔断 / 人工恢复）、工作手机与执行端协议、抓取规则（公开评论抓取受总开关约束）、<b>抓取原始记录</b>与 AI 判定。',
+    links: [['channels.html?tab=devices', '设备'], ['channels.html?tab=rules', '抓取规则'], ['channels.html?tab=raw', '抓取记录']] },
+  { id: 'risk', ic: 'shield', name: '风控 / 设置', pri: 9, href: 'risk.html', admin: true,
+    desc: '频率策略（商家自定义只能比平台默认更严）、账号状态机、风险事件、黑名单；设置页含<b>总开关</b>（含公开评论抓取风险告知）、意图阈值与分配、内容 / AI 策略、销售日报、数据保留与合规。',
+    links: [['risk.html?tab=incidents', '风险事件'], ['risk.html?tab=blacklist', '黑名单'], ['risk.html?tab=settings', '设置']] },
+  { id: 'app', ic: 'tablet', name: '获客助手 App（执行端）', pri: 9, href: 'app.html', admin: true,
+    desc: '装在工作手机上的 Android 执行端：权限自检 → 配对码绑定 → 托管账号；任务队列与<b>拟人化执行器</b>可视化（等待 / 唤起微信 / 逐字输入 / 截图存证 / 回执）；消息监听上报；风控信号（验证码 / UI_CHANGED）与人工恢复；技能包版本。右侧为服务端视角的 WebSocket 报文。',
+    links: [['app.html', '从未绑定开始']] },
+  { id: 'outreach', ic: 'send', name: '触达记录', pri: 10, href: 'outreach.html', admin: false,
+    desc: '每一条发出去的消息：触发来源、轮次、话术、命中变量、账号与拟人参数、结果与失败码（MISSING_VAR / 被拒 / 熔断），支持重试改账号。',
+    links: [['outreach.html?replied=1', '只看已回复']] },
+  { id: 'approvals', ic: 'check', name: '审核', pri: 10, href: 'approvals.html', admin: false,
+    desc: '报价 / 合同 / 承诺效果类 AI 草稿进入人工审核：改写后采纳并发送（过敏感词），或驳回；采纳后自动推进流程 HumanTask。',
+    links: [] },
+  { id: 'follow-ups', ic: 'clock', name: '跟进待办', pri: 10, href: 'follow-ups.html', admin: false,
+    desc: '需人工 / 机器自动 / 已完成，按逾期 / 今天 / 以后分组；流程定时器可「立即执行」看推进结果；完成跟进可直接改阶段。',
+    links: [] },
+];
+
+const visible = PAGES.filter(p => me.role === 'admin' || !p.admin);
+
+root.innerHTML = `
+<div class="hero">
+  <h1>AI 货袋子获客系统 · 高保真交互原型 <span class="muted" style="font-size:13px;font-weight:400;color:#98a2ae">v8 · 钢铁行业扁平化视觉</span></h1>
+  <p>把「人在各平台找客户 → 一对一发消息 → 盯着回复 → 手工记表」变成「系统从 <b>30 条配置式渠道</b>拿到项目 / 企业 / 个人三层线索 → 估吨位、算窗口、评分 → 个性化触达（消息 + 电话）→ 关键词 / AI 自动跟进 → 介绍人分成 → 自动记录与看板」的闭环。本原型为纯前端静态页面，所有数据与 AI 行为均为本地模拟（规则优先、LLM 兜底），可直接点击体验全部流程；数据保存在浏览器 localStorage，右上角可「重置演示数据」。</p>
+  <div class="chips-row"><span>商家：华东钢贸（演示）</span><span>当前视角：${me.role === 'admin' ? '管理员 陈总' : '销售 张三'}（右上角可切换）</span><span>待人工 ${b.needHuman || 0}</span><span>今日待跟进 ${b.dueToday || 0}</span><span>待审核 ${b.approvals || 0}</span><span>线索 ${ACQ.leads.filter(l => !l.isTest).length} 条</span><span>项目 ${ACQ.projects.length} · 企业 ${ACQ.companies.length}</span><span>渠道 ${ACQ.sources.filter(s => s.enabled).length}/${ACQ.sources.length} 已启用</span><span>待报价 <b>${(window.QUOTE ? QUOTE.rfqs.filter(r => r.status === 'NEW').length : 0)}</b></span><span>待确认投喂 <b>${b.intake || 0}</b></span></div>
+</div>
+
+<div class="grid" style="grid-template-columns: 1.4fr 1fr; gap:16px" id="top">
+  <div class="card"><div class="card-h"><h3>推荐演示路线（约 15 分钟）</h3><span class="muted small">前半段：项目 / 企业线索从哪来、怎么打（Q10–Q16）；后半段：消息触达与自动跟进</span></div><div class="card-b">
+    <ol class="story">
+      <li><span class="who s">销售</span><b>报价工作台</b>：李工微信说「20 的螺纹 8 吨、12 的盘螺 5 吨，送相城工地，明天到，老价格还能做吗」→ 引擎给出 5 个方案：Φ20 自有库存搭明天的拼车、Φ12 缺货由平台商家直发，毛利 ¥507；因客户提到老价格 → 需确认后发出；再看「赵老板」管型材单（方管 30 支 + 4 寸镀锌管 20 支 + 弯头 10 个）：按理重换算吨位、缺货从市场内档口调、整单一辆 4.2 m 车送完、管件按个定价；「王经理 5 吨」市区配送 vs 自提 + 替代；「徐厂长 50 吨新客户」被信用 / 起订量守门。<a href="quote.html?rfq=Q1">去体验 →</a></li>
+      <li><span class="who a">管理员</span><b>线索渠道目录</b>：看六族 30 条渠道的可得性等级与获取方式链——A 级（施工许可 / 招标 / 工商）走数据商 API，网页列表兜底；C 级（央企集采 / 商砼站 / 现场铭牌）走投喂箱与介绍人；打开「施工许可」看订阅参数、成本、评分与默认话术 / SOP；试着「新增渠道」。<a href="sources.html">去体验 →</a></li>
+      <li><span class="who a">管理员</span><b>项目线索</b>：管道里「智能装备产业园二期」中标 + 施工许可 + 桩基进场三信号叠加 → 评分 92，用钢量 3,000–4,500 吨、窗口 45 天；决策链里项目经理李工已是线索；点「电话首呼」。<a href="projects.html?open=PJ1">去体验 →</a></li>
+      <li><span class="who s">销售</span><b>企微 H5</b>：右侧「SOP 到电话节点」推送 → 点横幅深链到李工 → 打电话，按开场白记录「接通」→ SOP 自动置高意向并通知；再试「拍铭牌」→ OCR → 抽取 → 确认入库为新项目。<a href="mobile.html?lead=L033">去体验 →</a></li>
+      <li><span class="who r">介绍人</span><b>介绍人与分成</b>：商砼站王站长扫专属码报送「相城某厂房 320 吨」→ 成交后按阶梯规则计提 1,600 元 → 月底生成对账单 → 线下结算并标记；扫码报送页可直接预览。<a href="referrals.html?open=RF1">去体验 →</a></li>
+      <li><span class="who a">管理员</span><b>投喂箱</b>：粘贴一段央企集采询价公告 → AI 抽取为项目待确认卡片 → 与已有项目重复则「合并」只加来源引用；语音速记「张家港做钢结构的徐厂长」→ 企业 + 联系人入库。<a href="intake.html">去体验 →</a></li>
+      <li><span class="who a">管理员</span><b>开通向导</b>：填商家信息 → 用自然语言写 3 条任务 → 绑企微 / 工作手机 → 5 条测试线索跑通，第 5 条缺昵称被 <code>ACQ-2001</code> 拦下，补昵称后重跑通过。<a href="wizard.html?step=1">去体验 →</a></li>
+      <li><span class="who a">管理员</span><b>自然语言任务</b>：输入「每天早上 9 点抓取抖音评论区求推荐的线索并首触」，看解析结果与歧义提示，试运行后确认生效。<a href="jobs.html">去体验 →</a></li>
+      <li><span class="who s">销售</span><b>看板</b>先看「谁该跟进 / 谁快成交」，点张总进入<b>线索详情</b>时间线，再进<b>会话工作台</b>：张总问价 → 机器发过渡话术并生成报价草稿 → 销售审核后发送 → SOP 自动推进到人工节点。<a href="dashboard.html">去体验 →</a></li>
+      <li><span class="who s">销售</span>在工作台底部演示条模拟客户说「不需要，别再发了」→ 触发拒绝词 → 自动进黑名单、流程终止；再模拟「有没有热轧卷板现货，多少钱」→ 抽实体 + 问价 → 转人工。<a href="workbench.html?c=C3&tab=AUTO">去体验 →</a></li>
+      <li><span class="who a">管理员</span><b>跟进流程</b>：先看「项目跟进 SOP（含电话）」里的 Call 节点与接通 / 未接通 / 拒绝分支，在模拟页记录一次通话；再打开标准 SOP，在「72h 未回复」分支后插入一个节点、加一条分支，校验 → 发布新版本；切到「模拟」页签逐事件推进；实例页把老实例迁移到新版本。<a href="flows.html?id=F4">去体验 →</a></li>
+      <li><span class="who a">管理员</span><b>海报分发</b>：选「9 月新客锁价」海报，勾 2 个微信群 + 朋友圈 + 小红书，看每渠道独立追踪码与发送计划，确认后观察逐条发送（小红书含促销词进审核）。<a href="poster-dispatch.html?new=PS2">去体验 →</a></li>
+      <li><span class="who a">管理员</span><b>渠道与风控</b>：抖音小号已熔断 → 人工恢复（额度 50% 起步）；设置页开启「抓取他人公开评论」需勾选风险告知；商家自定义频率不能高于平台默认。<a href="channels.html">去体验 →</a></li>
+      <li><span class="who d">工作手机</span><b>获客助手 App</b>：走完权限自检与配对码绑定，看队列里的 SEND_DM 如何被拟人化执行并回执；用左侧场景触发滑块验证 / 微信升级 / 断网重连，观察 RISK_SIGNAL、技能包更新与 cmdId 幂等。<a href="app.html">去体验 →</a></li>
+    </ol>
+  </div></div>
+  <div>
+    <div class="card mb16"><div class="card-h"><h3>模拟引擎（shared/engine.js）</h3></div><div class="card-b small" style="line-height:1.8">
+      <div><b>意图识别</b>：规则（关键词 / 正则）优先，未命中时模拟 LLM 语义兜底并给出置信度；拒绝词独立判定。</div>
+      <div><b>话术渲染</b>：变量替换 + 强制 ≥1 个个性化变量（昵称 / 来源 / 原话 / 上次互动），缺失报 <code>ACQ-2001</code>，敏感词报 <code>ACQ-2002</code>。</div>
+      <div><b>拟人节流</b>：按平台 / 账号档位算延迟、打字时长、时段与每日额度（养号期 20% / 50% / 100%）。</div>
+      <div><b>NL 解析</b>：自然语言 → 定时任务 JobSpec / 跟进流程 DAG 草稿，附歧义提示。</div>
+      <div><b>FlowEngine</b>：JSON DAG 校验 + 事件驱动推进（REPLY / TIMEOUT / HUMAN_DONE / <b>CALL</b>），带最大自动发送与回环护栏。</div>
+      <div><b>投喂抽取</b>：文本 / OCR / 转写 → 项目 / 企业 / 联系人 Schema 字段、置信度与待补项；<b>用钢量估算</b>按结构类型系数（住宅 40–55 · 商业 55–90 · 轻钢 30–60 · 重型 80–150 kg/㎡ · 光伏 30–45 t/MW）。</div>
+    </div></div>
+    <div class="card"><div class="card-h"><h3>两个视角</h3></div><div class="card-b small" style="line-height:1.8">
+      <div><b>管理员 陈总</b>：全部页面，配置任务 / 流程 / 渠道 / 风控，看全商家看板。</div>
+      <div><b>销售 张三</b>：看板、会话工作台、线索 / 项目 / 企业、投喂箱、跟进待办、审核、介绍人与分成、企微 H5，数据按归属人过滤。</div>
+      <div class="mt8"><button class="btn sm ${me.role === 'admin' ? 'primary' : ''}" onclick="App.setRole('admin')">管理员</button> <button class="btn sm ${me.role === 'sales' ? 'primary' : ''}" onclick="App.setRole('sales')">销售·张三</button></div>
+    </div></div>
+  </div>
+</div>
+
+<h3 class="mt16 mb8" style="font-size:15px">页面清单 <span class="muted small" style="font-weight:400">· 按 06 分册 §13 优先级排序${me.role === 'sales' ? ' · 当前销售视角仅显示可访问页面' : ''}</span></h3>
+<div class="grid g3" style="gap:14px">
+  ${visible.map(p => `<div class="pcard ${p.isNew ? 'new' : ''}"><div class="ph"><span class="ic">${App.icon(p.ic)}</span><b>${p.name}</b>${p.isNew ? `<span class="tagnew">${p.tagText || 'Q10–Q16'}</span>` : ''}<span class="pri">P${p.pri}</span></div><div class="desc">${p.desc}</div><div class="links"><a class="main" href="${p.href}">打开</a>${p.links.map(l => `<a href="${l[0]}">${l[1]}</a>`).join('')}</div></div>`).join('')}
+</div>
+
+<div class="card mt16"><div class="card-h"><h3>URL 参数（便于评审时直达）</h3></div><div class="card-b">
+  <table class="kvtab"><tbody>
+    <tr><td><code>dashboard.html</code></td><td><code>?range=today|7d|14d</code></td></tr>
+    <tr><td><code>workbench.html</code></td><td><code>?c=会话ID</code>（C1–C8）<code>&tab=NEED_HUMAN|AUTO|HUMAN|ALL</code></td></tr>
+    <tr><td><code>leads.html</code></td><td><code>?open=线索ID</code>（L001–L040）<code>&stage=NEW|CONTACTED|REPLIED|HOT|WON|LOST</code> <code>&type=PROJECT|COMPANY|PERSON</code></td></tr>
+    <tr><td><code>sources.html</code></td><td><code>?tab=catalog|vendors|adapters|runs</code> <code>&family=PROJECT|COMPANY|RELATION|INTENT|CONTENT|FIELD</code> <code>&open=渠道码</code>（如 P1_PERMIT）</td></tr>
+    <tr><td><code>projects.html</code></td><td><code>?open=PJ1..PJ6</code> <code>&stage=PLAN|BID|WON|PERMIT|PILE|STRUCTURE|DONE</code></td></tr>
+    <tr><td><code>companies.html</code></td><td><code>?open=CO1..CO8</code> <code>&type=CONTRACTOR|MANUFACTURER|PROCESSING|PROCESSING_CENTER|DEVELOPER</code></td></tr>
+    <tr><td><code>intake.html</code></td><td><code>?tab=PENDING|DONE|REJECTED|ALL</code></td></tr>
+    <tr><td><code>referrals.html</code></td><td><code>?tab=referrers|leads|rules|settle</code> <code>&open=RF1..RF5</code></td></tr>
+    <tr><td><code>quote.html</code></td><td><code>?rfq=询价ID</code>（Q1–Q7，Q7 为管型材）<code>&tab=work|rules|history</code></td></tr>
+    <tr><td><code>mobile.html</code></td><td><code>?tab=home|conv|approve|feed|leads</code>；<code>?c=会话ID</code> 直达会话；<code>?lead=线索ID</code> 直达线索详情</td></tr>
+    <tr><td><code>jobs.html</code></td><td><code>?nl=自然语言</code> 自动解析；<code>?run=任务ID</code> 打开运行记录</td></tr>
+    <tr><td><code>flows.html</code></td><td><code>?id=F1|F2|F3|F4</code> <code>&tab=edit|sim|inst|stats</code>；<code>?inst=FI1</code> 直达实例</td></tr>
+    <tr><td><code>scripts.html</code></td><td><code>?open=话术ID</code>（101–114、121–125）</td></tr>
+    <tr><td><code>wizard.html</code></td><td><code>?step=1..4</code></td></tr>
+    <tr><td><code>poster-dispatch.html</code></td><td><code>?new=海报ID</code>（PS1–PS4）直接打开新建分发</td></tr>
+    <tr><td><code>channels.html</code></td><td><code>?tab=accounts|devices|rules|raw</code></td></tr>
+    <tr><td><code>risk.html</code></td><td><code>?tab=policies|incidents|blacklist|settings</code></td></tr>
+    <tr><td><code>outreach.html</code></td><td><code>?replied=1</code> 只看已回复</td></tr>
+    <tr><td><code>app.html</code></td><td>无参数；App 状态存于 <code>localStorage acq:app:v1</code>，左侧「重置 App 演示」可回到未绑定；「投喂」栏拍铭牌 / 名片 / 语音</td></tr>
+  </tbody></table>
+  <div class="hint mt8">演示数据存于 <code>localStorage acq:state:v8</code>（升级版本会自动重建）。设计文档见 <code>docs/ai-acquisition/</code>（01 需求 → 08 线索渠道体系），本原型对应 06 分册《前端页面设计》与 08 分册《线索渠道体系》。</div>
+</div></div>`;
+</script>
+</body>
+</html>
