@@ -1,12 +1,30 @@
 /* 货袋子 · 报价工作台 · 演示数据（接单方案引擎输入：客户 / 规格 / 库存 / 货源 / 物流 / 拼车窗口 / 询价 / 参数） */
 (function (w) {
-  const VERSION = 'acq:quote:v1';
+  const VERSION = 'acq:quote:v2';
   const NOW = Date.now(), H = 3600e3, D = 24 * H;
   const ago = (h) => NOW - h * H;
 
   function build() {
-    /* 规格目录：key = 品名|材质|规格 ；index = 本地市场指数（苏州，元/吨，含税） */
+    /* 规格目录：key = 品名|材质|规格 ；index = 本地市场指数（苏州，含税）
+     * unit 结算单位（默认 吨）；kgPerM 理重（kg/m）与 stdLen 定尺（m）用于「支 / 根 / 米」换算；
+     * kgPerPiece 单件重量（管件，按 个 / 片 结算）；marginAdd 品类目标毛利加成（元/吨）；band 市场带覆盖 */
+    const pipe = (name, index, kgPerM, extra) => Object.assign({ name, index, unit: '吨', kgPerM, stdLen: 6, marginAdd: 60, band: { low: -40, high: 60 }, bandBasis: 'exw' }, extra || {});
+    const piece = (name, index, kgPerPiece) => ({ name, index, unit: '个', kgPerPiece });
     const specs = {
+      /* —— 管型材（量小而杂，按 支 / 米 询、按吨结）—— */
+      '镀锌管|Q235B|DN100×3.75': pipe('镀锌管 Q235B DN100×3.75（4 寸）', 4620, 10.6, { dn: 100, inch: 4 }),
+      '镀锌管|Q235B|DN50×3.0': pipe('镀锌管 Q235B DN50×3.0（2 寸）', 4680, 4.39, { dn: 50, inch: 2 }),
+      '镀锌管|Q235B|DN25×2.75': pipe('镀锌管 Q235B DN25×2.75（1 寸）', 4750, 2.17, { dn: 25, inch: 1 }),
+      '焊管|Q235B|DN100×3.75': pipe('焊管 Q235B DN100×3.75（4 寸）', 4180, 10.19, { dn: 100, inch: 4 }),
+      '焊管|Q235B|DN50×3.0': pipe('焊管 Q235B DN50×3.0（2 寸）', 4230, 4.22, { dn: 50, inch: 2 }),
+      '无缝管|20#|Φ108×4': pipe('无缝管 20# Φ108×4', 4850, 10.26, { marginAdd: 80 }),
+      '方管|Q235B|50×50×2.5': pipe('方管 Q235B 50×50×2.5', 4260, 3.73),
+      '角钢|Q235B|50×5': pipe('角钢 Q235B 50×5', 4020, 3.77, { marginAdd: 40 }),
+      '槽钢|Q235B|10#': pipe('槽钢 Q235B 10#', 4050, 10.0, { marginAdd: 40 }),
+      '弯头|碳钢|DN100': piece('冲压弯头 碳钢 DN100', 36, 1.6),
+      '弯头|碳钢|DN50': piece('冲压弯头 碳钢 DN50', 9, 0.45),
+      '法兰|碳钢|DN100': Object.assign(piece('平焊法兰 碳钢 DN100', 30, 2.2), { unit: '片' }),
+      /* —— 建材 / 板材 / 型钢 —— */
       '螺纹钢|HRB400E|Φ12': { name: '螺纹钢 HRB400E Φ12', index: 3830, unit: '吨' },
       '螺纹钢|HRB400E|Φ16': { name: '螺纹钢 HRB400E Φ16', index: 3800, unit: '吨' },
       '螺纹钢|HRB400E|Φ20': { name: '螺纹钢 HRB400E Φ20', index: 3800, unit: '吨' },
@@ -20,8 +38,10 @@
       '中板|Q355B|12mm': { name: '中板 Q355B 12 mm', index: 3960, unit: '吨' },
       '中板|Q235B|10mm': { name: '中板 Q235B 10 mm', index: 3780, unit: '吨' },
       '热卷|Q235B|5.75mm': { name: '热轧卷 Q235B 5.75 mm', index: 3740, unit: '吨' },
-      '方管|Q235B|100×100×4': { name: '方管 Q235B 100×100×4', index: 4150, unit: '吨' },
+      '方管|Q235B|100×100×4': pipe('方管 Q235B 100×100×4', 4150, 12.06),
     };
+    /* 寸 → DN 对照（询价常说「4 寸管」） */
+    const inchToDn = { 0.5: 15, 0.75: 20, 1: 25, 1.2: 32, 1.25: 32, 1.5: 40, 2: 50, 2.5: 65, 3: 80, 4: 100, 5: 125, 6: 150 };
     /* 区域与距离（公里）：仓库 / 货源 / 客户都挂在区域上 */
     const zones = { XC: '苏州 相城', SIP: '苏州 园区', WZ: '苏州 吴中', KS: '昆山', WX: '无锡', ZJG: '张家港', NT: '南通' };
     const dist = {
@@ -42,9 +62,25 @@
       { wh: 'W2', key: 'H型钢|Q355B|200×200', qty: 24, locked: 0, cost: 3880, age: 19 },
       { wh: 'W2', key: '中板|Q355B|12mm', qty: 15, locked: 5, cost: 3860, age: 40 },
       { wh: 'W2', key: '方管|Q235B|100×100×4', qty: 6, locked: 0, cost: 4040, age: 67 },
+      /* 管型材：吨数小、件数多；管件按 个 */
+      { wh: 'W1', key: '方管|Q235B|50×50×2.5', qty: 2.1, locked: 0, cost: 4180, age: 30 },
+      { wh: 'W1', key: '镀锌管|Q235B|DN50×3.0', qty: 1.4, locked: 0, cost: 4590, age: 58 },
+      { wh: 'W1', key: '角钢|Q235B|50×5', qty: 3.2, locked: 0, cost: 3930, age: 21 },
+      { wh: 'W1', key: '弯头|碳钢|DN100', qty: 40, locked: 0, cost: 28, age: 90 },
+      { wh: 'W1', key: '弯头|碳钢|DN50', qty: 120, locked: 0, cost: 7, age: 90 },
     ];
-    /* 外部货源：UPSTREAM 上游（钢厂代理 / 一级商）、PLATFORM 货袋子平台其他商家挂牌 */
+    /* 外部货源：UPSTREAM 上游（钢厂代理 / 一级商）、PLATFORM 货袋子平台其他商家挂牌、MARKET 同一钢材市场内档口互调（距离 0、当天、含搬运费 pickFee 元/吨） */
     const suppliers = [
+      { id: 'S6', type: 'MARKET', name: '市场内 · 友发总代（B 区 12 号）', zone: 'XC', offers: [
+        { key: '镀锌管|Q235B|DN100×3.75', price: 4530, qty: 30, moq: 0, leadH: 1, dropship: false, pickFee: 15, t: ago(1.5) },
+        { key: '镀锌管|Q235B|DN50×3.0', price: 4600, qty: 20, moq: 0, leadH: 1, dropship: false, pickFee: 15, t: ago(1.5) },
+        { key: '焊管|Q235B|DN100×3.75', price: 4090, qty: 40, moq: 0, leadH: 1, dropship: false, pickFee: 15, t: ago(1.5) },
+      ] },
+      { id: 'S7', type: 'MARKET', name: '市场内 · 鑫达型材（C 区 3 号）', zone: 'XC', offers: [
+        { key: '方管|Q235B|50×50×2.5', price: 4210, qty: 8, moq: 0, leadH: 1, dropship: false, pickFee: 15, t: ago(0.8) },
+        { key: '槽钢|Q235B|10#', price: 3960, qty: 15, moq: 0, leadH: 1, dropship: false, pickFee: 15, t: ago(0.8) },
+        { key: '法兰|碳钢|DN100', price: 24, qty: 60, moq: 0, leadH: 1, dropship: false, pickFee: 0, t: ago(0.8) },
+      ] },
       { id: 'S1', type: 'UPSTREAM', name: '沙钢代理 · 相城库', zone: 'XC', offers: [
         { key: '盘螺|HRB400E|Φ12', price: 3850, qty: 120, moq: 10, leadH: 4, dropship: true, dropFee: 30, t: ago(2) },
         { key: '螺纹钢|HRB400E|Φ12', price: 3790, qty: 200, moq: 10, leadH: 4, dropship: true, dropFee: 30, t: ago(2) },
@@ -74,6 +110,9 @@
       tripFee(km, cap) { const base = cap >= 30 ? 520 : 380; return Math.round(base + km * (cap >= 30 ? 9 : 6.5)); },
       handling: 8,             // 装卸 元/吨
       minLtlFee: 300,          // 零担最低一趟
+      /* 市区配送（管型材零碎单）：整单一车按总重选车型，一趟费 = 起步 + 公里 × 单价；超过 10 t 走专车 */
+      cityTrucks: [{ name: '三轮 / 小厢货', cap: 1.5, base: 120, perKm: 3 }, { name: '4.2 m 货车', cap: 5, base: 220, perKm: 5 }, { name: '6.8 m 货车', cap: 10, base: 320, perKm: 7 }],
+      cityTrip(km, tons) { const t = this.cityTrucks.find(x => tons <= x.cap); return t ? { truck: t.name, fee: Math.round(t.base + km * t.perKm) } : null; },
     };
     /* 拼车窗口：已排定或在途的车，剩余吨位可带货 */
     const windows = [
@@ -88,6 +127,7 @@
       { id: 'CU3', name: '昆山某钢结构工程', contact: '周总', leadId: 'L002', grade: 'C', zone: 'KS', addr: '昆山 花桥 加工厂', km: 36, creditLimit: 80000, creditUsed: 76000, terms: 0, overdue: true, hist: { 'H型钢|Q355B|300×300': 4000 }, deals: 3 },
       { id: 'CU4', name: '张家港某钢构有限公司', contact: '徐厂长', leadId: null, grade: 'N', zone: 'ZJG', addr: '张家港 杨舍镇', km: 70, creditLimit: 0, creditUsed: 0, terms: 0, overdue: false, hist: {}, deals: 0 },
       { id: 'CU5', name: '苏州某建筑劳务（黄埭工地）', contact: '王经理', leadId: 'L006', grade: 'B', zone: 'XC', addr: '相城 黄埭 安置房工地', km: 14, creditLimit: 150000, creditUsed: 20000, terms: 15, overdue: false, hist: { '螺纹钢|HRB400E|Φ16': 3800 }, deals: 4 },
+      { id: 'CU6', name: '苏州某装饰工程（郭巷项目）', contact: '赵老板', leadId: null, grade: 'B', zone: 'WZ', addr: '吴中 郭巷 商业街改造工地', km: 25, creditLimit: 60000, creditUsed: 8000, terms: 15, overdue: false, hist: { '方管|Q235B|50×50×2.5': 4330, '弯头|碳钢|DN100': 35 }, deals: 9 },
     ];
     /* 询价：原文（微信 / 语音 / 企微 / 电话 / 平台） */
     const rfqs = [
@@ -96,6 +136,7 @@
       { id: 'Q3', t: ago(2.5), via: 'PHONE', customerId: 'CU3', by: 3, status: 'NEW', raw: '周总电话：300×300 的 H 型钢 10 吨急用，后天前到花桥，问能不能先发货后付款。' },
       { id: 'Q4', t: ago(3.1), via: 'WECOM', customerId: 'CU4', by: 2, status: 'NEW', raw: '徐厂长：Q355B 中板 12mm 要 30 吨，5.75 热卷 20 吨，送张家港杨舍，报个到厂价，先合作一单看看。' },
       { id: 'Q5', t: ago(4.6), via: 'WECHAT', customerId: 'CU5', by: 2, status: 'NEW', raw: '王经理：16 的螺纹 3 吨，8 的盘螺 2 吨，黄埭工地，今天下午能送吗，我们自己也可以来拉。' },
+      { id: 'Q7', t: ago(0.2), via: 'WECHAT', customerId: 'CU6', by: 3, status: 'NEW', raw: '赵老板：50×50×2.5 方管 30 支，4 寸镀锌管 20 支，DN100 弯头 10 个，送吴中郭巷工地，今天下午要，还是月结。' },
       { id: 'Q6', t: ago(26), via: 'HDZ', customerId: 'CU2', by: 2, status: 'SENT', raw: '平台询价：方管 100×100×4 共 6 吨，园区唯亭，自提。', quoteId: 'QT1' },
     ];
     const quotes = [
@@ -123,12 +164,19 @@
       },
       agingDays: 45,                                     // 库龄超过 N 天的库存优先出、可让利
       agingDiscount: 10,                                 // 老库存可额外让利 元/吨
+      /* 管型材 / 管件扩展 */
+      cityMaxKm: 60,                                     // 市区配送最远公里数（超过走专车）
+      maxFreightPerTon: 300,                             // 单行运费上限 元/吨（超过视为不可行：客户不会接受）
+      pieceMarginRate: 0.18,                             // 管件（按 个 / 片）目标毛利率
+      pieceFloorRate: 0.06,                              // 管件毛利率下限
+      pieceBand: { low: -0.08, high: 0.15 },             // 管件报价相对参考价的允许区间
+      autoSendMinMarginRate: 0.08,                       // 管件行自动发出要求的最低毛利率
     };
-    return { v: VERSION, specs, zones, dist, warehouses, inventory, suppliers, logistics, windows, customers, rfqs, quotes, config, NOW, D, H };
+    return { v: VERSION, specs, inchToDn, zones, dist, warehouses, inventory, suppliers, logistics, windows, customers, rfqs, quotes, config, NOW, D, H };
   }
 
   function load() {
-    try { const s = JSON.parse(localStorage.getItem(VERSION)); if (s && s.v === VERSION) { const b = build(); s.logistics = b.logistics; s.specs = b.specs; s.dist = b.dist; s.zones = b.zones; s.warehouses = b.warehouses; return s; } } catch (e) { /* ignore */ }
+    try { const s = JSON.parse(localStorage.getItem(VERSION)); if (s && s.v === VERSION) { const b = build(); s.logistics = b.logistics; s.specs = b.specs; s.inchToDn = b.inchToDn; s.dist = b.dist; s.zones = b.zones; s.warehouses = b.warehouses; return s; } } catch (e) { /* ignore */ }
     const b = build(); save(b); return b;
   }
   function save(s) { try { const c = Object.assign({}, s); delete c.logistics; localStorage.setItem(VERSION, JSON.stringify(c)); } catch (e) { /* ignore */ } }
