@@ -76,6 +76,7 @@
     { group: '总览' },
     { id: 'dashboard', ic: 'grid', label: '看板', href: 'dashboard.html' },
     { id: 'workbench', ic: 'chat', label: '会话工作台', href: 'workbench.html', badgeKey: 'needHuman' },
+    { id: 'quote', ic: 'scale', label: '报价工作台', href: 'quote.html', badgeKey: 'rfq', isNew: true },
     { group: '线索' },
     { id: 'leads', ic: 'users', label: '线索列表', href: 'leads.html' },
     { id: 'projects', ic: 'crane', label: '项目线索', href: 'projects.html' },
@@ -103,7 +104,7 @@
     { id: 'app', ic: 'tablet', label: '执行端 App', href: 'app.html' },
     { id: 'index', ic: 'home', label: '原型总览', href: 'index.html' },
   ];
-  const SALES_ONLY = new Set(['dashboard', 'workbench', 'leads', 'projects', 'companies', 'intake', 'follow-ups', 'approvals', 'referrals', 'mobile', 'index']);
+  const SALES_ONLY = new Set(['dashboard', 'workbench', 'quote', 'leads', 'projects', 'companies', 'intake', 'follow-ups', 'approvals', 'referrals', 'mobile', 'index']);
 
   const App = {
     role() { return localStorage.getItem('acq:role') || 'admin'; },
@@ -112,6 +113,7 @@
     mount(opt) {
       const me = this.me();
       const badges = (w.ACQ && w.ACQ.badges) ? w.ACQ.badges() : {};
+      if (w.QUOTE) badges.rfq = w.QUOTE.rfqs.filter(r => r.status === 'NEW' && (me.role === 'admin' || r.by === me.id)).length;
       const navHtml = NAV.filter(n => n.group !== undefined || me.role === 'admin' || SALES_ONLY.has(n.id)).map(n => {
         if (n.group !== undefined) return n.group ? `<div class="nav-group">${n.group}</div>` : '<div style="height:10px"></div>';
         const b = n.badgeKey && badges[n.badgeKey] ? `<span class="badge">${badges[n.badgeKey]}</span>` : '';
